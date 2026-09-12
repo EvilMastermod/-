@@ -37,7 +37,12 @@ public final class AutoHarvesterClient implements ClientModInitializer {
     private Vec3d lastPosition;
     private int stuck;
     private boolean moving;
-    private enum Kind { BREAK, USE, PLANT }
+    private enum Kind { BREAK, USE, PLANT, TILL }
+    private final List<BlockPos> route = new ArrayList<>();
+    private BlockPos routeGoal;
+    private int routeIndex, routeBuilt;
+    private ItemEntity pickupTarget;
+    private int turnedAt = -1;
     private Kind kind;
     private Item useItem;
     private static final int RADIUS=12;
@@ -55,7 +60,7 @@ public final class AutoHarvesterClient implements ClientModInitializer {
         if(moving){c.options.forwardKey.setPressed(false);c.options.jumpKey.setPressed(false);moving=false;}
     }
     private void disable(MinecraftClient c,String reason) {
-        enabled=false;stop(c); target=null;breakingState=null;
+        enabled=false;stop(c); target=null;breakingState=null;route.clear();routeGoal=null;pickupTarget=null;
         if(c.interactionManager!=null)c.interactionManager.cancelBlockBreaking();
         if(unloading && c.player!=null && c.player.currentScreenHandler instanceof GenericContainerScreenHandler)c.player.closeHandledScreen();
         unloading=false;opening=false;
@@ -63,12 +68,12 @@ public final class AutoHarvesterClient implements ClientModInitializer {
     }
     private void tick(MinecraftClient c) {
         if(Boolean.getBoolean("autoharvester.smokeTest") && c.currentScreen instanceof net.minecraft.client.gui.screen.TitleScreen){System.out.println("AUTOHARVESTER_SMOKE_OK");c.scheduleStop();return;}
-        if(c.world!=session){session=c.world;enabled=false;chest=null;origin=null;target=null;plants.clear();logs.clear();appleLeaves.clear();ignored.clear();opening=false;unloading=false;stop(c);}
+        if(c.world!=session){route.clear();routeGoal=null;pickupTarget=null;session=c.world;enabled=false;chest=null;origin=null;target=null;plants.clear();logs.clear();appleLeaves.clear();ignored.clear();opening=false;unloading=false;stop(c);}
         if(c.player==null||c.world==null||c.interactionManager==null)return;
         ticks++;
         while(toggle.wasPressed()) {
             if(enabled)disable(c,"");
-            else {enabled=true;origin=c.player.getBlockPos();target=null;delay=0;actionTicks=0;stuck=0;lastPosition=null;message(c,"Авто Фарм Включен",Formatting.GREEN);}
+            else {enabled=true;route.clear();routeGoal=null;pickupTarget=null;origin=c.player.getBlockPos();target=null;delay=0;actionTicks=0;stuck=0;lastPosition=null;message(c,"Авто Фарм Включен",Formatting.GREEN);}
         }
         while(chestKey.wasPressed()) {
             if(c.crosshairTarget instanceof BlockHitResult h && c.world.getBlockState(h.getBlockPos()).getBlock() instanceof ChestBlock) {
@@ -125,6 +130,8 @@ public final class AutoHarvesterClient implements ClientModInitializer {
             }else c.interactionManager.updateBlockBreakingProgress(target,h.getSide());
             c.player.swingHand(Hand.MAIN_HAND);
         } else {
+            if(kind==Kind.TILL&&!equip(c,s->s.isIn(ItemTags.HOES))){ignored.put(target,ticks+100);target=null;return;}
+            if(useItem==Items.BONE_MEAL && !(c.world.getBlockState(target).getBlock() instanceof SaplingBlock)){target=null;return;}
             if(useItem!=null&&!equip(c,s->s.isOf(useItem))){ignored.put(target,ticks+100);target=null;return;}
             c.interactionManager.interactBlock(c.player,Hand.MAIN_HAND,h);c.player.swingHand(Hand.MAIN_HAND);
             if(kind==Kind.PLANT)ignored.put(target,ticks+20);
@@ -145,6 +152,9 @@ public final class AutoHarvesterClient implements ClientModInitializer {
             if(b==Blocks.SWEET_BERRY_BUSH&&s.get(SweetBerryBushBlock.AGE)>=2){task(p,Kind.USE,null);return;}
             if((b==Blocks.SUGAR_CANE||b==Blocks.BAMBOO)&&c.world.getBlockState(p.down()).isOf(b)){task(p,Kind.BREAK,null);return;}
         }
+        if(has(c,s->s.isIn(ItemTags.HOES)))for(BlockPos p:area) {
+            if(!ignored.containsKey(p)&&canTill(c,p)){task(p,Kind.TILL,null);return;}
+        }
         logs.removeIf(p->!c.world.getBlockState(p).isIn(BlockTags.LOGS));
         if(logs.isEmpty())for(BlockPos p:area) {
             if(!ignored.containsKey(p)&&c.world.getBlockState(p).isIn(BlockTags.LOGS)&&c.world.getBlockState(p.down()).isIn(BlockTags.DIRT)) {
@@ -157,8 +167,16 @@ public final class AutoHarvesterClient implements ClientModInitializer {
         if(has(c,s->s.isOf(Items.BONE_MEAL)))for(BlockPos p:area) {
             if(ignored.containsKey(p))continue;
             BlockState s=c.world.getBlockState(p);
-            if(s.getBlock() instanceof SaplingBlock||s.getBlock() instanceof CropBlock crop&&!crop.isMature(s)){task(p,Kind.USE,Items.BONE_MEAL);return;}
+            if(s.getBlock() instanceof SaplingBlock){task(p,Kind.USE,Items.BONE_MEAL);return;}
         }
+    }
+    private boolean canTill(MinecraftClient c,BlockPos p){
+        BlockState s=c.world.getBlockState(p);
+        if(!(s.isOf(Blocks.DIRT)||s.isOf(Blocks.GRASS_BLOCK)||s.isOf(Blocks.DIRT_PATH)||s.isOf(Blocks.COARSE_DIRT)))return false;
+        if(!c.world.getBlockState(p.up()).isAir())return false;
+        // Preserve remembered tree planting sites.
+        Item plant=plants.get(p.up());
+        return plant==null||!(plant instanceof BlockItem bi && bi.getBlock() instanceof SaplingBlock);
     }
     private void task(BlockPos p,Kind k,Item i){target=p;kind=k;useItem=i;breakingState=null;}
     private void discoverTree(MinecraftClient c,BlockPos root) {
@@ -229,23 +247,41 @@ public final class AutoHarvesterClient implements ClientModInitializer {
     }
     private BlockHitResult hit(MinecraftClient c,BlockPos p){
         Vec3d eye=c.player.getEyePos();
+        BlockHitResult best=null;double distance=Double.MAX_VALUE;
         for(Direction d:Direction.values()) {
             Vec3d v=Vec3d.ofCenter(p).add(d.getOffsetX()*0.49,d.getOffsetY()*0.49,d.getOffsetZ()*0.49);
             if(eye.distanceTo(v)>4.3)continue;
             BlockHitResult h=c.world.raycast(new RaycastContext(eye,v,RaycastContext.ShapeType.OUTLINE,RaycastContext.FluidHandling.NONE,c.player));
-            if(h.getBlockPos().equals(p)){look(c,v);return h;}
-        }return null;
+            if(h.getType()==net.minecraft.util.hit.HitResult.Type.BLOCK&&h.getBlockPos().equals(p)&&eye.squaredDistanceTo(h.getPos())<distance){best=h;distance=eye.squaredDistanceTo(h.getPos());}
+        }return best;
     }
-    private void look(MinecraftClient c,Vec3d v){Vec3d d=v.subtract(c.player.getEyePos());c.player.setYaw((float)(Math.atan2(d.z,d.x)*180/Math.PI)-90);c.player.setPitch((float)(-Math.atan2(d.y,Math.sqrt(d.x*d.x+d.z*d.z))*180/Math.PI));}
-    private boolean approach(MinecraftClient c,BlockPos p){if(hit(c,p)!=null){stop(c);stuck=0;return true;}walk(c,p,2.2);return false;}
+    private boolean turn(MinecraftClient c,Vec3d v){
+        Vec3d d=v.subtract(c.player.getEyePos());
+        float yaw=(float)(Math.atan2(d.z,d.x)*180/Math.PI)-90;
+        float pitch=(float)(-Math.atan2(d.y,Math.sqrt(d.x*d.x+d.z*d.z))*180/Math.PI);
+        if(turnedAt!=ticks){
+            c.player.setYaw(c.player.getYaw()+MathHelper.clamp(MathHelper.wrapDegrees(yaw-c.player.getYaw()),-8f,8f));
+            c.player.setPitch(c.player.getPitch()+MathHelper.clamp(pitch-c.player.getPitch(),-6f,6f));turnedAt=ticks;
+        }
+        return Math.abs(MathHelper.wrapDegrees(yaw-c.player.getYaw()))<5&&Math.abs(pitch-c.player.getPitch())<5;
+    }
+    private boolean approach(MinecraftClient c,BlockPos p){
+        BlockHitResult h=hit(c,p);
+        if(h!=null){stop(c);stuck=0;return turn(c,h.getPos());}
+        walk(c,p,2.2);return false;
+    }
     private boolean walkable(MinecraftClient c,BlockPos p){
         BlockState floor=c.world.getBlockState(p.down());
         return c.world.getBlockState(p).getCollisionShape(c.world,p).isEmpty()&&c.world.getBlockState(p.up()).getCollisionShape(c.world,p.up()).isEmpty()
           && !floor.getCollisionShape(c.world,p.down()).isEmpty()&&c.world.getFluidState(p).isEmpty()&&c.world.getFluidState(p.down()).isEmpty()
           &&!floor.isOf(Blocks.MAGMA_BLOCK)&&!floor.isOf(Blocks.CAMPFIRE)&&!floor.isOf(Blocks.CACTUS);
     }
-    private void walk(MinecraftClient c,BlockPos goal,double radius){
-        BlockPos start=c.player.getBlockPos();Map<BlockPos,BlockPos> prev=new HashMap<>();ArrayDeque<BlockPos> q=new ArrayDeque<>();q.add(start);prev.put(start,start);BlockPos end=null;
+    private boolean buildRoute(MinecraftClient c,BlockPos goal,double radius){
+        route.clear();routeIndex=0;routeGoal=goal;routeBuilt=ticks;
+        BlockPos start=c.player.getBlockPos();
+        // Feet may be just below the next integer Y on farmland (15/16 block high).
+        if(!walkable(c,start)&&walkable(c,start.up()))start=start.up();
+        Map<BlockPos,BlockPos> prev=new HashMap<>();ArrayDeque<BlockPos> q=new ArrayDeque<>();q.add(start);prev.put(start,start);BlockPos end=null;
         while(!q.isEmpty()&&prev.size()<2500){
             BlockPos p=q.remove();double dx=p.getX()-goal.getX(),dz=p.getZ()-goal.getZ();
             if(dx*dx+dz*dz<=radius*radius&&Math.abs(p.getY()-goal.getY())<=3){end=p;break;}
@@ -256,21 +292,54 @@ public final class AutoHarvesterClient implements ClientModInitializer {
                 prev.put(n,p);q.add(n);break;
             }
         }
-        if(end==null||end.equals(start)){
-            stop(c);if(goal.equals(chest)){disable(c,"нет доступного пути к сундуку");}else {ignored.put(goal,ticks+400);if(goal.equals(target))target=null;}return;
+        if(end==null)return false;
+        while(!end.equals(start)){route.add(end);end=prev.get(end);}
+        Collections.reverse(route);
+        if(route.isEmpty())route.add(start);
+        return true;
+    }
+    private void unreachable(MinecraftClient c,BlockPos goal){
+        stop(c);route.clear();routeGoal=null;ignored.put(goal,ticks+400);pickupTarget=null;
+        if(goal.equals(target))target=null;
+        if(goal.equals(chest))disable(c,"нет доступного пути к сундуку");
+    }
+    private double horizontalDistance(MinecraftClient c,BlockPos p){
+        double dx=p.getX()+0.5-c.player.getX(),dz=p.getZ()+0.5-c.player.getZ();return dx*dx+dz*dz;
+    }
+    private void walk(MinecraftClient c,BlockPos goal,double radius){
+        if(!goal.equals(routeGoal)||route.isEmpty()||ticks-routeBuilt>80){
+            if(!buildRoute(c,goal,radius)){unreachable(c,goal);return;}
         }
-        while(!prev.get(end).equals(start))end=prev.get(end);
-        Vec3d v=Vec3d.ofBottomCenter(end);Vec3d delta=v.subtract(new Vec3d(c.player.getX(),c.player.getY(),c.player.getZ()));
-        c.player.setYaw((float)(Math.atan2(delta.z,delta.x)*180/Math.PI)-90);c.player.setPitch(15);
-        c.options.forwardKey.setPressed(true);c.options.jumpKey.setPressed(end.getY()>start.getY());moving=true;
-        if(lastPosition!=null&&lastPosition.squaredDistanceTo(new Vec3d(c.player.getX(),c.player.getY(),c.player.getZ()))<0.0001)stuck++;else stuck=0;
-        lastPosition=new Vec3d(c.player.getX(),c.player.getY(),c.player.getZ());if(stuck>60){stop(c);ignored.put(goal,ticks+400);target=null;stuck=0;if(goal.equals(chest))disable(c,"путь к сундуку перекрыт");}
+        while(routeIndex<route.size()-1&&horizontalDistance(c,route.get(routeIndex))<0.18)routeIndex++;
+        BlockPos next=route.get(routeIndex);
+        if(!walkable(c,next)){route.clear();stop(c);return;}
+        // Look ahead along straight segments, retaining corners and height changes.
+        while(routeIndex+1<route.size()&&routeIndex>0){
+            BlockPos a=route.get(routeIndex-1),b=route.get(routeIndex),d=route.get(routeIndex+1);
+            if(b.getY()!=d.getY()||a.getY()!=b.getY()||b.getX()-a.getX()!=d.getX()-b.getX()||b.getZ()-a.getZ()!=d.getZ()-b.getZ()||horizontalDistance(c,b)>1.5)break;
+            next=d;routeIndex++;
+        }
+        if(horizontalDistance(c,next)<0.09&&routeIndex==route.size()-1){unreachable(c,goal);return;}
+        Vec3d v=new Vec3d(next.getX()+0.5,c.player.getEyePos().y-0.15,next.getZ()+0.5);
+        turn(c,v);
+        float desired=(float)(Math.atan2(v.z-c.player.getZ(),v.x-c.player.getX())*180/Math.PI)-90;
+        boolean aligned=Math.abs(MathHelper.wrapDegrees(desired-c.player.getYaw()))<35;
+        c.options.forwardKey.setPressed(aligned);
+        // A farmland height difference is not a full step and must not trigger jumping.
+        c.options.jumpKey.setPressed(aligned&&next.getY()-c.player.getY()>0.6&&horizontalDistance(c,next)<1.5);moving=true;
+        Vec3d pos=new Vec3d(c.player.getX(),c.player.getY(),c.player.getZ());
+        if(aligned&&lastPosition!=null&&lastPosition.squaredDistanceTo(pos)<0.0001)stuck++;else stuck=0;
+        lastPosition=pos;if(stuck>60){stuck=0;unreachable(c,goal);}
     }
     private boolean collect(MinecraftClient c){
-        var items=c.world.getEntitiesByClass(ItemEntity.class,new Box(origin).expand(RADIUS,5,RADIUS),e->e.isAlive()&&!ignored.containsKey(e.getBlockPos()));
-        items.sort(Comparator.comparingDouble(e->e.squaredDistanceTo(c.player)));
-        if(items.isEmpty())return false;
-        ItemEntity e=items.get(0);if(e.squaredDistanceTo(c.player)<1.5){stop(c);ignored.put(e.getBlockPos(),ticks+15);return false;}
+        if(pickupTarget==null||!pickupTarget.isAlive()||ignored.containsKey(pickupTarget.getBlockPos())||pickupTarget.squaredDistanceTo(c.player)>RADIUS*RADIUS*4){
+            var items=c.world.getEntitiesByClass(ItemEntity.class,new Box(origin).expand(RADIUS,5,RADIUS),e->e.isAlive()&&!ignored.containsKey(e.getBlockPos()));
+            items.sort(Comparator.comparingDouble(e->e.squaredDistanceTo(c.player)));
+            pickupTarget=items.isEmpty()?null:items.get(0);
+        }
+        if(pickupTarget==null)return false;
+        ItemEntity e=pickupTarget;
+        if(e.squaredDistanceTo(c.player)<1.5){stop(c);ignored.put(e.getBlockPos(),ticks+15);pickupTarget=null;return false;}
         walk(c,e.getBlockPos(),0.1);return true;
     }
 }

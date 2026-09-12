@@ -21,7 +21,7 @@ jobs:
         run: |
           python3 - <<'PY'
           import zipfile,json
-          with zipfile.ZipFile('build/libs/AutoHarvester-1.21.11-Fabric-1.0.0.jar') as z:
+          with zipfile.ZipFile('build/libs/AutoHarvester-1.21.11-Fabric-1.1.0.jar') as z:
             assert 'ua/kostia/autoharvester/AutoHarvesterClient.class' in z.namelist()
             assert json.loads(z.read('fabric.mod.json'))['id']=='autoharvester'
           PY
@@ -44,5 +44,5 @@ jobs:
       - uses: actions/upload-artifact@v4
         with:
           name: AutoHarvester-1.21.11
-          path: build/libs/AutoHarvester-1.21.11-Fabric-1.0.0.jar
+          path: build/libs/AutoHarvester-1.21.11-Fabric-1.1.0.jar
           if-no-files-found: error
