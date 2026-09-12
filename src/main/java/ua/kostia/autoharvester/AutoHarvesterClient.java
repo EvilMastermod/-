@@ -62,6 +62,7 @@ public final class AutoHarvesterClient implements ClientModInitializer {
         message(c,"Авто Фарм Выключен"+(reason.isEmpty()?"":" — "+reason),Formatting.RED);
     }
     private void tick(MinecraftClient c) {
+        if(Boolean.getBoolean("autoharvester.smokeTest") && c.currentScreen instanceof net.minecraft.client.gui.screen.TitleScreen){System.out.println("AUTOHARVESTER_SMOKE_OK");c.scheduleStop();return;}
         if(c.world!=session){session=c.world;enabled=false;chest=null;origin=null;target=null;plants.clear();logs.clear();appleLeaves.clear();ignored.clear();opening=false;unloading=false;stop(c);}
         if(c.player==null||c.world==null||c.interactionManager==null)return;
         ticks++;
@@ -133,7 +134,7 @@ public final class AutoHarvesterClient implements ClientModInitializer {
     }
     private void findTask(MinecraftClient c) {
         List<BlockPos> area=BlockPos.stream(origin.add(-RADIUS,-3,-RADIUS),origin.add(RADIUS,7,RADIUS)).map(BlockPos::toImmutable)
-            .sorted(Comparator.comparingDouble(p->Vec3d.ofCenter(p).squaredDistanceTo(c.player.getPos()))).toList();
+            .sorted(Comparator.comparingDouble(p->Vec3d.ofCenter(p).squaredDistanceTo(new Vec3d(c.player.getX(),c.player.getY(),c.player.getZ())))).toList();
         for(var e:plants.entrySet())if(!ignored.containsKey(e.getKey())&&c.world.getBlockState(e.getKey()).isAir()&&has(c,s->s.isOf(e.getValue()))) {
             task(e.getKey(),Kind.PLANT,e.getValue());return;
         }
@@ -175,7 +176,7 @@ public final class AutoHarvesterClient implements ClientModInitializer {
         if(!canopy)return;
         logs.addAll(found);
         Item sapling=sapling(c.world.getBlockState(root).getBlock());
-        if(sapling!=null)plants.put(root,sapling);
+        if(sapling!=null)for(BlockPos base:found)if(c.world.getBlockState(base.down()).isIn(BlockTags.DIRT))plants.put(base,sapling);
         for(BlockPos p:BlockPos.iterate(root.add(-4,0,-4),root.add(4,7,4))) {
             BlockState s=c.world.getBlockState(p);
             if((s.isOf(Blocks.OAK_LEAVES)||s.isOf(Blocks.DARK_OAK_LEAVES))&&!s.get(LeavesBlock.PERSISTENT))appleLeaves.add(p.toImmutable());
@@ -259,11 +260,11 @@ public final class AutoHarvesterClient implements ClientModInitializer {
             stop(c);if(goal.equals(chest)){disable(c,"нет доступного пути к сундуку");}else {ignored.put(goal,ticks+400);if(goal.equals(target))target=null;}return;
         }
         while(!prev.get(end).equals(start))end=prev.get(end);
-        Vec3d v=Vec3d.ofBottomCenter(end);Vec3d delta=v.subtract(c.player.getPos());
+        Vec3d v=Vec3d.ofBottomCenter(end);Vec3d delta=v.subtract(new Vec3d(c.player.getX(),c.player.getY(),c.player.getZ()));
         c.player.setYaw((float)(Math.atan2(delta.z,delta.x)*180/Math.PI)-90);c.player.setPitch(15);
         c.options.forwardKey.setPressed(true);c.options.jumpKey.setPressed(end.getY()>start.getY());moving=true;
-        if(lastPosition!=null&&lastPosition.squaredDistanceTo(c.player.getPos())<0.0001)stuck++;else stuck=0;
-        lastPosition=c.player.getPos();if(stuck>60){stop(c);ignored.put(goal,ticks+400);target=null;stuck=0;if(goal.equals(chest))disable(c,"путь к сундуку перекрыт");}
+        if(lastPosition!=null&&lastPosition.squaredDistanceTo(new Vec3d(c.player.getX(),c.player.getY(),c.player.getZ()))<0.0001)stuck++;else stuck=0;
+        lastPosition=new Vec3d(c.player.getX(),c.player.getY(),c.player.getZ());if(stuck>60){stop(c);ignored.put(goal,ticks+400);target=null;stuck=0;if(goal.equals(chest))disable(c,"путь к сундуку перекрыт");}
     }
     private boolean collect(MinecraftClient c){
         var items=c.world.getEntitiesByClass(ItemEntity.class,new Box(origin).expand(RADIUS,5,RADIUS),e->e.isAlive()&&!ignored.containsKey(e.getBlockPos()));

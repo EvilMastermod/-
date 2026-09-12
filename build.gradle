@@ -26,3 +26,7 @@ tasks.withType(JavaCompile).configureEach { options.release = 21 }
 java { withSourcesJar(); sourceCompatibility = JavaVersion.VERSION_21; targetCompatibility = JavaVersion.VERSION_21 }
 
 jar { from("LICENSE") }
+
+if (System.getenv('AUTOHARVESTER_SMOKE') == '1') {
+    loom { runs { client { vmArg '-Dautoharvester.smokeTest=true' } } }
+}

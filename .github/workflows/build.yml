@@ -16,10 +16,32 @@ jobs:
         with:
           gradle-version: '9.2.1'
       - name: Build mod
-        if: hashFiles('build.gradle') != ''
         run: gradle build --no-daemon --stacktrace
+      - name: Verify compiled JAR
+        run: |
+          python3 - <<'PY'
+          import zipfile,json
+          with zipfile.ZipFile('build/libs/AutoHarvester-1.21.11-Fabric-1.0.0.jar') as z:
+            assert 'ua/kostia/autoharvester/AutoHarvesterClient.class' in z.namelist()
+            assert json.loads(z.read('fabric.mod.json'))['id']=='autoharvester'
+          PY
+      - name: Launch Minecraft to title screen
+        env:
+          AUTOHARVESTER_SMOKE: '1'
+          LIBGL_ALWAYS_SOFTWARE: '1'
+        run: |
+          mkdir -p run
+          printf 'onboardAccessibility:false\n' > run/options.txt
+          timeout 300s xvfb-run -a gradle runClient --no-daemon > smoke.log 2>&1
+          grep AUTOHARVESTER_SMOKE_OK smoke.log
       - uses: actions/upload-artifact@v4
-        if: hashFiles('build.gradle') != ''
+        if: always()
+        with:
+          name: build-logs
+          path: |
+            smoke.log
+            run/logs/latest.log
+      - uses: actions/upload-artifact@v4
         with:
           name: AutoHarvester-1.21.11
           path: build/libs/AutoHarvester-1.21.11-Fabric-1.0.0.jar
