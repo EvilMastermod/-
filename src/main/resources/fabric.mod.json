@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "id": "autoharvester",
+  "version": "${version}",
+  "name": "Auto Harvester",
+  "description": "Автоматическая ферма, лесоруб и выгрузка в выбранный сундук.",
+  "authors": ["Kostia"],
+  "license": "MIT",
+  "environment": "client",
+  "entrypoints": { "client": ["ua.kostia.autoharvester.AutoHarvesterClient"] },
+  "depends": {
+    "fabricloader": ">=0.18.1",
+    "minecraft": "1.21.11",
+    "java": ">=21",
+    "fabric-api": "*"
+  }
+}
