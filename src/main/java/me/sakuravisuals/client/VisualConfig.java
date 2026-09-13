@@ -22,7 +22,7 @@ public final class VisualConfig {
     public boolean playerTrail = true;
 
     // 0 = petals, 1 = colored beam/wedge
-    public int trailMode = 0;
+    public int trailMode = 1;
     public int accentColorIndex = 0;
 
     // 0 = normal/vanilla inspired, 1 = sakura
@@ -39,10 +39,18 @@ public final class VisualConfig {
     public int playerCardY = 72;
     public int playerCardScale = 100;
 
+    private int configRevision = 0;
+    private static final int CURRENT_REVISION = 2;
+
     private final Path path = FabricLoader.getInstance().getConfigDir().resolve("sakuravisuals.properties");
 
     public void load() {
-        if (!Files.exists(path)) return;
+        if (!Files.exists(path)) {
+            configRevision = CURRENT_REVISION;
+            save();
+            return;
+        }
+
         Properties p = new Properties();
         try (InputStream in = Files.newInputStream(path)) {
             p.load(in);
@@ -66,7 +74,17 @@ public final class VisualConfig {
             playerCardX = getInt(p, "playerCardX", playerCardX);
             playerCardY = getInt(p, "playerCardY", playerCardY);
             playerCardScale = getInt(p, "playerCardScale", playerCardScale);
+            configRevision = getInt(p, "configRevision", 0);
         } catch (IOException ignored) {
+        }
+
+        // One-time migration so the new visible Sakura inventory + clean beam are enabled immediately.
+        if (configRevision < CURRENT_REVISION) {
+            uiStyle = 1;
+            trailMode = 1;
+            playerTrail = true;
+            configRevision = CURRENT_REVISION;
+            save();
         }
 
         menuSize = Math.floorMod(menuSize, 3);
@@ -98,6 +116,7 @@ public final class VisualConfig {
         p.setProperty("playerCardX", Integer.toString(playerCardX));
         p.setProperty("playerCardY", Integer.toString(playerCardY));
         p.setProperty("playerCardScale", Integer.toString(playerCardScale));
+        p.setProperty("configRevision", Integer.toString(configRevision));
         try {
             Files.createDirectories(path.getParent());
             try (OutputStream out = Files.newOutputStream(path)) {
