@@ -27,27 +27,41 @@ public abstract class GuiMixin {
 
         int accent = sakuraVisuals$uiAccent();
         int light = sakuraVisuals$uiLight();
+        int dark = SakuraVisualsClient.CONFIG.uiStyle == 1 ? 0xFF4B2439 : 0xFF20232A;
         int x = graphics.guiWidth() / 2 - 91;
         int y = graphics.guiHeight() - 22;
 
-        // Outer accent frame. This keeps the vanilla item rendering intact.
-        graphics.fill(x - 2, y - 2, x + 184, y - 1, accent);
-        graphics.fill(x - 2, y + 22, x + 184, y + 23, accent);
-        graphics.fill(x - 2, y - 2, x - 1, y + 23, accent);
-        graphics.fill(x + 183, y - 2, x + 184, y + 23, accent);
+        // Full decorative hotbar frame matching the selected inventory style.
+        graphics.fill(x - 4, y - 4, x + 186, y + 25, dark);
+        graphics.fill(x - 2, y - 2, x + 184, y + 23, 0x66100B15);
 
+        for (int slot = 0; slot < 9; slot++) {
+            int sx = x + 1 + slot * 20;
+            int border = slot == Math.floorMod(mc.player.getInventory().getSelectedSlot(), 9) ? light : accent;
+            int inner = slot == Math.floorMod(mc.player.getInventory().getSelectedSlot(), 9) ? accent : 0x66302A31;
+
+            graphics.fill(sx - 1, y - 1, sx + 20, y, border);
+            graphics.fill(sx - 1, y + 20, sx + 20, y + 21, border);
+            graphics.fill(sx - 1, y - 1, sx, y + 21, border);
+            graphics.fill(sx + 19, y - 1, sx + 20, y + 21, border);
+            graphics.fill(sx + 1, y + 1, sx + 18, y + 2, inner);
+        }
+
+        // Stronger selected slot glow.
         int selected = Math.floorMod(mc.player.getInventory().getSelectedSlot(), 9);
         int sx = x + 1 + selected * 20;
-        graphics.fill(sx, y, sx + 20, y + 1, light);
-        graphics.fill(sx, y + 20, sx + 20, y + 21, light);
-        graphics.fill(sx, y, sx + 1, y + 21, light);
-        graphics.fill(sx + 19, y, sx + 20, y + 21, light);
+        graphics.fill(sx - 2, y - 2, sx + 21, y - 1, light);
+        graphics.fill(sx - 2, y + 21, sx + 21, y + 22, light);
+        graphics.fill(sx - 2, y - 2, sx - 1, y + 22, light);
+        graphics.fill(sx + 20, y - 2, sx + 21, y + 22, light);
 
         if (SakuraVisualsClient.CONFIG.uiStyle == 1) {
-            sakuraVisuals$blossom(graphics, x - 5, y - 5, light);
-            sakuraVisuals$blossom(graphics, x + 180, y - 5, light);
-            sakuraVisuals$blossom(graphics, x - 5, y + 20, light);
-            sakuraVisuals$blossom(graphics, x + 180, y + 20, light);
+            sakuraVisuals$blossom(graphics, x - 7, y - 7, light);
+            sakuraVisuals$blossom(graphics, x + 181, y - 7, light);
+            sakuraVisuals$blossom(graphics, x - 7, y + 19, light);
+            sakuraVisuals$blossom(graphics, x + 181, y + 19, light);
+            sakuraVisuals$petal(graphics, x + 28, y - 5, accent);
+            sakuraVisuals$petal(graphics, x + 145, y + 23, light);
         }
     }
 
@@ -101,11 +115,11 @@ public abstract class GuiMixin {
     }
 
     private static int sakuraVisuals$uiAccent() {
-        return SakuraVisualsClient.CONFIG.uiStyle == 1 ? 0xFFFF7FB5 : SakuraVisualsClient.accent();
+        return SakuraVisualsClient.CONFIG.uiStyle == 1 ? 0xFFFF72AE : SakuraVisualsClient.accent();
     }
 
     private static int sakuraVisuals$uiLight() {
-        return SakuraVisualsClient.CONFIG.uiStyle == 1 ? 0xFFFFD5E6 : SakuraVisualsClient.accentLight();
+        return SakuraVisualsClient.CONFIG.uiStyle == 1 ? 0xFFFFD9E9 : SakuraVisualsClient.accentLight();
     }
 
     private static void sakuraVisuals$heart(GuiGraphics g, int x, int y, int empty, int fill, int highlight,
@@ -140,5 +154,10 @@ public abstract class GuiMixin {
         g.fill(x + 1, y + 2, x + 3, y + 4, color);
         g.fill(x + 2, y + 1, x + 4, y + 3, color);
         g.fill(x + 1, y + 1, x + 3, y + 3, 0xFFFFFFFF);
+    }
+
+    private static void sakuraVisuals$petal(GuiGraphics g, int x, int y, int color) {
+        g.fill(x, y, x + 3, y + 1, color);
+        g.fill(x + 1, y + 1, x + 3, y + 2, color);
     }
 }
