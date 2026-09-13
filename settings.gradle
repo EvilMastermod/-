@@ -5,4 +5,5 @@ pluginManagement {
         mavenCentral()
     }
 }
-rootProject.name = 'AutoHarvester-1.21.11-Fabric'
+
+rootProject.name = 'SakuraVisuals-1.21.11'
