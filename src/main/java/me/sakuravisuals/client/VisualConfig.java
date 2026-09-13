@@ -21,7 +21,7 @@ public final class VisualConfig {
     public boolean playerCard = true;
     public boolean playerTrail = true;
 
-    // 0 = petals, 1 = colored beam/wedge
+    // 0 = petals, 1 = clean colored beam/line
     public int trailMode = 1;
     public int accentColorIndex = 0;
 
@@ -40,7 +40,7 @@ public final class VisualConfig {
     public int playerCardScale = 100;
 
     private int configRevision = 0;
-    private static final int CURRENT_REVISION = 2;
+    private static final int CURRENT_REVISION = 3;
 
     private final Path path = FabricLoader.getInstance().getConfigDir().resolve("sakuravisuals.properties");
 
@@ -78,7 +78,7 @@ public final class VisualConfig {
         } catch (IOException ignored) {
         }
 
-        // One-time migration so the new visible Sakura inventory + clean beam are enabled immediately.
+        // One-time migration for the full GUI redraw and the new clean beam.
         if (configRevision < CURRENT_REVISION) {
             uiStyle = 1;
             trailMode = 1;
