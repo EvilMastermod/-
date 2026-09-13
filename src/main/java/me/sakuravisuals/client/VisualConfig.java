@@ -21,9 +21,12 @@ public final class VisualConfig {
     public boolean playerCard = true;
     public boolean playerTrail = true;
 
-    // 0 = petals, 1 = vertical line
+    // 0 = petals, 1 = colored beam/wedge
     public int trailMode = 0;
     public int accentColorIndex = 0;
+
+    // 0 = normal/vanilla inspired, 1 = sakura
+    public int uiStyle = 1;
 
     // 0 = small, 1 = medium, 2 = large
     public int menuSize = 1;
@@ -55,6 +58,7 @@ public final class VisualConfig {
             playerTrail = getBool(p, "playerTrail", playerTrail);
             trailMode = getInt(p, "trailMode", trailMode);
             accentColorIndex = getInt(p, "accentColorIndex", accentColorIndex);
+            uiStyle = getInt(p, "uiStyle", uiStyle);
             menuSize = getInt(p, "menuSize", menuSize);
             hudInfoX = getInt(p, "hudInfoX", hudInfoX);
             hudInfoY = getInt(p, "hudInfoY", hudInfoY);
@@ -67,6 +71,7 @@ public final class VisualConfig {
 
         menuSize = Math.floorMod(menuSize, 3);
         trailMode = Math.floorMod(trailMode, 2);
+        uiStyle = Math.floorMod(uiStyle, 2);
         hudInfoScale = clamp(hudInfoScale, 55, 190);
         playerCardScale = clamp(playerCardScale, 55, 190);
     }
@@ -85,6 +90,7 @@ public final class VisualConfig {
         p.setProperty("playerTrail", Boolean.toString(playerTrail));
         p.setProperty("trailMode", Integer.toString(trailMode));
         p.setProperty("accentColorIndex", Integer.toString(accentColorIndex));
+        p.setProperty("uiStyle", Integer.toString(uiStyle));
         p.setProperty("menuSize", Integer.toString(menuSize));
         p.setProperty("hudInfoX", Integer.toString(hudInfoX));
         p.setProperty("hudInfoY", Integer.toString(hudInfoY));
