@@ -6,7 +6,7 @@ import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElementRegistry;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.PlayerFaceRenderer;
-import net.minecraft.core.particles.ColorParticleOption;
+import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.resources.Identifier;
 
@@ -63,35 +63,39 @@ public final class SakuraVisualsExtras implements ClientModInitializer {
     }
 
     private static void spawnPetalColumn(Minecraft mc, double x, double y, double z) {
-        int count = 8;
-        double radius = 0.15D;
-        ColorParticleOption light = ColorParticleOption.create(
-                ParticleTypes.TINTED_LEAVES, SakuraVisualsClient.accentVeryLight());
-
+        // Bright vanilla cherry petals: much lighter and more visible than tinted leaves.
+        int count = 10;
+        double radius = 0.17D;
         for (int i = 0; i < count; i++) {
             double t = i / (double) (count - 1);
             double yy = y + 0.05D + t * 1.80D;
             double phase = trailTick * 0.47D + i * 1.61D;
             double ox = Math.sin(phase) * radius;
             double oz = Math.cos(phase) * radius;
-            mc.level.addParticle(light, x + ox, yy, z + oz, 0.0D, 0.009D, 0.0D);
+            mc.level.addParticle(ParticleTypes.CHERRY_LEAVES,
+                    x + ox, yy, z + oz,
+                    0.0D, 0.012D, 0.0D);
         }
     }
 
     private static void spawnColorLine(Minecraft mc, double x, double y, double z) {
-        int count = 24;
-        ColorParticleOption line = ColorParticleOption.create(
-                ParticleTypes.TINTED_LEAVES, SakuraVisualsClient.accentLight());
-        ColorParticleOption glow = ColorParticleOption.create(
-                ParticleTypes.TINTED_LEAVES, SakuraVisualsClient.accentVeryLight());
+        // Real colored line: DUST particles only, no leaf texture at all.
+        DustParticleOptions core = new DustParticleOptions(SakuraVisualsClient.accent(), 1.35F);
+        DustParticleOptions glow = new DustParticleOptions(SakuraVisualsClient.accentVeryLight(), 0.85F);
 
+        int count = 40;
         for (int i = 0; i < count; i++) {
             double t = i / (double) (count - 1);
             double yy = y + 0.03D + t * 1.84D;
-            mc.level.addParticle(line, x, yy, z, 0.0D, 0.0D, 0.0D);
-            if ((i & 2) == 0) {
-                mc.level.addParticle(glow, x + 0.025D, yy, z, 0.0D, 0.0D, 0.0D);
-                mc.level.addParticle(glow, x - 0.025D, yy, z, 0.0D, 0.0D, 0.0D);
+
+            mc.level.addParticle(core, x, yy, z, 0.0D, 0.0D, 0.0D);
+
+            // Small bright halo so the beam reads as one continuous luminous line.
+            if ((i & 1) == 0) {
+                mc.level.addParticle(glow, x + 0.018D, yy, z, 0.0D, 0.0D, 0.0D);
+                mc.level.addParticle(glow, x - 0.018D, yy, z, 0.0D, 0.0D, 0.0D);
+                mc.level.addParticle(glow, x, yy, z + 0.018D, 0.0D, 0.0D, 0.0D);
+                mc.level.addParticle(glow, x, yy, z - 0.018D, 0.0D, 0.0D, 0.0D);
             }
         }
     }
