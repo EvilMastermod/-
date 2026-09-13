@@ -18,6 +18,7 @@ public final class VisualConfig {
     public boolean sakuraPetals = true;
     public boolean hudBackground = true;
     public boolean fullBright = false;
+    public boolean playerCard = true;
     public int accentColorIndex = 0;
 
     private final Path path = FabricLoader.getInstance().getConfigDir().resolve("sakuravisuals.properties");
@@ -35,6 +36,7 @@ public final class VisualConfig {
             sakuraPetals = getBool(p, "sakuraPetals", sakuraPetals);
             hudBackground = getBool(p, "hudBackground", hudBackground);
             fullBright = getBool(p, "fullBright", fullBright);
+            playerCard = getBool(p, "playerCard", playerCard);
             accentColorIndex = getInt(p, "accentColorIndex", accentColorIndex);
         } catch (IOException ignored) {
         }
@@ -50,6 +52,7 @@ public final class VisualConfig {
         p.setProperty("sakuraPetals", Boolean.toString(sakuraPetals));
         p.setProperty("hudBackground", Boolean.toString(hudBackground));
         p.setProperty("fullBright", Boolean.toString(fullBright));
+        p.setProperty("playerCard", Boolean.toString(playerCard));
         p.setProperty("accentColorIndex", Integer.toString(accentColorIndex));
         try {
             Files.createDirectories(path.getParent());
