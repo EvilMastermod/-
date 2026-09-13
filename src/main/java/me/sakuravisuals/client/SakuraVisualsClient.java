@@ -4,7 +4,6 @@ import com.mojang.blaze3d.platform.InputConstants;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
-import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElement;
 import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElementRegistry;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
@@ -23,450 +22,298 @@ public final class SakuraVisualsClient implements ClientModInitializer {
     public static final String MOD_ID = "sakuravisuals";
     public static final VisualConfig CONFIG = new VisualConfig();
 
-    private static final int MENU_BG = 0xE5110B18;
-    private static final int PANEL_BG = 0xF3181124;
-    private static final int PANEL_BG_ALT = 0xEE130E1E;
-    private static final int BORDER = 0xFF2E2022;
     private static final int WHITE = 0xFFFFFFFF;
-    private static final int SOFT_TEXT = 0xFFDAB9C7;
-    private static final int BLOSSOM_PINK = 0xFFFFD4E3;
-    private static final int BLOSSOM_PINK_2 = 0xFFFFB6CF;
-    private static final int BLOSSOM_PINK_3 = 0xFFE58AB2;
-    private static final int BLOSSOM_PINK_4 = 0xFFD86A9D;
+    private static final int SOFT = 0xFFD9BAC7;
+    private static final int BG = 0xE5120C19;
+    private static final int PANEL = 0xF2191125;
+    private static final int CARD = 0xEE100B17;
+    private static final int BORDER = 0xFF34272B;
+    private static final int PINK = 0xFFFFD5E3;
+    private static final int PINK_TOP = 0xFFFFE7ED;
+    private static final int PINK_ON = 0xFFE681AB;
+    private static final int PINK_ON_TOP = 0xFFF29BBD;
 
-    private static final AccentColor[] ACCENT_COLORS = new AccentColor[]{
-            new AccentColor("Розовый", 0xFFFF84BE, 0xFFFFC4E0),
-            new AccentColor("Голубой", 0xFF7AC8FF, 0xFFCAE7FF),
-            new AccentColor("Фиолетовый", 0xFFB88CFF, 0xFFE1D0FF),
-            new AccentColor("Мятный", 0xFF7DE0C1, 0xFFC9F5E8),
-            new AccentColor("Белый", 0xFFF3F3F3, 0xFFFFFFFF)
-    };
+    private static final String[] COLOR_NAMES = {"Розовый", "Голубой", "Фиолетовый", "Мятный", "Белый"};
+    private static final int[] COLORS = {0xFFFF82BA, 0xFF72C7FF, 0xFFB38CFF, 0xFF72DEBE, 0xFFF4F4F4};
+    private static final int[] LIGHT = {0xFFFFC7E0, 0xFFCCE9FF, 0xFFE3D3FF, 0xFFC9F4E7, 0xFFFFFFFF};
 
-    private static KeyMapping openMenuKey;
-    private static double previousGamma = 1.0D;
-    private static boolean gammaStored = false;
-    private static Double previousDarknessScale = null;
-    private static Boolean previousEntityShadows = null;
+    private static KeyMapping menuKey;
+    private static boolean fullBrightApplied;
+    private static double oldGamma = 0.5D;
+    private static double oldDarkness = 1.0D;
+    private static Boolean oldEntityShadows;
 
     @Override
     public void onInitializeClient() {
         CONFIG.load();
-
-        KeyMapping.Category category = KeyMapping.Category.register(
-                Identifier.fromNamespaceAndPath(MOD_ID, "main")
-        );
-
-        openMenuKey = KeyBindingHelper.registerKeyBinding(new KeyMapping(
-                "key.sakuravisuals.open_menu",
-                InputConstants.Type.KEYSYM,
-                InputConstants.KEY_RSHIFT,
-                category
-        ));
+        KeyMapping.Category category = KeyMapping.Category.register(Identifier.fromNamespaceAndPath(MOD_ID, "main"));
+        menuKey = KeyBindingHelper.registerKeyBinding(new KeyMapping(
+                "key.sakuravisuals.open_menu", InputConstants.Type.KEYSYM, InputConstants.KEY_RSHIFT, category));
 
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
-            while (openMenuKey.consumeClick()) {
-                client.setScreen(new VisualsScreen(client.screen));
-            }
+            while (menuKey.consumeClick()) client.setScreen(new VisualsScreen(client.screen, Tab.CUSTOM));
             tickFullBright(client);
         });
 
-        HudElementRegistry.addLast(
-                Identifier.fromNamespaceAndPath(MOD_ID, "overlay"),
-                createHud()
-        );
-    }
-
-    private static HudElement createHud() {
-        return (graphics, deltaTracker) -> {
-            Minecraft mc = Minecraft.getInstance();
-            if (mc.player == null || mc.level == null || mc.options.hideGui) return;
-
-            int x = 8;
-            int y = 8;
-            int line = 11;
-            List<String> lines = new ArrayList<>();
-
-            if (CONFIG.watermark) lines.add("Sakura Visuals 1.21.11");
-            if (CONFIG.coordinates) {
-                lines.add(String.format("XYZ: %.0f / %.0f / %.0f", mc.player.getX(), mc.player.getY(), mc.player.getZ()));
-            }
-            if (CONFIG.fps) lines.add("FPS: " + mc.getFps());
-            if (CONFIG.worldTime) {
-                long t = mc.level.getDayTime() % 24000L;
-                long hours = ((t / 1000L) + 6L) % 24L;
-                long minutes = (t % 1000L) * 60L / 1000L;
-                lines.add(String.format("Time: %02d:%02d", hours, minutes));
-            }
-
-            int mainBottom = y;
-            if (!lines.isEmpty()) {
-                int maxWidth = 0;
-                for (String s : lines) maxWidth = Math.max(maxWidth, mc.font.width(s));
-                if (CONFIG.hudBackground) {
-                    graphics.fill(x - 4, y - 4, x + maxWidth + 6, y + lines.size() * line + 3, 0xA1120D18);
-                    graphics.fill(x - 4, y - 4, x - 2, y + lines.size() * line + 3, accent());
-                }
-                for (int i = 0; i < lines.size(); i++) {
-                    int color = i == 0 && CONFIG.watermark ? accentLight() : WHITE;
-                    graphics.drawString(mc.font, lines.get(i), x, y + i * line, color, true);
-                }
-                mainBottom = y + lines.size() * line + 10;
-            }
-
-            if (CONFIG.playerCard) drawPlayerCard(graphics, mc, x, mainBottom);
-            if (CONFIG.crosshair) drawCrosshair(graphics);
-            if (CONFIG.sakuraPetals) drawPetals(graphics);
-        };
+        HudElementRegistry.addLast(Identifier.fromNamespaceAndPath(MOD_ID, "overlay"), (graphics, deltaTracker) -> renderHud(graphics));
     }
 
     private static void tickFullBright(Minecraft mc) {
         if (mc == null || mc.options == null) return;
+        if (CONFIG.fullBright) {
+            if (!fullBrightApplied) {
+                oldGamma = mc.options.gamma().get();
+                oldDarkness = mc.options.darknessEffectScale().get();
+                oldEntityShadows = readBooleanOption(mc.options, "entityShadows");
+                fullBrightApplied = true;
+            }
+            mc.options.gamma().set(1.0D);
+            mc.options.darknessEffectScale().set(0.0D);
+            writeBooleanOption(mc.options, "entityShadows", false);
+        } else if (fullBrightApplied) {
+            mc.options.gamma().set(oldGamma);
+            mc.options.darknessEffectScale().set(oldDarkness);
+            if (oldEntityShadows != null) writeBooleanOption(mc.options, "entityShadows", oldEntityShadows);
+            oldEntityShadows = null;
+            fullBrightApplied = false;
+        }
+    }
 
+    @SuppressWarnings("unchecked")
+    private static Boolean readBooleanOption(Object options, String methodName) {
         try {
-            OptionInstance<Double> gammaOption = mc.options.gamma();
-            OptionInstance<Double> darknessOption = findDoubleOption(mc.options, "darknessEffectScale", "darknessScale");
-            OptionInstance<Boolean> entityShadowsOption = findBooleanOption(mc.options, "entityShadows");
-            if (CONFIG.fullBright) {
-                if (!gammaStored) {
-                    previousGamma = gammaOption.get();
-                    gammaStored = true;
-                }
-                gammaOption.set(64.0D);
-                if (darknessOption != null) {
-                    if (previousDarknessScale == null) previousDarknessScale = darknessOption.get();
-                    darknessOption.set(0.0D);
-                }
-                if (entityShadowsOption != null) {
-                    if (previousEntityShadows == null) previousEntityShadows = entityShadowsOption.get();
-                    entityShadowsOption.set(false);
-                }
-            } else {
-                if (gammaStored) {
-                    gammaOption.set(previousGamma);
-                    gammaStored = false;
-                }
-                if (darknessOption != null && previousDarknessScale != null) {
-                    darknessOption.set(previousDarknessScale);
-                    previousDarknessScale = null;
-                }
-                if (entityShadowsOption != null && previousEntityShadows != null) {
-                    entityShadowsOption.set(previousEntityShadows);
-                    previousEntityShadows = null;
-                }
-            }
-        } catch (Throwable ignored) {
-        }
-    }
-
-    @SuppressWarnings("unchecked")
-    private static OptionInstance<Double> findDoubleOption(Object options, String... methodNames) {
-        for (String name : methodNames) {
-            try {
-                Method m = options.getClass().getMethod(name);
-                Object value = m.invoke(options);
-                if (value instanceof OptionInstance<?> option) {
-                    return (OptionInstance<Double>) option;
-                }
-            } catch (Throwable ignored) {
-            }
-        }
+            Method m = options.getClass().getMethod(methodName);
+            Object value = m.invoke(options);
+            if (value instanceof OptionInstance<?> option) return ((OptionInstance<Boolean>) option).get();
+        } catch (Throwable ignored) {}
         return null;
     }
 
     @SuppressWarnings("unchecked")
-    private static OptionInstance<Boolean> findBooleanOption(Object options, String... methodNames) {
-        for (String name : methodNames) {
-            try {
-                Method m = options.getClass().getMethod(name);
-                Object value = m.invoke(options);
-                if (value instanceof OptionInstance<?> option) {
-                    return (OptionInstance<Boolean>) option;
-                }
-            } catch (Throwable ignored) {
-            }
+    private static void writeBooleanOption(Object options, String methodName, boolean value) {
+        try {
+            Method m = options.getClass().getMethod(methodName);
+            Object result = m.invoke(options);
+            if (result instanceof OptionInstance<?> option) ((OptionInstance<Boolean>) option).set(value);
+        } catch (Throwable ignored) {}
+    }
+
+    private static void renderHud(GuiGraphics graphics) {
+        Minecraft mc = Minecraft.getInstance();
+        if (mc.player == null || mc.level == null || mc.options.hideGui) return;
+
+        int x = 8, y = 8, line = 11;
+        List<String> lines = new ArrayList<>();
+        if (CONFIG.watermark) lines.add("Sakura Visuals 1.21.11");
+        if (CONFIG.coordinates) lines.add(String.format("XYZ: %.0f / %.0f / %.0f", mc.player.getX(), mc.player.getY(), mc.player.getZ()));
+        if (CONFIG.fps) lines.add("FPS: " + mc.getFps());
+        if (CONFIG.worldTime) {
+            long t = mc.level.getDayTime() % 24000L;
+            lines.add(String.format("Time: %02d:%02d", ((t / 1000L) + 6L) % 24L, (t % 1000L) * 60L / 1000L));
         }
-        return null;
+
+        int bottom = y;
+        if (!lines.isEmpty()) {
+            int max = 0;
+            for (String s : lines) max = Math.max(max, mc.font.width(s));
+            if (CONFIG.hudBackground) {
+                graphics.fill(x - 4, y - 4, x + max + 6, y + lines.size() * line + 3, 0xA5120D18);
+                graphics.fill(x - 4, y - 4, x - 2, y + lines.size() * line + 3, accent());
+            }
+            for (int i = 0; i < lines.size(); i++)
+                graphics.drawString(mc.font, lines.get(i), x, y + i * line, i == 0 ? accentLight() : WHITE, true);
+            bottom = y + lines.size() * line + 10;
+        }
+
+        if (CONFIG.playerCard) drawPlayerCard(graphics, mc, x, bottom);
+        if (CONFIG.crosshair) drawCrosshair(graphics);
+        if (CONFIG.sakuraPetals) drawPetals(graphics);
     }
 
-    private static void drawCrosshair(GuiGraphics graphics) {
-        int primary = accent();
-        int light = accentLight();
-        int cx = graphics.guiWidth() / 2 - 1;
-        int cy = graphics.guiHeight() / 2 - 1;
+    private static void drawPlayerCard(GuiGraphics g, Minecraft mc, int x, int y) {
+        String name = mc.player.getName().getString();
+        float hp = mc.player.getHealth();
+        float maxHp = Math.max(1.0F, mc.player.getMaxHealth());
+        float ratio = Math.max(0.0F, Math.min(1.0F, hp / maxHp));
+        int w = Math.max(126, mc.font.width(name) + 22);
 
-        graphics.fill(cx - 4, cy, cx - 1, cy + 1, primary);
-        graphics.fill(cx + 2, cy, cx + 5, cy + 1, primary);
-        graphics.fill(cx, cy - 4, cx + 1, cy - 1, primary);
-        graphics.fill(cx, cy + 2, cx + 1, cy + 5, primary);
-        graphics.fill(cx, cy, cx + 1, cy + 1, light);
+        g.fill(x - 4, y - 4, x + w + 6, y + 35, 0xB8140E18);
+        g.fill(x - 4, y - 4, x - 2, y + 35, accent());
+        g.fill(x - 2, y - 2, x + w + 4, y + 9, 0x22FFFFFF);
+        blossom(g, x + w - 12, y + 3);
+        g.drawString(mc.font, name, x + 2, y + 2, accentLight(), true);
+        g.drawString(mc.font, String.format("HP %.1f / %.1f", hp, maxHp), x + 2, y + 13, WHITE, true);
+
+        int barW = w - 8;
+        int fillW = (int) (barW * ratio);
+        g.fill(x + 2, y + 24, x + 2 + barW, y + 30, 0xAA241A23);
+        g.fill(x + 2, y + 24, x + 2 + fillW, y + 30, accent());
+        g.fill(x + 2, y + 24, x + 2 + fillW, y + 27, accentLight());
     }
 
-    private static void drawPlayerCard(GuiGraphics graphics, Minecraft mc, int x, int y) {
-        String playerName = mc.player.getName().getString();
-        float health = mc.player.getHealth();
-        float maxHealth = Math.max(1.0F, mc.player.getMaxHealth());
-        float ratio = Math.max(0.0F, Math.min(1.0F, health / maxHealth));
-
-        int width = Math.max(122, mc.font.width(playerName) + 18);
-        int height = 35;
-
-        graphics.fill(x - 4, y - 4, x + width + 6, y + height, 0xB1140E18);
-        graphics.fill(x - 4, y - 4, x - 2, y + height, accent());
-        graphics.fill(x - 2, y - 2, x + width + 4, y + 10, 0x33FFFFFF);
-        drawHudBlossom(graphics, x + width - 12, y + 4);
-
-        graphics.drawString(mc.font, playerName, x + 2, y + 2, accentLight(), true);
-        graphics.drawString(mc.font, String.format("HP %.1f / %.1f", health, maxHealth), x + 2, y + 13, WHITE, true);
-
-        int barX = x + 2;
-        int barY = y + 24;
-        int barW = width - 8;
-        int fillW = Math.max(0, (int) (barW * ratio));
-        graphics.fill(barX, barY, barX + barW, barY + 6, 0xAA241A23);
-        graphics.fill(barX, barY, barX + fillW, barY + 6, accent());
-        graphics.fill(barX, barY, barX + fillW, barY + 3, accentLight());
+    private static void drawCrosshair(GuiGraphics g) {
+        int cx = g.guiWidth() / 2 - 1, cy = g.guiHeight() / 2 - 1;
+        g.fill(cx - 4, cy, cx - 1, cy + 1, accent());
+        g.fill(cx + 2, cy, cx + 5, cy + 1, accent());
+        g.fill(cx, cy - 4, cx + 1, cy - 1, accent());
+        g.fill(cx, cy + 2, cx + 1, cy + 5, accent());
+        g.fill(cx, cy, cx + 1, cy + 1, accentLight());
     }
 
-    private static void drawHudBlossom(GuiGraphics graphics, int x, int y) {
-        graphics.fill(x, y + 1, x + 1, y + 2, 0xFFFFB1CA);
-        graphics.fill(x + 1, y, x + 2, y + 1, 0xFFFFB1CA);
-        graphics.fill(x + 1, y + 2, x + 2, y + 3, 0xFFFFB1CA);
-        graphics.fill(x + 2, y + 1, x + 3, y + 2, 0xFFFFB1CA);
-        graphics.fill(x + 1, y + 1, x + 2, y + 2, 0xFFFFE37A);
-    }
-
-    private static void drawPetals(GuiGraphics graphics) {
+    private static void drawPetals(GuiGraphics g) {
         long now = System.currentTimeMillis();
-        int w = Math.max(1, graphics.guiWidth());
-        int h = Math.max(1, graphics.guiHeight());
+        int w = Math.max(1, g.guiWidth()), h = Math.max(1, g.guiHeight());
         for (int i = 0; i < 18; i++) {
             long seed = i * 7919L;
             int x = (int) ((seed + now / (18 + (i % 5) * 3)) % (w + 40)) - 20;
             int y = (int) ((seed * 3 + now / (24 + (i % 4) * 4)) % (h + 40)) - 20;
-            int size = 1 + (i % 2);
-            int color = (i % 3 == 0) ? 0xAAFFF0F7 : 0xAAFF9FCA;
-            graphics.fill(x, y, x + size + 1, y + size, color);
-            graphics.fill(x + size, y + size, x + size + 2, y + size + 1, color);
+            int s = 1 + (i % 2);
+            int c = i % 3 == 0 ? 0xAAFFF0F7 : 0xAAFF9FCA;
+            g.fill(x, y, x + s + 1, y + s, c);
+            g.fill(x + s, y + s, x + s + 2, y + s + 1, c);
         }
     }
 
-    private static int accent() {
-        return ACCENT_COLORS[Math.floorMod(CONFIG.accentColorIndex, ACCENT_COLORS.length)].primary;
-    }
+    private static int idx() { return Math.floorMod(CONFIG.accentColorIndex, COLORS.length); }
+    private static int accent() { return COLORS[idx()]; }
+    private static int accentLight() { return LIGHT[idx()]; }
+    private static String accentName() { return COLOR_NAMES[idx()]; }
+    private static void nextAccent() { CONFIG.accentColorIndex = (idx() + 1) % COLORS.length; CONFIG.save(); }
 
-    private static int accentLight() {
-        return ACCENT_COLORS[Math.floorMod(CONFIG.accentColorIndex, ACCENT_COLORS.length)].light;
-    }
-
-    private static String accentName() {
-        return ACCENT_COLORS[Math.floorMod(CONFIG.accentColorIndex, ACCENT_COLORS.length)].name;
-    }
-
-    private static void nextAccentColor() {
-        CONFIG.accentColorIndex = (CONFIG.accentColorIndex + 1) % ACCENT_COLORS.length;
-        CONFIG.save();
-    }
+    private enum Tab { CUSTOM, SAKURA }
 
     public static final class VisualsScreen extends Screen {
-        private Tab currentTab = Tab.CUSTOM;
         private final Screen parent;
+        private final Tab tab;
 
-        public VisualsScreen(Screen parent) {
+        public VisualsScreen(Screen parent, Tab tab) {
             super(Component.literal("Sakura Visuals"));
             this.parent = parent;
+            this.tab = tab;
         }
 
         @Override
         protected void init() {
-            rebuildWidgets();
-        }
+            int center = width / 2, top = height / 2 - 120;
+            int left = center - 175, right = center + 8;
 
-        private void rebuildWidgets() {
-            clearWidgets();
+            addInvisible(center - 175, top + 30, 165, 28, () -> minecraft.setScreen(new VisualsScreen(parent, Tab.CUSTOM)));
+            addInvisible(center + 10, top + 30, 165, 28, () -> minecraft.setScreen(new VisualsScreen(parent, Tab.SAKURA)));
+            addInvisible(center - 70, top + 207, 140, 26, this::onClose);
 
-            int panelX = this.width / 2 - 210;
-            int panelY = this.height / 2 - 135;
-            int panelW = 420;
-            int leftX = panelX + 18;
-            int rightX = panelX + 220;
-            int row1Y = panelY + 64;
-            int row2Y = panelY + 102;
-            int row3Y = panelY + 140;
-
-            addRenderableWidget(new InvisibleButton(panelX + 18, panelY + 20, 122, 26, Component.literal("Кастом"), b -> {
-                currentTab = Tab.CUSTOM;
-                rebuildWidgets();
-            }));
-            addRenderableWidget(new InvisibleButton(panelX + 148, panelY + 20, 122, 26, Component.literal("Сакура"), b -> {
-                currentTab = Tab.SAKURA;
-                rebuildWidgets();
-            }));
-            addRenderableWidget(new InvisibleButton(panelX + panelW - 108, panelY + 20, 90, 26, Component.literal("Готово"), b -> onClose()));
-
-            if (currentTab == Tab.CUSTOM) {
-                addToggleRowButton(leftX, row1Y, () -> CONFIG.crosshair, v -> CONFIG.crosshair = v);
-                addToggleRowButton(rightX, row1Y, () -> CONFIG.fullBright, v -> CONFIG.fullBright = v);
-                addToggleRowButton(leftX, row2Y, () -> CONFIG.coordinates, v -> CONFIG.coordinates = v);
-                addToggleRowButton(rightX, row2Y, () -> CONFIG.fps, v -> CONFIG.fps = v);
-                addActionRowButton(leftX, row3Y, b -> {
-                    nextAccentColor();
-                    rebuildWidgets();
-                });
+            int r1 = top + 78, r2 = top + 118, r3 = top + 158;
+            if (tab == Tab.CUSTOM) {
+                addToggle(left, r1, () -> CONFIG.crosshair = !CONFIG.crosshair);
+                addToggle(right, r1, () -> CONFIG.fullBright = !CONFIG.fullBright);
+                addToggle(left, r2, () -> CONFIG.coordinates = !CONFIG.coordinates);
+                addToggle(right, r2, () -> CONFIG.fps = !CONFIG.fps);
+                addInvisible(left, r3, 167, 32, SakuraVisualsClient::nextAccent);
+                addToggle(right, r3, () -> CONFIG.hudBackground = !CONFIG.hudBackground);
             } else {
-                addToggleRowButton(leftX, row1Y, () -> CONFIG.sakuraPetals, v -> CONFIG.sakuraPetals = v);
-                addToggleRowButton(rightX, row1Y, () -> CONFIG.watermark, v -> CONFIG.watermark = v);
-                addToggleRowButton(leftX, row2Y, () -> CONFIG.hudBackground, v -> CONFIG.hudBackground = v);
-                addToggleRowButton(rightX, row2Y, () -> CONFIG.worldTime, v -> CONFIG.worldTime = v);
-                addToggleRowButton(leftX, row3Y, () -> CONFIG.playerCard, v -> CONFIG.playerCard = v);
+                addToggle(left, r1, () -> CONFIG.sakuraPetals = !CONFIG.sakuraPetals);
+                addToggle(right, r1, () -> CONFIG.watermark = !CONFIG.watermark);
+                addToggle(left, r2, () -> CONFIG.worldTime = !CONFIG.worldTime);
+                addToggle(right, r2, () -> CONFIG.hudBackground = !CONFIG.hudBackground);
+                addToggle(left, r3, () -> CONFIG.playerCard = !CONFIG.playerCard);
             }
         }
 
-        private void addToggleRowButton(int x, int y, BoolGetter getter, BoolSetter setter) {
-            addRenderableWidget(new InvisibleButton(x + 132, y + 7, 52, 20, Component.empty(), b -> {
-                boolean next = !getter.get();
-                setter.set(next);
-                CONFIG.save();
-                rebuildWidgets();
-            }));
+        private void addToggle(int x, int y, Runnable action) {
+            addInvisible(x, y, 167, 32, () -> { action.run(); CONFIG.save(); });
         }
 
-        private void addActionRowButton(int x, int y, Button.OnPress onPress) {
-            addRenderableWidget(new InvisibleButton(x + 102, y + 7, 82, 20, Component.empty(), onPress));
+        private void addInvisible(int x, int y, int w, int h, Runnable action) {
+            Button b = Button.builder(Component.empty(), button -> action.run()).bounds(x, y, w, h).build();
+            b.setAlpha(0.0F);
+            addRenderableWidget(b);
         }
 
         @Override
         public void onClose() {
             CONFIG.save();
-            if (this.minecraft != null) this.minecraft.setScreen(parent);
+            if (minecraft != null) minecraft.setScreen(parent);
         }
 
         @Override
-        public void render(GuiGraphics graphics, int mouseX, int mouseY, float delta) {
-            renderBackground(graphics, mouseX, mouseY, delta);
+        public void render(GuiGraphics g, int mouseX, int mouseY, float delta) {
+            int center = width / 2, top = height / 2 - 120;
+            int left = center - 175, right = center + 8;
+            int r1 = top + 78, r2 = top + 118, r3 = top + 158;
 
-            int panelX = this.width / 2 - 210;
-            int panelY = this.height / 2 - 135;
-            int panelW = 420;
-            int panelH = 270;
-            int leftX = panelX + 18;
-            int rightX = panelX + 220;
-            int row1Y = panelY + 64;
-            int row2Y = panelY + 102;
-            int row3Y = panelY + 140;
-            int row4Y = panelY + 178;
+            g.fill(0, 0, width, height, BG);
+            g.fill(center - 200, top, center + 200, top + 245, PANEL);
+            g.fill(center - 200, top, center + 200, top + 2, PINK_ON_TOP);
+            g.fill(center - 200, top, center - 196, top + 245, 0xFFE28AAF);
 
-            graphics.fill(0, 0, this.width, this.height, MENU_BG);
-            graphics.fill(panelX, panelY, panelX + panelW, panelY + panelH, PANEL_BG);
-            graphics.fill(panelX, panelY, panelX + 10, panelY + panelH, 0xE526123E);
-            graphics.fill(panelX, panelY, panelX + panelW, panelY + 2, BLOSSOM_PINK_2);
-            graphics.fill(panelX + 12, panelY + 12, panelX + panelW - 12, panelY + 48, PANEL_BG_ALT);
+            g.drawCenteredString(font, title, center, top + 8, 0xFFFFD7E4);
+            drawBigButton(g, center - 175, top + 30, 165, 28, "Кастом", tab == Tab.CUSTOM);
+            drawBigButton(g, center + 10, top + 30, 165, 28, "Сакура", tab == Tab.SAKURA);
 
-            graphics.drawCenteredString(this.font, this.title, this.width / 2, panelY + 14, BLOSSOM_PINK);
-            graphics.drawCenteredString(this.font, Component.literal("Bloom UI • Right Shift"), this.width / 2, panelY + 30, SOFT_TEXT);
-
-            drawSakuraButton(graphics, panelX + 18, panelY + 20, 122, 26, "Кастом", currentTab == Tab.CUSTOM);
-            drawSakuraButton(graphics, panelX + 148, panelY + 20, 122, 26, "Сакура", currentTab == Tab.SAKURA);
-            drawSakuraButton(graphics, panelX + panelW - 108, panelY + 20, 90, 26, "Готово", false);
-
-            if (currentTab == Tab.CUSTOM) {
-                drawToggleRow(graphics, leftX, row1Y, "Прицел", "Кастомный прицел", CONFIG.crosshair);
-                drawToggleRow(graphics, rightX, row1Y, "Фул Брайт", "Без темноты и теней", CONFIG.fullBright);
-                drawToggleRow(graphics, leftX, row2Y, "Координаты", "Показывать XYZ", CONFIG.coordinates);
-                drawToggleRow(graphics, rightX, row2Y, "FPS", "Показывать FPS", CONFIG.fps);
-                drawActionRow(graphics, leftX, row3Y, "Цвет", accentName());
-                drawPreviewRow(graphics, rightX, row3Y, "Текущий", accent(), accentLight());
-                graphics.drawString(this.font, "Выбор цвета меняет прицел и акцент HUD", leftX, row4Y + 12, SOFT_TEXT, true);
+            if (tab == Tab.CUSTOM) {
+                card(g, left, r1, "Прицел", "Кастомный цветной", CONFIG.crosshair);
+                card(g, right, r1, "Фул Брайт", "Без темноты и теней", CONFIG.fullBright);
+                card(g, left, r2, "Координаты", "Показывать XYZ", CONFIG.coordinates);
+                card(g, right, r2, "FPS", "Показывать FPS", CONFIG.fps);
+                colorCard(g, left, r3);
+                card(g, right, r3, "Фон HUD", "Подложка у HUD", CONFIG.hudBackground);
             } else {
-                drawToggleRow(graphics, leftX, row1Y, "Сакура частицы", "Лепестки на экране", CONFIG.sakuraPetals);
-                drawToggleRow(graphics, rightX, row1Y, "Надпись", "Sakura Visuals", CONFIG.watermark);
-                drawToggleRow(graphics, leftX, row2Y, "Фон HUD", "Темная подложка", CONFIG.hudBackground);
-                drawToggleRow(graphics, rightX, row2Y, "Время мира", "Игровое время", CONFIG.worldTime);
-                drawToggleRow(graphics, leftX, row3Y, "Игрок HUD", "Ник и HP слева", CONFIG.playerCard);
-                graphics.drawString(this.font, "Игрок HUD сделан в стиле сакуры", leftX, row4Y + 12, SOFT_TEXT, true);
+                card(g, left, r1, "Лепестки", "Сакура на экране", CONFIG.sakuraPetals);
+                card(g, right, r1, "Watermark", "Sakura Visuals", CONFIG.watermark);
+                card(g, left, r2, "Время мира", "Игровые часы", CONFIG.worldTime);
+                card(g, right, r2, "Фон HUD", "Темная подложка", CONFIG.hudBackground);
+                card(g, left, r3, "Игрок HUD", "Ник и HP слева", CONFIG.playerCard);
             }
 
-            super.render(graphics, mouseX, mouseY, delta);
+            drawBigButton(g, center - 70, top + 207, 140, 26, "Готово", false);
+            g.drawCenteredString(font, Component.literal("Bloom UI • Right Shift"), center, top + 232, SOFT);
+            super.render(g, mouseX, mouseY, delta);
         }
 
-        private void drawToggleRow(GuiGraphics graphics, int x, int y, String title, String subtitle, boolean enabled) {
-            graphics.fill(x, y, x + 184, y + 30, 0xE1140E18);
-            graphics.fill(x, y, x + 184, y + 1, 0x552E2022);
-            graphics.drawString(this.font, title, x + 8, y + 7, WHITE, true);
-            graphics.drawString(this.font, subtitle, x + 8, y + 18, SOFT_TEXT, true);
-            drawSakuraMiniButton(graphics, x + 132, y + 7, 52, 20, enabled ? "ВКЛ" : "ВЫКЛ", enabled);
+        private void card(GuiGraphics g, int x, int y, String a, String b, boolean on) {
+            g.fill(x, y, x + 167, y + 32, CARD);
+            g.fill(x, y, x + 167, y + 1, 0x55433237);
+            g.drawString(font, a, x + 8, y + 7, WHITE, true);
+            g.drawString(font, b, x + 8, y + 19, SOFT, true);
+            miniButton(g, x + 119, y + 6, 42, 20, on ? "ВКЛ" : "ВЫКЛ", on);
         }
 
-        private void drawActionRow(GuiGraphics graphics, int x, int y, String title, String value) {
-            graphics.fill(x, y, x + 184, y + 30, 0xE1140E18);
-            graphics.fill(x, y, x + 184, y + 1, 0x552E2022);
-            graphics.drawString(this.font, title, x + 8, y + 7, WHITE, true);
-            graphics.drawString(this.font, value, x + 8, y + 18, accentLight(), true);
-            drawSakuraMiniButton(graphics, x + 102, y + 7, 82, 20, "Сменить", false);
+        private void colorCard(GuiGraphics g, int x, int y) {
+            g.fill(x, y, x + 167, y + 32, CARD);
+            g.drawString(font, "Цвет", x + 8, y + 7, WHITE, true);
+            g.drawString(font, accentName(), x + 8, y + 19, accentLight(), true);
+            g.fill(x + 112, y + 7, x + 159, y + 25, BORDER);
+            g.fill(x + 114, y + 9, x + 157, y + 23, accentLight());
+            g.fill(x + 124, y + 15, x + 147, y + 16, accent());
+            g.fill(x + 135, y + 11, x + 136, y + 21, accent());
         }
 
-        private void drawPreviewRow(GuiGraphics graphics, int x, int y, String title, int primary, int light) {
-            graphics.fill(x, y, x + 184, y + 30, 0xE1140E18);
-            graphics.fill(x, y, x + 184, y + 1, 0x552E2022);
-            graphics.drawString(this.font, title, x + 8, y + 7, WHITE, true);
-            graphics.drawString(this.font, "Превью", x + 8, y + 18, SOFT_TEXT, true);
-            graphics.fill(x + 130, y + 8, x + 175, y + 22, BORDER);
-            graphics.fill(x + 131, y + 9, x + 174, y + 21, light);
-            graphics.fill(x + 141, y + 14, x + 165, y + 15, primary);
-            graphics.fill(x + 153, y + 10, x + 154, y + 20, primary);
+        private void drawBigButton(GuiGraphics g, int x, int y, int w, int h, String text, boolean selected) {
+            int base = selected ? PINK_ON : PINK;
+            int top = selected ? PINK_ON_TOP : PINK_TOP;
+            g.fill(x, y, x + w, y + h, BORDER);
+            g.fill(x + 2, y + 2, x + w - 2, y + h - 2, base);
+            g.fill(x + 2, y + 2, x + w - 2, y + h / 2, top);
+            blossom(g, x + 7, y + 7);
+            blossom(g, x + w - 13, y + h - 11);
+            g.drawCenteredString(font, Component.literal(text), x + w / 2, y + 9, 0xFF281314);
         }
 
-        private void drawSakuraButton(GuiGraphics graphics, int x, int y, int width, int height, String text, boolean active) {
-            int fill = active ? BLOSSOM_PINK_4 : BLOSSOM_PINK;
-            int fill2 = active ? BLOSSOM_PINK_3 : BLOSSOM_PINK_2;
-            graphics.fill(x, y, x + width, y + height, BORDER);
-            graphics.fill(x + 2, y + 2, x + width - 2, y + height - 2, fill);
-            graphics.fill(x + 2, y + 2, x + width - 2, y + height / 2, fill2);
-            drawBlossom(graphics, x + 8, y + 8, 1);
-            drawBlossom(graphics, x + width - 14, y + height - 12, 1);
-            graphics.drawCenteredString(this.font, Component.literal(text), x + width / 2, y + 9, 0xFF281314);
-        }
-
-        private void drawSakuraMiniButton(GuiGraphics graphics, int x, int y, int width, int height, String text, boolean pressed) {
-            int fill = pressed ? BLOSSOM_PINK_4 : BLOSSOM_PINK_2;
-            int fill2 = pressed ? BLOSSOM_PINK_3 : BLOSSOM_PINK;
-            graphics.fill(x, y, x + width, y + height, BORDER);
-            graphics.fill(x + 2, y + 2, x + width - 2, y + height - 2, fill);
-            graphics.fill(x + 2, y + 2, x + width - 2, y + height / 2, fill2);
-            drawBlossom(graphics, x + 6, y + 6, 1);
-            graphics.drawCenteredString(this.font, Component.literal(text), x + width / 2, y + 6, 0xFF2A1718);
-        }
-
-        private void drawBlossom(GuiGraphics graphics, int x, int y, int scale) {
-            int s = Math.max(1, scale);
-            graphics.fill(x, y + s, x + s, y + 2 * s, 0xFFFFB1CA);
-            graphics.fill(x + s, y, x + 2 * s, y + s, 0xFFFFB1CA);
-            graphics.fill(x + s, y + 2 * s, x + 2 * s, y + 3 * s, 0xFFFFB1CA);
-            graphics.fill(x + 2 * s, y + s, x + 3 * s, y + 2 * s, 0xFFFFB1CA);
-            graphics.fill(x + s, y + s, x + 2 * s, y + 2 * s, 0xFFFFE37A);
+        private void miniButton(GuiGraphics g, int x, int y, int w, int h, String text, boolean pressed) {
+            int base = pressed ? PINK_ON : PINK;
+            int top = pressed ? PINK_ON_TOP : PINK_TOP;
+            g.fill(x, y, x + w, y + h, BORDER);
+            g.fill(x + 2, y + 2, x + w - 2, y + h - 2, base);
+            g.fill(x + 2, y + 2, x + w - 2, y + h / 2, top);
+            blossom(g, x + 5, y + 5);
+            g.drawCenteredString(font, Component.literal(text), x + w / 2, y + 6, 0xFF291719);
         }
     }
 
-    private static final class InvisibleButton extends Button {
-        private InvisibleButton(int x, int y, int width, int height, Component message, OnPress onPress) {
-            super(x, y, width, height, message, onPress, DEFAULT_NARRATION);
-        }
-
-        @Override
-        protected void renderWidget(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
-        }
+    private static void blossom(GuiGraphics g, int x, int y) {
+        g.fill(x, y + 1, x + 1, y + 2, 0xFFFFB1CA);
+        g.fill(x + 1, y, x + 2, y + 1, 0xFFFFB1CA);
+        g.fill(x + 1, y + 2, x + 2, y + 3, 0xFFFFB1CA);
+        g.fill(x + 2, y + 1, x + 3, y + 2, 0xFFFFB1CA);
+        g.fill(x + 1, y + 1, x + 2, y + 2, 0xFFFFE37A);
     }
-
-    private enum Tab {
-        CUSTOM,
-        SAKURA
-    }
-
-    private record AccentColor(String name, int primary, int light) {
-    }
-
-    @FunctionalInterface
-    private interface BoolGetter { boolean get(); }
-
-    @FunctionalInterface
-    private interface BoolSetter { void set(boolean value); }
 }
