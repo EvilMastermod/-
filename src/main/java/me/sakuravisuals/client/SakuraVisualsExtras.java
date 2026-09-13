@@ -6,6 +6,7 @@ import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElementRegistry;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.PlayerFaceRenderer;
+import net.minecraft.core.particles.ColorParticleOption;
 import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.resources.Identifier;
@@ -32,7 +33,7 @@ public final class SakuraVisualsExtras implements ClientModInitializer {
         }
 
         trailTick++;
-        if ((trailTick & 1) != 0) return;
+        if (trailTick % 3 != 0) return;
 
         double x = mc.player.getX();
         double y = mc.player.getY();
@@ -52,50 +53,63 @@ public final class SakuraVisualsExtras implements ClientModInitializer {
         double len = Math.sqrt(dx * dx + dz * dz);
         double backX = len > 0.00001D ? -dx / len : 0.0D;
         double backZ = len > 0.00001D ? -dz / len : 0.0D;
-        double px = x + backX * 0.28D;
-        double pz = z + backZ * 0.28D;
+        double px = x + backX * 0.25D;
+        double pz = z + backZ * 0.25D;
 
         if (Math.floorMod(SakuraVisualsClient.CONFIG.trailMode, 2) == 0) {
             spawnPetalColumn(mc, px, y, pz);
         } else {
-            spawnColorLine(mc, px, y, pz);
+            spawnColorBeam(mc, x, y, z, backX, backZ);
         }
     }
 
     private static void spawnPetalColumn(Minecraft mc, double x, double y, double z) {
-        // Bright vanilla cherry petals: much lighter and more visible than tinted leaves.
-        int count = 10;
-        double radius = 0.17D;
+        // Bright pink leaf/petal particles from feet to head.
+        int count = 11;
+        double radius = 0.18D;
+        ColorParticleOption petal = ColorParticleOption.create(
+                ParticleTypes.TINTED_LEAVES, 0xFFFFC8E1);
+
         for (int i = 0; i < count; i++) {
             double t = i / (double) (count - 1);
-            double yy = y + 0.05D + t * 1.80D;
-            double phase = trailTick * 0.47D + i * 1.61D;
+            double yy = y + 0.05D + t * 1.82D;
+            double phase = trailTick * 0.50D + i * 1.57D;
             double ox = Math.sin(phase) * radius;
             double oz = Math.cos(phase) * radius;
-            mc.level.addParticle(ParticleTypes.CHERRY_LEAVES,
+            mc.level.addParticle(petal,
                     x + ox, yy, z + oz,
-                    0.0D, 0.012D, 0.0D);
+                    0.0D, 0.014D, 0.0D);
         }
     }
 
-    private static void spawnColorLine(Minecraft mc, double x, double y, double z) {
-        // Real colored line: DUST particles only, no leaf texture at all.
-        DustParticleOptions core = new DustParticleOptions(SakuraVisualsClient.accent(), 1.35F);
-        DustParticleOptions glow = new DustParticleOptions(SakuraVisualsClient.accentVeryLight(), 0.85F);
+    private static void spawnColorBeam(Minecraft mc, double x, double y, double z, double backX, double backZ) {
+        // A broad luminous wedge behind the player, inspired by the user's reference.
+        // It is DUST only - never leaf/petal particles.
+        DustParticleOptions core = new DustParticleOptions(SakuraVisualsClient.accent(), 1.65F);
+        DustParticleOptions glow = new DustParticleOptions(SakuraVisualsClient.accentVeryLight(), 1.05F);
 
-        int count = 40;
-        for (int i = 0; i < count; i++) {
-            double t = i / (double) (count - 1);
-            double yy = y + 0.03D + t * 1.84D;
+        double sideX = -backZ;
+        double sideZ = backX;
+        int depthSteps = 5;
+        int heightSteps = 8;
 
-            mc.level.addParticle(core, x, yy, z, 0.0D, 0.0D, 0.0D);
+        for (int d = 0; d < depthSteps; d++) {
+            double depth = 0.18D + d * 0.25D;
+            double width = 0.04D + d * 0.11D;
+            double cx = x + backX * depth;
+            double cz = z + backZ * depth;
 
-            // Small bright halo so the beam reads as one continuous luminous line.
-            if ((i & 1) == 0) {
-                mc.level.addParticle(glow, x + 0.018D, yy, z, 0.0D, 0.0D, 0.0D);
-                mc.level.addParticle(glow, x - 0.018D, yy, z, 0.0D, 0.0D, 0.0D);
-                mc.level.addParticle(glow, x, yy, z + 0.018D, 0.0D, 0.0D, 0.0D);
-                mc.level.addParticle(glow, x, yy, z - 0.018D, 0.0D, 0.0D, 0.0D);
+            for (int h = 0; h < heightSteps; h++) {
+                double t = h / (double) (heightSteps - 1);
+                double yy = y + 0.04D + t * 1.82D;
+
+                mc.level.addParticle(core, cx, yy, cz, 0.0D, 0.0D, 0.0D);
+                mc.level.addParticle(glow,
+                        cx + sideX * width, yy, cz + sideZ * width,
+                        0.0D, 0.0D, 0.0D);
+                mc.level.addParticle(glow,
+                        cx - sideX * width, yy, cz - sideZ * width,
+                        0.0D, 0.0D, 0.0D);
             }
         }
     }
