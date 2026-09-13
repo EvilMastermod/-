@@ -25,8 +25,14 @@ public final class SakuraVisualsClient implements ClientModInitializer {
     private static final int LIGHT_PINK = 0xFFFFC4DF;
     private static final int WHITE = 0xFFFFFFFF;
     private static final int BOX = 0xA0140E1B;
+    private static final int MENU_BG = 0xE4100A16;
+    private static final int PANEL = 0xE91A1026;
+    private static final int TAB_IDLE = 0xFF281A45;
+    private static final int TAB_ACTIVE = 0xFF8A2D67;
 
     private static KeyMapping openMenuKey;
+    private static boolean fullBrightApplied;
+    private static double oldGamma = 0.5D;
 
     @Override
     public void onInitializeClient() {
@@ -45,14 +51,31 @@ public final class SakuraVisualsClient implements ClientModInitializer {
 
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
             while (openMenuKey.consumeClick()) {
-                client.setScreen(new VisualsScreen(client.screen));
+                client.setScreen(new VisualsScreen(client.screen, Tab.CUSTOM));
             }
+            tickFullBright(client);
         });
 
         HudElementRegistry.addLast(
                 Identifier.fromNamespaceAndPath(MOD_ID, "overlay"),
                 createHud()
         );
+    }
+
+    private static void tickFullBright(Minecraft mc) {
+        if (mc == null || mc.options == null) return;
+        if (CONFIG.fullBright) {
+            if (!fullBrightApplied) {
+                oldGamma = mc.options.gamma().get();
+                fullBrightApplied = true;
+            }
+            if (mc.options.gamma().get() < 1.0D) {
+                mc.options.gamma().set(1.0D);
+            }
+        } else if (fullBrightApplied) {
+            mc.options.gamma().set(oldGamma);
+            fullBrightApplied = false;
+        }
     }
 
     private static HudElement createHud() {
@@ -96,13 +119,13 @@ public final class SakuraVisualsClient implements ClientModInitializer {
     }
 
     private static void drawCrosshair(GuiGraphics graphics) {
-        int cx = graphics.guiWidth() / 2;
-        int cy = graphics.guiHeight() / 2;
-        graphics.fill(cx - 5, cy, cx - 1, cy + 1, PINK);
-        graphics.fill(cx + 2, cy, cx + 6, cy + 1, PINK);
-        graphics.fill(cx, cy - 5, cx + 1, cy - 1, PINK);
-        graphics.fill(cx, cy + 2, cx + 1, cy + 6, PINK);
-        graphics.fill(cx, cy, cx + 1, cy + 1, WHITE);
+        int cx = graphics.guiWidth() / 2 - 1;
+        int cy = graphics.guiHeight() / 2 - 1;
+        graphics.fill(cx - 4, cy, cx - 1, cy + 1, PINK);
+        graphics.fill(cx + 2, cy, cx + 5, cy + 1, PINK);
+        graphics.fill(cx, cy - 4, cx + 1, cy - 1, PINK);
+        graphics.fill(cx, cy + 2, cx + 1, cy + 5, PINK);
+        graphics.fill(cx, cy, cx + 1, cy + 1, LIGHT_PINK);
     }
 
     private static void drawPetals(GuiGraphics graphics) {
@@ -120,35 +143,56 @@ public final class SakuraVisualsClient implements ClientModInitializer {
         }
     }
 
+    private enum Tab {
+        CUSTOM("Кастом"),
+        SAKURA("Сакура");
+
+        final String title;
+        Tab(String title) { this.title = title; }
+    }
+
     public static final class VisualsScreen extends Screen {
         private final Screen parent;
+        private final Tab tab;
 
-        public VisualsScreen(Screen parent) {
+        public VisualsScreen(Screen parent, Tab tab) {
             super(Component.literal("Sakura Visuals"));
             this.parent = parent;
+            this.tab = tab;
         }
 
         @Override
         protected void init() {
-            int buttonWidth = 150;
-            int gap = 8;
-            int left = this.width / 2 - buttonWidth - gap / 2;
-            int right = this.width / 2 + gap / 2;
-            int y = this.height / 2 - 78;
+            int center = this.width / 2;
+            int top = this.height / 2 - 110;
 
-            addToggle(left, y, buttonWidth, "Watermark", () -> CONFIG.watermark, v -> CONFIG.watermark = v);
-            addToggle(right, y, buttonWidth, "Координаты", () -> CONFIG.coordinates, v -> CONFIG.coordinates = v);
-            y += 26;
-            addToggle(left, y, buttonWidth, "FPS", () -> CONFIG.fps, v -> CONFIG.fps = v);
-            addToggle(right, y, buttonWidth, "Время мира", () -> CONFIG.worldTime, v -> CONFIG.worldTime = v);
-            y += 26;
-            addToggle(left, y, buttonWidth, "Розовый прицел", () -> CONFIG.crosshair, v -> CONFIG.crosshair = v);
-            addToggle(right, y, buttonWidth, "Лепестки сакуры", () -> CONFIG.sakuraPetals, v -> CONFIG.sakuraPetals = v);
-            y += 26;
-            addToggle(left, y, buttonWidth, "Фон HUD", () -> CONFIG.hudBackground, v -> CONFIG.hudBackground = v);
+            this.addRenderableWidget(Button.builder(Component.literal("Кастом"), b ->
+                    this.minecraft.setScreen(new VisualsScreen(parent, Tab.CUSTOM)))
+                    .bounds(center - 155, top + 24, 145, 22).build());
+            this.addRenderableWidget(Button.builder(Component.literal("Сакура"), b ->
+                    this.minecraft.setScreen(new VisualsScreen(parent, Tab.SAKURA)))
+                    .bounds(center + 10, top + 24, 145, 22).build());
+
+            int left = center - 155;
+            int right = center + 10;
+            int y = top + 64;
+
+            if (tab == Tab.CUSTOM) {
+                addToggle(left, y, 145, "Прицел", () -> CONFIG.crosshair, v -> CONFIG.crosshair = v);
+                addToggle(right, y, 145, "FullBright", () -> CONFIG.fullBright, v -> CONFIG.fullBright = v);
+                y += 28;
+                addToggle(left, y, 145, "Координаты", () -> CONFIG.coordinates, v -> CONFIG.coordinates = v);
+                addToggle(right, y, 145, "FPS", () -> CONFIG.fps, v -> CONFIG.fps = v);
+                y += 28;
+                addToggle(left, y, 145, "Время мира", () -> CONFIG.worldTime, v -> CONFIG.worldTime = v);
+                addToggle(right, y, 145, "Фон HUD", () -> CONFIG.hudBackground, v -> CONFIG.hudBackground = v);
+            } else {
+                addToggle(left, y, 145, "Лепестки сакуры", () -> CONFIG.sakuraPetals, v -> CONFIG.sakuraPetals = v);
+                addToggle(right, y, 145, "Watermark", () -> CONFIG.watermark, v -> CONFIG.watermark = v);
+            }
 
             this.addRenderableWidget(Button.builder(Component.literal("Готово"), b -> onClose())
-                    .bounds(right, y, buttonWidth, 20).build());
+                    .bounds(center - 70, top + 178, 140, 22).build());
         }
 
         private void addToggle(int x, int y, int width, String label, BoolGetter getter, BoolSetter setter) {
@@ -157,7 +201,7 @@ public final class SakuraVisualsClient implements ClientModInitializer {
                 setter.set(next);
                 CONFIG.save();
                 b.setMessage(toggleText(label, next));
-            }).bounds(x, y, width, 20).build();
+            }).bounds(x, y, width, 22).build();
             this.addRenderableWidget(button);
         }
 
@@ -173,13 +217,20 @@ public final class SakuraVisualsClient implements ClientModInitializer {
 
         @Override
         public void render(GuiGraphics graphics, int mouseX, int mouseY, float delta) {
-            graphics.fill(0, 0, this.width, this.height, 0xD0100A16);
-            graphics.fill(this.width / 2 - 175, this.height / 2 - 115,
-                    this.width / 2 + 175, this.height / 2 + 80, 0xD91A1022);
-            graphics.fill(this.width / 2 - 175, this.height / 2 - 115,
-                    this.width / 2 + 175, this.height / 2 - 111, PINK);
-            graphics.drawCenteredString(this.font, this.title, this.width / 2, this.height / 2 - 101, LIGHT_PINK);
-            graphics.drawCenteredString(this.font, "Right Shift — открыть меню", this.width / 2, this.height / 2 - 88, 0xFFB9AFC0);
+            int center = this.width / 2;
+            int top = this.height / 2 - 110;
+            graphics.fill(0, 0, this.width, this.height, MENU_BG);
+            graphics.fill(center - 180, top, center + 180, top + 215, PANEL);
+            graphics.fill(center - 180, top, center - 176, top + 215, PINK);
+            graphics.fill(center - 180, top, center + 180, top + 2, LIGHT_PINK);
+
+            int customColor = tab == Tab.CUSTOM ? TAB_ACTIVE : TAB_IDLE;
+            int sakuraColor = tab == Tab.SAKURA ? TAB_ACTIVE : TAB_IDLE;
+            graphics.fill(center - 155, top + 24, center - 10, top + 46, customColor);
+            graphics.fill(center + 10, top + 24, center + 155, top + 46, sakuraColor);
+
+            graphics.drawCenteredString(this.font, this.title, center, top + 8, LIGHT_PINK);
+            graphics.drawCenteredString(this.font, "Right Shift — открыть меню", center, top + 50, 0xFFB9AFC0);
             super.render(graphics, mouseX, mouseY, delta);
         }
     }
