@@ -18,6 +18,7 @@ public final class VisualConfig {
     public boolean sakuraPetals = true;
     public boolean hudBackground = true;
     public boolean fullBright = false;
+    public int accentColorIndex = 0;
 
     private final Path path = FabricLoader.getInstance().getConfigDir().resolve("sakuravisuals.properties");
 
@@ -26,14 +27,15 @@ public final class VisualConfig {
         Properties p = new Properties();
         try (InputStream in = Files.newInputStream(path)) {
             p.load(in);
-            watermark = get(p, "watermark", watermark);
-            coordinates = get(p, "coordinates", coordinates);
-            fps = get(p, "fps", fps);
-            worldTime = get(p, "worldTime", worldTime);
-            crosshair = get(p, "crosshair", crosshair);
-            sakuraPetals = get(p, "sakuraPetals", sakuraPetals);
-            hudBackground = get(p, "hudBackground", hudBackground);
-            fullBright = get(p, "fullBright", fullBright);
+            watermark = getBool(p, "watermark", watermark);
+            coordinates = getBool(p, "coordinates", coordinates);
+            fps = getBool(p, "fps", fps);
+            worldTime = getBool(p, "worldTime", worldTime);
+            crosshair = getBool(p, "crosshair", crosshair);
+            sakuraPetals = getBool(p, "sakuraPetals", sakuraPetals);
+            hudBackground = getBool(p, "hudBackground", hudBackground);
+            fullBright = getBool(p, "fullBright", fullBright);
+            accentColorIndex = getInt(p, "accentColorIndex", accentColorIndex);
         } catch (IOException ignored) {
         }
     }
@@ -48,6 +50,7 @@ public final class VisualConfig {
         p.setProperty("sakuraPetals", Boolean.toString(sakuraPetals));
         p.setProperty("hudBackground", Boolean.toString(hudBackground));
         p.setProperty("fullBright", Boolean.toString(fullBright));
+        p.setProperty("accentColorIndex", Integer.toString(accentColorIndex));
         try {
             Files.createDirectories(path.getParent());
             try (OutputStream out = Files.newOutputStream(path)) {
@@ -57,7 +60,15 @@ public final class VisualConfig {
         }
     }
 
-    private static boolean get(Properties p, String key, boolean fallback) {
+    private static boolean getBool(Properties p, String key, boolean fallback) {
         return Boolean.parseBoolean(p.getProperty(key, Boolean.toString(fallback)));
+    }
+
+    private static int getInt(Properties p, String key, int fallback) {
+        try {
+            return Integer.parseInt(p.getProperty(key, Integer.toString(fallback)));
+        } catch (NumberFormatException ignored) {
+            return fallback;
+        }
     }
 }
