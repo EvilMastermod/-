@@ -17,6 +17,7 @@ public final class VisualConfig {
     public boolean crosshair = true;
     public boolean sakuraPetals = true;
     public boolean hudBackground = true;
+    public boolean fullBright = false;
 
     private final Path path = FabricLoader.getInstance().getConfigDir().resolve("sakuravisuals.properties");
 
@@ -32,6 +33,7 @@ public final class VisualConfig {
             crosshair = get(p, "crosshair", crosshair);
             sakuraPetals = get(p, "sakuraPetals", sakuraPetals);
             hudBackground = get(p, "hudBackground", hudBackground);
+            fullBright = get(p, "fullBright", fullBright);
         } catch (IOException ignored) {
         }
     }
@@ -45,6 +47,7 @@ public final class VisualConfig {
         p.setProperty("crosshair", Boolean.toString(crosshair));
         p.setProperty("sakuraPetals", Boolean.toString(sakuraPetals));
         p.setProperty("hudBackground", Boolean.toString(hudBackground));
+        p.setProperty("fullBright", Boolean.toString(fullBright));
         try {
             Files.createDirectories(path.getParent());
             try (OutputStream out = Files.newOutputStream(path)) {
