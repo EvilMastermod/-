@@ -8,7 +8,8 @@
   "environment": "client",
   "entrypoints": {
     "client": [
-      "me.sakuravisuals.client.SakuraVisualsClient"
+      "me.sakuravisuals.client.SakuraVisualsClient",
+      "me.sakuravisuals.client.SakuraVisualsExtras"
     ]
   },
   "mixins": [
