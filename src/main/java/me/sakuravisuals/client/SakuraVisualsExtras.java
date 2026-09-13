@@ -38,7 +38,8 @@ public final class SakuraVisualsExtras implements ClientModInitializer {
         double y = mc.player.getY();
         double z = mc.player.getZ();
 
-        // The beam is a clean effect based on player direction, not a cloud of leaf particles.
+        // Beam mode: a clean geometric neon outline behind the player.
+        // No petals and no wide particle cloud are used here.
         if (Math.floorMod(SakuraVisualsClient.CONFIG.trailMode, 2) == 1) {
             if ((trailTick & 1) == 0) {
                 double yaw = Math.toRadians(mc.player.getYRot());
@@ -51,7 +52,7 @@ public final class SakuraVisualsExtras implements ClientModInitializer {
             return;
         }
 
-        // Sakura petal mode only spawns while the player is actually moving.
+        // Sakura petal mode only spawns while moving.
         if (trailTick % 3 != 0) return;
         if (Double.isNaN(lastX)) {
             lastX = x;
@@ -72,10 +73,10 @@ public final class SakuraVisualsExtras implements ClientModInitializer {
     }
 
     private static void spawnPetalColumn(Minecraft mc, double x, double y, double z) {
-        int count = 10;
-        double radius = 0.15D;
+        int count = 12;
+        double radius = 0.16D;
         ColorParticleOption petal = ColorParticleOption.create(
-                ParticleTypes.TINTED_LEAVES, 0xFFFFE3F0);
+                ParticleTypes.TINTED_LEAVES, 0xFFFFECF5);
 
         for (int i = 0; i < count; i++) {
             double t = i / (double) (count - 1);
@@ -88,45 +89,66 @@ public final class SakuraVisualsExtras implements ClientModInitializer {
     }
 
     private static void spawnColorBeam(Minecraft mc, double x, double y, double z, double backX, double backZ) {
-        // Triangular glowing wedge like the reference: narrow at the player and wider behind.
-        // DUST only, so there are no giant leaf-shaped particles.
-        DustParticleOptions core = new DustParticleOptions(SakuraVisualsClient.accent(), 0.55F);
-        DustParticleOptions glow = new DustParticleOptions(SakuraVisualsClient.accentLight(), 0.32F);
+        // Clean line/beam shaped like the reference: narrow at the player and wider behind.
+        // The effect is made from a few continuous neon edge lines, not a cloud.
+        DustParticleOptions main = new DustParticleOptions(SakuraVisualsClient.accent(), 0.34F);
+        DustParticleOptions glow = new DustParticleOptions(SakuraVisualsClient.accentVeryLight(), 0.22F);
 
         double sideX = -backZ;
         double sideZ = backX;
-        int depthSteps = 7;
-        int heightSteps = 5;
 
-        for (int d = 0; d < depthSteps; d++) {
-            double depthT = d / (double) (depthSteps - 1);
-            double depth = 0.18D + depthT * 1.65D;
-            double halfWidth = 0.04D + depthT * 0.62D;
-            double centerX = x + backX * depth;
-            double centerZ = z + backZ * depth;
+        double nearDepth = 0.10D;
+        double farDepth = 1.70D;
+        double nearHalfWidth = 0.03D;
+        double farHalfWidth = 0.50D;
+        double bottomY = y + 0.06D;
+        double topY = y + 1.76D;
 
-            for (int h = 0; h < heightSteps; h++) {
-                double heightT = h / (double) (heightSteps - 1);
-                double yy = y + 0.08D + heightT * 1.62D;
+        double nearCenterX = x + backX * nearDepth;
+        double nearCenterZ = z + backZ * nearDepth;
+        double farCenterX = x + backX * farDepth;
+        double farCenterZ = z + backZ * farDepth;
 
-                // Three clean stripes across the wedge instead of a chaotic particle cloud.
-                for (int s = -1; s <= 1; s++) {
-                    double lateral = halfWidth * s;
-                    double px = centerX + sideX * lateral;
-                    double pz = centerZ + sideZ * lateral;
-                    mc.level.addParticle(core, px, yy, pz, 0.0D, 0.0D, 0.0D);
-                }
+        double nearLeftX = nearCenterX - sideX * nearHalfWidth;
+        double nearLeftZ = nearCenterZ - sideZ * nearHalfWidth;
+        double nearRightX = nearCenterX + sideX * nearHalfWidth;
+        double nearRightZ = nearCenterZ + sideZ * nearHalfWidth;
+        double farLeftX = farCenterX - sideX * farHalfWidth;
+        double farLeftZ = farCenterZ - sideZ * farHalfWidth;
+        double farRightX = farCenterX + sideX * farHalfWidth;
+        double farRightZ = farCenterZ + sideZ * farHalfWidth;
 
-                // Bright edges make the wedge read as a single beam.
-                if (h == 0 || h == heightSteps - 1) {
-                    mc.level.addParticle(glow,
-                            centerX + sideX * halfWidth, yy, centerZ + sideZ * halfWidth,
-                            0.0D, 0.0D, 0.0D);
-                    mc.level.addParticle(glow,
-                            centerX - sideX * halfWidth, yy, centerZ - sideZ * halfWidth,
-                            0.0D, 0.0D, 0.0D);
-                }
-            }
+        // Four main perspective edges.
+        spawnLine(mc, main, nearLeftX, bottomY, nearLeftZ, farLeftX, bottomY, farLeftZ, 28);
+        spawnLine(mc, main, nearRightX, bottomY, nearRightZ, farRightX, bottomY, farRightZ, 28);
+        spawnLine(mc, main, nearLeftX, topY, nearLeftZ, farLeftX, topY, farLeftZ, 28);
+        spawnLine(mc, main, nearRightX, topY, nearRightZ, farRightX, topY, farRightZ, 28);
+
+        // Vertical far edge makes it read as one clean luminous panel/line effect.
+        spawnLine(mc, glow, farLeftX, bottomY, farLeftZ, farLeftX, topY, farLeftZ, 24);
+        spawnLine(mc, glow, farRightX, bottomY, farRightZ, farRightX, topY, farRightZ, 24);
+
+        // One soft center line gives the beam a solid readable core without turning into a particle cloud.
+        spawnLine(mc, glow,
+                nearCenterX, y + 0.90D, nearCenterZ,
+                farCenterX, y + 0.90D, farCenterZ,
+                30);
+    }
+
+    private static void spawnLine(
+            Minecraft mc,
+            DustParticleOptions particle,
+            double x0, double y0, double z0,
+            double x1, double y1, double z1,
+            int steps
+    ) {
+        int safeSteps = Math.max(2, steps);
+        for (int i = 0; i < safeSteps; i++) {
+            double t = i / (double) (safeSteps - 1);
+            double px = x0 + (x1 - x0) * t;
+            double py = y0 + (y1 - y0) * t;
+            double pz = z0 + (z1 - z0) * t;
+            mc.level.addParticle(particle, px, py, pz, 0.0D, 0.0D, 0.0D);
         }
     }
 
