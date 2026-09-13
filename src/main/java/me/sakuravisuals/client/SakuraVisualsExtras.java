@@ -6,13 +6,11 @@ import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElementRegistry;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.PlayerFaceRenderer;
+import net.minecraft.core.particles.ColorParticleOption;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.resources.Identifier;
 
 public final class SakuraVisualsExtras implements ClientModInitializer {
-    private static final int[] COLORS = {0xFFFF82BA, 0xFF72C7FF, 0xFFB38CFF, 0xFF72DEBE, 0xFFF4F4F4};
-    private static final int[] LIGHT = {0xFFFFC7E0, 0xFFCCE9FF, 0xFFE3D3FF, 0xFFC9F4E7, 0xFFFFFFFF};
-
     private static int trailTick;
     private static double lastX = Double.NaN;
     private static double lastZ = Double.NaN;
@@ -34,7 +32,9 @@ public final class SakuraVisualsExtras implements ClientModInitializer {
         }
 
         trailTick++;
-        if ((trailTick & 1) != 0) return;
+        int size = Math.floorMod(SakuraVisualsClient.CONFIG.trailSize, 3);
+        int interval = size == 0 ? 3 : (size == 1 ? 2 : 1);
+        if (trailTick % interval != 0) return;
 
         double x = mc.player.getX();
         double y = mc.player.getY();
@@ -49,20 +49,44 @@ public final class SakuraVisualsExtras implements ClientModInitializer {
         double dz = z - lastZ;
         lastX = x;
         lastZ = z;
-        if (dx * dx + dz * dz < 0.0004D) return;
+        if (dx * dx + dz * dz < 0.00004D) return;
 
-        double phase = trailTick * 0.72D;
-        double ox = Math.sin(phase) * 0.16D;
-        double oz = Math.cos(phase) * 0.16D;
+        double len = Math.sqrt(dx * dx + dz * dz);
+        double backX = len > 0.00001D ? -dx / len : 0.0D;
+        double backZ = len > 0.00001D ? -dz / len : 0.0D;
+        double distance = size == 0 ? 0.18D : (size == 1 ? 0.28D : 0.38D);
+        double px = x + backX * distance;
+        double pz = z + backZ * distance;
 
-        mc.level.addParticle(ParticleTypes.CHERRY_LEAVES,
-                x + ox, y + 0.10D, z + oz,
-                0.0D, 0.015D, 0.0D);
+        if (Math.floorMod(SakuraVisualsClient.CONFIG.trailMode, 2) == 0) {
+            spawnPetalColumn(mc, px, y, pz, size);
+        } else {
+            spawnColorLine(mc, px, y, pz, size);
+        }
+    }
 
-        if ((trailTick & 3) == 0) {
-            mc.level.addParticle(ParticleTypes.CHERRY_LEAVES,
-                    x - ox, y + 0.14D, z - oz,
-                    0.0D, 0.010D, 0.0D);
+    private static void spawnPetalColumn(Minecraft mc, double x, double y, double z, int size) {
+        int count = size == 0 ? 4 : (size == 1 ? 6 : 9);
+        double radius = size == 0 ? 0.08D : (size == 1 ? 0.14D : 0.22D);
+        ColorParticleOption option = ColorParticleOption.create(ParticleTypes.TINTED_LEAVES, SakuraVisualsClient.accent());
+
+        for (int i = 0; i < count; i++) {
+            double t = count <= 1 ? 0.0D : i / (double) (count - 1);
+            double yy = y + 0.05D + t * 1.75D;
+            double phase = trailTick * 0.44D + i * 1.73D;
+            double ox = Math.sin(phase) * radius;
+            double oz = Math.cos(phase) * radius;
+            mc.level.addParticle(option, x + ox, yy, z + oz, 0.0D, 0.006D, 0.0D);
+        }
+    }
+
+    private static void spawnColorLine(Minecraft mc, double x, double y, double z, int size) {
+        int count = size == 0 ? 7 : (size == 1 ? 11 : 16);
+        ColorParticleOption option = ColorParticleOption.create(ParticleTypes.TINTED_LEAVES, SakuraVisualsClient.accent());
+        for (int i = 0; i < count; i++) {
+            double t = count <= 1 ? 0.0D : i / (double) (count - 1);
+            double yy = y + 0.04D + t * 1.78D;
+            mc.level.addParticle(option, x, yy, z, 0.0D, 0.0D, 0.0D);
         }
     }
 
@@ -84,8 +108,8 @@ public final class SakuraVisualsExtras implements ClientModInitializer {
         float maxHp = Math.max(1.0F, mc.player.getMaxHealth());
         float ratio = Math.max(0.0F, Math.min(1.0F, hp / maxHp));
 
-        int accent = accent();
-        int light = accentLight();
+        int accent = SakuraVisualsClient.accent();
+        int light = SakuraVisualsClient.accentLight();
         int head = 28;
         int width = Math.max(158, mc.font.width(name) + 68);
         int height = 43;
@@ -109,23 +133,15 @@ public final class SakuraVisualsExtras implements ClientModInitializer {
         g.fill(tx, barY, tx + fillW, barY + 7, accent);
         g.fill(tx, barY, tx + fillW, barY + 3, light);
 
-        blossom(g, x + width - 13, cardY + 5);
-        blossom(g, x + width - 20, cardY + 33);
+        blossom(g, x + width - 13, cardY + 5, light);
+        blossom(g, x + width - 20, cardY + 33, light);
     }
 
-    private static int accent() {
-        return COLORS[Math.floorMod(SakuraVisualsClient.CONFIG.accentColorIndex, COLORS.length)];
-    }
-
-    private static int accentLight() {
-        return LIGHT[Math.floorMod(SakuraVisualsClient.CONFIG.accentColorIndex, LIGHT.length)];
-    }
-
-    private static void blossom(GuiGraphics g, int x, int y) {
-        g.fill(x, y + 1, x + 1, y + 2, 0xFFFFB1CA);
-        g.fill(x + 1, y, x + 2, y + 1, 0xFFFFB1CA);
-        g.fill(x + 1, y + 2, x + 2, y + 3, 0xFFFFB1CA);
-        g.fill(x + 2, y + 1, x + 3, y + 2, 0xFFFFB1CA);
-        g.fill(x + 1, y + 1, x + 2, y + 2, 0xFFFFE37A);
+    private static void blossom(GuiGraphics g, int x, int y, int color) {
+        g.fill(x, y + 1, x + 1, y + 2, color);
+        g.fill(x + 1, y, x + 2, y + 1, color);
+        g.fill(x + 1, y + 2, x + 2, y + 3, color);
+        g.fill(x + 2, y + 1, x + 3, y + 2, color);
+        g.fill(x + 1, y + 1, x + 2, y + 2, 0xFFFFFFFF);
     }
 }
