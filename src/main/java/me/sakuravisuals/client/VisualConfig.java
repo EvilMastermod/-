@@ -20,9 +20,21 @@ public final class VisualConfig {
     public boolean fullBright = false;
     public boolean playerCard = true;
     public boolean playerTrail = true;
+
+    // 0 = petals, 1 = vertical line
     public int trailMode = 0;
-    public int trailSize = 1;
     public int accentColorIndex = 0;
+
+    // 0 = small, 1 = medium, 2 = large
+    public int menuSize = 1;
+
+    // Freely editable HUD placement and scale (percent).
+    public int hudInfoX = 8;
+    public int hudInfoY = 8;
+    public int hudInfoScale = 100;
+    public int playerCardX = 8;
+    public int playerCardY = 72;
+    public int playerCardScale = 100;
 
     private final Path path = FabricLoader.getInstance().getConfigDir().resolve("sakuravisuals.properties");
 
@@ -42,10 +54,21 @@ public final class VisualConfig {
             playerCard = getBool(p, "playerCard", playerCard);
             playerTrail = getBool(p, "playerTrail", playerTrail);
             trailMode = getInt(p, "trailMode", trailMode);
-            trailSize = getInt(p, "trailSize", trailSize);
             accentColorIndex = getInt(p, "accentColorIndex", accentColorIndex);
+            menuSize = getInt(p, "menuSize", menuSize);
+            hudInfoX = getInt(p, "hudInfoX", hudInfoX);
+            hudInfoY = getInt(p, "hudInfoY", hudInfoY);
+            hudInfoScale = getInt(p, "hudInfoScale", hudInfoScale);
+            playerCardX = getInt(p, "playerCardX", playerCardX);
+            playerCardY = getInt(p, "playerCardY", playerCardY);
+            playerCardScale = getInt(p, "playerCardScale", playerCardScale);
         } catch (IOException ignored) {
         }
+
+        menuSize = Math.floorMod(menuSize, 3);
+        trailMode = Math.floorMod(trailMode, 2);
+        hudInfoScale = clamp(hudInfoScale, 55, 190);
+        playerCardScale = clamp(playerCardScale, 55, 190);
     }
 
     public void save() {
@@ -61,8 +84,14 @@ public final class VisualConfig {
         p.setProperty("playerCard", Boolean.toString(playerCard));
         p.setProperty("playerTrail", Boolean.toString(playerTrail));
         p.setProperty("trailMode", Integer.toString(trailMode));
-        p.setProperty("trailSize", Integer.toString(trailSize));
         p.setProperty("accentColorIndex", Integer.toString(accentColorIndex));
+        p.setProperty("menuSize", Integer.toString(menuSize));
+        p.setProperty("hudInfoX", Integer.toString(hudInfoX));
+        p.setProperty("hudInfoY", Integer.toString(hudInfoY));
+        p.setProperty("hudInfoScale", Integer.toString(hudInfoScale));
+        p.setProperty("playerCardX", Integer.toString(playerCardX));
+        p.setProperty("playerCardY", Integer.toString(playerCardY));
+        p.setProperty("playerCardScale", Integer.toString(playerCardScale));
         try {
             Files.createDirectories(path.getParent());
             try (OutputStream out = Files.newOutputStream(path)) {
@@ -82,5 +111,9 @@ public final class VisualConfig {
         } catch (NumberFormatException ignored) {
             return fallback;
         }
+    }
+
+    private static int clamp(int value, int min, int max) {
+        return Math.max(min, Math.min(max, value));
     }
 }
