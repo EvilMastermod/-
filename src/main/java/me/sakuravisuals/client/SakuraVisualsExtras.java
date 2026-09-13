@@ -32,9 +32,7 @@ public final class SakuraVisualsExtras implements ClientModInitializer {
         }
 
         trailTick++;
-        int size = Math.floorMod(SakuraVisualsClient.CONFIG.trailSize, 3);
-        int interval = size == 0 ? 3 : (size == 1 ? 2 : 1);
-        if (trailTick % interval != 0) return;
+        if ((trailTick & 1) != 0) return;
 
         double x = mc.player.getX();
         double y = mc.player.getY();
@@ -54,54 +52,62 @@ public final class SakuraVisualsExtras implements ClientModInitializer {
         double len = Math.sqrt(dx * dx + dz * dz);
         double backX = len > 0.00001D ? -dx / len : 0.0D;
         double backZ = len > 0.00001D ? -dz / len : 0.0D;
-        double distance = size == 0 ? 0.18D : (size == 1 ? 0.28D : 0.38D);
-        double px = x + backX * distance;
-        double pz = z + backZ * distance;
+        double px = x + backX * 0.28D;
+        double pz = z + backZ * 0.28D;
 
         if (Math.floorMod(SakuraVisualsClient.CONFIG.trailMode, 2) == 0) {
-            spawnPetalColumn(mc, px, y, pz, size);
+            spawnPetalColumn(mc, px, y, pz);
         } else {
-            spawnColorLine(mc, px, y, pz, size);
+            spawnColorLine(mc, px, y, pz);
         }
     }
 
-    private static void spawnPetalColumn(Minecraft mc, double x, double y, double z, int size) {
-        int count = size == 0 ? 4 : (size == 1 ? 6 : 9);
-        double radius = size == 0 ? 0.08D : (size == 1 ? 0.14D : 0.22D);
-        ColorParticleOption option = ColorParticleOption.create(ParticleTypes.TINTED_LEAVES, SakuraVisualsClient.accent());
+    private static void spawnPetalColumn(Minecraft mc, double x, double y, double z) {
+        int count = 8;
+        double radius = 0.15D;
+        ColorParticleOption light = ColorParticleOption.create(
+                ParticleTypes.TINTED_LEAVES, SakuraVisualsClient.accentVeryLight());
 
         for (int i = 0; i < count; i++) {
-            double t = count <= 1 ? 0.0D : i / (double) (count - 1);
-            double yy = y + 0.05D + t * 1.75D;
-            double phase = trailTick * 0.44D + i * 1.73D;
+            double t = i / (double) (count - 1);
+            double yy = y + 0.05D + t * 1.80D;
+            double phase = trailTick * 0.47D + i * 1.61D;
             double ox = Math.sin(phase) * radius;
             double oz = Math.cos(phase) * radius;
-            mc.level.addParticle(option, x + ox, yy, z + oz, 0.0D, 0.006D, 0.0D);
+            mc.level.addParticle(light, x + ox, yy, z + oz, 0.0D, 0.009D, 0.0D);
         }
     }
 
-    private static void spawnColorLine(Minecraft mc, double x, double y, double z, int size) {
-        int count = size == 0 ? 7 : (size == 1 ? 11 : 16);
-        ColorParticleOption option = ColorParticleOption.create(ParticleTypes.TINTED_LEAVES, SakuraVisualsClient.accent());
+    private static void spawnColorLine(Minecraft mc, double x, double y, double z) {
+        int count = 24;
+        ColorParticleOption line = ColorParticleOption.create(
+                ParticleTypes.TINTED_LEAVES, SakuraVisualsClient.accentLight());
+        ColorParticleOption glow = ColorParticleOption.create(
+                ParticleTypes.TINTED_LEAVES, SakuraVisualsClient.accentVeryLight());
+
         for (int i = 0; i < count; i++) {
-            double t = count <= 1 ? 0.0D : i / (double) (count - 1);
-            double yy = y + 0.04D + t * 1.78D;
-            mc.level.addParticle(option, x, yy, z, 0.0D, 0.0D, 0.0D);
+            double t = i / (double) (count - 1);
+            double yy = y + 0.03D + t * 1.84D;
+            mc.level.addParticle(line, x, yy, z, 0.0D, 0.0D, 0.0D);
+            if ((i & 2) == 0) {
+                mc.level.addParticle(glow, x + 0.025D, yy, z, 0.0D, 0.0D, 0.0D);
+                mc.level.addParticle(glow, x - 0.025D, yy, z, 0.0D, 0.0D, 0.0D);
+            }
         }
+    }
+
+    static int playerCardBaseWidth(Minecraft mc) {
+        if (mc == null || mc.player == null) return 170;
+        return Math.max(170, mc.font.width(mc.player.getName().getString()) + 82);
+    }
+
+    static int playerCardBaseHeight() {
+        return 51;
     }
 
     private static void renderSkinCard(GuiGraphics g) {
         Minecraft mc = Minecraft.getInstance();
         if (mc.player == null || mc.level == null || mc.options.hideGui || !SakuraVisualsClient.CONFIG.playerCard) return;
-
-        int x = 8;
-        int y = 8;
-        int lineCount = 0;
-        if (SakuraVisualsClient.CONFIG.watermark) lineCount++;
-        if (SakuraVisualsClient.CONFIG.coordinates) lineCount++;
-        if (SakuraVisualsClient.CONFIG.fps) lineCount++;
-        if (SakuraVisualsClient.CONFIG.worldTime) lineCount++;
-        int cardY = lineCount == 0 ? y : y + lineCount * 11 + 10;
 
         String name = mc.player.getName().getString();
         float hp = mc.player.getHealth();
@@ -110,38 +116,38 @@ public final class SakuraVisualsExtras implements ClientModInitializer {
 
         int accent = SakuraVisualsClient.accent();
         int light = SakuraVisualsClient.accentLight();
-        int head = 28;
-        int width = Math.max(158, mc.font.width(name) + 68);
-        int height = 43;
+        int width = playerCardBaseWidth(mc);
+        int height = playerCardBaseHeight();
+        int head = 32;
+        float scale = SakuraVisualsClient.clampScale(SakuraVisualsClient.CONFIG.playerCardScale);
 
-        g.fill(x - 4, cardY - 4, x + width + 6, cardY + height, 0xEC120C18);
-        g.fill(x - 4, cardY - 4, x - 2, cardY + height, accent);
-        g.fill(x - 2, cardY - 2, x + width + 4, cardY + 11, 0x38FFFFFF);
+        var matrices = g.pose();
+        matrices.pushMatrix();
+        matrices.translate(SakuraVisualsClient.CONFIG.playerCardX, SakuraVisualsClient.CONFIG.playerCardY);
+        matrices.scale(scale, scale);
 
-        g.fill(x, cardY, x + head + 4, cardY + head + 4, 0xFF2A1825);
-        g.fill(x + 1, cardY + 1, x + head + 3, cardY + head + 3, accent);
-        PlayerFaceRenderer.draw(g, mc.player.getSkin(), x + 3, cardY + 3, head - 2);
+        g.fill(0, 0, width, height, 0xEC120C18);
+        g.fill(0, 0, 3, height, accent);
+        g.fill(3, 0, width, 2, 0x66FFFFFF & light | 0x66000000);
 
-        int tx = x + head + 10;
-        g.drawString(mc.font, name, tx, cardY + 3, light, true);
-        g.drawString(mc.font, String.format("HP %.1f / %.1f", hp, maxHp), tx, cardY + 15, 0xFFFFFFFF, true);
+        g.fill(7, 7, 7 + head + 4, 7 + head + 4, 0xFF2A1825);
+        g.fill(8, 8, 8 + head + 2, 8 + head + 2, accent);
+        PlayerFaceRenderer.draw(g, mc.player.getSkin(), 10, 10, head - 2);
 
-        int barW = Math.max(48, width - (tx - x) - 9);
+        int tx = 48;
+        g.drawString(mc.font, name, tx, 8, light, true);
+        g.drawString(mc.font, String.format("HP %.1f / %.1f", hp, maxHp), tx, 21, 0xFFFFFFFF, true);
+
+        int barW = Math.max(54, width - tx - 10);
         int fillW = (int) (barW * ratio);
-        int barY = cardY + 29;
-        g.fill(tx, barY, tx + barW, barY + 7, 0xFF291922);
-        g.fill(tx, barY, tx + fillW, barY + 7, accent);
+        int barY = 36;
+        g.fill(tx, barY, tx + barW, barY + 8, 0xFF291922);
+        g.fill(tx, barY, tx + fillW, barY + 8, accent);
         g.fill(tx, barY, tx + fillW, barY + 3, light);
 
-        blossom(g, x + width - 13, cardY + 5, light);
-        blossom(g, x + width - 20, cardY + 33, light);
-    }
+        SakuraVisualsClient.blossom(g, width - 14, 7);
+        SakuraVisualsClient.blossom(g, width - 23, height - 12);
 
-    private static void blossom(GuiGraphics g, int x, int y, int color) {
-        g.fill(x, y + 1, x + 1, y + 2, color);
-        g.fill(x + 1, y, x + 2, y + 1, color);
-        g.fill(x + 1, y + 2, x + 2, y + 3, color);
-        g.fill(x + 2, y + 1, x + 3, y + 2, color);
-        g.fill(x + 1, y + 1, x + 2, y + 2, 0xFFFFFFFF);
+        matrices.popMatrix();
     }
 }
