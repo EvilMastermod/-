@@ -3,7 +3,8 @@
   "package": "me.sakuravisuals.mixin",
   "compatibilityLevel": "JAVA_21",
   "client": [
-    "GuiMixin"
+    "GuiMixin",
+    "VisualsScreenMixin"
   ],
   "injectors": {
     "defaultRequire": 1
