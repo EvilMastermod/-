@@ -45,8 +45,7 @@ public final class SakuraVisualsExtras implements ClientModInitializer {
         double y = mc.player.getY();
         double z = mc.player.getZ();
 
-        // Line mode is rendered as real world geometry every frame.
-        // Absolutely no particles are spawned in this mode.
+        // Line mode is true geometry. No particles are spawned here.
         if (Math.floorMod(SakuraVisualsClient.CONFIG.trailMode, 2) == 1) {
             lastX = x;
             lastZ = z;
@@ -94,17 +93,20 @@ public final class SakuraVisualsExtras implements ClientModInitializer {
         if (mc == null || mc.player == null || mc.level == null || !SakuraVisualsClient.CONFIG.playerTrail) return;
         if (Math.floorMod(SakuraVisualsClient.CONFIG.trailMode, 2) != 1) return;
 
-        // Put the line just behind the player's body so it remains visible in third person,
-        // while still running exactly from feet to head.
         double yaw = Math.toRadians(mc.player.getYRot());
-        double backX = Math.sin(yaw) * 0.26D;
-        double backZ = -Math.cos(yaw) * 0.26D;
+
+        // Keep the line close to the player, but move it slightly to the side and back.
+        // This prevents the player's body from completely hiding it in third person.
+        double backX = Math.sin(yaw) * 0.16D;
+        double backZ = -Math.cos(yaw) * 0.16D;
+        double sideX = Math.cos(yaw) * 0.38D;
+        double sideZ = Math.sin(yaw) * 0.38D;
 
         Vec3 camera = context.worldState().cameraRenderState.pos;
-        float x = (float) (mc.player.getX() + backX - camera.x);
-        float z = (float) (mc.player.getZ() + backZ - camera.z);
-        float bottomY = (float) (mc.player.getY() + 0.03D - camera.y);
-        float topY = (float) (mc.player.getY() + 1.82D - camera.y);
+        float x = (float) (mc.player.getX() + backX + sideX - camera.x);
+        float z = (float) (mc.player.getZ() + backZ + sideZ - camera.z);
+        float bottomY = (float) (mc.player.getY() + 0.02D - camera.y);
+        float topY = (float) (mc.player.getY() + 1.90D - camera.y);
 
         PoseStack matrices = context.matrices();
         if (matrices == null) return;
@@ -113,15 +115,18 @@ public final class SakuraVisualsExtras implements ClientModInitializer {
 
         int base = SakuraVisualsClient.accent();
         int light = SakuraVisualsClient.accentVeryLight();
-        int glowColor = (0x70 << 24) | (light & 0x00FFFFFF);
+        int glowColor = (0xA0 << 24) | (light & 0x00FFFFFF);
         int coreColor = 0xFF000000 | (base & 0x00FFFFFF);
 
-        Vector3f normal = new Vector3f(0.0F, 1.0F, 0.0F);
+        // IMPORTANT: the line shader needs a normal perpendicular to the vertical segment.
+        // The old code used (0,1,0), parallel to the line, which could make it effectively invisible.
+        Vector3f normal = new Vector3f((float) sideX, 0.0F, (float) sideZ);
+        if (normal.lengthSquared() < 0.0001F) normal.set(1.0F, 0.0F, 0.0F);
+        normal.normalize();
 
-        // Soft glow pass on exactly the same geometry.
-        addLine(line, pose, x, bottomY, z, x, topY, z, glowColor, 5.0F, normal);
-        // Crisp core pass. This is the actual one-piece geometric line.
-        addLine(line, pose, x, bottomY, z, x, topY, z, coreColor, 2.0F, normal);
+        // One geometric line, drawn twice on the exact same path: soft glow + crisp core.
+        addLine(line, pose, x, bottomY, z, x, topY, z, glowColor, 9.0F, normal);
+        addLine(line, pose, x, bottomY, z, x, topY, z, coreColor, 3.0F, normal);
     }
 
     private static void addLine(
