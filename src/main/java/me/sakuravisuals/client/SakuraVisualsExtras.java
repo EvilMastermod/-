@@ -1,15 +1,21 @@
 package me.sakuravisuals.client;
 
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElementRegistry;
+import net.fabricmc.fabric.api.client.rendering.v1.world.WorldRenderContext;
+import net.fabricmc.fabric.api.client.rendering.v1.world.WorldRenderEvents;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.PlayerFaceRenderer;
+import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.core.particles.ColorParticleOption;
-import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.resources.Identifier;
+import net.minecraft.world.phys.Vec3;
+import org.joml.Vector3f;
 
 public final class SakuraVisualsExtras implements ClientModInitializer {
     private static int trailTick;
@@ -19,6 +25,7 @@ public final class SakuraVisualsExtras implements ClientModInitializer {
     @Override
     public void onInitializeClient() {
         ClientTickEvents.END_CLIENT_TICK.register(SakuraVisualsExtras::tickTrail);
+        WorldRenderEvents.BEFORE_TRANSLUCENT.register(SakuraVisualsExtras::renderGeometricLine);
         HudElementRegistry.addLast(
                 Identifier.fromNamespaceAndPath(SakuraVisualsClient.MOD_ID, "player_card_skin"),
                 (graphics, deltaTracker) -> renderSkinCard(graphics)
@@ -38,21 +45,15 @@ public final class SakuraVisualsExtras implements ClientModInitializer {
         double y = mc.player.getY();
         double z = mc.player.getZ();
 
-        // Beam mode: a clean geometric neon outline behind the player.
-        // No petals and no wide particle cloud are used here.
+        // Line mode is rendered as real world geometry every frame.
+        // Absolutely no particles are spawned in this mode.
         if (Math.floorMod(SakuraVisualsClient.CONFIG.trailMode, 2) == 1) {
-            if ((trailTick & 1) == 0) {
-                double yaw = Math.toRadians(mc.player.getYRot());
-                double backX = Math.sin(yaw);
-                double backZ = -Math.cos(yaw);
-                spawnColorBeam(mc, x, y, z, backX, backZ);
-            }
             lastX = x;
             lastZ = z;
             return;
         }
 
-        // Sakura petal mode only spawns while moving.
+        // Sakura petal mode stays available as the second effect.
         if (trailTick % 3 != 0) return;
         if (Double.isNaN(lastX)) {
             lastX = x;
@@ -88,68 +89,58 @@ public final class SakuraVisualsExtras implements ClientModInitializer {
         }
     }
 
-    private static void spawnColorBeam(Minecraft mc, double x, double y, double z, double backX, double backZ) {
-        // Clean line/beam shaped like the reference: narrow at the player and wider behind.
-        // The effect is made from a few continuous neon edge lines, not a cloud.
-        DustParticleOptions main = new DustParticleOptions(SakuraVisualsClient.accent(), 0.34F);
-        DustParticleOptions glow = new DustParticleOptions(SakuraVisualsClient.accentVeryLight(), 0.22F);
+    private static void renderGeometricLine(WorldRenderContext context) {
+        Minecraft mc = Minecraft.getInstance();
+        if (mc == null || mc.player == null || mc.level == null || !SakuraVisualsClient.CONFIG.playerTrail) return;
+        if (Math.floorMod(SakuraVisualsClient.CONFIG.trailMode, 2) != 1) return;
 
-        double sideX = -backZ;
-        double sideZ = backX;
+        // Put the line just behind the player's body so it remains visible in third person,
+        // while still running exactly from feet to head.
+        double yaw = Math.toRadians(mc.player.getYRot());
+        double backX = Math.sin(yaw) * 0.26D;
+        double backZ = -Math.cos(yaw) * 0.26D;
 
-        double nearDepth = 0.10D;
-        double farDepth = 1.70D;
-        double nearHalfWidth = 0.03D;
-        double farHalfWidth = 0.50D;
-        double bottomY = y + 0.06D;
-        double topY = y + 1.76D;
+        Vec3 camera = context.worldState().cameraRenderState.pos;
+        float x = (float) (mc.player.getX() + backX - camera.x);
+        float z = (float) (mc.player.getZ() + backZ - camera.z);
+        float bottomY = (float) (mc.player.getY() + 0.03D - camera.y);
+        float topY = (float) (mc.player.getY() + 1.82D - camera.y);
 
-        double nearCenterX = x + backX * nearDepth;
-        double nearCenterZ = z + backZ * nearDepth;
-        double farCenterX = x + backX * farDepth;
-        double farCenterZ = z + backZ * farDepth;
+        PoseStack matrices = context.matrices();
+        if (matrices == null) return;
+        PoseStack.Pose pose = matrices.last();
+        VertexConsumer line = context.consumers().getBuffer(RenderTypes.lines());
 
-        double nearLeftX = nearCenterX - sideX * nearHalfWidth;
-        double nearLeftZ = nearCenterZ - sideZ * nearHalfWidth;
-        double nearRightX = nearCenterX + sideX * nearHalfWidth;
-        double nearRightZ = nearCenterZ + sideZ * nearHalfWidth;
-        double farLeftX = farCenterX - sideX * farHalfWidth;
-        double farLeftZ = farCenterZ - sideZ * farHalfWidth;
-        double farRightX = farCenterX + sideX * farHalfWidth;
-        double farRightZ = farCenterZ + sideZ * farHalfWidth;
+        int base = SakuraVisualsClient.accent();
+        int light = SakuraVisualsClient.accentVeryLight();
+        int glowColor = (0x70 << 24) | (light & 0x00FFFFFF);
+        int coreColor = 0xFF000000 | (base & 0x00FFFFFF);
 
-        // Four main perspective edges.
-        spawnLine(mc, main, nearLeftX, bottomY, nearLeftZ, farLeftX, bottomY, farLeftZ, 28);
-        spawnLine(mc, main, nearRightX, bottomY, nearRightZ, farRightX, bottomY, farRightZ, 28);
-        spawnLine(mc, main, nearLeftX, topY, nearLeftZ, farLeftX, topY, farLeftZ, 28);
-        spawnLine(mc, main, nearRightX, topY, nearRightZ, farRightX, topY, farRightZ, 28);
+        Vector3f normal = new Vector3f(0.0F, 1.0F, 0.0F);
 
-        // Vertical far edge makes it read as one clean luminous panel/line effect.
-        spawnLine(mc, glow, farLeftX, bottomY, farLeftZ, farLeftX, topY, farLeftZ, 24);
-        spawnLine(mc, glow, farRightX, bottomY, farRightZ, farRightX, topY, farRightZ, 24);
-
-        // One soft center line gives the beam a solid readable core without turning into a particle cloud.
-        spawnLine(mc, glow,
-                nearCenterX, y + 0.90D, nearCenterZ,
-                farCenterX, y + 0.90D, farCenterZ,
-                30);
+        // Soft glow pass on exactly the same geometry.
+        addLine(line, pose, x, bottomY, z, x, topY, z, glowColor, 5.0F, normal);
+        // Crisp core pass. This is the actual one-piece geometric line.
+        addLine(line, pose, x, bottomY, z, x, topY, z, coreColor, 2.0F, normal);
     }
 
-    private static void spawnLine(
-            Minecraft mc,
-            DustParticleOptions particle,
-            double x0, double y0, double z0,
-            double x1, double y1, double z1,
-            int steps
+    private static void addLine(
+            VertexConsumer consumer,
+            PoseStack.Pose pose,
+            float x0, float y0, float z0,
+            float x1, float y1, float z1,
+            int color,
+            float width,
+            Vector3f normal
     ) {
-        int safeSteps = Math.max(2, steps);
-        for (int i = 0; i < safeSteps; i++) {
-            double t = i / (double) (safeSteps - 1);
-            double px = x0 + (x1 - x0) * t;
-            double py = y0 + (y1 - y0) * t;
-            double pz = z0 + (z1 - z0) * t;
-            mc.level.addParticle(particle, px, py, pz, 0.0D, 0.0D, 0.0D);
-        }
+        consumer.addVertex(pose, x0, y0, z0)
+                .setColor(color)
+                .setNormal(pose, normal)
+                .setLineWidth(width);
+        consumer.addVertex(pose, x1, y1, z1)
+                .setColor(color)
+                .setNormal(pose, normal)
+                .setLineWidth(width);
     }
 
     static int playerCardBaseWidth(Minecraft mc) {
