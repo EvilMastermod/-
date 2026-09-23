@@ -1,11 +1,14 @@
 import os
 import logging
 import time
+from urllib.parse import quote
 from telegram import (
     Update,
     ReplyKeyboardMarkup,
     KeyboardButton,
     KeyboardButtonRequestUsers,
+    InlineKeyboardMarkup,
+    InlineKeyboardButton,
 )
 from telegram.ext import (
     Application,
@@ -81,6 +84,13 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return
 
     clear_modes(context)
+
+    if context.args and context.args[0] == "anon":
+        await update.message.reply_text(
+            "✅ Готово. Теперь вам можно отправлять анонимные сообщения через этого бота.",
+            reply_markup=main_keyboard,
+        )
+        return
 
     await update.message.reply_text(
         "Привет! 👋\n\nВыберите действие.",
@@ -206,11 +216,38 @@ async def send_anonymous(update: Update, context: ContextTypes.DEFAULT_TYPE, tex
 
     except Exception:
         logging.exception("Не удалось отправить анонимное сообщение")
-        clear_modes(context)
-        await update.message.reply_text(
-            "❌ Не удалось отправить сообщение",
-            reply_markup=main_keyboard,
-        )
+
+        try:
+            me = await context.bot.get_me()
+            bot_link = f"https://t.me/{me.username}?start=anon"
+            share_url = (
+                "https://t.me/share/url?url="
+                + quote(bot_link, safe="")
+                + "&text="
+                + quote("Открой RNMD Bot и нажми Start, чтобы получать сообщения.", safe="")
+            )
+
+            invite_keyboard = InlineKeyboardMarkup(
+                [[InlineKeyboardButton("📨 Отправить ссылку получателю", url=share_url)]]
+            )
+
+            clear_modes(context)
+
+            await update.message.reply_text(
+                "Получатель ещё не подключил бота. Отправь ему ссылку:",
+                reply_markup=invite_keyboard,
+            )
+            await update.message.reply_text(
+                "Главное меню:",
+                reply_markup=main_keyboard,
+            )
+        except Exception:
+            logging.exception("Не удалось создать ссылку-приглашение")
+            clear_modes(context)
+            await update.message.reply_text(
+                "❌ Не удалось отправить сообщение",
+                reply_markup=main_keyboard,
+            )
 
 async def no_answer_job(context: ContextTypes.DEFAULT_TYPE):
     data = context.job.data
