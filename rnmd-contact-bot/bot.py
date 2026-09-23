@@ -375,10 +375,16 @@ async def spooky_price_lookup(update: Update, context: ContextTypes.DEFAULT_TYPE
         def money(value):
             return f"{int(value):,}".replace(",", " ")
 
+        collectors = int(data.get("collectors") or 0)
+        age_seconds = int(data.get("ageSeconds") or 0)
+        age_minutes = max(0, age_seconds // 60)
+
         await update.message.reply_text(
             f"💰 Предмет: {item}\n"
             f"📦 Анка: {auction}\n"
-            f"🔎 Найдено: {count}\n\n"
+            f"🔎 Найдено цен: {count}\n"
+            f"👥 Источников: {collectors}\n"
+            f"🕒 Обновлено: {age_minutes} мин назад\n\n"
             f"📉 Минимум: {money(data['min'])}\n"
             f"📊 Средняя: {money(data['average'])}\n"
             f"📈 Максимум: {money(data['max'])}",
