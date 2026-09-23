@@ -101,9 +101,6 @@ async def handle_user_message(update: Update, context: ContextTypes.DEFAULT_TYPE
     if not update.message:
         return
 
-    if update.effective_user.id == ADMIN_ID:
-        return
-
     text = update.message.text or ""
 
     if text == CONTACT_BUTTON:
