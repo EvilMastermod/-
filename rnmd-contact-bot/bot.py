@@ -20,8 +20,6 @@ ADMIN_ID = int(os.environ["ADMIN_ID"])
 
 CONTACT_BUTTON = "📩 Связь"
 CANCEL_BUTTON = "❌ Отменить"
-OWNER_LINK = "https://t.me/EvilMaster_YT"
-
 main_keyboard = ReplyKeyboardMarkup(
     [[KeyboardButton(CONTACT_BUTTON)]],
     resize_keyboard=True,
@@ -113,8 +111,7 @@ async def handle_user_message(update: Update, context: ContextTypes.DEFAULT_TYPE
 
     if not context.user_data.get("waiting_for_message"):
         await update.message.reply_text(
-            "Нажми кнопку «📩 Связь», чтобы написать владельцу.\n\n"
-            f"{OWNER_LINK}",
+            "Нажми кнопку «📩 Связь», чтобы написать владельцу.",
             reply_markup=main_keyboard,
         )
         return
@@ -157,8 +154,7 @@ async def handle_user_message(update: Update, context: ContextTypes.DEFAULT_TYPE
         context.user_data["waiting_for_message"] = False
 
         await update.message.reply_text(
-            "✅ Сообщение отправлено\n\n"
-            f"{OWNER_LINK}",
+            "\u2063",
             reply_markup=main_keyboard,
         )
 
