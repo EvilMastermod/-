@@ -39,6 +39,7 @@ ADMIN_REPORT_LIST_BUTTON = "📋 Лист жалоб"
 MINECRAFT_BUTTON = "⛏ Minecraft"
 SPOOKY_BUTTON = "👻 Spooky Time"
 BACK_BUTTON = "⬅️ Назад"
+MINECRAFT_BACK_BUTTON = "⬅️ В Minecraft"
 CANCEL_BUTTON = "❌ Отменить"
 CHOOSE_USER_BUTTON = "👤 Выбрать получателя"
 
@@ -46,7 +47,7 @@ user_main_keyboard = ReplyKeyboardMarkup(
     [
         [KeyboardButton(CONTACT_BUTTON), KeyboardButton(ANON_BUTTON)],
         [KeyboardButton(DND_BUTTON), KeyboardButton(DND_OFF_BUTTON)],
-        [KeyboardButton(MINECRAFT_BUTTON), KeyboardButton(SPOOKY_BUTTON)],
+        [KeyboardButton(MINECRAFT_BUTTON)],
     ],
     resize_keyboard=True,
 )
@@ -55,7 +56,7 @@ admin_main_keyboard = ReplyKeyboardMarkup(
     [
         [KeyboardButton(CONTACT_BUTTON), KeyboardButton(ANON_BUTTON)],
         [KeyboardButton(DND_BUTTON), KeyboardButton(DND_OFF_BUTTON)],
-        [KeyboardButton(MINECRAFT_BUTTON), KeyboardButton(SPOOKY_BUTTON)],
+        [KeyboardButton(MINECRAFT_BUTTON)],
         [KeyboardButton(ADMIN_DND_OFF_BUTTON), KeyboardButton(ADMIN_ANON_BAN_BUTTON)],
         [KeyboardButton(ADMIN_ANON_UNBAN_BUTTON), KeyboardButton(ADMIN_REPORT_LIST_BUTTON)],
     ],
@@ -65,8 +66,16 @@ admin_main_keyboard = ReplyKeyboardMarkup(
 def get_main_keyboard(user_id: int):
     return admin_main_keyboard if user_id == ADMIN_ID else user_main_keyboard
 
-section_keyboard = ReplyKeyboardMarkup(
-    [[KeyboardButton(BACK_BUTTON)]],
+minecraft_keyboard = ReplyKeyboardMarkup(
+    [
+        [KeyboardButton(SPOOKY_BUTTON)],
+        [KeyboardButton(BACK_BUTTON)],
+    ],
+    resize_keyboard=True,
+)
+
+spooky_keyboard = ReplyKeyboardMarkup(
+    [[KeyboardButton(MINECRAFT_BACK_BUTTON)]],
     resize_keyboard=True,
 )
 
@@ -248,15 +257,15 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def minecraft_section(update: Update, context: ContextTypes.DEFAULT_TYPE):
     clear_modes(context)
     await update.message.reply_text(
-        "⛏ Minecraft\n\nРаздел Minecraft.",
-        reply_markup=section_keyboard,
+        "⛏ Minecraft\n\nВыберите раздел:",
+        reply_markup=minecraft_keyboard,
     )
 
 async def spooky_section(update: Update, context: ContextTypes.DEFAULT_TYPE):
     clear_modes(context)
     await update.message.reply_text(
         "👻 Spooky Time\n\nРаздел Spooky Time.",
-        reply_markup=section_keyboard,
+        reply_markup=spooky_keyboard,
     )
 
 async def back_to_main(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -1000,6 +1009,10 @@ async def handle_user_message(update: Update, context: ContextTypes.DEFAULT_TYPE
 
     if text == BACK_BUTTON:
         await back_to_main(update, context)
+        return
+
+    if text == MINECRAFT_BACK_BUTTON:
+        await minecraft_section(update, context)
         return
 
     if text == ADMIN_DND_OFF_BUTTON:
