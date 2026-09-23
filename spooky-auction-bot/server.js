@@ -223,12 +223,20 @@ async function inspectAuction(itemQuery, auctionCommand) {
     if (bot.currentWindow) bot.closeWindow(bot.currentWindow);
   } catch (_) {}
 
-  await wait(250);
-
-  const windowPromise = waitForWindow(8000);
+  // Сначала переходим на нужную анку (/an101 ... /an309).
   bot.chat(auctionCommand);
+  await wait(4000);
+
+  // После перехода открываем аукцион и читаем видимые лоты.
+  try {
+    if (bot.currentWindow) bot.closeWindow(bot.currentWindow);
+  } catch (_) {}
+
+  await wait(300);
+  const windowPromise = waitForWindow(8000);
+  bot.chat('/ah');
   const window = await windowPromise;
-  await wait(700);
+  await wait(900);
 
   const prices = [];
   const matches = [];
