@@ -353,7 +353,9 @@ async def spooky_price_lookup(update: Update, context: ContextTypes.DEFAULT_TYPE
         data = response.json()
 
         if response.status_code != 200 or not data.get("ok"):
-            error_text = data.get("error", "неизвестная ошибка")
+            error_text = data.get("error")
+            if not error_text:
+                error_text = f"HTTP {response.status_code}"
             await update.message.reply_text(
                 f"❌ Не удалось проверить цены: {error_text}",
                 reply_markup=spooky_keyboard,
