@@ -1,6 +1,8 @@
 import os
+import re
 import logging
 import time
+import httpx
 from urllib.parse import quote
 from telegram import (
     Update,
@@ -27,6 +29,8 @@ logging.basicConfig(
 
 BOT_TOKEN = os.environ["BOT_TOKEN"]
 ADMIN_ID = int(os.environ["ADMIN_ID"])
+SPOOKY_PRICE_API = os.environ.get("SPOOKY_PRICE_API", "").rstrip("/")
+PRICE_API_KEY = os.environ.get("PRICE_API_KEY", "")
 
 CONTACT_BUTTON = "📩 Связь"
 ANON_BUTTON = "🕵️ Анон"
@@ -38,6 +42,7 @@ ADMIN_ANON_UNBAN_BUTTON = "🟢 Отключить бан анона"
 ADMIN_REPORT_LIST_BUTTON = "📋 Лист жалоб"
 MINECRAFT_BUTTON = "⛏ Minecraft"
 SPOOKY_BUTTON = "👻 Spooky Time"
+SPOOKY_PRICE_BUTTON = "💰 Средняя цена"
 BACK_BUTTON = "⬅️ Назад"
 MINECRAFT_BACK_BUTTON = "⬅️ В Minecraft"
 CANCEL_BUTTON = "❌ Отменить"
@@ -75,7 +80,10 @@ minecraft_keyboard = ReplyKeyboardMarkup(
 )
 
 spooky_keyboard = ReplyKeyboardMarkup(
-    [[KeyboardButton(MINECRAFT_BACK_BUTTON)]],
+    [
+        [KeyboardButton(SPOOKY_PRICE_BUTTON)],
+        [KeyboardButton(MINECRAFT_BACK_BUTTON)],
+    ],
     resize_keyboard=True,
 )
 
@@ -226,6 +234,7 @@ def clear_modes(context: ContextTypes.DEFAULT_TYPE):
     context.user_data.pop("admin_anon_ban_stage", None)
     context.user_data.pop("admin_anon_ban_target_id", None)
     context.user_data.pop("admin_anon_unban_stage", None)
+    context.user_data.pop("spooky_price_waiting", None)
 
 async def post_init(application: Application):
     try:
@@ -267,6 +276,118 @@ async def spooky_section(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "👻 Spooky Time\n\nРаздел Spooky Time.",
         reply_markup=spooky_keyboard,
     )
+
+def parse_spooky_price_request(text: str):
+    match = re.search(r"/an\d{3}", text.lower())
+    if not match:
+        return None, None
+
+    auction = match.group(0)
+    if not re.fullmatch(r"/an(?:10[1-8]|20[1-9]|30[1-9])", auction):
+        return None, "bad_auction"
+
+    item = (text[:match.start()] + " " + text[match.end():]).strip(" -,:;")
+    item = re.sub(r"\s+", " ", item).strip()
+
+    if not item:
+        return None, "no_item"
+
+    return (item, auction), None
+
+async def spooky_price_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    clear_modes(context)
+    context.user_data["spooky_price_waiting"] = True
+    await update.message.reply_text(
+        "💰 Напишите предмет и анку одним сообщением.\n\n"
+        "Например: тотем /an205\n\n"
+        "Разрешены: /an101–/an108, /an201–/an209, /an301–/an309.",
+        reply_markup=spooky_keyboard,
+    )
+
+async def spooky_price_lookup(update: Update, context: ContextTypes.DEFAULT_TYPE, text: str):
+    parsed, error = parse_spooky_price_request(text)
+
+    if error == "bad_auction":
+        await update.message.reply_text(
+            "❌ Эта анка не разрешена.\n"
+            "Можно только /an101–/an108, /an201–/an209, /an301–/an309.",
+            reply_markup=spooky_keyboard,
+        )
+        return
+
+    if error == "no_item" or not parsed:
+        await update.message.reply_text(
+            "❌ Напишите и предмет, и анку.\nНапример: тотем /an205",
+            reply_markup=spooky_keyboard,
+        )
+        return
+
+    item, auction = parsed
+
+    if not SPOOKY_PRICE_API:
+        await update.message.reply_text(
+            "⚙️ Minecraft-бот поиска цен ещё не подключён.",
+            reply_markup=spooky_keyboard,
+        )
+        return
+
+    await update.message.reply_text(
+        f"🔎 Ищу «{item}» на {auction} и считаю среднюю цену..."
+    )
+
+    headers = {}
+    if PRICE_API_KEY:
+        headers["x-api-key"] = PRICE_API_KEY
+
+    try:
+        async with httpx.AsyncClient(timeout=20.0) as client:
+            response = await client.post(
+                f"{SPOOKY_PRICE_API}/price",
+                json={"item": item, "auction": auction},
+                headers=headers,
+            )
+
+        data = response.json()
+
+        if response.status_code != 200 or not data.get("ok"):
+            error_text = data.get("error", "неизвестная ошибка")
+            await update.message.reply_text(
+                f"❌ Не удалось проверить цены: {error_text}",
+                reply_markup=spooky_keyboard,
+            )
+            return
+
+        count = int(data.get("count") or 0)
+        if count == 0:
+            await update.message.reply_text(
+                f"🔎 Предмет: {item}\n"
+                f"Анка: {auction}\n\n"
+                "Ничего с ценой не найдено.",
+                reply_markup=spooky_keyboard,
+            )
+            return
+
+        def money(value):
+            return f"{int(value):,}".replace(",", " ")
+
+        await update.message.reply_text(
+            f"💰 Предмет: {item}\n"
+            f"📦 Анка: {auction}\n"
+            f"🔎 Найдено: {count}\n\n"
+            f"📉 Минимум: {money(data['min'])}\n"
+            f"📊 Средняя: {money(data['average'])}\n"
+            f"📈 Максимум: {money(data['max'])}",
+            reply_markup=spooky_keyboard,
+        )
+
+    except Exception:
+        logging.exception("Ошибка запроса цены Spooky Time")
+        await update.message.reply_text(
+            "❌ Minecraft-бот сейчас не отвечает. Попробуйте чуть позже.",
+            reply_markup=spooky_keyboard,
+        )
+
+    context.user_data["spooky_price_waiting"] = False
 
 async def back_to_main(update: Update, context: ContextTypes.DEFAULT_TYPE):
     clear_modes(context)
@@ -1007,6 +1128,10 @@ async def handle_user_message(update: Update, context: ContextTypes.DEFAULT_TYPE
         await spooky_section(update, context)
         return
 
+    if text == SPOOKY_PRICE_BUTTON:
+        await spooky_price_start(update, context)
+        return
+
     if text == BACK_BUTTON:
         await back_to_main(update, context)
         return
@@ -1033,6 +1158,10 @@ async def handle_user_message(update: Update, context: ContextTypes.DEFAULT_TYPE
 
     if text == CANCEL_BUTTON:
         await cancel_action(update, context)
+        return
+
+    if context.user_data.get("spooky_price_waiting"):
+        await spooky_price_lookup(update, context, text)
         return
 
     if context.user_data.get("anon_stage") == "choose":
