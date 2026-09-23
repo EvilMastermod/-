@@ -15,6 +15,7 @@ from telegram.ext import (
     ApplicationBuilder,
     CommandHandler,
     MessageHandler,
+    CallbackQueryHandler,
     ContextTypes,
     filters,
 )
@@ -64,11 +65,15 @@ anon_recipient_keyboard = ReplyKeyboardMarkup(
 def get_waiting_map(application: Application):
     return application.bot_data.setdefault("waiting_replies", {})
 
+def get_anon_reply_map(application: Application):
+    return application.bot_data.setdefault("anon_reply_routes", {})
+
 def clear_modes(context: ContextTypes.DEFAULT_TYPE):
     context.user_data["waiting_for_message"] = False
     context.user_data.pop("anon_stage", None)
     context.user_data.pop("anon_recipient_id", None)
     context.user_data.pop("anon_recipient_name", None)
+    context.user_data.pop("anon_reply_target_id", None)
 
 async def post_init(application: Application):
     try:
@@ -182,10 +187,17 @@ async def send_anonymous(update: Update, context: ContextTypes.DEFAULT_TYPE, tex
         return
 
     try:
-        await context.bot.send_message(
+        reply_keyboard = InlineKeyboardMarkup(
+            [[InlineKeyboardButton("💬 Ответить анонимно", callback_data="anon_reply")]]
+        )
+        sent = await context.bot.send_message(
             chat_id=target_id,
             text=f"📨 Анонимное сообщение\n\n{text}",
+            reply_markup=reply_keyboard,
         )
+
+        reply_routes = get_anon_reply_map(context.application)
+        reply_routes[f"{target_id}:{sent.message_id}"] = update.effective_user.id
 
         context.user_data["anon_last_sent"] = now
         clear_modes(context)
@@ -229,6 +241,79 @@ async def send_anonymous(update: Update, context: ContextTypes.DEFAULT_TYPE, tex
                 "❌ Не удалось отправить сообщение",
                 reply_markup=main_keyboard,
             )
+
+async def handle_anon_reply_button(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    query = update.callback_query
+    if not query or not query.message:
+        return
+
+    await query.answer()
+
+    route_key = f"{query.message.chat_id}:{query.message.message_id}"
+    target_id = get_anon_reply_map(context.application).get(route_key)
+
+    if not target_id:
+        await query.message.reply_text(
+            "❌ На это сообщение уже нельзя ответить.",
+            reply_markup=main_keyboard,
+        )
+        return
+
+    clear_modes(context)
+    context.user_data["anon_reply_target_id"] = target_id
+
+    await query.message.reply_text(
+        "✍️ Напишите анонимный ответ",
+        reply_markup=cancel_keyboard,
+    )
+
+async def send_anonymous_reply(update: Update, context: ContextTypes.DEFAULT_TYPE, text: str):
+    target_id = context.user_data.get("anon_reply_target_id")
+    if not target_id:
+        clear_modes(context)
+        await update.message.reply_text(
+            "❌ Не удалось найти получателя ответа.",
+            reply_markup=main_keyboard,
+        )
+        return
+
+    now = time.monotonic()
+    last_sent = context.user_data.get("anon_last_sent", 0.0)
+    if now - last_sent < 5:
+        await update.message.reply_text(
+            "⏳ Подождите несколько секунд перед следующим анонимным сообщением.",
+            reply_markup=main_keyboard,
+        )
+        return
+
+    try:
+        reply_keyboard = InlineKeyboardMarkup(
+            [[InlineKeyboardButton("💬 Ответить анонимно", callback_data="anon_reply")]]
+        )
+        sent = await context.bot.send_message(
+            chat_id=target_id,
+            text=f"💬 Анонимный ответ\n\n{text}",
+            reply_markup=reply_keyboard,
+        )
+
+        reply_routes = get_anon_reply_map(context.application)
+        reply_routes[f"{target_id}:{sent.message_id}"] = update.effective_user.id
+
+        context.user_data["anon_last_sent"] = now
+        clear_modes(context)
+
+        await update.message.reply_text(
+            "✅ Анонимный ответ отправлен",
+            reply_markup=main_keyboard,
+        )
+
+    except Exception:
+        logging.exception("Не удалось отправить анонимный ответ")
+        clear_modes(context)
+        await update.message.reply_text(
+            "❌ Не удалось отправить анонимный ответ",
+            reply_markup=main_keyboard,
+        )
 
 async def no_answer_job(context: ContextTypes.DEFAULT_TYPE):
     data = context.job.data
@@ -277,6 +362,10 @@ async def handle_user_message(update: Update, context: ContextTypes.DEFAULT_TYPE
 
     if context.user_data.get("anon_stage") == "message":
         await send_anonymous(update, context, text)
+        return
+
+    if context.user_data.get("anon_reply_target_id"):
+        await send_anonymous_reply(update, context, text)
         return
 
     # Обычная связь. Если Railway перезапустился между нажатием «Связь»
@@ -380,6 +469,7 @@ def main():
 
     app.add_handler(CommandHandler("start", start))
     app.add_handler(CommandHandler("id", show_id))
+    app.add_handler(CallbackQueryHandler(handle_anon_reply_button, pattern="^anon_reply$"))
 
     app.add_handler(
         MessageHandler(
