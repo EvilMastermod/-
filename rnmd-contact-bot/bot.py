@@ -31,13 +31,35 @@ ADMIN_ID = int(os.environ["ADMIN_ID"])
 CONTACT_BUTTON = "📩 Связь"
 ANON_BUTTON = "🕵️ Анон"
 DND_BUTTON = "🔕 Не беспокоить"
+DND_OFF_BUTTON = "🔔 Отключить не беспокоить"
+ADMIN_DND_OFF_BUTTON = "🛡 Снять DND у пользователя"
 CANCEL_BUTTON = "❌ Отменить"
 CHOOSE_USER_BUTTON = "👤 Выбрать получателя"
 
 main_keyboard = ReplyKeyboardMarkup(
     [
         [KeyboardButton(CONTACT_BUTTON), KeyboardButton(ANON_BUTTON)],
-        [KeyboardButton(DND_BUTTON)],
+        [KeyboardButton(DND_BUTTON), KeyboardButton(DND_OFF_BUTTON)],
+        [KeyboardButton(ADMIN_DND_OFF_BUTTON)],
+    ],
+    resize_keyboard=True,
+)
+
+admin_dnd_keyboard = ReplyKeyboardMarkup(
+    [
+        [
+            KeyboardButton(
+                "👤 Выбрать пользователя",
+                request_users=KeyboardButtonRequestUsers(
+                    request_id=778,
+                    user_is_bot=False,
+                    max_quantity=1,
+                    request_name=True,
+                    request_username=True,
+                ),
+            )
+        ],
+        [KeyboardButton(CANCEL_BUTTON)],
     ],
     resize_keyboard=True,
 )
@@ -113,6 +135,7 @@ def clear_modes(context: ContextTypes.DEFAULT_TYPE):
     context.user_data.pop("anon_recipient_id", None)
     context.user_data.pop("anon_recipient_name", None)
     context.user_data.pop("anon_reply_target_id", None)
+    context.user_data.pop("admin_dnd_stage", None)
 
 async def post_init(application: Application):
     try:
@@ -206,6 +229,70 @@ async def dnd_menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
         reply_markup=keyboard,
     )
 
+async def dnd_off(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    user_id = update.effective_user.id
+    status, remaining = get_dnd_status(context.application, user_id)
+
+    if status == "active":
+        now = time.time()
+        get_dnd_map(context.application)[user_id] = {
+            "active_until": 0,
+            "cooldown_until": now + 30 * 60,
+        }
+        await update.message.reply_text(
+            "🔔 «Не беспокоить» отключён. Перезарядка — 30 минут.",
+            reply_markup=main_keyboard,
+        )
+        return
+
+    if status == "cooldown":
+        await update.message.reply_text(
+            f"🔔 Режим уже выключен. Перезарядка ещё примерно {minutes_left(remaining)} мин.",
+            reply_markup=main_keyboard,
+        )
+        return
+
+    await update.message.reply_text(
+        "🔔 «Не беспокоить» уже выключен.",
+        reply_markup=main_keyboard,
+    )
+
+async def admin_dnd_off_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if update.effective_user.id != ADMIN_ID:
+        await update.message.reply_text(
+            "⛔ Эта кнопка доступна только администратору.",
+            reply_markup=main_keyboard,
+        )
+        return
+
+    clear_modes(context)
+    context.user_data["admin_dnd_stage"] = True
+
+    await update.message.reply_text(
+        "🛡 Выберите пользователя, у которого нужно снять «Не беспокоить».",
+        reply_markup=admin_dnd_keyboard,
+    )
+
+async def admin_remove_dnd_for_user(update: Update, context: ContextTypes.DEFAULT_TYPE, target_id: int):
+    if update.effective_user.id != ADMIN_ID:
+        return
+
+    get_dnd_map(context.application).pop(target_id, None)
+    clear_modes(context)
+
+    await update.message.reply_text(
+        f"✅ «Не беспокоить» у пользователя {target_id} отключён без перезарядки.",
+        reply_markup=main_keyboard,
+    )
+
+    try:
+        await context.bot.send_message(
+            chat_id=target_id,
+            text="🔔 Администратор отключил у вас режим «Не беспокоить»."
+        )
+    except Exception:
+        logging.exception("Не удалось уведомить пользователя об отключении DND")
+
 async def handle_dnd_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     if not query:
@@ -251,14 +338,27 @@ async def handle_users_shared(update: Update, context: ContextTypes.DEFAULT_TYPE
     if not update.message or not update.message.users_shared:
         return
 
+    shared = update.message.users_shared.users
+
+    if context.user_data.get("admin_dnd_stage"):
+        if update.effective_user.id != ADMIN_ID:
+            clear_modes(context)
+            return
+        if not shared:
+            await update.message.reply_text(
+                "❌ Пользователь не выбран.",
+                reply_markup=admin_dnd_keyboard,
+            )
+            return
+        await admin_remove_dnd_for_user(update, context, shared[0].user_id)
+        return
+
     if context.user_data.get("anon_stage") != "choose":
         await update.message.reply_text(
             "Сначала нажмите «🕵️ Анон».",
             reply_markup=main_keyboard,
         )
         return
-
-    shared = update.message.users_shared.users
     if not shared:
         await update.message.reply_text(
             "❌ Получатель не выбран.",
@@ -513,6 +613,14 @@ async def handle_user_message(update: Update, context: ContextTypes.DEFAULT_TYPE
 
     if text == DND_BUTTON:
         await dnd_menu(update, context)
+        return
+
+    if text == DND_OFF_BUTTON:
+        await dnd_off(update, context)
+        return
+
+    if text == ADMIN_DND_OFF_BUTTON:
+        await admin_dnd_off_start(update, context)
         return
 
     if text == CANCEL_BUTTON:
