@@ -109,13 +109,9 @@ async def handle_user_message(update: Update, context: ContextTypes.DEFAULT_TYPE
         await cancel_contact(update, context)
         return
 
-    if not context.user_data.get("waiting_for_message"):
-        await update.message.reply_text(
-            "Нажми кнопку «📩 Связь», чтобы отправить сообщение.",
-            reply_markup=main_keyboard,
-        )
-        return
-
+    # Если Railway перезапустил бота между нажатием «Связь» и текстом,
+    # всё равно принимаем текст как сообщение. Это не даёт терять сообщения
+    # при обновлениях/рестартах.
     user = update.effective_user
     username = f"@{user.username}" if user.username else "нет username"
 
