@@ -954,7 +954,7 @@ def main():
     app.add_handler(CallbackQueryHandler(handle_anon_report_button, pattern="^anon_report$"))
     app.add_handler(CallbackQueryHandler(handle_dnd_callback, pattern="^dnd_(15|30|60)$"))
     app.add_handler(CallbackQueryHandler(handle_admin_anon_ban_callback, pattern="^admin_anon_ban_(15|20|25|30|60)$"))
-    app.add_handler(CallbackQueryHandler(handle_report_ban_callback, pattern=r"^report:ban:-?\\d+:(15|20|25|30|60)$"))
+    app.add_handler(CallbackQueryHandler(handle_report_ban_callback, pattern=r"^report:ban:-?\d+:(15|20|25|30|60)$"))
 
     app.add_handler(
         MessageHandler(
