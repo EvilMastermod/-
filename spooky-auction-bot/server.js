@@ -15,6 +15,8 @@ app.use(express.json({ limit: '64kb' }));
 let bot = null;
 let ready = false;
 let reconnectTimer = null;
+let reconnectDelayMs = 5000;
+let lastConnectionError = '';
 let lastAuthSend = 0;
 let queue = Promise.resolve();
 
@@ -142,7 +144,7 @@ function scheduleReconnect() {
   reconnectTimer = setTimeout(() => {
     reconnectTimer = null;
     connect();
-  }, 5000);
+  }, reconnectDelayMs);
 }
 
 function maybeAuthenticate(message) {
@@ -175,6 +177,8 @@ function connect() {
 
     bot.on('spawn', () => {
       ready = true;
+      reconnectDelayMs = 5000;
+      lastConnectionError = '';
       console.log('[MC] Spawned as', MC_USERNAME, 'on', MC_HOST + ':' + MC_PORT);
       if (MC_PASSWORD) {
         setTimeout(() => {
@@ -187,13 +191,30 @@ function connect() {
     bot.on('message', msg => maybeAuthenticate(msg?.toString?.() || msg));
 
     bot.on('kicked', reason => {
-      console.error('[MC] Kicked:', String(reason));
+      const rawReason = String(reason);
+      console.error('[MC] Kicked:', rawReason);
       ready = false;
+
+      let readable = stripMinecraft(rawReason);
+      try {
+        const parsed = JSON.parse(rawReason);
+        if (parsed && parsed.text) readable = stripMinecraft(parsed.text);
+      } catch (_) {}
+
+      if (/возможно вы бот|провалили проверку/i.test(readable)) {
+        lastConnectionError = 'Spooky Time отклонил автоматический вход: вы провалили антибот-проверку.';
+        reconnectDelayMs = 5 * 60 * 1000;
+      } else {
+        lastConnectionError = readable || 'Spooky Time разорвал соединение.';
+        reconnectDelayMs = 30000;
+      }
     });
 
     bot.on('error', err => {
-      console.error('[MC] Error:', err?.message || err);
+      const message = err?.message || String(err);
+      console.error('[MC] Error:', message);
       ready = false;
+      lastConnectionError = message;
     });
 
     bot.on('end', () => {
@@ -202,14 +223,18 @@ function connect() {
       scheduleReconnect();
     });
   } catch (err) {
-    console.error('[MC] Connect failed:', err?.message || err);
+    const message = err?.message || String(err);
+    console.error('[MC] Connect failed:', message);
+    lastConnectionError = message;
     scheduleReconnect();
   }
 }
 
 async function inspectAuction(itemQuery, auctionCommand) {
   if (!ready || !bot) {
-    throw new Error('Minecraft bot is not connected to Spooky Time');
+    throw new Error(
+      lastConnectionError || 'Minecraft-бот сейчас не подключён к Spooky Time.'
+    );
   }
 
   if (!allowedAuction.test(auctionCommand)) {
@@ -311,7 +336,8 @@ app.get('/health', (_req, res) => {
     ok: true,
     minecraftConnected: ready,
     host: MC_HOST,
-    username: MC_USERNAME
+    username: MC_USERNAME,
+    error: ready ? null : (lastConnectionError || null)
   });
 });
 
