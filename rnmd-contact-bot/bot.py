@@ -33,6 +33,7 @@ ANON_BUTTON = "🕵️ Анон"
 DND_BUTTON = "🔕 Не беспокоить"
 DND_OFF_BUTTON = "🔔 Отключить не беспокоить"
 ADMIN_DND_OFF_BUTTON = "🛡 Снять DND у пользователя"
+ADMIN_ANON_BAN_BUTTON = "🚫 Бан анона"
 CANCEL_BUTTON = "❌ Отменить"
 CHOOSE_USER_BUTTON = "👤 Выбрать получателя"
 
@@ -40,7 +41,26 @@ main_keyboard = ReplyKeyboardMarkup(
     [
         [KeyboardButton(CONTACT_BUTTON), KeyboardButton(ANON_BUTTON)],
         [KeyboardButton(DND_BUTTON), KeyboardButton(DND_OFF_BUTTON)],
-        [KeyboardButton(ADMIN_DND_OFF_BUTTON)],
+        [KeyboardButton(ADMIN_DND_OFF_BUTTON), KeyboardButton(ADMIN_ANON_BAN_BUTTON)],
+    ],
+    resize_keyboard=True,
+)
+
+admin_anon_ban_keyboard = ReplyKeyboardMarkup(
+    [
+        [
+            KeyboardButton(
+                "👤 Выбрать пользователя для бана",
+                request_users=KeyboardButtonRequestUsers(
+                    request_id=779,
+                    user_is_bot=False,
+                    max_quantity=1,
+                    request_name=True,
+                    request_username=True,
+                ),
+            )
+        ],
+        [KeyboardButton(CANCEL_BUTTON)],
     ],
     resize_keyboard=True,
 )
@@ -100,6 +120,18 @@ def get_anon_reports(application: Application):
 def get_dnd_map(application: Application):
     return application.bot_data.setdefault("dnd_states", {})
 
+def get_anon_ban_map(application: Application):
+    return application.bot_data.setdefault("anon_bans", {})
+
+def get_anon_ban_remaining(application: Application, user_id: int):
+    banned_until = get_anon_ban_map(application).get(user_id, 0)
+    now = time.time()
+    if banned_until > now:
+        return int(banned_until - now)
+
+    get_anon_ban_map(application).pop(user_id, None)
+    return 0
+
 def get_dnd_status(application: Application, user_id: int):
     state = get_dnd_map(application).get(user_id)
     if not state:
@@ -136,6 +168,8 @@ def clear_modes(context: ContextTypes.DEFAULT_TYPE):
     context.user_data.pop("anon_recipient_name", None)
     context.user_data.pop("anon_reply_target_id", None)
     context.user_data.pop("admin_dnd_stage", None)
+    context.user_data.pop("admin_anon_ban_stage", None)
+    context.user_data.pop("admin_anon_ban_target_id", None)
 
 async def post_init(application: Application):
     try:
@@ -180,6 +214,14 @@ async def contact(update: Update, context: ContextTypes.DEFAULT_TYPE):
     )
 
 async def anon_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    remaining = get_anon_ban_remaining(context.application, update.effective_user.id)
+    if remaining:
+        await update.message.reply_text(
+            f"🚫 Вам временно запрещено отправлять анонимные сообщения. Осталось примерно {minutes_left(remaining)} мин.",
+            reply_markup=main_keyboard,
+        )
+        return
+
     clear_modes(context)
     context.user_data["anon_stage"] = "choose"
 
@@ -293,6 +335,113 @@ async def admin_remove_dnd_for_user(update: Update, context: ContextTypes.DEFAUL
     except Exception:
         logging.exception("Не удалось уведомить пользователя об отключении DND")
 
+async def admin_anon_ban_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if update.effective_user.id != ADMIN_ID:
+        await update.message.reply_text(
+            "⛔ Эта кнопка доступна только администратору.",
+            reply_markup=main_keyboard,
+        )
+        return
+
+    clear_modes(context)
+    context.user_data["admin_anon_ban_stage"] = True
+
+    await update.message.reply_text(
+        "🚫 Выберите пользователя, которому нужно запретить анонимные сообщения.",
+        reply_markup=admin_anon_ban_keyboard,
+    )
+
+async def admin_choose_anon_ban_duration(update: Update, context: ContextTypes.DEFAULT_TYPE, target_id: int):
+    if update.effective_user.id != ADMIN_ID:
+        return
+
+    context.user_data["admin_anon_ban_stage"] = False
+    context.user_data["admin_anon_ban_target_id"] = target_id
+
+    keyboard = InlineKeyboardMarkup(
+        [
+            [
+                InlineKeyboardButton("15 мин", callback_data="admin_anon_ban_15"),
+                InlineKeyboardButton("20 мин", callback_data="admin_anon_ban_20"),
+                InlineKeyboardButton("25 мин", callback_data="admin_anon_ban_25"),
+            ],
+            [
+                InlineKeyboardButton("30 мин", callback_data="admin_anon_ban_30"),
+                InlineKeyboardButton("1 час", callback_data="admin_anon_ban_60"),
+            ],
+        ]
+    )
+
+    await update.message.reply_text(
+        f"🚫 На сколько забанить анонимки пользователю {target_id}?",
+        reply_markup=keyboard,
+    )
+
+async def apply_anon_ban(application: Application, target_id: int, minutes: int):
+    minutes = min(max(minutes, 1), 60)
+    get_anon_ban_map(application)[target_id] = time.time() + minutes * 60
+    return minutes
+
+async def handle_admin_anon_ban_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    query = update.callback_query
+    if not query or query.from_user.id != ADMIN_ID:
+        if query:
+            await query.answer("⛔ Только для администратора.", show_alert=True)
+        return
+
+    target_id = context.user_data.get("admin_anon_ban_target_id")
+    if not target_id:
+        await query.answer("Сначала выберите пользователя.", show_alert=True)
+        return
+
+    try:
+        minutes = int(query.data.rsplit("_", 1)[1])
+    except Exception:
+        await query.answer("Ошибка.", show_alert=True)
+        return
+
+    minutes = await apply_anon_ban(context.application, target_id, minutes)
+    clear_modes(context)
+
+    await query.answer("Пользователь забанен.")
+    await query.edit_message_text(
+        f"🚫 Пользователю {target_id} запрещены анонимные сообщения на {minutes} мин."
+    )
+
+    try:
+        await context.bot.send_message(
+            chat_id=target_id,
+            text=f"🚫 Администратор временно запретил вам анонимные сообщения на {minutes} мин."
+        )
+    except Exception:
+        logging.exception("Не удалось уведомить пользователя об анонимном бане")
+
+async def handle_report_ban_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    query = update.callback_query
+    if not query or query.from_user.id != ADMIN_ID:
+        if query:
+            await query.answer("⛔ Только для администратора.", show_alert=True)
+        return
+
+    try:
+        _, _, target_id_raw, minutes_raw = query.data.split(":")
+        target_id = int(target_id_raw)
+        minutes = int(minutes_raw)
+    except Exception:
+        await query.answer("Ошибка данных.", show_alert=True)
+        return
+
+    minutes = await apply_anon_ban(context.application, target_id, minutes)
+    await query.answer(f"Бан на {minutes} мин. применён.", show_alert=True)
+
+    try:
+        await context.bot.send_message(
+            chat_id=target_id,
+            text=f"🚫 Администратор временно запретил вам анонимные сообщения на {minutes} мин."
+        )
+    except Exception:
+        logging.exception("Не удалось уведомить пользователя об анонимном бане")
+
 async def handle_dnd_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     if not query:
@@ -353,6 +502,19 @@ async def handle_users_shared(update: Update, context: ContextTypes.DEFAULT_TYPE
         await admin_remove_dnd_for_user(update, context, shared[0].user_id)
         return
 
+    if context.user_data.get("admin_anon_ban_stage"):
+        if update.effective_user.id != ADMIN_ID:
+            clear_modes(context)
+            return
+        if not shared:
+            await update.message.reply_text(
+                "❌ Пользователь не выбран.",
+                reply_markup=admin_anon_ban_keyboard,
+            )
+            return
+        await admin_choose_anon_ban_duration(update, context, shared[0].user_id)
+        return
+
     if context.user_data.get("anon_stage") != "choose":
         await update.message.reply_text(
             "Сначала нажмите «🕵️ Анон».",
@@ -381,6 +543,15 @@ async def handle_users_shared(update: Update, context: ContextTypes.DEFAULT_TYPE
     )
 
 async def send_anonymous(update: Update, context: ContextTypes.DEFAULT_TYPE, text: str):
+    ban_remaining = get_anon_ban_remaining(context.application, update.effective_user.id)
+    if ban_remaining:
+        clear_modes(context)
+        await update.message.reply_text(
+            f"🚫 Вам временно запрещено отправлять анонимные сообщения. Осталось примерно {minutes_left(ban_remaining)} мин.",
+            reply_markup=main_keyboard,
+        )
+        return
+
     target_id = context.user_data.get("anon_recipient_id")
     if not target_id:
         clear_modes(context)
@@ -467,6 +638,14 @@ async def handle_anon_reply_button(update: Update, context: ContextTypes.DEFAULT
     if not query or not query.message:
         return
 
+    ban_remaining = get_anon_ban_remaining(context.application, query.from_user.id)
+    if ban_remaining:
+        await query.answer(
+            f"🚫 Анонимные ответы заблокированы ещё примерно на {minutes_left(ban_remaining)} мин.",
+            show_alert=True,
+        )
+        return
+
     await query.answer()
 
     route_key = f"{query.message.chat_id}:{query.message.message_id}"
@@ -507,6 +686,20 @@ async def handle_anon_report_button(update: Update, context: ContextTypes.DEFAUL
     reports.add(route_key)
 
     try:
+        ban_keyboard = InlineKeyboardMarkup(
+            [
+                [
+                    InlineKeyboardButton("🚫 15м", callback_data=f"report:ban:{sender_id}:15"),
+                    InlineKeyboardButton("20м", callback_data=f"report:ban:{sender_id}:20"),
+                    InlineKeyboardButton("25м", callback_data=f"report:ban:{sender_id}:25"),
+                ],
+                [
+                    InlineKeyboardButton("30м", callback_data=f"report:ban:{sender_id}:30"),
+                    InlineKeyboardButton("1ч", callback_data=f"report:ban:{sender_id}:60"),
+                ],
+            ]
+        )
+
         await context.bot.send_message(
             chat_id=ADMIN_ID,
             text=(
@@ -515,6 +708,7 @@ async def handle_anon_report_button(update: Update, context: ContextTypes.DEFAUL
                 f"ID получателя: {query.from_user.id}\n\n"
                 f"Сообщение:\n{query.message.text or '(без текста)'}"
             ),
+            reply_markup=ban_keyboard,
         )
         await query.answer("✅ Жалоба отправлена.", show_alert=True)
     except Exception:
@@ -523,6 +717,15 @@ async def handle_anon_report_button(update: Update, context: ContextTypes.DEFAUL
         await query.answer("❌ Не удалось отправить жалобу.", show_alert=True)
 
 async def send_anonymous_reply(update: Update, context: ContextTypes.DEFAULT_TYPE, text: str):
+    ban_remaining = get_anon_ban_remaining(context.application, update.effective_user.id)
+    if ban_remaining:
+        clear_modes(context)
+        await update.message.reply_text(
+            f"🚫 Вам временно запрещены анонимные ответы. Осталось примерно {minutes_left(ban_remaining)} мин.",
+            reply_markup=main_keyboard,
+        )
+        return
+
     target_id = context.user_data.get("anon_reply_target_id")
     if not target_id:
         clear_modes(context)
@@ -621,6 +824,10 @@ async def handle_user_message(update: Update, context: ContextTypes.DEFAULT_TYPE
 
     if text == ADMIN_DND_OFF_BUTTON:
         await admin_dnd_off_start(update, context)
+        return
+
+    if text == ADMIN_ANON_BAN_BUTTON:
+        await admin_anon_ban_start(update, context)
         return
 
     if text == CANCEL_BUTTON:
@@ -746,6 +953,8 @@ def main():
     app.add_handler(CallbackQueryHandler(handle_anon_reply_button, pattern="^anon_reply$"))
     app.add_handler(CallbackQueryHandler(handle_anon_report_button, pattern="^anon_report$"))
     app.add_handler(CallbackQueryHandler(handle_dnd_callback, pattern="^dnd_(15|30|60)$"))
+    app.add_handler(CallbackQueryHandler(handle_admin_anon_ban_callback, pattern="^admin_anon_ban_(15|20|25|30|60)$"))
+    app.add_handler(CallbackQueryHandler(handle_report_ban_callback, pattern=r"^report:ban:-?\\d+:(15|20|25|30|60)$"))
 
     app.add_handler(
         MessageHandler(
