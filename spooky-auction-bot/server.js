@@ -152,9 +152,9 @@ function maybeAuthenticate(message) {
 
   const text = normalize(message);
 
-  if (/\/register|зарегистр/.test(text)) {
+  if (/\/(?:reg|register)|зарегистр/.test(text)) {
     lastAuthSend = now;
-    bot.chat('/register ' + MC_PASSWORD + ' ' + MC_PASSWORD);
+    bot.chat('/reg ' + MC_PASSWORD + ' ' + MC_PASSWORD);
   } else if (/\/login|авториз|войдите|войти/.test(text)) {
     lastAuthSend = now;
     bot.chat('/login ' + MC_PASSWORD);
