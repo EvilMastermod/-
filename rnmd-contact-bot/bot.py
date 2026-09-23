@@ -18,15 +18,6 @@ logging.basicConfig(
 BOT_TOKEN = os.environ["BOT_TOKEN"]
 ADMIN_ID = int(os.environ["ADMIN_ID"])
 
-PORT = int(os.getenv("PORT", "10000"))
-BASE_URL = os.getenv("RENDER_EXTERNAL_URL", "").rstrip("/")
-
-if not BASE_URL:
-    raise RuntimeError("RENDER_EXTERNAL_URL не найден. Запусти проект на Render.")
-
-WEBHOOK_PATH = "telegram"
-WEBHOOK_URL = f"{BASE_URL}/{WEBHOOK_PATH}"
-
 CONTACT_BUTTON = "📩 Связь"
 
 keyboard = ReplyKeyboardMarkup(
@@ -204,14 +195,12 @@ def main():
 
     app.add_handler(CommandHandler("start", start))
     app.add_handler(CommandHandler("id", show_id))
-
     app.add_handler(
         MessageHandler(
             filters.User(user_id=ADMIN_ID) & filters.REPLY & filters.TEXT,
             handle_admin_reply,
         )
     )
-
     app.add_handler(
         MessageHandler(
             filters.TEXT & ~filters.COMMAND,
@@ -219,15 +208,8 @@ def main():
         )
     )
 
-    logging.info("Webhook URL: %s", WEBHOOK_URL)
-
-    app.run_webhook(
-        listen="0.0.0.0",
-        port=PORT,
-        url_path=WEBHOOK_PATH,
-        webhook_url=WEBHOOK_URL,
-        drop_pending_updates=False,
-    )
+    print("Бот запущен...")
+    app.run_polling(drop_pending_updates=False)
 
 if __name__ == "__main__":
     main()
