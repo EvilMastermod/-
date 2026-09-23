@@ -30,11 +30,15 @@ ADMIN_ID = int(os.environ["ADMIN_ID"])
 
 CONTACT_BUTTON = "📩 Связь"
 ANON_BUTTON = "🕵️ Анон"
+DND_BUTTON = "🔕 Не беспокоить"
 CANCEL_BUTTON = "❌ Отменить"
 CHOOSE_USER_BUTTON = "👤 Выбрать получателя"
 
 main_keyboard = ReplyKeyboardMarkup(
-    [[KeyboardButton(CONTACT_BUTTON), KeyboardButton(ANON_BUTTON)]],
+    [
+        [KeyboardButton(CONTACT_BUTTON), KeyboardButton(ANON_BUTTON)],
+        [KeyboardButton(DND_BUTTON)],
+    ],
     resize_keyboard=True,
 )
 
@@ -67,6 +71,41 @@ def get_waiting_map(application: Application):
 
 def get_anon_reply_map(application: Application):
     return application.bot_data.setdefault("anon_reply_routes", {})
+
+def get_anon_reports(application: Application):
+    return application.bot_data.setdefault("anon_reports", set())
+
+def get_dnd_map(application: Application):
+    return application.bot_data.setdefault("dnd_states", {})
+
+def get_dnd_status(application: Application, user_id: int):
+    state = get_dnd_map(application).get(user_id)
+    if not state:
+        return "available", 0
+
+    now = time.time()
+    active_until = state.get("active_until", 0)
+    cooldown_until = state.get("cooldown_until", 0)
+
+    if now < active_until:
+        return "active", int(active_until - now)
+
+    if now < cooldown_until:
+        return "cooldown", int(cooldown_until - now)
+
+    get_dnd_map(application).pop(user_id, None)
+    return "available", 0
+
+def minutes_left(seconds: int):
+    return max(1, (seconds + 59) // 60)
+
+def anon_message_keyboard():
+    return InlineKeyboardMarkup(
+        [[
+            InlineKeyboardButton("💬 Ответить анонимно", callback_data="anon_reply"),
+            InlineKeyboardButton("⚠️ Жалоба", callback_data="anon_report"),
+        ]]
+    )
 
 def clear_modes(context: ContextTypes.DEFAULT_TYPE):
     context.user_data["waiting_for_message"] = False
@@ -134,6 +173,80 @@ async def cancel_action(update: Update, context: ContextTypes.DEFAULT_TYPE):
         reply_markup=main_keyboard,
     )
 
+async def dnd_menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    user_id = update.effective_user.id
+    status, remaining = get_dnd_status(context.application, user_id)
+
+    if status == "active":
+        await update.message.reply_text(
+            f"🔕 Режим уже включён. Осталось примерно {minutes_left(remaining)} мин.",
+            reply_markup=main_keyboard,
+        )
+        return
+
+    if status == "cooldown":
+        await update.message.reply_text(
+            f"⏳ Перезарядка режима. Осталось примерно {minutes_left(remaining)} мин.",
+            reply_markup=main_keyboard,
+        )
+        return
+
+    keyboard = InlineKeyboardMarkup(
+        [
+            [
+                InlineKeyboardButton("15 мин", callback_data="dnd_15"),
+                InlineKeyboardButton("30 мин", callback_data="dnd_30"),
+                InlineKeyboardButton("1 час", callback_data="dnd_60"),
+            ]
+        ]
+    )
+
+    await update.message.reply_text(
+        "🔕 На сколько включить «Не беспокоить»?\n\nМаксимум — 1 час. После окончания перезарядка 30 минут.",
+        reply_markup=keyboard,
+    )
+
+async def handle_dnd_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    query = update.callback_query
+    if not query:
+        return
+
+    try:
+        minutes = int(query.data.split("_", 1)[1])
+    except Exception:
+        await query.answer("Ошибка", show_alert=True)
+        return
+
+    minutes = min(max(minutes, 1), 60)
+    user_id = query.from_user.id
+
+    status, remaining = get_dnd_status(context.application, user_id)
+    if status == "active":
+        await query.answer(
+            f"Уже включено. Осталось примерно {minutes_left(remaining)} мин.",
+            show_alert=True,
+        )
+        return
+
+    if status == "cooldown":
+        await query.answer(
+            f"Перезарядка. Осталось примерно {minutes_left(remaining)} мин.",
+            show_alert=True,
+        )
+        return
+
+    now = time.time()
+    active_until = now + minutes * 60
+    get_dnd_map(context.application)[user_id] = {
+        "active_until": active_until,
+        "cooldown_until": active_until + 30 * 60,
+    }
+
+    await query.answer("Включено")
+    await query.edit_message_text(
+        f"🔕 «Не беспокоить» включён на {minutes} мин.\nПосле окончания будет перезарядка 30 минут."
+    )
+
 async def handle_users_shared(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not update.message or not update.message.users_shared:
         return
@@ -177,6 +290,15 @@ async def send_anonymous(update: Update, context: ContextTypes.DEFAULT_TYPE, tex
         )
         return
 
+    dnd_status, dnd_remaining = get_dnd_status(context.application, target_id)
+    if dnd_status == "active":
+        clear_modes(context)
+        await update.message.reply_text(
+            f"🔕 Получатель сейчас не принимает анонимные сообщения. Осталось примерно {minutes_left(dnd_remaining)} мин.",
+            reply_markup=main_keyboard,
+        )
+        return
+
     now = time.monotonic()
     last_sent = context.user_data.get("anon_last_sent", 0.0)
     if now - last_sent < 5:
@@ -187,9 +309,7 @@ async def send_anonymous(update: Update, context: ContextTypes.DEFAULT_TYPE, tex
         return
 
     try:
-        reply_keyboard = InlineKeyboardMarkup(
-            [[InlineKeyboardButton("💬 Ответить анонимно", callback_data="anon_reply")]]
-        )
+        reply_keyboard = anon_message_keyboard()
         sent = await context.bot.send_message(
             chat_id=target_id,
             text=f"📨 Анонимное сообщение\n\n{text}",
@@ -267,12 +387,56 @@ async def handle_anon_reply_button(update: Update, context: ContextTypes.DEFAULT
         reply_markup=cancel_keyboard,
     )
 
+async def handle_anon_report_button(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    query = update.callback_query
+    if not query or not query.message:
+        return
+
+    route_key = f"{query.message.chat_id}:{query.message.message_id}"
+    sender_id = get_anon_reply_map(context.application).get(route_key)
+
+    if not sender_id:
+        await query.answer("На это сообщение уже нельзя пожаловаться.", show_alert=True)
+        return
+
+    reports = get_anon_reports(context.application)
+    if route_key in reports:
+        await query.answer("Жалоба уже отправлена.", show_alert=True)
+        return
+
+    reports.add(route_key)
+
+    try:
+        await context.bot.send_message(
+            chat_id=ADMIN_ID,
+            text=(
+                "⚠️ Жалоба на анонимное сообщение\n\n"
+                f"ID отправителя: {sender_id}\n"
+                f"ID получателя: {query.from_user.id}\n\n"
+                f"Сообщение:\n{query.message.text or '(без текста)'}"
+            ),
+        )
+        await query.answer("✅ Жалоба отправлена.", show_alert=True)
+    except Exception:
+        reports.discard(route_key)
+        logging.exception("Не удалось отправить жалобу")
+        await query.answer("❌ Не удалось отправить жалобу.", show_alert=True)
+
 async def send_anonymous_reply(update: Update, context: ContextTypes.DEFAULT_TYPE, text: str):
     target_id = context.user_data.get("anon_reply_target_id")
     if not target_id:
         clear_modes(context)
         await update.message.reply_text(
             "❌ Не удалось найти получателя ответа.",
+            reply_markup=main_keyboard,
+        )
+        return
+
+    dnd_status, dnd_remaining = get_dnd_status(context.application, target_id)
+    if dnd_status == "active":
+        clear_modes(context)
+        await update.message.reply_text(
+            f"🔕 Получатель сейчас не принимает анонимные сообщения. Осталось примерно {minutes_left(dnd_remaining)} мин.",
             reply_markup=main_keyboard,
         )
         return
@@ -287,9 +451,7 @@ async def send_anonymous_reply(update: Update, context: ContextTypes.DEFAULT_TYP
         return
 
     try:
-        reply_keyboard = InlineKeyboardMarkup(
-            [[InlineKeyboardButton("💬 Ответить анонимно", callback_data="anon_reply")]]
-        )
+        reply_keyboard = anon_message_keyboard()
         sent = await context.bot.send_message(
             chat_id=target_id,
             text=f"💬 Анонимный ответ\n\n{text}",
@@ -347,6 +509,10 @@ async def handle_user_message(update: Update, context: ContextTypes.DEFAULT_TYPE
 
     if text == ANON_BUTTON:
         await anon_start(update, context)
+        return
+
+    if text == DND_BUTTON:
+        await dnd_menu(update, context)
         return
 
     if text == CANCEL_BUTTON:
@@ -470,6 +636,8 @@ def main():
     app.add_handler(CommandHandler("start", start))
     app.add_handler(CommandHandler("id", show_id))
     app.add_handler(CallbackQueryHandler(handle_anon_reply_button, pattern="^anon_reply$"))
+    app.add_handler(CallbackQueryHandler(handle_anon_report_button, pattern="^anon_report$"))
+    app.add_handler(CallbackQueryHandler(handle_dnd_callback, pattern="^dnd_(15|30|60)$"))
 
     app.add_handler(
         MessageHandler(
