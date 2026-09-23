@@ -1,17 +1,9 @@
 {
-  "name": "spooky-auction-bot",
-  "version": "1.0.0",
-  "private": true,
-  "description": "Minecraft auction price reader for RNMD Telegram bot",
-  "main": "server.js",
-  "scripts": {
-    "start": "node server.js"
-  },
-  "engines": {
-    "node": ">=22"
-  },
-  "dependencies": {
-    "express": "5.2.1",
-    "mineflayer": "4.39.0"
-  }
+  "name":"spooky-auction-bot",
+  "version":"2.0.0",
+  "private":true,
+  "main":"server.js",
+  "scripts":{"start":"node server.js"},
+  "engines":{"node":">=22"},
+  "dependencies":{"express":"5.2.1"}
 }
