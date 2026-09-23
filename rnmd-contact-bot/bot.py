@@ -154,7 +154,7 @@ async def handle_user_message(update: Update, context: ContextTypes.DEFAULT_TYPE
         context.user_data["waiting_for_message"] = False
 
         await update.message.reply_text(
-            "\u2063",
+            "✅ Сообщение отправлено",
             reply_markup=main_keyboard,
         )
 
