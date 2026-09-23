@@ -29,7 +29,10 @@ logging.basicConfig(
 
 BOT_TOKEN = os.environ["BOT_TOKEN"]
 ADMIN_ID = int(os.environ["ADMIN_ID"])
-SPOOKY_PRICE_API = os.environ.get("SPOOKY_PRICE_API", "").rstrip("/")
+SPOOKY_PRICE_API = os.environ.get(
+    "SPOOKY_PRICE_API",
+    "https://spooky-auction-bot-production.up.railway.app",
+).rstrip("/")
 PRICE_API_KEY = os.environ.get("PRICE_API_KEY", "")
 
 CONTACT_BUTTON = "📩 Связь"
