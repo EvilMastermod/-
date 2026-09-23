@@ -34,14 +34,47 @@ DND_BUTTON = "🔕 Не беспокоить"
 DND_OFF_BUTTON = "🔔 Отключить не беспокоить"
 ADMIN_DND_OFF_BUTTON = "🛡 Снять DND у пользователя"
 ADMIN_ANON_BAN_BUTTON = "🚫 Бан анона"
+ADMIN_ANON_UNBAN_BUTTON = "🟢 Отключить бан анона"
+ADMIN_REPORT_LIST_BUTTON = "📋 Лист жалоб"
 CANCEL_BUTTON = "❌ Отменить"
 CHOOSE_USER_BUTTON = "👤 Выбрать получателя"
 
-main_keyboard = ReplyKeyboardMarkup(
+user_main_keyboard = ReplyKeyboardMarkup(
+    [
+        [KeyboardButton(CONTACT_BUTTON), KeyboardButton(ANON_BUTTON)],
+        [KeyboardButton(DND_BUTTON), KeyboardButton(DND_OFF_BUTTON)],
+    ],
+    resize_keyboard=True,
+)
+
+admin_main_keyboard = ReplyKeyboardMarkup(
     [
         [KeyboardButton(CONTACT_BUTTON), KeyboardButton(ANON_BUTTON)],
         [KeyboardButton(DND_BUTTON), KeyboardButton(DND_OFF_BUTTON)],
         [KeyboardButton(ADMIN_DND_OFF_BUTTON), KeyboardButton(ADMIN_ANON_BAN_BUTTON)],
+        [KeyboardButton(ADMIN_ANON_UNBAN_BUTTON), KeyboardButton(ADMIN_REPORT_LIST_BUTTON)],
+    ],
+    resize_keyboard=True,
+)
+
+def get_main_keyboard(user_id: int):
+    return admin_main_keyboard if user_id == ADMIN_ID else user_main_keyboard
+
+admin_anon_unban_keyboard = ReplyKeyboardMarkup(
+    [
+        [
+            KeyboardButton(
+                "👤 Выбрать пользователя для разбана",
+                request_users=KeyboardButtonRequestUsers(
+                    request_id=780,
+                    user_is_bot=False,
+                    max_quantity=1,
+                    request_name=True,
+                    request_username=True,
+                ),
+            )
+        ],
+        [KeyboardButton(CANCEL_BUTTON)],
     ],
     resize_keyboard=True,
 )
@@ -117,6 +150,9 @@ def get_anon_reply_map(application: Application):
 def get_anon_reports(application: Application):
     return application.bot_data.setdefault("anon_reports", set())
 
+def get_report_history(application: Application):
+    return application.bot_data.setdefault("anon_report_history", [])
+
 def get_dnd_map(application: Application):
     return application.bot_data.setdefault("dnd_states", {})
 
@@ -170,6 +206,7 @@ def clear_modes(context: ContextTypes.DEFAULT_TYPE):
     context.user_data.pop("admin_dnd_stage", None)
     context.user_data.pop("admin_anon_ban_stage", None)
     context.user_data.pop("admin_anon_ban_target_id", None)
+    context.user_data.pop("admin_anon_unban_stage", None)
 
 async def post_init(application: Application):
     try:
@@ -189,13 +226,13 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if context.args and context.args[0] == "anon":
         await update.message.reply_text(
             "✅ Готово. Теперь вам можно отправлять анонимные сообщения через этого бота.",
-            reply_markup=main_keyboard,
+            reply_markup=get_main_keyboard(update.effective_user.id),
         )
         return
 
     await update.message.reply_text(
         "Привет! 👋\n\nВыберите действие.",
-        reply_markup=main_keyboard,
+        reply_markup=get_main_keyboard(update.effective_user.id),
     )
 
 async def show_id(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -218,7 +255,7 @@ async def anon_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if remaining:
         await update.message.reply_text(
             f"🚫 Вам временно запрещено отправлять анонимные сообщения. Осталось примерно {minutes_left(remaining)} мин.",
-            reply_markup=main_keyboard,
+            reply_markup=get_main_keyboard(update.effective_user.id),
         )
         return
 
@@ -235,7 +272,7 @@ async def cancel_action(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     await update.message.reply_text(
         "❌ Отправка отменена.",
-        reply_markup=main_keyboard,
+        reply_markup=get_main_keyboard(update.effective_user.id),
     )
 
 async def dnd_menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -245,14 +282,14 @@ async def dnd_menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if status == "active":
         await update.message.reply_text(
             f"🔕 Режим уже включён. Осталось примерно {minutes_left(remaining)} мин.",
-            reply_markup=main_keyboard,
+            reply_markup=get_main_keyboard(update.effective_user.id),
         )
         return
 
     if status == "cooldown":
         await update.message.reply_text(
             f"⏳ Перезарядка режима. Осталось примерно {minutes_left(remaining)} мин.",
-            reply_markup=main_keyboard,
+            reply_markup=get_main_keyboard(update.effective_user.id),
         )
         return
 
@@ -283,27 +320,27 @@ async def dnd_off(update: Update, context: ContextTypes.DEFAULT_TYPE):
         }
         await update.message.reply_text(
             "🔔 «Не беспокоить» отключён. Перезарядка — 30 минут.",
-            reply_markup=main_keyboard,
+            reply_markup=get_main_keyboard(update.effective_user.id),
         )
         return
 
     if status == "cooldown":
         await update.message.reply_text(
             f"🔔 Режим уже выключен. Перезарядка ещё примерно {minutes_left(remaining)} мин.",
-            reply_markup=main_keyboard,
+            reply_markup=get_main_keyboard(update.effective_user.id),
         )
         return
 
     await update.message.reply_text(
         "🔔 «Не беспокоить» уже выключен.",
-        reply_markup=main_keyboard,
+        reply_markup=get_main_keyboard(update.effective_user.id),
     )
 
 async def admin_dnd_off_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if update.effective_user.id != ADMIN_ID:
         await update.message.reply_text(
             "⛔ Эта кнопка доступна только администратору.",
-            reply_markup=main_keyboard,
+            reply_markup=get_main_keyboard(update.effective_user.id),
         )
         return
 
@@ -324,7 +361,7 @@ async def admin_remove_dnd_for_user(update: Update, context: ContextTypes.DEFAUL
 
     await update.message.reply_text(
         f"✅ «Не беспокоить» у пользователя {target_id} отключён без перезарядки.",
-        reply_markup=main_keyboard,
+        reply_markup=get_main_keyboard(update.effective_user.id),
     )
 
     try:
@@ -335,11 +372,86 @@ async def admin_remove_dnd_for_user(update: Update, context: ContextTypes.DEFAUL
     except Exception:
         logging.exception("Не удалось уведомить пользователя об отключении DND")
 
+async def admin_anon_unban_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if update.effective_user.id != ADMIN_ID:
+        await update.message.reply_text(
+            "⛔ Эта кнопка доступна только администратору.",
+            reply_markup=get_main_keyboard(update.effective_user.id),
+        )
+        return
+
+    clear_modes(context)
+    context.user_data["admin_anon_unban_stage"] = True
+
+    await update.message.reply_text(
+        "🟢 Выберите пользователя, у которого нужно отключить бан анона.",
+        reply_markup=admin_anon_unban_keyboard,
+    )
+
+async def admin_remove_anon_ban(update: Update, context: ContextTypes.DEFAULT_TYPE, target_id: int):
+    if update.effective_user.id != ADMIN_ID:
+        return
+
+    was_banned = target_id in get_anon_ban_map(context.application)
+    get_anon_ban_map(context.application).pop(target_id, None)
+    clear_modes(context)
+
+    if was_banned:
+        text = f"✅ Бан анона у пользователя {target_id} отключён."
+    else:
+        text = f"ℹ️ У пользователя {target_id} активного бана анона нет."
+
+    await update.message.reply_text(
+        text,
+        reply_markup=get_main_keyboard(update.effective_user.id),
+    )
+
+    if was_banned:
+        try:
+            await context.bot.send_message(
+                chat_id=target_id,
+                text="🟢 Администратор отключил ваш бан на анонимные сообщения."
+            )
+        except Exception:
+            logging.exception("Не удалось уведомить пользователя о снятии анонимного бана")
+
+async def admin_report_list(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if update.effective_user.id != ADMIN_ID:
+        await update.message.reply_text(
+            "⛔ Эта кнопка доступна только администратору.",
+            reply_markup=get_main_keyboard(update.effective_user.id),
+        )
+        return
+
+    history = get_report_history(context.application)
+    if not history:
+        await update.message.reply_text(
+            "📋 Жалоб пока нет.",
+            reply_markup=get_main_keyboard(update.effective_user.id),
+        )
+        return
+
+    lines = ["📋 Последние жалобы:"]
+    for i, item in enumerate(reversed(history[-10:]), 1):
+        msg = item["text"].replace("\n", " ")
+        if len(msg) > 180:
+            msg = msg[:177] + "..."
+        lines.append(
+            f"\n{i}. Отправитель ID: {item['sender_id']}\n"
+            f"Получатель ID: {item['recipient_id']}\n"
+            f"Сообщение: {msg}"
+        )
+
+    await update.message.reply_text(
+        "".join(lines),
+        reply_markup=get_main_keyboard(update.effective_user.id),
+    )
+
 async def admin_anon_ban_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if update.effective_user.id != ADMIN_ID:
         await update.message.reply_text(
             "⛔ Эта кнопка доступна только администратору.",
-            reply_markup=main_keyboard,
+            reply_markup=get_main_keyboard(update.effective_user.id),
         )
         return
 
@@ -515,10 +627,23 @@ async def handle_users_shared(update: Update, context: ContextTypes.DEFAULT_TYPE
         await admin_choose_anon_ban_duration(update, context, shared[0].user_id)
         return
 
+    if context.user_data.get("admin_anon_unban_stage"):
+        if update.effective_user.id != ADMIN_ID:
+            clear_modes(context)
+            return
+        if not shared:
+            await update.message.reply_text(
+                "❌ Пользователь не выбран.",
+                reply_markup=admin_anon_unban_keyboard,
+            )
+            return
+        await admin_remove_anon_ban(update, context, shared[0].user_id)
+        return
+
     if context.user_data.get("anon_stage") != "choose":
         await update.message.reply_text(
             "Сначала нажмите «🕵️ Анон».",
-            reply_markup=main_keyboard,
+            reply_markup=get_main_keyboard(update.effective_user.id),
         )
         return
     if not shared:
@@ -548,7 +673,7 @@ async def send_anonymous(update: Update, context: ContextTypes.DEFAULT_TYPE, tex
         clear_modes(context)
         await update.message.reply_text(
             f"🚫 Вам временно запрещено отправлять анонимные сообщения. Осталось примерно {minutes_left(ban_remaining)} мин.",
-            reply_markup=main_keyboard,
+            reply_markup=get_main_keyboard(update.effective_user.id),
         )
         return
 
@@ -557,7 +682,7 @@ async def send_anonymous(update: Update, context: ContextTypes.DEFAULT_TYPE, tex
         clear_modes(context)
         await update.message.reply_text(
             "❌ Получатель не выбран. Нажмите «🕵️ Анон» ещё раз.",
-            reply_markup=main_keyboard,
+            reply_markup=get_main_keyboard(update.effective_user.id),
         )
         return
 
@@ -566,7 +691,7 @@ async def send_anonymous(update: Update, context: ContextTypes.DEFAULT_TYPE, tex
         clear_modes(context)
         await update.message.reply_text(
             f"🔕 Получатель сейчас не принимает анонимные сообщения. Осталось примерно {minutes_left(dnd_remaining)} мин.",
-            reply_markup=main_keyboard,
+            reply_markup=get_main_keyboard(update.effective_user.id),
         )
         return
 
@@ -575,7 +700,7 @@ async def send_anonymous(update: Update, context: ContextTypes.DEFAULT_TYPE, tex
     if now - last_sent < 5:
         await update.message.reply_text(
             "⏳ Подождите несколько секунд перед следующим анонимным сообщением.",
-            reply_markup=main_keyboard,
+            reply_markup=get_main_keyboard(update.effective_user.id),
         )
         return
 
@@ -595,7 +720,7 @@ async def send_anonymous(update: Update, context: ContextTypes.DEFAULT_TYPE, tex
 
         await update.message.reply_text(
             "✅ Анонимное сообщение отправлено",
-            reply_markup=main_keyboard,
+            reply_markup=get_main_keyboard(update.effective_user.id),
         )
 
     except Exception:
@@ -623,14 +748,14 @@ async def send_anonymous(update: Update, context: ContextTypes.DEFAULT_TYPE, tex
             )
             await update.message.reply_text(
                 "Главное меню:",
-                reply_markup=main_keyboard,
+                reply_markup=get_main_keyboard(update.effective_user.id),
             )
         except Exception:
             logging.exception("Не удалось создать ссылку-приглашение")
             clear_modes(context)
             await update.message.reply_text(
                 "❌ Не удалось отправить сообщение",
-                reply_markup=main_keyboard,
+                reply_markup=get_main_keyboard(update.effective_user.id),
             )
 
 async def handle_anon_reply_button(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -654,7 +779,7 @@ async def handle_anon_reply_button(update: Update, context: ContextTypes.DEFAULT
     if not target_id:
         await query.message.reply_text(
             "❌ На это сообщение уже нельзя ответить.",
-            reply_markup=main_keyboard,
+            reply_markup=get_main_keyboard(update.effective_user.id),
         )
         return
 
@@ -700,16 +825,28 @@ async def handle_anon_report_button(update: Update, context: ContextTypes.DEFAUL
             ]
         )
 
+        report_text = query.message.text or "(без текста)"
         await context.bot.send_message(
             chat_id=ADMIN_ID,
             text=(
                 "⚠️ Жалоба на анонимное сообщение\n\n"
                 f"ID отправителя: {sender_id}\n"
                 f"ID получателя: {query.from_user.id}\n\n"
-                f"Сообщение:\n{query.message.text or '(без текста)'}"
+                f"Сообщение:\n{report_text}"
             ),
             reply_markup=ban_keyboard,
         )
+
+        history = get_report_history(context.application)
+        history.append({
+            "sender_id": sender_id,
+            "recipient_id": query.from_user.id,
+            "text": report_text,
+            "created_at": time.time(),
+        })
+        if len(history) > 100:
+            del history[:-100]
+
         await query.answer("✅ Жалоба отправлена.", show_alert=True)
     except Exception:
         reports.discard(route_key)
@@ -722,7 +859,7 @@ async def send_anonymous_reply(update: Update, context: ContextTypes.DEFAULT_TYP
         clear_modes(context)
         await update.message.reply_text(
             f"🚫 Вам временно запрещены анонимные ответы. Осталось примерно {minutes_left(ban_remaining)} мин.",
-            reply_markup=main_keyboard,
+            reply_markup=get_main_keyboard(update.effective_user.id),
         )
         return
 
@@ -731,7 +868,7 @@ async def send_anonymous_reply(update: Update, context: ContextTypes.DEFAULT_TYP
         clear_modes(context)
         await update.message.reply_text(
             "❌ Не удалось найти получателя ответа.",
-            reply_markup=main_keyboard,
+            reply_markup=get_main_keyboard(update.effective_user.id),
         )
         return
 
@@ -740,7 +877,7 @@ async def send_anonymous_reply(update: Update, context: ContextTypes.DEFAULT_TYP
         clear_modes(context)
         await update.message.reply_text(
             f"🔕 Получатель сейчас не принимает анонимные сообщения. Осталось примерно {minutes_left(dnd_remaining)} мин.",
-            reply_markup=main_keyboard,
+            reply_markup=get_main_keyboard(update.effective_user.id),
         )
         return
 
@@ -749,7 +886,7 @@ async def send_anonymous_reply(update: Update, context: ContextTypes.DEFAULT_TYP
     if now - last_sent < 5:
         await update.message.reply_text(
             "⏳ Подождите несколько секунд перед следующим анонимным сообщением.",
-            reply_markup=main_keyboard,
+            reply_markup=get_main_keyboard(update.effective_user.id),
         )
         return
 
@@ -769,7 +906,7 @@ async def send_anonymous_reply(update: Update, context: ContextTypes.DEFAULT_TYP
 
         await update.message.reply_text(
             "✅ Анонимный ответ отправлен",
-            reply_markup=main_keyboard,
+            reply_markup=get_main_keyboard(update.effective_user.id),
         )
 
     except Exception:
@@ -777,7 +914,7 @@ async def send_anonymous_reply(update: Update, context: ContextTypes.DEFAULT_TYP
         clear_modes(context)
         await update.message.reply_text(
             "❌ Не удалось отправить анонимный ответ",
-            reply_markup=main_keyboard,
+            reply_markup=get_main_keyboard(update.effective_user.id),
         )
 
 async def no_answer_job(context: ContextTypes.DEFAULT_TYPE):
@@ -828,6 +965,14 @@ async def handle_user_message(update: Update, context: ContextTypes.DEFAULT_TYPE
 
     if text == ADMIN_ANON_BAN_BUTTON:
         await admin_anon_ban_start(update, context)
+        return
+
+    if text == ADMIN_ANON_UNBAN_BUTTON:
+        await admin_anon_unban_start(update, context)
+        return
+
+    if text == ADMIN_REPORT_LIST_BUTTON:
+        await admin_report_list(update, context)
         return
 
     if text == CANCEL_BUTTON:
@@ -890,14 +1035,14 @@ async def handle_user_message(update: Update, context: ContextTypes.DEFAULT_TYPE
 
         await update.message.reply_text(
             "✅ Сообщение отправлено",
-            reply_markup=main_keyboard,
+            reply_markup=get_main_keyboard(update.effective_user.id),
         )
 
     except Exception:
         logging.exception("Не удалось отправить сообщение владельцу")
         await update.message.reply_text(
             "❌ Не получилось отправить сообщение. Попробуй позже.",
-            reply_markup=main_keyboard,
+            reply_markup=get_main_keyboard(update.effective_user.id),
         )
 
 async def handle_admin_reply(update: Update, context: ContextTypes.DEFAULT_TYPE):
