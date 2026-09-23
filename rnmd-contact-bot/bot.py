@@ -19,9 +19,16 @@ BOT_TOKEN = os.environ["BOT_TOKEN"]
 ADMIN_ID = int(os.environ["ADMIN_ID"])
 
 CONTACT_BUTTON = "📩 Связь"
+CANCEL_BUTTON = "❌ Отменить"
+OWNER_LINK = "https://t.me/EvilMaster_YT"
 
-keyboard = ReplyKeyboardMarkup(
+main_keyboard = ReplyKeyboardMarkup(
     [[KeyboardButton(CONTACT_BUTTON)]],
+    resize_keyboard=True,
+)
+
+cancel_keyboard = ReplyKeyboardMarkup(
+    [[KeyboardButton(CANCEL_BUTTON)]],
     resize_keyboard=True,
 )
 
@@ -40,10 +47,12 @@ async def post_init(application: Application):
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not update.message:
         return
+
     context.user_data["waiting_for_message"] = False
+
     await update.message.reply_text(
         "Привет! 👋\n\nНажми «📩 Связь», чтобы написать владельцу бота.",
-        reply_markup=keyboard,
+        reply_markup=main_keyboard,
     )
 
 async def show_id(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -54,8 +63,18 @@ async def show_id(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 async def contact(update: Update, context: ContextTypes.DEFAULT_TYPE):
     context.user_data["waiting_for_message"] = True
+
     await update.message.reply_text(
-        "✍️ Напиши сообщение одним сообщением. Я передам его владельцу."
+        "✍️ Отправьте сообщение",
+        reply_markup=cancel_keyboard,
+    )
+
+async def cancel_contact(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    context.user_data["waiting_for_message"] = False
+
+    await update.message.reply_text(
+        "❌ Отправка отменена.",
+        reply_markup=main_keyboard,
     )
 
 async def no_answer_job(context: ContextTypes.DEFAULT_TYPE):
@@ -91,10 +110,15 @@ async def handle_user_message(update: Update, context: ContextTypes.DEFAULT_TYPE
         await contact(update, context)
         return
 
+    if text == CANCEL_BUTTON:
+        await cancel_contact(update, context)
+        return
+
     if not context.user_data.get("waiting_for_message"):
         await update.message.reply_text(
-            "Нажми кнопку «📩 Связь», чтобы написать владельцу.",
-            reply_markup=keyboard,
+            "Нажми кнопку «📩 Связь», чтобы написать владельцу.\n\n"
+            f"{OWNER_LINK}",
+            reply_markup=main_keyboard,
         )
         return
 
@@ -133,16 +157,19 @@ async def handle_user_message(update: Update, context: ContextTypes.DEFAULT_TYPE
             name=f"no_answer_{sent.message_id}",
         )
 
-        await update.message.reply_text(
-            "✅ Сообщение отправлено!",
-            reply_markup=keyboard,
-        )
         context.user_data["waiting_for_message"] = False
+
+        await update.message.reply_text(
+            "✅ Сообщение отправлено\n\n"
+            f"{OWNER_LINK}",
+            reply_markup=main_keyboard,
+        )
 
     except Exception:
         logging.exception("Не удалось отправить сообщение владельцу")
         await update.message.reply_text(
-            "❌ Не получилось отправить сообщение. Попробуй позже."
+            "❌ Не получилось отправить сообщение. Попробуй позже.",
+            reply_markup=main_keyboard,
         )
 
 async def handle_admin_reply(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -195,12 +222,14 @@ def main():
 
     app.add_handler(CommandHandler("start", start))
     app.add_handler(CommandHandler("id", show_id))
+
     app.add_handler(
         MessageHandler(
             filters.User(user_id=ADMIN_ID) & filters.REPLY & filters.TEXT,
             handle_admin_reply,
         )
     )
+
     app.add_handler(
         MessageHandler(
             filters.TEXT & ~filters.COMMAND,
