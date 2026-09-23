@@ -181,30 +181,11 @@ async def send_anonymous(update: Update, context: ContextTypes.DEFAULT_TYPE, tex
         )
         return
 
-    sender = update.effective_user
-    sender_username = f"@{sender.username}" if sender.username else "нет username"
-
     try:
         await context.bot.send_message(
             chat_id=target_id,
             text=f"📨 Анонимное сообщение\n\n{text}",
         )
-
-        # Получатель не видит отправителя. Этот лог видит только владелец бота.
-        try:
-            await context.bot.send_message(
-                chat_id=ADMIN_ID,
-                text=(
-                    "🛡 Анонимное сообщение отправлено\n\n"
-                    f"Отправитель: {sender.full_name}\n"
-                    f"Username: {sender_username}\n"
-                    f"ID: {sender.id}\n"
-                    f"Получатель ID: {target_id}\n\n"
-                    f"Текст:\n{text}"
-                ),
-            )
-        except Exception:
-            logging.exception("Не удалось отправить админ-лог анонимного сообщения")
 
         context.user_data["anon_last_sent"] = now
         clear_modes(context)
