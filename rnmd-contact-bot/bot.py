@@ -208,7 +208,7 @@ async def send_anonymous(update: Update, context: ContextTypes.DEFAULT_TYPE, tex
         logging.exception("Не удалось отправить анонимное сообщение")
         clear_modes(context)
         await update.message.reply_text(
-            "❌ Не удалось отправить. Получатель должен сначала открыть этого бота и нажать /start.",
+            "❌ Не удалось отправить сообщение",
             reply_markup=main_keyboard,
         )
 
