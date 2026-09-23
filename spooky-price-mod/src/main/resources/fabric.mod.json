@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "id": "spookyprice",
+  "version": "${version}",
+  "name": "Spooky Price Collector",
+  "description": "Collects visible /ah prices from your normal client and sends them to the shared RNMD price database.",
+  "environment": "client",
+  "entrypoints": {
+    "client": ["ua.kostia.spookyprice.SpookyPriceClient"]
+  },
+  "depends": {
+    "fabricloader": ">=0.19.5",
+    "minecraft": "1.21.11",
+    "java": ">=21",
+    "fabric-api": "*"
+  }
+}
