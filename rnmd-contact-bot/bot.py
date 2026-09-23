@@ -49,7 +49,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     context.user_data["waiting_for_message"] = False
 
     await update.message.reply_text(
-        "Привет! 👋\n\nНажми «📩 Связь», чтобы написать владельцу бота.",
+        "Привет! 👋\n\nНажми «📩 Связь», чтобы отправить сообщение.",
         reply_markup=main_keyboard,
     )
 
@@ -111,7 +111,7 @@ async def handle_user_message(update: Update, context: ContextTypes.DEFAULT_TYPE
 
     if not context.user_data.get("waiting_for_message"):
         await update.message.reply_text(
-            "Нажми кнопку «📩 Связь», чтобы написать владельцу.",
+            "Нажми кнопку «📩 Связь», чтобы отправить сообщение.",
             reply_markup=main_keyboard,
         )
         return
