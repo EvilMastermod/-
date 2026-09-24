@@ -1294,6 +1294,442 @@ async def handle_shop_buy(update: Update, context: ContextTypes.DEFAULT_TYPE):
         )
 
 
+async def api_post(path: str, payload: dict):
+    async with httpx.AsyncClient(timeout=12.0) as client:
+        response = await client.post(
+            f"{SPOOKY_PRICE_API}{path}",
+            json=payload,
+            headers=shop_headers(),
+        )
+    try:
+        data = response.json()
+    except Exception:
+        data = {}
+    return response, data
+
+
+async def track_activity(user):
+    try:
+        await api_post(
+            "/activity",
+            {
+                "userId": user.id,
+                "kind": "message",
+                "displayName": user.full_name,
+                "username": user.username or "",
+            },
+        )
+    except Exception:
+        logging.debug("Не удалось записать активность", exc_info=True)
+
+
+async def activities_section(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    clear_modes(context)
+    await update.message.reply_text(
+        "🎮 Активности\n\nВыберите действие:",
+        reply_markup=activities_keyboard,
+    )
+
+
+async def claim_daily(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    clear_modes(context)
+    user = update.effective_user
+    try:
+        response, data = await api_post(
+            "/daily",
+            {
+                "userId": user.id,
+                "displayName": user.full_name,
+                "username": user.username or "",
+            },
+        )
+        if response.status_code == 429 and data.get("code") == "daily_cooldown":
+            remaining_ms = int(data.get("remainingMs") or 0)
+            hours = remaining_ms // 3_600_000
+            minutes = (remaining_ms % 3_600_000) // 60_000
+            await update.message.reply_text(
+                f"⏳ Награда уже получена. До следующей: {hours} ч {minutes} мин.\n"
+                f"📅 Серия: {int(data.get('streak') or 0)} дн.",
+                reply_markup=activities_keyboard,
+            )
+            return
+        if response.status_code != 200 or not data.get("ok"):
+            await update.message.reply_text("❌ Не удалось получить награду.", reply_markup=activities_keyboard)
+            return
+
+        reward = int(data.get("reward") or 0)
+        milestone = int(data.get("milestone") or 0)
+        streak = int(data.get("streak") or 0)
+        balance = int(data.get("balance") or 0)
+        bonus_text = f"\n🎉 Бонус за серию: +{milestone:,} RC".replace(",", " ") if milestone else ""
+        await update.message.reply_text(
+            (
+                f"🎁 Ежедневная награда: +{reward:,} RC\n"
+                f"📅 Серия входов: {streak} дн.{bonus_text}\n"
+                f"👛 Баланс: {balance:,} RC"
+            ).replace(",", " "),
+            reply_markup=activities_keyboard,
+        )
+    except Exception:
+        logging.exception("Ошибка ежедневной награды")
+        await update.message.reply_text("❌ Сервис наград недоступен.", reply_markup=activities_keyboard)
+
+
+async def show_inventory(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    clear_modes(context)
+    try:
+        response, data = await fetch_shop(update.effective_user.id)
+        if response.status_code != 200 or not data.get("ok"):
+            await update.message.reply_text("❌ Инвентарь недоступен.", reply_markup=activities_keyboard)
+            return
+        owned = [item for item in (data.get("items") or []) if item.get("owned")]
+        lines = ["🧰 Инвентарь", ""]
+        if not owned:
+            lines.append("Пока пусто.")
+        else:
+            for item in owned:
+                lines.append(f"• {item.get('name')}")
+        await update.message.reply_text("\n".join(lines), reply_markup=activities_keyboard)
+    except Exception:
+        logging.exception("Ошибка инвентаря")
+        await update.message.reply_text("❌ Инвентарь недоступен.", reply_markup=activities_keyboard)
+
+
+async def transfer_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    clear_modes(context)
+    context.user_data["transfer_stage"] = "choose"
+    await update.message.reply_text(
+        "💸 Выберите пользователя, которому перевести Random Coins.",
+        reply_markup=transfer_user_keyboard,
+    )
+
+
+async def transfer_choose_amount(update: Update, context: ContextTypes.DEFAULT_TYPE, target_id: int):
+    context.user_data["transfer_stage"] = "amount"
+    context.user_data["transfer_target_id"] = target_id
+    await update.message.reply_text(
+        f"💸 Сколько Random Coins перевести пользователю {target_id}?\n"
+        "Напишите целое число.",
+        reply_markup=cancel_keyboard,
+    )
+
+
+async def transfer_send(update: Update, context: ContextTypes.DEFAULT_TYPE, text: str):
+    target_id = context.user_data.get("transfer_target_id")
+    raw = text.replace(" ", "").replace(",", "")
+    if not target_id or not raw.isdigit():
+        await update.message.reply_text("❌ Напишите целое число.", reply_markup=cancel_keyboard)
+        return
+    amount = int(raw)
+    try:
+        response, data = await api_post(
+            "/transfer",
+            {"fromUserId": update.effective_user.id, "toUserId": target_id, "amount": amount},
+        )
+        if response.status_code != 200 or not data.get("ok"):
+            code = data.get("code")
+            if code == "insufficient_funds":
+                msg = f"❌ Не хватает {int(data.get('missing') or 0):,} RC".replace(",", " ")
+            elif code == "self_transfer":
+                msg = "❌ Нельзя переводить коины самому себе."
+            else:
+                msg = "❌ Перевод не выполнен."
+            await update.message.reply_text(msg, reply_markup=activities_keyboard)
+            clear_modes(context)
+            return
+
+        balance = int(data.get("fromBalance") or 0)
+        clear_modes(context)
+        await update.message.reply_text(
+            f"✅ Переведено {amount:,} RC.\n👛 Баланс: {balance:,} RC".replace(",", " "),
+            reply_markup=activities_keyboard,
+        )
+        try:
+            await context.bot.send_message(
+                chat_id=target_id,
+                text=f"💸 Вам перевели {amount:,} Random Coins.".replace(",", " "),
+            )
+        except Exception:
+            pass
+    except Exception:
+        logging.exception("Ошибка перевода")
+        clear_modes(context)
+        await update.message.reply_text("❌ Сервис переводов недоступен.", reply_markup=activities_keyboard)
+
+
+async def gift_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    clear_modes(context)
+    context.user_data["gift_stage"] = "choose"
+    await update.message.reply_text(
+        "🎁 Выберите пользователя, которому хотите купить украшение.",
+        reply_markup=gift_user_keyboard,
+    )
+
+
+async def gift_choose_item(update: Update, context: ContextTypes.DEFAULT_TYPE, target_id: int):
+    context.user_data["gift_stage"] = "item"
+    context.user_data["gift_target_id"] = target_id
+    try:
+        response, data = await fetch_shop(target_id)
+        if response.status_code != 200 or not data.get("ok"):
+            await update.message.reply_text("❌ Не удалось открыть список подарков.", reply_markup=activities_keyboard)
+            clear_modes(context)
+            return
+        items = [
+            item for item in (data.get("items") or [])
+            if item.get("category") == "items" and not item.get("owned")
+        ]
+        if not items:
+            await update.message.reply_text("🎁 У этого пользователя уже есть все доступные украшения.", reply_markup=activities_keyboard)
+            clear_modes(context)
+            return
+        rows = []
+        for item in items:
+            locked = " 🔒Premium" if item.get("locked") else ""
+            rows.append([
+                InlineKeyboardButton(
+                    f"{item.get('name')} — {int(item.get('price') or 0):,} RC{locked}".replace(",", " "),
+                    callback_data=f"gift_buy:{item.get('id')}",
+                )
+            ])
+        rows.append([InlineKeyboardButton("❌ Отмена", callback_data="gift_cancel")])
+        await update.message.reply_text(
+            "🎁 Выберите украшение для подарка:",
+            reply_markup=InlineKeyboardMarkup(rows),
+        )
+    except Exception:
+        logging.exception("Ошибка списка подарков")
+        clear_modes(context)
+        await update.message.reply_text("❌ Подарки недоступны.", reply_markup=activities_keyboard)
+
+
+async def handle_gift_buy(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    query = update.callback_query
+    if not query:
+        return
+    item_id = query.data.split(":", 1)[1]
+    target_id = context.user_data.get("gift_target_id")
+    if not target_id:
+        await query.answer("Сначала выберите получателя.", show_alert=True)
+        return
+    try:
+        response, data = await api_post(
+            "/gift/buy",
+            {"fromUserId": query.from_user.id, "toUserId": target_id, "itemId": item_id},
+        )
+        if response.status_code != 200 or not data.get("ok"):
+            code = data.get("code")
+            messages = {
+                "already_owned": "У получателя уже есть это украшение.",
+                "recipient_premium_required": "Это украшение можно подарить только пользователю с Premium.",
+                "insufficient_funds": "Не хватает Random Coins.",
+                "expired": "Это ограниченное украшение уже недоступно.",
+            }
+            await query.answer(messages.get(code, "❌ Не удалось купить подарок."), show_alert=True)
+            return
+        item = data.get("item") or {}
+        balance = int(data.get("balance") or 0)
+        clear_modes(context)
+        await query.answer("🎁 Подарок отправлен!", show_alert=True)
+        await query.edit_message_text(
+            f"✅ Подарено: {item.get('name')}\n🪙 Остаток: {balance:,} RC".replace(",", " ")
+        )
+        try:
+            await context.bot.send_message(
+                chat_id=target_id,
+                text=f"🎁 Вам подарили украшение: {item.get('name')}!",
+            )
+        except Exception:
+            pass
+    except Exception:
+        logging.exception("Ошибка покупки подарка")
+        await query.answer("❌ Подарки недоступны.", show_alert=True)
+
+
+async def handle_gift_cancel(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    query = update.callback_query
+    if query:
+        clear_modes(context)
+        await query.answer("Отменено")
+        await query.edit_message_text("❌ Подарок отменён.")
+
+
+async def promo_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    clear_modes(context)
+    context.user_data["promo_waiting"] = True
+    await update.message.reply_text(
+        "🎟 Введите промокод:",
+        reply_markup=cancel_keyboard,
+    )
+
+
+async def promo_redeem(update: Update, context: ContextTypes.DEFAULT_TYPE, text: str):
+    code = text.strip().upper()
+    try:
+        response, data = await api_post(
+            "/promo/redeem",
+            {"userId": update.effective_user.id, "code": code},
+        )
+        clear_modes(context)
+        if response.status_code != 200 or not data.get("ok"):
+            messages = {
+                "promo_not_found": "❌ Промокод не найден.",
+                "promo_used": "ℹ️ Вы уже использовали этот промокод.",
+                "promo_limit": "❌ Лимит активаций промокода закончился.",
+            }
+            await update.message.reply_text(messages.get(data.get("code"), "❌ Промокод не сработал."), reply_markup=activities_keyboard)
+            return
+        reward = data.get("reward") or {}
+        parts = ["✅ Промокод активирован!"]
+        if reward.get("amount"):
+            parts.append(f"🪙 +{int(reward['amount']):,} RC".replace(",", " "))
+        if reward.get("item"):
+            parts.append(f"🎁 {reward['item'].get('name')}")
+        await update.message.reply_text("\n".join(parts), reply_markup=activities_keyboard)
+    except Exception:
+        logging.exception("Ошибка промокода")
+        clear_modes(context)
+        await update.message.reply_text("❌ Промокоды недоступны.", reply_markup=activities_keyboard)
+
+
+async def admin_promo_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if update.effective_user.id != ADMIN_ID:
+        return
+    clear_modes(context)
+    context.user_data["admin_promo_waiting"] = True
+    await update.message.reply_text(
+        "🎟 Создание промокода\n\n"
+        "Для коинов: CODE 1000 50\n"
+        "Для украшения: CODE item:crown 50\n\n"
+        "Последнее число — максимум активаций.",
+        reply_markup=cancel_keyboard,
+    )
+
+
+async def admin_promo_create(update: Update, context: ContextTypes.DEFAULT_TYPE, text: str):
+    parts = text.strip().split()
+    if len(parts) < 2:
+        await update.message.reply_text("❌ Формат: CODE 1000 50 или CODE item:crown 50", reply_markup=cancel_keyboard)
+        return
+    code = parts[0].upper()
+    reward = parts[1]
+    max_uses = int(parts[2]) if len(parts) > 2 and parts[2].isdigit() else 100
+    payload = {"code": code, "maxUses": max_uses}
+    if reward.lower().startswith("item:"):
+        payload["itemId"] = reward.split(":", 1)[1]
+    elif reward.replace(" ", "").isdigit():
+        payload["amount"] = int(reward)
+    else:
+        await update.message.reply_text("❌ Награда должна быть числом или item:id.", reply_markup=cancel_keyboard)
+        return
+    try:
+        response, data = await api_post("/admin/promo", payload)
+        clear_modes(context)
+        if response.status_code != 200 or not data.get("ok"):
+            await update.message.reply_text("❌ Не удалось создать промокод.", reply_markup=get_main_keyboard(update.effective_user.id))
+            return
+        await update.message.reply_text(
+            f"✅ Промокод {code} создан. Лимит: {max_uses}.",
+            reply_markup=get_main_keyboard(update.effective_user.id),
+        )
+    except Exception:
+        logging.exception("Ошибка создания промокода")
+        clear_modes(context)
+        await update.message.reply_text("❌ Сервис промокодов недоступен.", reply_markup=get_main_keyboard(update.effective_user.id))
+
+
+async def top_menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    clear_modes(context)
+    keyboard = InlineKeyboardMarkup([
+        [
+            InlineKeyboardButton("⭐ Уровень", callback_data="top:level"),
+            InlineKeyboardButton("🪙 Коины", callback_data="top:coins"),
+        ],
+        [InlineKeyboardButton("✨ Коллекция", callback_data="top:collection")],
+    ])
+    await update.message.reply_text("🏆 Выберите рейтинг:", reply_markup=keyboard)
+
+
+async def handle_top(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    query = update.callback_query
+    if not query:
+        return
+    kind = query.data.split(":", 1)[1]
+    await query.answer()
+    try:
+        response, data = await api_post("/leaderboard", {"type": kind})
+        if response.status_code != 200 or not data.get("ok"):
+            await query.edit_message_text("❌ Рейтинг недоступен.")
+            return
+        labels = {"level": "⭐ По уровню", "coins": "🪙 По коинам", "collection": "✨ По коллекции"}
+        lines = [f"🏆 {labels.get(kind, 'Топ')}", ""]
+        for i, row in enumerate(data.get("rows") or [], 1):
+            who = f"@{row.get('username')}" if row.get("username") else (row.get("displayName") or f"ID {row.get('userId')}")
+            value = row.get("level") if kind == "level" else row.get("balance") if kind == "coins" else row.get("collection")
+            lines.append(f"{i}. {who} — {value}")
+        await query.edit_message_text("\n".join(lines))
+    except Exception:
+        logging.exception("Ошибка рейтинга")
+        await query.edit_message_text("❌ Рейтинг недоступен.")
+
+
+async def like_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    clear_modes(context)
+    context.user_data["like_stage"] = "choose"
+    await update.message.reply_text("❤️ Выберите профиль, которому поставить лайк.", reply_markup=like_user_keyboard)
+
+
+async def like_profile(update: Update, context: ContextTypes.DEFAULT_TYPE, target_id: int):
+    try:
+        response, data = await api_post(
+            "/like",
+            {"fromUserId": update.effective_user.id, "toUserId": target_id},
+        )
+        clear_modes(context)
+        if response.status_code != 200 or not data.get("ok"):
+            code = data.get("code")
+            msg = "Вы уже ставили лайк этому профилю." if code == "already_liked" else "Нельзя лайкнуть свой профиль." if code == "self_like" else "Не удалось поставить лайк."
+            await update.message.reply_text(f"❌ {msg}", reply_markup=activities_keyboard)
+            return
+        likes = int(data.get("likes") or 0)
+        await update.message.reply_text(f"❤️ Лайк поставлен! Теперь у профиля {likes} лайков.", reply_markup=activities_keyboard)
+        try:
+            await context.bot.send_message(chat_id=target_id, text="❤️ Ваш профиль получил новый лайк!")
+        except Exception:
+            pass
+    except Exception:
+        logging.exception("Ошибка лайка")
+        clear_modes(context)
+        await update.message.reply_text("❌ Лайки недоступны.", reply_markup=activities_keyboard)
+
+
+async def open_case(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    clear_modes(context)
+    try:
+        response, data = await api_post("/case/open", {"userId": update.effective_user.id})
+        if response.status_code != 200 or not data.get("ok"):
+            if data.get("code") == "insufficient_funds":
+                await update.message.reply_text(
+                    f"❌ Для кейса нужно 400 RC. Не хватает {int(data.get('missing') or 0):,} RC".replace(",", " "),
+                    reply_markup=activities_keyboard,
+                )
+            else:
+                await update.message.reply_text("❌ Кейс сейчас недоступен.", reply_markup=activities_keyboard)
+            return
+        reward = data.get("reward") or {}
+        if reward.get("type") == "item":
+            reward_text = f"🎁 Выпало украшение: {reward.get('item', {}).get('name')}"
+        else:
+            reward_text = f"🪙 Выпало {int(reward.get('amount') or 0):,} RC".replace(",", " ")
+        await update.message.reply_text(
+            f"🎁 Кейс открыт за 400 RC!\n{reward_text}\n👛 Баланс: {int(data.get('balance') or 0):,} RC".replace(",", " "),
+            reply_markup=activities_keyboard,
+        )
+    except Exception:
+        logging.exception("Ошибка кейса")
+        await update.message.reply_text("❌ Кейс недоступен.", reply_markup=activities_keyboard)
+
+
 def parse_spooky_price_request(text: str):
     match = re.search(r"/an\d{3}", text.lower())
     if not match:
