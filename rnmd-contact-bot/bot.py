@@ -2543,6 +2543,290 @@ async def admin_promo_create(update: Update, context: ContextTypes.DEFAULT_TYPE,
         await update.message.reply_text("❌ Сервис промокодов недоступен.", reply_markup=get_main_keyboard(update.effective_user.id))
 
 
+async def admin_stats(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if update.effective_user.id != ADMIN_ID:
+        return
+    clear_modes(context)
+    try:
+        response, data = await api_post("/admin/stats", {})
+        if response.status_code != 200 or not data.get("ok"):
+            raise RuntimeError("stats")
+        event = data.get("activeEvent")
+        lines = [
+            "📊 Статистика бота",
+            "",
+            f"👥 Пользователей: {int(data.get('users') or 0)}",
+            f"🪙 Коинов в кошельках: {int(data.get('totalCoins') or 0):,}".replace(",", " "),
+            f"🏦 Коинов в банке: {int(data.get('bankCoins') or 0):,}".replace(",", " "),
+            f"🛍 Всего предметов у пользователей: {int(data.get('purchases') or 0)}",
+            f"🎟 Промокодов: {int(data.get('promos') or 0)}",
+            f"✨ Кастомных предметов: {int(data.get('customItems') or 0)}",
+            f"🎉 Ивент: {event.get('name') if event else 'нет'}",
+        ]
+        await update.message.reply_text("\n".join(lines), reply_markup=admin_panel_keyboard)
+    except Exception:
+        logging.exception("Ошибка админ статистики")
+        await update.message.reply_text("❌ Статистика недоступна.", reply_markup=admin_panel_keyboard)
+
+
+async def admin_log_show(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if update.effective_user.id != ADMIN_ID:
+        return
+    clear_modes(context)
+    try:
+        response, data = await api_post("/admin/log", {})
+        rows = data.get("rows") or []
+        lines = ["🧾 История админ-действий", ""]
+        if not rows:
+            lines.append("История пока пустая.")
+        for row in rows[:30]:
+            extra = ""
+            if row.get("userId"):
+                extra += f" · ID {row.get('userId')}"
+            if row.get("amount") is not None:
+                extra += f" · {row.get('amount')} RC"
+            if row.get("itemId"):
+                extra += f" · {row.get('itemId')}"
+            lines.append(f"• {row.get('action')}{extra}")
+        await update.message.reply_text("\n".join(lines), reply_markup=admin_panel_keyboard)
+    except Exception:
+        logging.exception("Ошибка админ лога")
+        await update.message.reply_text("❌ История недоступна.", reply_markup=admin_panel_keyboard)
+
+
+async def admin_shop_edit_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if update.effective_user.id != ADMIN_ID:
+        return
+    clear_modes(context)
+    context.user_data["admin_shop_edit_waiting"] = True
+
+    items_text = ""
+    try:
+        response, data = await api_post("/admin/shop/list", {})
+        items = data.get("items") or []
+        if items:
+            rows = ["", "", "Кастомные предметы:"]
+            for item in items[:25]:
+                rows.append(
+                    f"• {item.get('id')} — {item.get('name')} — "
+                    f"{int(item.get('price') or 0)} RC — "
+                    f"{'hidden' if item.get('hidden') else 'show'} — "
+                    f"{item.get('rarity') or 'exclusive'}"
+                )
+            items_text = "\n".join(rows)
+    except Exception:
+        pass
+
+    await update.message.reply_text(
+        "🧰 Редактор магазина\n\n"
+        "Изменить: ID | цена | show/hidden | rarity\n"
+        "Удалить: ID | delete\n\n"
+        "Пример: ex_abc123 | 2500 | hidden | legendary"
+        + items_text,
+        reply_markup=cancel_keyboard,
+    )
+
+
+async def admin_shop_edit_apply(update: Update, context: ContextTypes.DEFAULT_TYPE, text: str):
+    parts = [x.strip() for x in text.split("|")]
+    if len(parts) < 2:
+        await update.message.reply_text("❌ Формат: ID | цена | show/hidden | rarity или ID | delete", reply_markup=cancel_keyboard)
+        return
+    item_id = parts[0]
+    if parts[1].lower() == "delete":
+        payload = {"itemId": item_id, "delete": True}
+    else:
+        if not parts[1].replace(" ", "").isdigit():
+            await update.message.reply_text("❌ Цена должна быть числом.", reply_markup=cancel_keyboard)
+            return
+        payload = {"itemId": item_id, "price": int(parts[1].replace(" ", ""))}
+        if len(parts) > 2 and parts[2]:
+            payload["hidden"] = parts[2].lower() in {"hidden", "hide", "скрыто"}
+        if len(parts) > 3 and parts[3]:
+            payload["rarity"] = parts[3].lower()
+    try:
+        response, data = await api_post("/admin/shop/edit", payload)
+        clear_modes(context)
+        if response.status_code != 200 or not data.get("ok"):
+            await update.message.reply_text("❌ Предмет не найден или изменить его нельзя.", reply_markup=admin_panel_keyboard)
+            return
+        await update.message.reply_text(
+            "✅ Предмет удалён." if data.get("deleted") else "✅ Предмет магазина обновлён.",
+            reply_markup=admin_panel_keyboard,
+        )
+    except Exception:
+        logging.exception("Ошибка редактора магазина")
+        clear_modes(context)
+        await update.message.reply_text("❌ Редактор магазина недоступен.", reply_markup=admin_panel_keyboard)
+
+
+async def admin_economy_block_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if update.effective_user.id != ADMIN_ID:
+        return
+    clear_modes(context)
+    context.user_data["admin_economy_stage"] = "choose"
+    await update.message.reply_text(
+        "🚫 Выберите пользователя. Повторное нажатие снимает блокировку переводов и подарков.",
+        reply_markup=admin_economy_user_keyboard,
+    )
+
+
+async def admin_toggle_economy_block(update: Update, context: ContextTypes.DEFAULT_TYPE, target_id: int):
+    try:
+        response, data = await api_post("/admin/economy-block", {"userId": target_id})
+        clear_modes(context)
+        if response.status_code != 200 or not data.get("ok"):
+            raise RuntimeError("block")
+        await update.message.reply_text(
+            f"{'🚫 Экономика заблокирована' if data.get('enabled') else '✅ Блокировка экономики снята'} для ID {target_id}.",
+            reply_markup=admin_panel_keyboard,
+        )
+    except Exception:
+        logging.exception("Ошибка блокировки экономики")
+        clear_modes(context)
+        await update.message.reply_text("❌ Не удалось изменить блокировку.", reply_markup=admin_panel_keyboard)
+
+
+async def admin_random_daily_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if update.effective_user.id != ADMIN_ID:
+        return
+    clear_modes(context)
+    context.user_data["admin_random_daily_waiting"] = True
+    await update.message.reply_text(
+        "🎲 Случайная ежедневка\n\n"
+        "Формат: on | награда:шанс,награда:шанс\n"
+        "Пример: on | 100:50,500:20,1000:5\n"
+        "Это означает +100 RC с шансом 50%, +500 с шансом 20%, +1000 с шансом 5%.\n"
+        "Чтобы выключить: off",
+        reply_markup=cancel_keyboard,
+    )
+
+
+async def admin_random_daily_set(update: Update, context: ContextTypes.DEFAULT_TYPE, text: str):
+    raw = text.strip().lower()
+    if raw == "off":
+        payload = {"enabled": False, "rewards": []}
+    else:
+        parts = [x.strip() for x in text.split("|")]
+        if len(parts) < 2 or parts[0].lower() != "on":
+            await update.message.reply_text("❌ Пример: on | 100:50,500:20,1000:5", reply_markup=cancel_keyboard)
+            return
+        rewards = []
+        total = 0.0
+        try:
+            for pair in parts[1].split(","):
+                coins_s, chance_s = [x.strip() for x in pair.split(":", 1)]
+                coins = int(coins_s)
+                chance = float(chance_s.replace(",", "."))
+                if coins < 0 or chance <= 0:
+                    raise ValueError
+                rewards.append({"coins": coins, "chance": chance})
+                total += chance
+        except Exception:
+            await update.message.reply_text("❌ Неверный список. Формат: 100:50,500:20", reply_markup=cancel_keyboard)
+            return
+        if total > 100:
+            await update.message.reply_text("❌ Сумма всех шансов не может быть больше 100%.", reply_markup=cancel_keyboard)
+            return
+        payload = {"enabled": True, "rewards": rewards}
+
+    try:
+        response, data = await api_post("/admin/random-daily", payload)
+        clear_modes(context)
+        if response.status_code != 200 or not data.get("ok"):
+            raise RuntimeError("random daily")
+        await update.message.reply_text(
+            f"✅ Случайная ежедневка: {'включена' if data.get('randomDaily', {}).get('enabled') else 'выключена'}.",
+            reply_markup=admin_panel_keyboard,
+        )
+    except Exception:
+        clear_modes(context)
+        await update.message.reply_text("❌ Не удалось сохранить настройки.", reply_markup=admin_panel_keyboard)
+
+
+async def admin_bundle_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if update.effective_user.id != ADMIN_ID:
+        return
+    clear_modes(context)
+    context.user_data["admin_bundle_waiting"] = True
+    await update.message.reply_text(
+        "📦 Создание набора\n\n"
+        "Формат: Название | цена | item1,item2,item3\n"
+        "Пример: Sakura Pack | 3000 | crown,sakura_badge,bg_sakura",
+        reply_markup=cancel_keyboard,
+    )
+
+
+async def admin_bundle_create(update: Update, context: ContextTypes.DEFAULT_TYPE, text: str):
+    parts = [x.strip() for x in text.split("|")]
+    if len(parts) < 3 or not parts[1].replace(" ", "").isdigit():
+        await update.message.reply_text("❌ Формат: Название | цена | item1,item2", reply_markup=cancel_keyboard)
+        return
+    payload = {
+        "name": parts[0],
+        "price": int(parts[1].replace(" ", "")),
+        "items": [x.strip() for x in parts[2].split(",") if x.strip()],
+    }
+    try:
+        response, data = await api_post("/admin/bundle", payload)
+        clear_modes(context)
+        if response.status_code != 200 or not data.get("ok"):
+            await update.message.reply_text("❌ Проверь ID предметов.", reply_markup=admin_panel_keyboard)
+            return
+        bundle = data.get("bundle") or {}
+        await update.message.reply_text(
+            f"✅ Набор создан: {bundle.get('name')}\n🆔 {bundle.get('id')}\n🪙 {int(bundle.get('price') or 0)} RC",
+            reply_markup=admin_panel_keyboard,
+        )
+    except Exception:
+        clear_modes(context)
+        await update.message.reply_text("❌ Не удалось создать набор.", reply_markup=admin_panel_keyboard)
+
+
+async def admin_event_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if update.effective_user.id != ADMIN_ID:
+        return
+    clear_modes(context)
+    context.user_data["admin_event_waiting"] = True
+    await update.message.reply_text(
+        "🎉 Настройка ивента\n\n"
+        "Включить: on | Название | дней | бонус_к_ежедневке\n"
+        "Пример: on | Sakura Week | 7 | 250\n"
+        "Выключить: off",
+        reply_markup=cancel_keyboard,
+    )
+
+
+async def admin_event_set(update: Update, context: ContextTypes.DEFAULT_TYPE, text: str):
+    raw = text.strip()
+    if raw.lower() == "off":
+        payload = {"active": False}
+    else:
+        parts = [x.strip() for x in raw.split("|")]
+        if len(parts) < 4 or parts[0].lower() != "on" or not parts[2].isdigit() or not parts[3].replace(" ", "").isdigit():
+            await update.message.reply_text("❌ Пример: on | Sakura Week | 7 | 250", reply_markup=cancel_keyboard)
+            return
+        payload = {
+            "active": True,
+            "name": parts[1],
+            "days": int(parts[2]),
+            "dailyBonus": int(parts[3].replace(" ", "")),
+        }
+    try:
+        response, data = await api_post("/admin/event", payload)
+        clear_modes(context)
+        if response.status_code != 200 or not data.get("ok"):
+            raise RuntimeError("event")
+        event = data.get("event") or {}
+        await update.message.reply_text(
+            f"✅ Ивент {'включён: ' + str(event.get('name')) if event.get('active') else 'выключен'}.",
+            reply_markup=admin_panel_keyboard,
+        )
+    except Exception:
+        clear_modes(context)
+        await update.message.reply_text("❌ Не удалось изменить ивент.", reply_markup=admin_panel_keyboard)
+
+
 async def admin_daily_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if update.effective_user.id != ADMIN_ID:
         return
