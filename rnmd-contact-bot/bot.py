@@ -425,6 +425,10 @@ async def show_wallet(update: Update, context: ContextTypes.DEFAULT_TYPE):
             "diamond_badge": "💎 Алмазный значок",
             "sakura_badge": "🌸 Sakura-значок",
             "trophy": "🏆 Трофей",
+            "premium_gold_frame": "👑 Premium-рамка",
+            "premium_star": "🌟 Premium-звезда",
+            "autumn_frame": "🍂 Осенняя рамка",
+            "pumpkin_badge": "🎃 Тыквенный значок",
         }
         purchase_names = [
             purchase_labels[item_id]
@@ -468,7 +472,9 @@ def shop_item_button(item):
         text = f"✅ {name} — куплено"
         callback = "shop_owned"
     else:
-        text = f"Купить {name} — {price:,} RC".replace(",", " ")
+        lock = " 🔒Premium" if item.get("locked") else ""
+        limited = " ⏳" if item.get("availableUntil") else ""
+        text = f"Купить {name} — {price:,} RC{lock}{limited}".replace(",", " ")
         callback = f"shop_buy:{item_id}"
 
     return InlineKeyboardButton(text, callback_data=callback)
@@ -602,6 +608,10 @@ def profile_display_name(user, data):
         suffixes.append("💎")
     if "sakura_badge" in equipped:
         suffixes.append("🌸")
+    if "premium_star" in equipped:
+        suffixes.append("🌟")
+    if "pumpkin_badge" in equipped:
+        suffixes.append("🎃")
     if "trophy" in equipped:
         suffixes.append("🏆")
     if "random_item" in equipped:
@@ -614,7 +624,11 @@ def profile_display_name(user, data):
     if title:
         name += f" · [{title}]"
 
-    if "profile_frame" in equipped:
+    if "premium_gold_frame" in equipped:
+        name = f"╔══ 👑 PREMIUM 👑 ══╗\n{name}\n╚══════════════════╝"
+    elif "autumn_frame" in equipped:
+        name = f"╔══ 🍂 ══╗\n{name}\n╚══ 🍂 ══╝"
+    elif "profile_frame" in equipped:
         name = f"╔══ ✦ ══╗\n{name}\n╚══ ✦ ══╝"
 
     return name
@@ -1241,6 +1255,10 @@ async def handle_shop_buy(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
             if code == "already_owned":
                 await query.answer("✅ Этот товар уже куплен.", show_alert=True)
+            elif code == "premium_required":
+                await query.answer("🔒 Это украшение доступно только с Premium.", show_alert=True)
+            elif code == "expired":
+                await query.answer("⏳ Это ограниченное украшение уже недоступно.", show_alert=True)
             else:
                 await query.answer(
                     "❌ Не удалось выполнить покупку.",
@@ -3048,7 +3066,7 @@ def main():
     app.add_handler(CallbackQueryHandler(handle_dnd_callback, pattern="^dnd_(15|30|60|90)$"))
     app.add_handler(CallbackQueryHandler(handle_admin_anon_ban_callback, pattern="^admin_anon_ban_(15|20|25|30|60)$"))
     app.add_handler(CallbackQueryHandler(handle_report_ban_callback, pattern=r"^report:ban:-?\d+:(15|20|25|30|60)$"))
-    app.add_handler(CallbackQueryHandler(handle_shop_buy, pattern=r"^shop_buy:(plus|premium|name_color|crown|star_badge|profile_frame|message_style|random_item|rnmd_badge|diamond_badge|sakura_badge|trophy)$"))
+    app.add_handler(CallbackQueryHandler(handle_shop_buy, pattern=r"^shop_buy:(plus|premium|name_color|crown|star_badge|profile_frame|message_style|random_item|rnmd_badge|diamond_badge|sakura_badge|trophy|premium_gold_frame|premium_star|autumn_frame|pumpkin_badge)$"))
     app.add_handler(CallbackQueryHandler(handle_shop_items, pattern=r"^shop_items$"))
     app.add_handler(CallbackQueryHandler(handle_shop_back, pattern=r"^shop_back$"))
     app.add_handler(CallbackQueryHandler(handle_shop_owned, pattern=r"^shop_owned$"))
@@ -3057,6 +3075,13 @@ def main():
     app.add_handler(CallbackQueryHandler(handle_profile_color_set, pattern=r"^profile_color:(green|white|gray|black|red|purple|pink|dark_green|light_blue|blue)$"))
     app.add_handler(CallbackQueryHandler(handle_profile_toggle, pattern=r"^profile_toggle:[a-z_]+$"))
     app.add_handler(CallbackQueryHandler(handle_profile_back, pattern=r"^profile_back$"))
+    app.add_handler(CallbackQueryHandler(handle_profile_titles, pattern=r"^profile_titles$"))
+    app.add_handler(CallbackQueryHandler(handle_profile_title_set, pattern=r"^profile_title:[a-z_]+$"))
+    app.add_handler(CallbackQueryHandler(handle_profile_favorite, pattern=r"^profile_favorite$"))
+    app.add_handler(CallbackQueryHandler(handle_profile_favorite_set, pattern=r"^profile_fav:[a-z_]+$"))
+    app.add_handler(CallbackQueryHandler(handle_gift_buy, pattern=r"^gift_buy:[a-z_]+$"))
+    app.add_handler(CallbackQueryHandler(handle_gift_cancel, pattern=r"^gift_cancel$"))
+    app.add_handler(CallbackQueryHandler(handle_top, pattern=r"^top:(level|coins|collection)$"))
 
     app.add_handler(
         MessageHandler(
