@@ -255,6 +255,34 @@ app.post('/buy',(req,res)=>{
   });
 });
 
+app.post('/admin/coins',(req,res)=>{
+  if(!shopAuthorized(req))return res.status(401).json({ok:false,error:'unauthorized'});
+
+  const userId=String(req.body?.userId??'').trim();
+  const amount=Math.round(Number(req.body?.amount));
+
+  if(!/^-?\d{1,20}$/.test(userId)){
+    return res.status(400).json({ok:false,error:'invalid user id'});
+  }
+
+  if(!Number.isFinite(amount)||amount<1||amount>1000000000){
+    return res.status(400).json({ok:false,error:'invalid amount'});
+  }
+
+  const wallet=getWallet(userId);
+  const before=Number(wallet.balance||0);
+  wallet.balance=before+amount;
+  save();
+
+  res.json({
+    ok:true,
+    userId,
+    amount,
+    before,
+    balance:wallet.balance
+  });
+});
+
 app.post('/submit',(req,res)=>{
   const collector=String(req.body?.collector||'').trim().slice(0,80),
         auction=an(req.body?.auction),
