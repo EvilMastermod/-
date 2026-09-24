@@ -4,8 +4,19 @@ const app=express(); app.use(express.json({limit:'512kb'}));
 const PORT=Number(process.env.PORT||3000), DIR=process.env.DATA_DIR||'/data';
 const SHOP_API_KEY=String(process.env.SHOP_API_KEY||'');
 const SHOP=Object.freeze({
-  plus:{id:'plus',name:'Plus',price:1000},
-  premium:{id:'premium',name:'Premium',price:5000}
+  plus:{id:'plus',name:'Plus',price:1000,category:'main'},
+  premium:{id:'premium',name:'Premium',price:5000,category:'main'},
+
+  name_color:{id:'name_color',name:'🎨 Цвет ника',price:500,category:'items'},
+  crown:{id:'crown',name:'👑 Корона возле имени',price:1500,category:'items'},
+  star_badge:{id:'star_badge',name:'⭐ Значок возле ника',price:800,category:'items'},
+  profile_frame:{id:'profile_frame',name:'🖼 Рамка профиля',price:1000,category:'items'},
+  message_style:{id:'message_style',name:'💬 Особый стиль сообщений',price:700,category:'items'},
+  random_item:{id:'random_item',name:'🎁 Случайный предмет',price:300,category:'items'},
+  rnmd_badge:{id:'rnmd_badge',name:'🔥 Редкий значок RNMD',price:2000,category:'items'},
+  diamond_badge:{id:'diamond_badge',name:'💎 Алмазный значок',price:2500,category:'items'},
+  sakura_badge:{id:'sakura_badge',name:'🌸 Sakura-значок',price:1200,category:'items'},
+  trophy:{id:'trophy',name:'🏆 Коллекционный трофей',price:3000,category:'items'}
 });
 const FILE=path.join(DIR,'spooky-prices.json');
 const FRESH=Number(process.env.PRICE_FRESH_MS||7200000), RETAIN=Number(process.env.PRICE_RETAIN_MS||259200000);
