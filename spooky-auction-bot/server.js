@@ -758,7 +758,7 @@ app.post('/case/open',(req,res)=>{
   if(!/^-?\d{1,20}$/.test(userId))return res.status(400).json({ok:false,error:'invalid user id'});
   const wallet=getWallet(userId);
   if(Number(wallet.balance||0)<CASE_COST)return res.status(400).json({ok:false,code:'insufficient_funds',missing:CASE_COST-Number(wallet.balance||0)});
-  wallet.balance-=CASE_COST;wallet.stats.spent+=CASE_COST;wallet.stats.casesOpened+=1;addXp(wallet,10);
+  wallet.balance-=CASE_COST;addHistory(wallet,'case',-CASE_COST);wallet.stats.spent+=CASE_COST;wallet.stats.casesOpened+=1;addXp(wallet,10);
   const available=allShopItems().filter(item=>item.category==='items'&&isItemAvailable(item)&&!item.premiumOnly&&!item.dailyOnly&&!item.hidden&&!wallet.purchases?.[item.id]);
   let reward;
   if(available.length&&Math.random()<0.25){
@@ -768,7 +768,7 @@ app.post('/case/open',(req,res)=>{
     reward={type:'item',item};
   }else{
     const amount=[150,200,250,300,500,750,1000][Math.floor(Math.random()*7)];
-    wallet.balance+=amount;wallet.stats.received+=amount;
+    wallet.balance+=amount;wallet.stats.received+=amount;addHistory(wallet,'case_reward',amount);
     reward={type:'coins',amount};
   }
   save();
@@ -824,6 +824,7 @@ app.post('/admin/daily',(req,res)=>{
 
   const daily={coins,itemId,streakBonus,surprise};
   db.settings.dailySchedule[String(day)]=daily;
+  logAdmin('daily_set',{day,coins,itemId,surprise});
   save();
   res.json({ok:true,day,daily,item:itemId?getShopItem(itemId):null});
 });
@@ -863,6 +864,7 @@ app.post('/admin/promo/delete',(req,res)=>{
   const code=String(req.body?.code||'').trim().toUpperCase().replace(/\s+/g,'');
   if(!db.promocodes?.[code])return res.status(404).json({ok:false,code:'promo_not_found'});
   delete db.promocodes[code];
+  logAdmin('promo_delete',{code});
   save();
   res.json({ok:true,code});
 });
@@ -903,6 +905,7 @@ app.post('/admin/exclusive',(req,res)=>{
   if(days>0)item.availableUntil=new Date(Date.now()+days*86400000).toISOString();
 
   db.customShop[id]=item;
+  logAdmin('exclusive_create',{itemId:id,name:item.name,price:item.price});
   save();
   res.json({ok:true,item});
 });
@@ -918,6 +921,7 @@ app.post('/admin/promo',(req,res)=>{
   if(!amount&&!promoItem)return res.status(400).json({ok:false,error:'reward required'});
   if(promoItem?.dailyOnly)return res.status(400).json({ok:false,code:'daily_only_item',error:'daily-only item cannot be used in promo'});
   db.promocodes[code]={code,amount,itemId:promoItem?itemId:null,maxUses,usedBy:{},createdAt:Date.now()};
+  logAdmin('promo_create',{code,amount,itemId:promoItem?itemId:null,maxUses});
   save();
   res.json({ok:true,promo:db.promocodes[code]});
 });
@@ -933,7 +937,7 @@ app.post('/promo/redeem',(req,res)=>{
   const wallet=getWallet(userId);
   let reward={};
   if(promo.amount){
-    wallet.balance=Number(wallet.balance||0)+promo.amount;wallet.stats.received+=promo.amount;
+    wallet.balance=Number(wallet.balance||0)+promo.amount;wallet.stats.received+=promo.amount;addHistory(wallet,'promo',promo.amount,{code});
     reward.amount=promo.amount;
   }
   if(promo.itemId&&getShopItem(promo.itemId)&&!wallet.purchases?.[promo.itemId]){
