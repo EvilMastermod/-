@@ -3,6 +3,7 @@ import re
 import logging
 import time
 import httpx
+from types import SimpleNamespace
 from urllib.parse import quote
 from telegram import (
     Update,
@@ -53,6 +54,7 @@ SPOOKY_PRICE_BUTTON = "💰 Средняя цена"
 WALLET_BUTTON = "👛 Кошелёк"
 SHOP_BUTTON = "🛒 Магазин"
 PROFILE_BUTTON = "👤 Профиль"
+OTHER_PROFILE_BUTTON = "👥 Профиль другого"
 ACTIVITIES_BUTTON = "🎮 Активности"
 DAILY_BUTTON = "🎁 Ежедневная награда"
 INVENTORY_BUTTON = "🧰 Инвентарь"
@@ -91,7 +93,7 @@ user_main_keyboard = ReplyKeyboardMarkup(
         [KeyboardButton(DND_BUTTON), KeyboardButton(DND_OFF_BUTTON)],
         [KeyboardButton(MINECRAFT_BUTTON), KeyboardButton(WALLET_BUTTON)],
         [KeyboardButton(SHOP_BUTTON), KeyboardButton(PROFILE_BUTTON)],
-        [KeyboardButton(ACTIVITIES_BUTTON)],
+        [KeyboardButton(OTHER_PROFILE_BUTTON), KeyboardButton(ACTIVITIES_BUTTON)],
     ],
     resize_keyboard=True,
 )
@@ -102,7 +104,7 @@ admin_main_keyboard = ReplyKeyboardMarkup(
         [KeyboardButton(DND_BUTTON), KeyboardButton(DND_OFF_BUTTON)],
         [KeyboardButton(MINECRAFT_BUTTON), KeyboardButton(WALLET_BUTTON)],
         [KeyboardButton(SHOP_BUTTON), KeyboardButton(PROFILE_BUTTON)],
-        [KeyboardButton(ACTIVITIES_BUTTON)],
+        [KeyboardButton(OTHER_PROFILE_BUTTON), KeyboardButton(ACTIVITIES_BUTTON)],
         [KeyboardButton(ADMIN_PANEL_BUTTON)],
     ],
     resize_keyboard=True,
@@ -131,6 +133,20 @@ activities_keyboard = ReplyKeyboardMarkup(
         [KeyboardButton(LIKE_BUTTON), KeyboardButton(CASE_BUTTON)],
         [KeyboardButton(BACK_BUTTON)],
     ],
+    resize_keyboard=True,
+)
+
+other_profile_keyboard = ReplyKeyboardMarkup(
+    [[KeyboardButton(
+        "👤 Выбрать профиль пользователя",
+        request_users=KeyboardButtonRequestUsers(
+            request_id=786,
+            user_is_bot=False,
+            max_quantity=1,
+            request_name=True,
+            request_username=True,
+        ),
+    )], [KeyboardButton(CANCEL_BUTTON)]],
     resize_keyboard=True,
 )
 
@@ -377,6 +393,7 @@ def clear_modes(context: ContextTypes.DEFAULT_TYPE):
     context.user_data.pop("gift_stage", None)
     context.user_data.pop("gift_target_id", None)
     context.user_data.pop("like_stage", None)
+    context.user_data.pop("other_profile_stage", None)
     context.user_data.pop("promo_waiting", None)
     context.user_data.pop("admin_promo_waiting", None)
     context.user_data.pop("admin_daily_waiting", None)
@@ -1020,6 +1037,51 @@ async def handle_profile_favorite_set(update: Update, context: ContextTypes.DEFA
     except Exception:
         logging.exception("Ошибка выбора избранного")
         await query.answer("❌ Не удалось выбрать.", show_alert=True)
+
+
+async def other_profile_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    clear_modes(context)
+    context.user_data["other_profile_stage"] = "choose"
+    await update.message.reply_text(
+        "👥 Выберите пользователя, чей профиль хотите посмотреть.",
+        reply_markup=other_profile_keyboard,
+    )
+
+
+async def show_other_profile(update: Update, context: ContextTypes.DEFAULT_TYPE, shared_user):
+    clear_modes(context)
+
+    target_id = shared_user.user_id
+    first_name = shared_user.first_name or "Пользователь"
+    last_name = shared_user.last_name or ""
+    full_name = (first_name + (" " + last_name if last_name else "")).strip()
+    username = shared_user.username or None
+
+    user_view = SimpleNamespace(
+        id=target_id,
+        full_name=full_name,
+        username=username,
+    )
+
+    try:
+        response, data = await fetch_profile(target_id)
+        if response.status_code != 200 or not data.get("ok"):
+            await update.message.reply_text(
+                "❌ Не удалось открыть профиль пользователя.",
+                reply_markup=get_main_keyboard(update.effective_user.id),
+            )
+            return
+
+        await update.message.reply_text(
+            "👥 Профиль другого пользователя\n\n" + profile_text(user_view, data),
+            reply_markup=get_main_keyboard(update.effective_user.id),
+        )
+    except Exception:
+        logging.exception("Ошибка просмотра чужого профиля")
+        await update.message.reply_text(
+            "❌ Профиль пользователя сейчас недоступен.",
+            reply_markup=get_main_keyboard(update.effective_user.id),
+        )
 
 
 async def show_profile(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -2892,6 +2954,16 @@ async def handle_users_shared(update: Update, context: ContextTypes.DEFAULT_TYPE
 
     shared = update.message.users_shared.users
 
+    if context.user_data.get("other_profile_stage") == "choose":
+        if not shared:
+            await update.message.reply_text(
+                "❌ Пользователь не выбран.",
+                reply_markup=other_profile_keyboard,
+            )
+            return
+        await show_other_profile(update, context, shared[0])
+        return
+
     if context.user_data.get("admin_dnd_stage"):
         if update.effective_user.id != ADMIN_ID:
             clear_modes(context)
@@ -3325,6 +3397,10 @@ async def handle_user_message(update: Update, context: ContextTypes.DEFAULT_TYPE
 
     if text == PROFILE_BUTTON:
         await show_profile(update, context)
+        return
+
+    if text == OTHER_PROFILE_BUTTON:
+        await other_profile_start(update, context)
         return
 
     if text == ACTIVITIES_BUTTON:
