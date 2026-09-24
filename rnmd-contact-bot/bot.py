@@ -334,11 +334,25 @@ async def show_wallet(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
         balance = int(data.get("balance") or 0)
         purchases = data.get("purchases") or []
-        purchase_names = []
-        if "plus" in purchases:
-            purchase_names.append("Plus")
-        if "premium" in purchases:
-            purchase_names.append("Premium")
+        purchase_labels = {
+            "plus": "Plus",
+            "premium": "Premium",
+            "name_color": "🎨 Цвет ника",
+            "crown": "👑 Корона",
+            "star_badge": "⭐ Значок",
+            "profile_frame": "🖼 Рамка профиля",
+            "message_style": "💬 Стиль сообщений",
+            "random_item": "🎁 Случайный предмет",
+            "rnmd_badge": "🔥 RNMD",
+            "diamond_badge": "💎 Алмазный значок",
+            "sakura_badge": "🌸 Sakura-значок",
+            "trophy": "🏆 Трофей",
+        }
+        purchase_names = [
+            purchase_labels[item_id]
+            for item_id in purchases
+            if item_id in purchase_labels
+        ]
 
         purchases_text = ""
         if purchase_names:
@@ -366,25 +380,38 @@ def shop_headers():
     return headers
 
 
+def shop_item_button(item):
+    item_id = item.get("id")
+    name = item.get("name")
+    price = int(item.get("price") or 0)
+    owned = bool(item.get("owned"))
+
+    if owned:
+        text = f"✅ {name} — куплено"
+        callback = "shop_owned"
+    else:
+        text = f"Купить {name} — {price:,} RC".replace(",", " ")
+        callback = f"shop_buy:{item_id}"
+
+    return InlineKeyboardButton(text, callback_data=callback)
+
+
 def shop_keyboard(items):
+    main_items = [item for item in items if item.get("category") == "main"]
     rows = [
         [InlineKeyboardButton("📦 Предметы", callback_data="shop_items")]
     ]
-    for item in items:
-        item_id = item.get("id")
-        name = item.get("name")
-        price = int(item.get("price") or 0)
-        owned = bool(item.get("owned"))
 
-        if owned:
-            text = f"✅ {name} — куплено"
-            callback = "shop_owned"
-        else:
-            text = f"Купить {name} — {price:,} RC".replace(",", " ")
-            callback = f"shop_buy:{item_id}"
+    for item in main_items:
+        rows.append([shop_item_button(item)])
 
-        rows.append([InlineKeyboardButton(text, callback_data=callback)])
+    return InlineKeyboardMarkup(rows)
 
+
+def shop_items_keyboard(items):
+    collectible_items = [item for item in items if item.get("category") == "items"]
+    rows = [[shop_item_button(item)] for item in collectible_items]
+    rows.append([InlineKeyboardButton("⬅️ Назад в магазин", callback_data="shop_back")])
     return InlineKeyboardMarkup(rows)
 
 
@@ -416,10 +443,39 @@ async def user_has_premium(user_id: int):
 
 def shop_text(data):
     balance = int(data.get("balance") or 0)
-    items = data.get("items") or []
+    items = [
+        item for item in (data.get("items") or [])
+        if item.get("category") == "main"
+    ]
 
     lines = [
         "🛒 Магазин",
+        "",
+        f"🪙 Баланс: {balance:,} Random Coins".replace(",", " "),
+        "",
+    ]
+
+    for item in items:
+        name = item.get("name")
+        price = int(item.get("price") or 0)
+        status = " ✅" if item.get("owned") else ""
+        lines.append(f"• {name} — {price:,} RC{status}".replace(",", " "))
+
+    lines.append("")
+    lines.append("📦 Нажми «Предметы», чтобы открыть виртуальные предметы.")
+
+    return "\n".join(lines)
+
+
+def shop_items_text(data):
+    balance = int(data.get("balance") or 0)
+    items = [
+        item for item in (data.get("items") or [])
+        if item.get("category") == "items"
+    ]
+
+    lines = [
+        "📦 Предметы",
         "",
         f"🪙 Баланс: {balance:,} Random Coins".replace(",", " "),
         "",
@@ -467,13 +523,19 @@ async def handle_shop_items(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     await query.answer()
 
-    await query.edit_message_text(
-        "📦 Предметы\n\n"
-        "Здесь будут игровые предметы, которые можно купить за Random Coins.",
-        reply_markup=InlineKeyboardMarkup(
-            [[InlineKeyboardButton("⬅️ Назад в магазин", callback_data="shop_back")]]
-        ),
-    )
+    try:
+        response, data = await fetch_shop(query.from_user.id)
+        if response.status_code != 200 or not data.get("ok"):
+            await query.answer("❌ Магазин сейчас недоступен.", show_alert=True)
+            return
+
+        await query.edit_message_text(
+            shop_items_text(data),
+            reply_markup=shop_items_keyboard(data.get("items") or []),
+        )
+    except Exception:
+        logging.exception("Не удалось открыть предметы")
+        await query.answer("❌ Предметы сейчас недоступны.", show_alert=True)
 
 
 async def handle_shop_back(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -554,10 +616,16 @@ async def handle_shop_buy(update: Update, context: ContextTypes.DEFAULT_TYPE):
         try:
             response2, shop_data = await fetch_shop(query.from_user.id)
             if response2.status_code == 200 and shop_data.get("ok"):
-                await query.edit_message_text(
-                    shop_text(shop_data),
-                    reply_markup=shop_keyboard(shop_data.get("items") or []),
-                )
+                if item.get("category") == "items":
+                    await query.edit_message_text(
+                        shop_items_text(shop_data),
+                        reply_markup=shop_items_keyboard(shop_data.get("items") or []),
+                    )
+                else:
+                    await query.edit_message_text(
+                        shop_text(shop_data),
+                        reply_markup=shop_keyboard(shop_data.get("items") or []),
+                    )
         except Exception:
             logging.exception("Не удалось обновить магазин после покупки")
 
@@ -1803,7 +1871,7 @@ def main():
     app.add_handler(CallbackQueryHandler(handle_dnd_callback, pattern="^dnd_(15|30|60|90)$"))
     app.add_handler(CallbackQueryHandler(handle_admin_anon_ban_callback, pattern="^admin_anon_ban_(15|20|25|30|60)$"))
     app.add_handler(CallbackQueryHandler(handle_report_ban_callback, pattern=r"^report:ban:-?\d+:(15|20|25|30|60)$"))
-    app.add_handler(CallbackQueryHandler(handle_shop_buy, pattern=r"^shop_buy:(plus|premium)$"))
+    app.add_handler(CallbackQueryHandler(handle_shop_buy, pattern=r"^shop_buy:(plus|premium|name_color|crown|star_badge|profile_frame|message_style|random_item|rnmd_badge|diamond_badge|sakura_badge|trophy)$"))
     app.add_handler(CallbackQueryHandler(handle_shop_items, pattern=r"^shop_items$"))
     app.add_handler(CallbackQueryHandler(handle_shop_back, pattern=r"^shop_back$"))
     app.add_handler(CallbackQueryHandler(handle_shop_owned, pattern=r"^shop_owned$"))
