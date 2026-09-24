@@ -72,6 +72,7 @@ function load(){
   if(!db.wallets||typeof db.wallets!=='object'||Array.isArray(db.wallets))db.wallets={};
   if(!db.promocodes||typeof db.promocodes!=='object'||Array.isArray(db.promocodes))db.promocodes={};
   if(!db.customShop||typeof db.customShop!=='object'||Array.isArray(db.customShop))db.customShop={};
+  if(!db.shopOverrides||typeof db.shopOverrides!=='object'||Array.isArray(db.shopOverrides))db.shopOverrides={};
   if(!db.settings||typeof db.settings!=='object'||Array.isArray(db.settings))db.settings={};
   if(!db.settings.daily||typeof db.settings.daily!=='object'){
     db.settings.daily={coins:250,itemId:null,streakBonus:true};
@@ -224,9 +225,16 @@ function isItemAvailable(item){
   if(item.availableUntil && Date.now()>Date.parse(item.availableUntil))return false;
   return true;
 }
-function allShopMap(){return {...SHOP,...(db.customShop||{})}}
+function getShopItem(id){
+  const base=SHOP[id]||db.customShop?.[id]||null;
+  if(!base)return null;
+  return {...base,...(db.shopOverrides?.[id]||{})};
+}
+function allShopMap(){
+  const ids=new Set([...Object.keys(SHOP),...Object.keys(db.customShop||{})]);
+  return Object.fromEntries([...ids].map(id=>[id,getShopItem(id)]).filter(([,v])=>v));
+}
 function allShopItems(){return Object.values(allShopMap())}
-function getShopItem(id){return SHOP[id]||db.customShop?.[id]||null}
 
 function itemAccessAllowed(wallet,item){
   if(!isItemAvailable(item))return {ok:false,code:'expired'};
@@ -751,7 +759,7 @@ app.post('/case/open',(req,res)=>{
   const wallet=getWallet(userId);
   if(Number(wallet.balance||0)<CASE_COST)return res.status(400).json({ok:false,code:'insufficient_funds',missing:CASE_COST-Number(wallet.balance||0)});
   wallet.balance-=CASE_COST;wallet.stats.spent+=CASE_COST;wallet.stats.casesOpened+=1;addXp(wallet,10);
-  const available=allShopItems().filter(item=>item.category==='items'&&isItemAvailable(item)&&!item.premiumOnly&&!item.dailyOnly&&!wallet.purchases?.[item.id]);
+  const available=allShopItems().filter(item=>item.category==='items'&&isItemAvailable(item)&&!item.premiumOnly&&!item.dailyOnly&&!item.hidden&&!wallet.purchases?.[item.id]);
   let reward;
   if(available.length&&Math.random()<0.25){
     const item=available[Math.floor(Math.random()*available.length)];
@@ -1102,6 +1110,7 @@ app.post('/trade/create',(req,res)=>{
   if(!shopAuthorized(req))return res.status(401).json({ok:false,error:'unauthorized'});
   const fromId=String(req.body?.fromUserId??'').trim(),toId=String(req.body?.toUserId??'').trim(),giveItem=String(req.body?.giveItem||'').trim(),wantItem=String(req.body?.wantItem||'').trim();
   const a=getWallet(fromId),b=getWallet(toId);if(fromId===toId||!a.purchases?.[giveItem]||!b.purchases?.[wantItem])return res.status(400).json({ok:false,error:'invalid trade'});
+  if(a.economyBlocked||b.economyBlocked)return res.status(403).json({ok:false,code:'economy_blocked'});
   if(getShopItem(giveItem)?.dailyOnly||getShopItem(wantItem)?.dailyOnly)return res.status(403).json({ok:false,code:'daily_only'});
   const id='tr_'+Date.now().toString(36)+Math.floor(Math.random()*1296).toString(36);db.trades[id]={id,fromId,toId,giveItem,wantItem,status:'pending',createdAt:Date.now()};save();res.json({ok:true,trade:db.trades[id]});
 });
@@ -1142,17 +1151,23 @@ app.post('/admin/bundle',(req,res)=>{
 });
 app.post('/admin/shop/list',(req,res)=>{
   if(!shopAuthorized(req))return res.status(401).json({ok:false,error:'unauthorized'});
-  const items=Object.values(db.customShop||{}).sort((a,b)=>Number(b.createdAt||0)-Number(a.createdAt||0));
+  const items=allShopItems().map(item=>({...item,custom:Boolean(db.customShop?.[item.id])})).sort((a,b)=>Number(Boolean(b.custom))-Number(Boolean(a.custom))||String(a.name).localeCompare(String(b.name)));
   res.json({ok:true,items});
 });
 app.post('/admin/shop/edit',(req,res)=>{
   if(!shopAuthorized(req))return res.status(401).json({ok:false,error:'unauthorized'});
-  const itemId=String(req.body?.itemId||'').trim(),item=db.customShop?.[itemId];if(!item)return res.status(404).json({ok:false,error:'custom item only'});
-  if(req.body?.delete===true){delete db.customShop[itemId];logAdmin('shop_delete',{itemId});save();return res.json({ok:true,deleted:true})}
-  if(Number.isFinite(Number(req.body?.price)))item.price=Math.max(0,Math.round(Number(req.body.price)));
-  if(typeof req.body?.hidden==='boolean')item.hidden=req.body.hidden;
-  if(req.body?.rarity)item.rarity=String(req.body.rarity).slice(0,20);
-  logAdmin('shop_edit',{itemId});save();res.json({ok:true,item});
+  const itemId=String(req.body?.itemId||'').trim(),item=getShopItem(itemId);if(!item)return res.status(404).json({ok:false,error:'item not found'});
+  if(req.body?.delete===true){
+    if(db.customShop?.[itemId])delete db.customShop[itemId];
+    else db.shopOverrides[itemId]={...(db.shopOverrides[itemId]||{}),hidden:true};
+    logAdmin('shop_delete',{itemId});save();return res.json({ok:true,deleted:true,hiddenBase:Boolean(SHOP[itemId])});
+  }
+  const patch={...(db.shopOverrides[itemId]||{})};
+  if(Number.isFinite(Number(req.body?.price)))patch.price=Math.max(0,Math.round(Number(req.body.price)));
+  if(typeof req.body?.hidden==='boolean')patch.hidden=req.body.hidden;
+  if(req.body?.rarity)patch.rarity=String(req.body.rarity).slice(0,20);
+  db.shopOverrides[itemId]=patch;
+  logAdmin('shop_edit',{itemId});save();res.json({ok:true,item:getShopItem(itemId)});
 });
 app.post('/admin/event',(req,res)=>{
   if(!shopAuthorized(req))return res.status(401).json({ok:false,error:'unauthorized'});
