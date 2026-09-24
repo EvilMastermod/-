@@ -2,6 +2,11 @@ const express=require('express'),fs=require('fs'),path=require('path');
 const app=express(); app.use(express.json({limit:'512kb'}));
 
 const PORT=Number(process.env.PORT||3000), DIR=process.env.DATA_DIR||'/data';
+const SHOP_API_KEY=String(process.env.SHOP_API_KEY||'');
+const SHOP=Object.freeze({
+  plus:{id:'plus',name:'Plus',price:1000},
+  premium:{id:'premium',name:'Premium',price:5000}
+});
 const FILE=path.join(DIR,'spooky-prices.json');
 const FRESH=Number(process.env.PRICE_FRESH_MS||7200000), RETAIN=Number(process.env.PRICE_RETAIN_MS||259200000);
 const ALLOWED=/^\/an(?:10[1-8]|20[1-9]|30[1-9])$/i;
@@ -24,6 +29,11 @@ function load(){
   if(!db||typeof db!=='object')db={version:3,listings:[],wallets:{}};
   if(!Array.isArray(db.listings))db.listings=[];
   if(!db.wallets||typeof db.wallets!=='object'||Array.isArray(db.wallets))db.wallets={};
+  for(const wallet of Object.values(db.wallets)){
+    if(wallet&&typeof wallet==='object'&&(!wallet.purchases||typeof wallet.purchases!=='object'||Array.isArray(wallet.purchases))){
+      wallet.purchases={};
+    }
+  }
 
   if(Number(db.version||0)<3){
     for(const wallet of Object.values(db.wallets)){
@@ -145,23 +155,103 @@ app.get('/stats',(_q,res)=>{
   res.json({ok:true,listings:db.listings.length,collectors:c.size,auctions:[...a].sort(),wallets:Object.keys(db.wallets).length});
 });
 
+function getWallet(userId){
+  if(!db.wallets[userId]){
+    db.wallets[userId]={balance:0,createdAt:Date.now(),purchases:{}};
+  }
+  if(!db.wallets[userId].purchases||typeof db.wallets[userId].purchases!=='object'){
+    db.wallets[userId].purchases={};
+  }
+  return db.wallets[userId];
+}
+
+function shopAuthorized(req){
+  return Boolean(SHOP_API_KEY) && req.get('x-shop-key')===SHOP_API_KEY;
+}
+
 app.post('/wallet',(req,res)=>{
   const userId=String(req.body?.userId??'').trim();
   if(!/^-?\d{1,20}$/.test(userId))return res.status(400).json({ok:false,error:'invalid user id'});
 
-  if(!db.wallets[userId]){
-    db.wallets[userId]={
-      balance:0,
-      createdAt:Date.now()
-    };
-    later();
-  }
+  const wallet=getWallet(userId);
+  later();
 
   res.json({
     ok:true,
     userId,
-    balance:Number(db.wallets[userId].balance||0),
-    currency:'Random Coins'
+    balance:Number(wallet.balance||0),
+    currency:'Random Coins',
+    purchases:Object.keys(wallet.purchases||{})
+  });
+});
+
+app.post('/shop',(req,res)=>{
+  if(!shopAuthorized(req))return res.status(401).json({ok:false,error:'unauthorized'});
+  const userId=String(req.body?.userId??'').trim();
+  if(!/^-?\d{1,20}$/.test(userId))return res.status(400).json({ok:false,error:'invalid user id'});
+
+  const wallet=getWallet(userId);
+  later();
+
+  const items=Object.values(SHOP).map(item=>({
+    ...item,
+    owned:Boolean(wallet.purchases?.[item.id])
+  }));
+
+  res.json({
+    ok:true,
+    balance:Number(wallet.balance||0),
+    currency:'Random Coins',
+    items
+  });
+});
+
+app.post('/buy',(req,res)=>{
+  if(!shopAuthorized(req))return res.status(401).json({ok:false,error:'unauthorized'});
+  const userId=String(req.body?.userId??'').trim();
+  const itemId=String(req.body?.itemId??'').trim().toLowerCase();
+
+  if(!/^-?\d{1,20}$/.test(userId))return res.status(400).json({ok:false,error:'invalid user id'});
+  const item=SHOP[itemId];
+  if(!item)return res.status(400).json({ok:false,error:'invalid item'});
+
+  const wallet=getWallet(userId);
+  const balance=Number(wallet.balance||0);
+
+  if(wallet.purchases?.[item.id]){
+    return res.status(409).json({
+      ok:false,
+      code:'already_owned',
+      error:'already owned',
+      item,
+      balance
+    });
+  }
+
+  if(balance<item.price){
+    return res.status(400).json({
+      ok:false,
+      code:'insufficient_funds',
+      error:'insufficient funds',
+      item,
+      balance,
+      missing:item.price-balance
+    });
+  }
+
+  wallet.balance=balance-item.price;
+  wallet.purchases[item.id]={
+    name:item.name,
+    price:item.price,
+    purchasedAt:Date.now()
+  };
+  save();
+
+  res.json({
+    ok:true,
+    item,
+    balance:wallet.balance,
+    purchase:wallet.purchases[item.id]
   });
 });
 
