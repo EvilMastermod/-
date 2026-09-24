@@ -566,10 +566,12 @@ async def business_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
             )
         else:
             text = (
-                "❌ Telegram Business ещё не подключён.\n\n"
-                "Сначала включи Secretary Mode у бота в @BotFather, "
-                "потом в Telegram открой Настройки → Telegram Business → "
-                "Автоматизация чатов и выбери этого бота."
+                "❌ Бот пока не получил Business-подключение.\n\n"
+                "Если Secretary Mode уже включён и бот уже выбран: "
+                "в Telegram открой Настройки → Telegram Business → Автоматизация чатов, "
+                "временно отключи этого бота, сохрани, затем подключи его снова и сохрани. "
+                "После этого попроси кого-нибудь написать тебе в разрешённый личный чат "
+                "и снова открой /business."
             )
         await q.answer()
         await q.message.reply_text(text)
@@ -666,6 +668,48 @@ async def business_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return
 
     connection = get_business_connection(msg.business_connection_id)
+    if not connection:
+        try:
+            bc = await context.bot.get_business_connection(msg.business_connection_id)
+            can_reply = int(bool(getattr(bc.rights, "can_reply", False))) if bc.rights else 0
+            can_read = int(bool(getattr(bc.rights, "can_read_messages", False))) if bc.rights else 0
+            can_delete_sent = int(bool(getattr(bc.rights, "can_delete_sent_messages", False))) if bc.rights else 0
+            can_delete_all = int(bool(getattr(bc.rights, "can_delete_all_messages", False))) if bc.rights else 0
+            with db() as db_conn:
+                db_conn.execute(
+                    """
+                    INSERT INTO business_connections(
+                        connection_id,owner_user_id,user_chat_id,is_enabled,
+                        can_reply,can_read,can_delete_sent,can_delete_all,updated_at
+                    ) VALUES(?,?,?,?,?,?,?,?,?)
+                    ON CONFLICT(connection_id) DO UPDATE SET
+                        owner_user_id=excluded.owner_user_id,
+                        user_chat_id=excluded.user_chat_id,
+                        is_enabled=excluded.is_enabled,
+                        can_reply=excluded.can_reply,
+                        can_read=excluded.can_read,
+                        can_delete_sent=excluded.can_delete_sent,
+                        can_delete_all=excluded.can_delete_all,
+                        updated_at=excluded.updated_at
+                    """,
+                    (
+                        bc.id,
+                        bc.user.id,
+                        bc.user_chat_id,
+                        int(bool(bc.is_enabled)),
+                        can_reply,
+                        can_read,
+                        can_delete_sent,
+                        can_delete_all,
+                        int(time_module.time()),
+                    ),
+                )
+            ensure_business_settings(bc.user.id)
+            connection = get_business_connection(msg.business_connection_id)
+        except Exception:
+            log.exception("Could not recover Business connection from incoming message")
+            return
+
     if not connection or not connection["is_enabled"]:
         return
 
