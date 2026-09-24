@@ -662,6 +662,67 @@ async def business_connection_update(update: Update, context: ContextTypes.DEFAU
         log.exception("Could not notify business owner")
 
 
+async def business_chat_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    q = update.callback_query
+    if not q or not q.data or not q.message:
+        return
+
+    parts = q.data.split(":")
+    if len(parts) != 4 or parts[0] != "bizchat":
+        return
+
+    action = parts[1]
+    try:
+        owner_id = int(parts[2])
+        chat_id = int(parts[3])
+    except ValueError:
+        await q.answer("❌ Ошибка команды.", show_alert=True)
+        return
+
+    if q.from_user.id != owner_id:
+        await q.answer("⛔ Эта кнопка только для владельца аккаунта.", show_alert=True)
+        return
+
+    if q.message.chat.id != chat_id:
+        await q.answer("❌ Эта кнопка относится к другому чату.", show_alert=True)
+        return
+
+    if action == "unmute":
+        set_business_chat_muted(owner_id, chat_id, False)
+        await q.answer("🔊 Можно говорить")
+        try:
+            await q.edit_message_text(
+                "🔊 Говорить",
+                reply_markup=InlineKeyboardMarkup(
+                    [[InlineKeyboardButton("🔇 Молчать", callback_data=f"bizchat:mute:{owner_id}:{chat_id}")]]
+                ),
+            )
+        except Exception:
+            log.exception("Failed to edit Business mute control")
+        return
+
+    if action == "mute":
+        connection_id = getattr(q.message, "business_connection_id", None)
+        connection = get_business_connection(connection_id) if connection_id else None
+        if connection and not connection["can_delete_all"]:
+            await q.answer(
+                "❌ У бота нет права удалять все сообщения.",
+                show_alert=True,
+            )
+            return
+        set_business_chat_muted(owner_id, chat_id, True)
+        await q.answer("🔇 Молчать")
+        try:
+            await q.edit_message_text(
+                "🔇 Молчать",
+                reply_markup=InlineKeyboardMarkup(
+                    [[InlineKeyboardButton("🔊 Говори", callback_data=f"bizchat:unmute:{owner_id}:{chat_id}")]]
+                ),
+            )
+        except Exception:
+            log.exception("Failed to edit Business mute control")
+
+
 async def business_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     msg = update.business_message
     if not msg or not msg.business_connection_id:
@@ -723,7 +784,7 @@ async def business_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
         if low == ".mute":
             if not connection["can_delete_all"]:
                 await msg.reply_text(
-                    "❌ Для .мут включи боту право удалять все сообщения в Telegram Business.",
+                    "❌ Для .mute включи боту право удалять все сообщения в Telegram Business.",
                     do_quote=False,
                 )
                 return
@@ -737,8 +798,14 @@ async def business_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 pass
             await context.bot.send_message(
                 chat_id=msg.chat_id,
-                text="🔇 Чат замьючен. Новые сообщения собеседника будут удаляться.",
+                text="🔇 Молчать",
                 business_connection_id=msg.business_connection_id,
+                reply_markup=InlineKeyboardMarkup(
+                    [[InlineKeyboardButton(
+                        "🔊 Говори",
+                        callback_data=f"bizchat:unmute:{owner_id}:{msg.chat_id}",
+                    )]]
+                ),
             )
             return
 
@@ -754,8 +821,14 @@ async def business_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 pass
             await context.bot.send_message(
                 chat_id=msg.chat_id,
-                text="🔊 Мут снят.",
+                text="🔊 Говорить",
                 business_connection_id=msg.business_connection_id,
+                reply_markup=InlineKeyboardMarkup(
+                    [[InlineKeyboardButton(
+                        "🔇 Молчать",
+                        callback_data=f"bizchat:mute:{owner_id}:{msg.chat_id}",
+                    )]]
+                ),
             )
             return
 
@@ -1501,6 +1574,7 @@ def main():
     app.add_handler(CommandHandler("bizfallback", biz_fallback))
     app.add_handler(CommandHandler("bizwelcome", biz_welcome))
     app.add_handler(CallbackQueryHandler(business_callback, pattern=r"^biz:"))
+    app.add_handler(CallbackQueryHandler(business_chat_callback, pattern=r"^bizchat:"))
     app.add_handler(CommandHandler("setup", setup))
     app.add_handler(CommandHandler("setwelcome", set_welcome))
     app.add_handler(CommandHandler("setrules", set_rules))
