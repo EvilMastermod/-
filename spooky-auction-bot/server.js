@@ -18,6 +18,18 @@ const SHOP=Object.freeze({
   sakura_badge:{id:'sakura_badge',name:'🌸 Sakura-значок',price:1200,category:'items'},
   trophy:{id:'trophy',name:'🏆 Коллекционный трофей',price:3000,category:'items'}
 });
+const PROFILE_COLORS=Object.freeze({
+  green:{id:'green',name:'Зелёный'},
+  white:{id:'white',name:'Белый'},
+  gray:{id:'gray',name:'Серый'},
+  black:{id:'black',name:'Чёрный'},
+  red:{id:'red',name:'Красный'},
+  purple:{id:'purple',name:'Фиолетовый'},
+  pink:{id:'pink',name:'Розовый'},
+  dark_green:{id:'dark_green',name:'Тёмно-зелёный'},
+  light_blue:{id:'light_blue',name:'Голубой'},
+  blue:{id:'blue',name:'Синий'}
+});
 const FILE=path.join(DIR,'spooky-prices.json');
 const FRESH=Number(process.env.PRICE_FRESH_MS||7200000), RETAIN=Number(process.env.PRICE_RETAIN_MS||259200000);
 const ALLOWED=/^\/an(?:10[1-8]|20[1-9]|30[1-9])$/i;
@@ -49,6 +61,9 @@ function load(){
       for(const itemId of Object.keys(wallet.purchases||{})){
         if(SHOP[itemId]?.category==='items')wallet.decorations[itemId]=true;
       }
+    }
+    if(wallet&&typeof wallet==='object'&&!PROFILE_COLORS[wallet.nameColor]){
+      wallet.nameColor='white';
     }
   }
 
@@ -174,7 +189,7 @@ app.get('/stats',(_q,res)=>{
 
 function getWallet(userId){
   if(!db.wallets[userId]){
-    db.wallets[userId]={balance:0,createdAt:Date.now(),purchases:{},decorations:{}};
+    db.wallets[userId]={balance:0,createdAt:Date.now(),purchases:{},decorations:{},nameColor:'white'};
   }
   if(!db.wallets[userId].purchases||typeof db.wallets[userId].purchases!=='object'){
     db.wallets[userId].purchases={};
@@ -184,6 +199,9 @@ function getWallet(userId){
     for(const itemId of Object.keys(db.wallets[userId].purchases)){
       if(SHOP[itemId]?.category==='items')db.wallets[userId].decorations[itemId]=true;
     }
+  }
+  if(!PROFILE_COLORS[db.wallets[userId].nameColor]){
+    db.wallets[userId].nameColor='white';
   }
   return db.wallets[userId];
 }
@@ -271,6 +289,9 @@ app.post('/buy',(req,res)=>{
   if(item.category==='items'){
     wallet.decorations[item.id]=true;
   }
+  if(item.id==='name_color'&&!PROFILE_COLORS[wallet.nameColor]){
+    wallet.nameColor='white';
+  }
   save();
 
   res.json({
@@ -304,7 +325,9 @@ app.post('/profile',(req,res)=>{
     plus:Boolean(wallet.purchases?.plus),
     premium:Boolean(wallet.purchases?.premium),
     purchases,
-    cosmetics
+    cosmetics,
+    nameColor:wallet.nameColor||'white',
+    availableColors:Object.values(PROFILE_COLORS)
   });
 });
 
@@ -331,6 +354,29 @@ app.post('/profile/decorate',(req,res)=>{
     ok:true,
     itemId,
     equipped:wallet.decorations[itemId]
+  });
+});
+
+app.post('/profile/color',(req,res)=>{
+  if(!shopAuthorized(req))return res.status(401).json({ok:false,error:'unauthorized'});
+  const userId=String(req.body?.userId??'').trim();
+  const colorId=String(req.body?.colorId??'').trim().toLowerCase();
+
+  if(!/^-?\d{1,20}$/.test(userId))return res.status(400).json({ok:false,error:'invalid user id'});
+  if(!PROFILE_COLORS[colorId])return res.status(400).json({ok:false,error:'invalid color'});
+
+  const wallet=getWallet(userId);
+  if(!wallet.purchases?.name_color){
+    return res.status(403).json({ok:false,error:'name color not owned'});
+  }
+
+  wallet.nameColor=colorId;
+  save();
+
+  res.json({
+    ok:true,
+    nameColor:colorId,
+    color:PROFILE_COLORS[colorId]
   });
 });
 
