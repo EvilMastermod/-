@@ -64,10 +64,32 @@ PROMO_BUTTON = "🎟 Промокод"
 TOP_BUTTON = "🏆 Топ"
 LIKE_BUTTON = "❤️ Лайк профиля"
 CASE_BUTTON = "🎁 Кейс"
+FRIENDS_BUTTON = "🧑‍🤝‍🧑 Друзья"
+DIRECT_BUTTON = "💌 Личное сообщение"
+ACHIEVEMENTS_BUTTON = "🏅 Достижения"
+QUESTS_BUTTON = "🎯 Задания на день"
+BANK_BUTTON = "🏦 Банк"
+SEASON_BUTTON = "🎫 Сезонный пропуск"
+CALENDAR_BUTTON = "📅 Календарь ежедневок"
+ROTATION_BUTTON = "🔄 Ротация магазина"
+TRADE_BUTTON = "🔁 Обмен украшениями"
+SELL_BUTTON = "🗑 Продать украшение"
+HISTORY_BUTTON = "📈 История баланса"
+NOTIFICATIONS_BUTTON = "🔔 Уведомления"
+STATUS_BUTTON = "🪪 Статус профиля"
+BUNDLES_BUTTON = "📦 Наборы"
+EVENT_BUTTON = "🎉 Ивент"
 ADMIN_PROMO_BUTTON = "🎟 Создать промокод"
 ADMIN_DAILY_BUTTON = "🎁 Настроить ежедневку"
 ADMIN_PROMO_DELETE_BUTTON = "🗑 Удалить промокод"
 ADMIN_EXCLUSIVE_BUTTON = "✨ Создать эксклюзив"
+ADMIN_STATS_BUTTON = "📊 Статистика бота"
+ADMIN_LOG_BUTTON = "🧾 История админа"
+ADMIN_SHOP_EDIT_BUTTON = "🧰 Редактор магазина"
+ADMIN_ECONOMY_BLOCK_BUTTON = "🚫 Блок экономики"
+ADMIN_RANDOM_DAILY_BUTTON = "🎲 Случайная ежедневка"
+ADMIN_BUNDLE_BUTTON = "📦 Создать набор"
+ADMIN_EVENT_BUTTON = "🎉 Настроить ивент"
 BACK_BUTTON = "⬅️ Назад"
 MINECRAFT_BACK_BUTTON = "⬅️ В Minecraft"
 CANCEL_BUTTON = "❌ Отменить"
@@ -120,6 +142,10 @@ admin_panel_keyboard = ReplyKeyboardMarkup(
         [KeyboardButton(ADMIN_COINS_BUTTON), KeyboardButton(ADMIN_REMOVE_COINS_BUTTON)],
         [KeyboardButton(ADMIN_PROMO_BUTTON), KeyboardButton(ADMIN_PROMO_DELETE_BUTTON)],
         [KeyboardButton(ADMIN_DAILY_BUTTON), KeyboardButton(ADMIN_EXCLUSIVE_BUTTON)],
+        [KeyboardButton(ADMIN_STATS_BUTTON), KeyboardButton(ADMIN_LOG_BUTTON)],
+        [KeyboardButton(ADMIN_SHOP_EDIT_BUTTON), KeyboardButton(ADMIN_ECONOMY_BLOCK_BUTTON)],
+        [KeyboardButton(ADMIN_RANDOM_DAILY_BUTTON), KeyboardButton(ADMIN_BUNDLE_BUTTON)],
+        [KeyboardButton(ADMIN_EVENT_BUTTON)],
         [KeyboardButton(BACK_BUTTON)],
     ],
     resize_keyboard=True,
@@ -128,9 +154,17 @@ admin_panel_keyboard = ReplyKeyboardMarkup(
 activities_keyboard = ReplyKeyboardMarkup(
     [
         [KeyboardButton(DAILY_BUTTON), KeyboardButton(INVENTORY_BUTTON)],
+        [KeyboardButton(FRIENDS_BUTTON), KeyboardButton(DIRECT_BUTTON)],
+        [KeyboardButton(ACHIEVEMENTS_BUTTON), KeyboardButton(QUESTS_BUTTON)],
+        [KeyboardButton(BANK_BUTTON), KeyboardButton(SEASON_BUTTON)],
+        [KeyboardButton(CALENDAR_BUTTON), KeyboardButton(ROTATION_BUTTON)],
         [KeyboardButton(TRANSFER_BUTTON), KeyboardButton(GIFT_BUTTON)],
-        [KeyboardButton(PROMO_BUTTON), KeyboardButton(TOP_BUTTON)],
-        [KeyboardButton(LIKE_BUTTON), KeyboardButton(CASE_BUTTON)],
+        [KeyboardButton(TRADE_BUTTON), KeyboardButton(SELL_BUTTON)],
+        [KeyboardButton(PROMO_BUTTON), KeyboardButton(BUNDLES_BUTTON)],
+        [KeyboardButton(TOP_BUTTON), KeyboardButton(LIKE_BUTTON)],
+        [KeyboardButton(HISTORY_BUTTON), KeyboardButton(NOTIFICATIONS_BUTTON)],
+        [KeyboardButton(STATUS_BUTTON), KeyboardButton(EVENT_BUTTON)],
+        [KeyboardButton(CASE_BUTTON)],
         [KeyboardButton(BACK_BUTTON)],
     ],
     resize_keyboard=True,
@@ -145,6 +179,50 @@ other_profile_keyboard = ReplyKeyboardMarkup(
             max_quantity=1,
             request_name=True,
             request_username=True,
+        ),
+    )], [KeyboardButton(CANCEL_BUTTON)]],
+    resize_keyboard=True,
+)
+
+friends_user_keyboard = ReplyKeyboardMarkup(
+    [[KeyboardButton(
+        "👤 Добавить/удалить друга",
+        request_users=KeyboardButtonRequestUsers(
+            request_id=787, user_is_bot=False, max_quantity=1,
+            request_name=True, request_username=True,
+        ),
+    )], [KeyboardButton(BACK_BUTTON)]],
+    resize_keyboard=True,
+)
+
+direct_user_keyboard = ReplyKeyboardMarkup(
+    [[KeyboardButton(
+        "👤 Выбрать получателя сообщения",
+        request_users=KeyboardButtonRequestUsers(
+            request_id=788, user_is_bot=False, max_quantity=1,
+            request_name=True, request_username=True,
+        ),
+    )], [KeyboardButton(CANCEL_BUTTON)]],
+    resize_keyboard=True,
+)
+
+trade_user_keyboard = ReplyKeyboardMarkup(
+    [[KeyboardButton(
+        "👤 Выбрать пользователя для обмена",
+        request_users=KeyboardButtonRequestUsers(
+            request_id=789, user_is_bot=False, max_quantity=1,
+            request_name=True, request_username=True,
+        ),
+    )], [KeyboardButton(CANCEL_BUTTON)]],
+    resize_keyboard=True,
+)
+
+admin_economy_user_keyboard = ReplyKeyboardMarkup(
+    [[KeyboardButton(
+        "👤 Выбрать пользователя для блокировки экономики",
+        request_users=KeyboardButtonRequestUsers(
+            request_id=790, user_is_bot=False, max_quantity=1,
+            request_name=True, request_username=True,
         ),
     )], [KeyboardButton(CANCEL_BUTTON)]],
     resize_keyboard=True,
@@ -394,6 +472,19 @@ def clear_modes(context: ContextTypes.DEFAULT_TYPE):
     context.user_data.pop("gift_target_id", None)
     context.user_data.pop("like_stage", None)
     context.user_data.pop("other_profile_stage", None)
+    context.user_data.pop("friends_stage", None)
+    context.user_data.pop("direct_stage", None)
+    context.user_data.pop("direct_target_id", None)
+    context.user_data.pop("trade_stage", None)
+    context.user_data.pop("trade_target_id", None)
+    context.user_data.pop("trade_give_item", None)
+    context.user_data.pop("bank_stage", None)
+    context.user_data.pop("status_waiting", None)
+    context.user_data.pop("admin_shop_edit_waiting", None)
+    context.user_data.pop("admin_economy_stage", None)
+    context.user_data.pop("admin_random_daily_waiting", None)
+    context.user_data.pop("admin_bundle_waiting", None)
+    context.user_data.pop("admin_event_waiting", None)
     context.user_data.pop("promo_waiting", None)
     context.user_data.pop("admin_promo_waiting", None)
     context.user_data.pop("admin_daily_waiting", None)
