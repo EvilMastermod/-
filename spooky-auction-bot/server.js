@@ -32,6 +32,7 @@ function load(){
   }
 
   db.version=3;
+  db.listings=db.listings.filter(x=>!(String(x.normalizedName||'').includes('тотем') && Number(x.price)===3));
   prune();
   save();
   console.log('[DB] loaded listings='+db.listings.length);
