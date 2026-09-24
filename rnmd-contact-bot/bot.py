@@ -629,13 +629,23 @@ def shop_item_button(item):
     price = int(item.get("price") or 0)
     owned = bool(item.get("owned"))
 
+    rarity_labels = {
+        "common": "⚪",
+        "rare": "🔵",
+        "epic": "🟣",
+        "legendary": "🟡",
+        "exclusive": "🔴",
+    }
+    rarity = rarity_labels.get(item.get("rarity"), "")
+    rotation = " 🔄" if item.get("rotating") else ""
+
     if owned:
-        text = f"✅ {name} — куплено"
+        text = f"✅ {rarity} {name} — куплено{rotation}".strip()
         callback = "shop_owned"
     else:
         lock = " 🔒Premium" if item.get("locked") else ""
         limited = " ⏳" if item.get("availableUntil") else ""
-        text = f"Купить {name} — {price:,} RC{lock}{limited}".replace(",", " ")
+        text = f"Купить {rarity} {name} — {price:,} RC{lock}{limited}{rotation}".replace(",", " ").strip()
         callback = f"shop_buy:{item_id}"
 
     return InlineKeyboardButton(text, callback_data=callback)
@@ -644,7 +654,8 @@ def shop_item_button(item):
 def shop_keyboard(items):
     main_items = [item for item in items if item.get("category") == "main"]
     rows = [
-        [InlineKeyboardButton("✨ Украшения", callback_data="shop_items")]
+        [InlineKeyboardButton("✨ Украшения", callback_data="shop_items")],
+        [InlineKeyboardButton("📦 Наборы", callback_data="shop_bundles")],
     ]
 
     for item in main_items:
@@ -824,10 +835,23 @@ def profile_text(user, data):
     title = data.get("title") or "Новичок"
     favorite_id = data.get("favoriteDecoration")
 
+    rank = data.get("rank") or "Новичок"
+    custom_status = data.get("customStatus") or ""
+    friends_count = int(data.get("friends") or 0)
+    selected_background = data.get("selectedBackground")
+
     lines.append(f"⭐ Уровень: {level} · XP: {xp}")
+    lines.append(f"👑 Ранг: {rank}")
     lines.append(f"🎖 Титул: {title}")
+    if custom_status:
+        lines.append(f"🪪 Статус: {custom_status}")
     lines.append(f"❤️ Лайков: {likes}")
+    lines.append(f"🧑‍🤝‍🧑 Друзей: {friends_count}")
     lines.append(f"📅 Серия входов: {streak} дн.")
+    if selected_background:
+        bg = next((x for x in cosmetics if x.get("id") == selected_background), None)
+        if bg:
+            lines.append(f"🖼 Фон: {bg.get('name')}")
 
     if cosmetics:
         lines.append(f"✨ Украшений: {equipped_count}/{len(cosmetics)}")
@@ -864,6 +888,15 @@ def profile_keyboard(data):
         rows.append([InlineKeyboardButton("⭐ Избранное украшение", callback_data="profile_favorite")])
     if data.get("unlockedTitles"):
         rows.append([InlineKeyboardButton("🎖 Выбрать титул", callback_data="profile_titles")])
+
+    backgrounds = [
+        item for item in (data.get("cosmetics") or [])
+        if item.get("kind") == "background"
+    ]
+    if backgrounds:
+        rows.append([InlineKeyboardButton("🖼 Фон профиля", callback_data="profile_background")])
+
+    rows.append([InlineKeyboardButton("🪪 Изменить статус", callback_data="profile_status")])
     return InlineKeyboardMarkup(rows) if rows else None
 
 
