@@ -61,6 +61,9 @@ TOP_BUTTON = "🏆 Топ"
 LIKE_BUTTON = "❤️ Лайк профиля"
 CASE_BUTTON = "🎁 Кейс"
 ADMIN_PROMO_BUTTON = "🎟 Создать промокод"
+ADMIN_DAILY_BUTTON = "🎁 Настроить ежедневку"
+ADMIN_PROMO_DELETE_BUTTON = "🗑 Удалить промокод"
+ADMIN_EXCLUSIVE_BUTTON = "✨ Создать эксклюзив"
 BACK_BUTTON = "⬅️ Назад"
 MINECRAFT_BACK_BUTTON = "⬅️ В Minecraft"
 CANCEL_BUTTON = "❌ Отменить"
@@ -101,6 +104,8 @@ admin_main_keyboard = ReplyKeyboardMarkup(
         [KeyboardButton(ADMIN_DND_OFF_BUTTON), KeyboardButton(ADMIN_ANON_BAN_BUTTON)],
         [KeyboardButton(ADMIN_ANON_UNBAN_BUTTON), KeyboardButton(ADMIN_REPORT_LIST_BUTTON)],
         [KeyboardButton(ADMIN_COINS_BUTTON), KeyboardButton(ADMIN_PROMO_BUTTON)],
+        [KeyboardButton(ADMIN_DAILY_BUTTON), KeyboardButton(ADMIN_PROMO_DELETE_BUTTON)],
+        [KeyboardButton(ADMIN_EXCLUSIVE_BUTTON)],
     ],
     resize_keyboard=True,
 )
@@ -343,6 +348,8 @@ def clear_modes(context: ContextTypes.DEFAULT_TYPE):
     context.user_data.pop("like_stage", None)
     context.user_data.pop("promo_waiting", None)
     context.user_data.pop("admin_promo_waiting", None)
+    context.user_data.pop("admin_daily_waiting", None)
+    context.user_data.pop("admin_exclusive_waiting", None)
     context.user_data.pop("spooky_price_waiting", None)
 
 async def post_init(application: Application):
@@ -616,6 +623,10 @@ def profile_display_name(user, data):
         suffixes.append("🏆")
     if "random_item" in equipped:
         suffixes.append("🎁")
+
+    for item in data.get("cosmetics") or []:
+        if item.get("customExclusive") and item.get("equipped"):
+            suffixes.append(item.get("name") or "✨ Эксклюзив")
 
     if suffixes:
         name += " " + " ".join(suffixes)
@@ -1379,10 +1390,21 @@ async def claim_daily(update: Update, context: ContextTypes.DEFAULT_TYPE):
         milestone = int(data.get("milestone") or 0)
         streak = int(data.get("streak") or 0)
         balance = int(data.get("balance") or 0)
+        reward_item = data.get("rewardItem")
+        item_already_owned = bool(data.get("itemAlreadyOwned"))
         bonus_text = f"\n🎉 Бонус за серию: +{milestone:,} RC".replace(",", " ") if milestone else ""
+        item_text = ""
+        if reward_item:
+            item_text = f"\n🎁 Предмет: {reward_item.get('name')}"
+        elif item_already_owned:
+            item_text = "\nℹ️ Предмет из награды у вас уже есть."
+
+        coins_text = f"🪙 +{reward:,} RC" if reward else "🪙 Без коинов"
         await update.message.reply_text(
             (
-                f"🎁 Ежедневная награда: +{reward:,} RC\n"
+                f"🎁 Ежедневная награда\n"
+                f"{coins_text}"
+                f"{item_text}\n"
                 f"📅 Серия входов: {streak} дн.{bonus_text}\n"
                 f"👛 Баланс: {balance:,} RC"
             ).replace(",", " "),
@@ -1654,6 +1676,248 @@ async def admin_promo_create(update: Update, context: ContextTypes.DEFAULT_TYPE,
         logging.exception("Ошибка создания промокода")
         clear_modes(context)
         await update.message.reply_text("❌ Сервис промокодов недоступен.", reply_markup=get_main_keyboard(update.effective_user.id))
+
+
+async def admin_daily_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if update.effective_user.id != ADMIN_ID:
+        return
+
+    clear_modes(context)
+    context.user_data["admin_daily_waiting"] = True
+
+    current_text = ""
+    try:
+        response, data = await api_post("/admin/daily/get", {})
+        if response.status_code == 200 and data.get("ok"):
+            daily = data.get("daily") or {}
+            item = data.get("item")
+            current_text = (
+                f"\n\nСейчас: {int(daily.get('coins') or 0):,} RC".replace(",", " ")
+                + (f" + {item.get('name')}" if item else "")
+                + (" + бонусы за серию" if daily.get("streakBonus", True) else "")
+            )
+    except Exception:
+        pass
+
+    await update.message.reply_text(
+        "🎁 Настройка ежедневной награды\n\n"
+        "Формат:\n"
+        "1000\n"
+        "1000 | crown\n"
+        "0 | ex_abc123 | off\n\n"
+        "1 часть — коины.\n"
+        "2 часть — ID предмета, можно оставить пустой.\n"
+        "3 часть — on/off для бонусов серии.\n"
+        "Например: 500 | premium_star | on"
+        + current_text,
+        reply_markup=cancel_keyboard,
+    )
+
+
+async def admin_daily_set(update: Update, context: ContextTypes.DEFAULT_TYPE, text: str):
+    if update.effective_user.id != ADMIN_ID:
+        clear_modes(context)
+        return
+
+    parts = [part.strip() for part in text.split("|")]
+    if not parts or not parts[0].replace(" ", "").isdigit():
+        await update.message.reply_text(
+            "❌ Первый параметр должен быть количеством коинов. Например: 1000 | crown | on",
+            reply_markup=cancel_keyboard,
+        )
+        return
+
+    coins = int(parts[0].replace(" ", ""))
+    item_id = parts[1].strip().lower() if len(parts) > 1 and parts[1].strip() else None
+    streak_bonus = True
+    if len(parts) > 2:
+        value = parts[2].strip().lower()
+        if value in {"off", "0", "нет", "false"}:
+            streak_bonus = False
+        elif value in {"on", "1", "да", "true"}:
+            streak_bonus = True
+        else:
+            await update.message.reply_text(
+                "❌ Третий параметр только on или off.",
+                reply_markup=cancel_keyboard,
+            )
+            return
+
+    try:
+        response, data = await api_post(
+            "/admin/daily",
+            {"coins": coins, "itemId": item_id, "streakBonus": streak_bonus},
+        )
+        if response.status_code != 200 or not data.get("ok"):
+            await update.message.reply_text(
+                "❌ Не удалось сохранить награду. Проверь ID предмета.",
+                reply_markup=cancel_keyboard,
+            )
+            return
+
+        clear_modes(context)
+        daily = data.get("daily") or {}
+        item = data.get("item")
+        lines = [
+            "✅ Ежедневная награда изменена.",
+            f"🪙 Коины: {int(daily.get('coins') or 0):,}".replace(",", " "),
+            f"📅 Бонусы серии: {'вкл' if daily.get('streakBonus', True) else 'выкл'}",
+        ]
+        if item:
+            lines.append(f"🎁 Предмет: {item.get('name')} ({item.get('id')})")
+        await update.message.reply_text(
+            "\n".join(lines),
+            reply_markup=get_main_keyboard(update.effective_user.id),
+        )
+    except Exception:
+        logging.exception("Ошибка настройки ежедневной награды")
+        clear_modes(context)
+        await update.message.reply_text(
+            "❌ Сервис наград недоступен.",
+            reply_markup=get_main_keyboard(update.effective_user.id),
+        )
+
+
+async def admin_promos_delete_menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if update.effective_user.id != ADMIN_ID:
+        return
+
+    clear_modes(context)
+    try:
+        response, data = await api_post("/admin/promos", {})
+        if response.status_code != 200 or not data.get("ok"):
+            await update.message.reply_text("❌ Не удалось получить промокоды.", reply_markup=get_main_keyboard(update.effective_user.id))
+            return
+
+        promos = data.get("promos") or []
+        if not promos:
+            await update.message.reply_text("🗑 Активных промокодов нет.", reply_markup=get_main_keyboard(update.effective_user.id))
+            return
+
+        rows = []
+        for promo in promos[:50]:
+            code = promo.get("code")
+            uses = int(promo.get("uses") or 0)
+            max_uses = int(promo.get("maxUses") or 0)
+            reward = f"{int(promo.get('amount') or 0):,} RC".replace(",", " ") if promo.get("amount") else f"item:{promo.get('itemId')}"
+            rows.append([
+                InlineKeyboardButton(
+                    f"🗑 {code} · {reward} · {uses}/{max_uses}",
+                    callback_data=f"promo_del:{code}",
+                )
+            ])
+
+        await update.message.reply_text(
+            "🗑 Выберите промокод для удаления:",
+            reply_markup=InlineKeyboardMarkup(rows),
+        )
+    except Exception:
+        logging.exception("Ошибка списка промокодов")
+        await update.message.reply_text("❌ Сервис промокодов недоступен.", reply_markup=get_main_keyboard(update.effective_user.id))
+
+
+async def handle_admin_promo_delete(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    query = update.callback_query
+    if not query or query.from_user.id != ADMIN_ID:
+        if query:
+            await query.answer("⛔ Только для администратора.", show_alert=True)
+        return
+
+    code = query.data.split(":", 1)[1]
+    try:
+        response, data = await api_post("/admin/promo/delete", {"code": code})
+        if response.status_code != 200 or not data.get("ok"):
+            await query.answer("❌ Не удалось удалить промокод.", show_alert=True)
+            return
+        await query.answer("🗑 Промокод удалён", show_alert=True)
+        await query.edit_message_text(f"✅ Промокод {code} удалён.")
+    except Exception:
+        logging.exception("Ошибка удаления промокода")
+        await query.answer("❌ Сервис промокодов недоступен.", show_alert=True)
+
+
+async def admin_exclusive_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if update.effective_user.id != ADMIN_ID:
+        return
+
+    clear_modes(context)
+    context.user_data["admin_exclusive_waiting"] = True
+    await update.message.reply_text(
+        "✨ Создание кастомного эксклюзива\n\n"
+        "Формат:\n"
+        "Название | цена | эмодзи | тип | дней\n\n"
+        "Тип: premium или обычный\n"
+        "Дней: 0 = навсегда\n\n"
+        "Пример:\n"
+        "Молния RNMD | 2500 | ⚡ | premium | 7",
+        reply_markup=cancel_keyboard,
+    )
+
+
+async def admin_exclusive_create(update: Update, context: ContextTypes.DEFAULT_TYPE, text: str):
+    if update.effective_user.id != ADMIN_ID:
+        clear_modes(context)
+        return
+
+    parts = [part.strip() for part in text.split("|")]
+    if len(parts) < 2:
+        await update.message.reply_text(
+            "❌ Формат: Название | цена | эмодзи | premium/обычный | дней",
+            reply_markup=cancel_keyboard,
+        )
+        return
+
+    name = parts[0]
+    price_raw = parts[1].replace(" ", "")
+    emoji = parts[2] if len(parts) > 2 and parts[2] else "✨"
+    kind = parts[3].lower() if len(parts) > 3 else "обычный"
+    days_raw = parts[4].replace(" ", "") if len(parts) > 4 else "0"
+
+    if not price_raw.isdigit() or not days_raw.isdigit():
+        await update.message.reply_text(
+            "❌ Цена и количество дней должны быть числами.",
+            reply_markup=cancel_keyboard,
+        )
+        return
+
+    payload = {
+        "name": name,
+        "price": int(price_raw),
+        "emoji": emoji,
+        "premiumOnly": kind in {"premium", "премиум", "vip"},
+        "days": int(days_raw),
+    }
+
+    try:
+        response, data = await api_post("/admin/exclusive", payload)
+        if response.status_code != 200 or not data.get("ok"):
+            await update.message.reply_text("❌ Не удалось создать эксклюзив.", reply_markup=cancel_keyboard)
+            return
+
+        clear_modes(context)
+        item = data.get("item") or {}
+        until = item.get("availableUntil")
+        lines = [
+            "✅ Эксклюзив создан!",
+            f"✨ {item.get('name')}",
+            f"🪙 Цена: {int(item.get('price') or 0):,} RC".replace(",", " "),
+            f"🆔 ID: {item.get('id')}",
+            f"🔒 Premium: {'да' if item.get('premiumOnly') else 'нет'}",
+            f"⏳ Срок: {'до ' + until if until else 'навсегда'}",
+            "",
+            "Этот ID можно использовать в промокодах и ежедневной награде.",
+        ]
+        await update.message.reply_text(
+            "\n".join(lines),
+            reply_markup=get_main_keyboard(update.effective_user.id),
+        )
+    except Exception:
+        logging.exception("Ошибка создания эксклюзива")
+        clear_modes(context)
+        await update.message.reply_text(
+            "❌ Сервис эксклюзивов недоступен.",
+            reply_markup=get_main_keyboard(update.effective_user.id),
+        )
 
 
 async def top_menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -2912,6 +3176,18 @@ async def handle_user_message(update: Update, context: ContextTypes.DEFAULT_TYPE
         await admin_promo_start(update, context)
         return
 
+    if text == ADMIN_DAILY_BUTTON:
+        await admin_daily_start(update, context)
+        return
+
+    if text == ADMIN_PROMO_DELETE_BUTTON:
+        await admin_promos_delete_menu(update, context)
+        return
+
+    if text == ADMIN_EXCLUSIVE_BUTTON:
+        await admin_exclusive_start(update, context)
+        return
+
     if text == CANCEL_BUTTON:
         await cancel_action(update, context)
         return
@@ -2922,6 +3198,14 @@ async def handle_user_message(update: Update, context: ContextTypes.DEFAULT_TYPE
 
     if context.user_data.get("admin_promo_waiting"):
         await admin_promo_create(update, context, text)
+        return
+
+    if context.user_data.get("admin_daily_waiting"):
+        await admin_daily_set(update, context, text)
+        return
+
+    if context.user_data.get("admin_exclusive_waiting"):
+        await admin_exclusive_create(update, context, text)
         return
 
     if context.user_data.get("promo_waiting"):
@@ -3066,22 +3350,23 @@ def main():
     app.add_handler(CallbackQueryHandler(handle_dnd_callback, pattern="^dnd_(15|30|60|90)$"))
     app.add_handler(CallbackQueryHandler(handle_admin_anon_ban_callback, pattern="^admin_anon_ban_(15|20|25|30|60)$"))
     app.add_handler(CallbackQueryHandler(handle_report_ban_callback, pattern=r"^report:ban:-?\d+:(15|20|25|30|60)$"))
-    app.add_handler(CallbackQueryHandler(handle_shop_buy, pattern=r"^shop_buy:(plus|premium|name_color|crown|star_badge|profile_frame|message_style|random_item|rnmd_badge|diamond_badge|sakura_badge|trophy|premium_gold_frame|premium_star|autumn_frame|pumpkin_badge)$"))
+    app.add_handler(CallbackQueryHandler(handle_shop_buy, pattern=r"^shop_buy:(plus|premium|name_color|crown|star_badge|profile_frame|message_style|random_item|rnmd_badge|diamond_badge|sakura_badge|trophy|premium_gold_frame|premium_star|autumn_frame|pumpkin_badge|ex_[a-z0-9]+)$"))
     app.add_handler(CallbackQueryHandler(handle_shop_items, pattern=r"^shop_items$"))
     app.add_handler(CallbackQueryHandler(handle_shop_back, pattern=r"^shop_back$"))
     app.add_handler(CallbackQueryHandler(handle_shop_owned, pattern=r"^shop_owned$"))
     app.add_handler(CallbackQueryHandler(handle_profile_decor, pattern=r"^profile_decor$"))
     app.add_handler(CallbackQueryHandler(handle_profile_colors, pattern=r"^profile_colors$"))
     app.add_handler(CallbackQueryHandler(handle_profile_color_set, pattern=r"^profile_color:(green|white|gray|black|red|purple|pink|dark_green|light_blue|blue)$"))
-    app.add_handler(CallbackQueryHandler(handle_profile_toggle, pattern=r"^profile_toggle:[a-z_]+$"))
+    app.add_handler(CallbackQueryHandler(handle_profile_toggle, pattern=r"^profile_toggle:[a-z0-9_]+$"))
     app.add_handler(CallbackQueryHandler(handle_profile_back, pattern=r"^profile_back$"))
     app.add_handler(CallbackQueryHandler(handle_profile_titles, pattern=r"^profile_titles$"))
     app.add_handler(CallbackQueryHandler(handle_profile_title_set, pattern=r"^profile_title:[a-z_]+$"))
     app.add_handler(CallbackQueryHandler(handle_profile_favorite, pattern=r"^profile_favorite$"))
-    app.add_handler(CallbackQueryHandler(handle_profile_favorite_set, pattern=r"^profile_fav:[a-z_]+$"))
-    app.add_handler(CallbackQueryHandler(handle_gift_buy, pattern=r"^gift_buy:[a-z_]+$"))
+    app.add_handler(CallbackQueryHandler(handle_profile_favorite_set, pattern=r"^profile_fav:[a-z0-9_]+$"))
+    app.add_handler(CallbackQueryHandler(handle_gift_buy, pattern=r"^gift_buy:[a-z0-9_]+$"))
     app.add_handler(CallbackQueryHandler(handle_gift_cancel, pattern=r"^gift_cancel$"))
     app.add_handler(CallbackQueryHandler(handle_top, pattern=r"^top:(level|coins|collection)$"))
+    app.add_handler(CallbackQueryHandler(handle_admin_promo_delete, pattern=r"^promo_del:[A-Z0-9_-]{3,24}$"))
 
     app.add_handler(
         MessageHandler(
