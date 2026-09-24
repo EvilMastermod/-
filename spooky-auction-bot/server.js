@@ -1,4 +1,4 @@
-const express=require('express'),fs=require('fs'),path=require('path'),crypto=require('crypto');
+const express=require('express'),fs=require('fs'),path=require('path');
 const app=express(); app.use(express.json({limit:'512kb'}));
 
 const PORT=Number(process.env.PORT||3000), DIR=process.env.DATA_DIR||'/data';
@@ -6,7 +6,7 @@ const FILE=path.join(DIR,'spooky-prices.json');
 const FRESH=Number(process.env.PRICE_FRESH_MS||7200000), RETAIN=Number(process.env.PRICE_RETAIN_MS||259200000);
 const ALLOWED=/^\/an(?:10[1-8]|20[1-9]|30[1-9])$/i;
 
-let db={version:2,listings:[],wallets:{}},saveTimer=null;
+let db={version:3,listings:[],wallets:{}},saveTimer=null;
 
 function strip(v){return String(v??'').replace(/§[0-9A-FK-OR]/gi,'').replace(/\u00a0/g,' ').trim()}
 function norm(v){return strip(v).toLowerCase().replace(/ё/g,'е').replace(/[^a-zа-я0-9+ _-]/gi,' ').replace(/\s+/g,' ').trim()}
@@ -21,11 +21,19 @@ function load(){
       if(x&&Array.isArray(x.listings)) db=x;
     }
   }catch(e){console.error('[DB] load',e.message)}
-  if(!db||typeof db!=='object')db={version:2,listings:[],wallets:{}};
+  if(!db||typeof db!=='object')db={version:3,listings:[],wallets:{}};
   if(!Array.isArray(db.listings))db.listings=[];
   if(!db.wallets||typeof db.wallets!=='object'||Array.isArray(db.wallets))db.wallets={};
-  db.version=2;
+
+  if(Number(db.version||0)<3){
+    for(const wallet of Object.values(db.wallets)){
+      if(wallet&&typeof wallet==='object') wallet.balance=0;
+    }
+  }
+
+  db.version=3;
   prune();
+  save();
 }
 function save(){mkdir();try{const t=FILE+'.tmp';fs.writeFileSync(t,JSON.stringify(db));fs.renameSync(t,FILE)}catch(e){console.error('[DB] save',e.message)}}
 function later(){if(saveTimer)return;saveTimer=setTimeout(()=>{saveTimer=null;save()},400)}
@@ -79,7 +87,7 @@ app.post('/wallet',(req,res)=>{
 
   if(!db.wallets[userId]){
     db.wallets[userId]={
-      balance:crypto.randomInt(100,1001),
+      balance:0,
       createdAt:Date.now()
     };
     later();
