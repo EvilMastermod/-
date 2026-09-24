@@ -83,6 +83,7 @@ ADMIN_PROMO_BUTTON = "🎟 Создать промокод"
 ADMIN_DAILY_BUTTON = "🎁 Настроить ежедневку"
 ADMIN_PROMO_DELETE_BUTTON = "🗑 Удалить промокод"
 ADMIN_EXCLUSIVE_BUTTON = "✨ Создать эксклюзив"
+ADMIN_TITLE_BUTTON = "🎖 Создать титул"
 ADMIN_STATS_BUTTON = "📊 Статистика бота"
 ADMIN_LOG_BUTTON = "🧾 История админа"
 ADMIN_SHOP_EDIT_BUTTON = "🧰 Редактор магазина"
@@ -142,6 +143,7 @@ admin_panel_keyboard = ReplyKeyboardMarkup(
         [KeyboardButton(ADMIN_COINS_BUTTON), KeyboardButton(ADMIN_REMOVE_COINS_BUTTON)],
         [KeyboardButton(ADMIN_PROMO_BUTTON), KeyboardButton(ADMIN_PROMO_DELETE_BUTTON)],
         [KeyboardButton(ADMIN_DAILY_BUTTON), KeyboardButton(ADMIN_EXCLUSIVE_BUTTON)],
+        [KeyboardButton(ADMIN_TITLE_BUTTON)],
         [KeyboardButton(ADMIN_STATS_BUTTON), KeyboardButton(ADMIN_LOG_BUTTON)],
         [KeyboardButton(ADMIN_SHOP_EDIT_BUTTON), KeyboardButton(ADMIN_ECONOMY_BLOCK_BUTTON)],
         [KeyboardButton(ADMIN_RANDOM_DAILY_BUTTON), KeyboardButton(ADMIN_BUNDLE_BUTTON)],
@@ -489,6 +491,7 @@ def clear_modes(context: ContextTypes.DEFAULT_TYPE):
     context.user_data.pop("admin_promo_waiting", None)
     context.user_data.pop("admin_daily_waiting", None)
     context.user_data.pop("admin_exclusive_waiting", None)
+    context.user_data.pop("admin_title_waiting", None)
     context.user_data.pop("spooky_price_waiting", None)
 
 async def post_init(application: Application):
@@ -655,6 +658,7 @@ def shop_keyboard(items):
     main_items = [item for item in items if item.get("category") == "main"]
     rows = [
         [InlineKeyboardButton("✨ Украшения", callback_data="shop_items")],
+        [InlineKeyboardButton("🎖 Титулы", callback_data="shop_titles")],
         [InlineKeyboardButton("📦 Наборы", callback_data="shop_bundles")],
     ]
 
@@ -669,6 +673,13 @@ def shop_items_keyboard(items):
     rows = [[shop_item_button(item)] for item in collectible_items]
     rows.append([InlineKeyboardButton("⬅️ Назад в магазин", callback_data="shop_back")])
     return InlineKeyboardMarkup(rows)
+
+def shop_titles_keyboard(items):
+    title_items = [item for item in items if item.get("category") == "titles"]
+    rows = [[shop_item_button(item)] for item in title_items]
+    rows.append([InlineKeyboardButton("⬅️ Назад в магазин", callback_data="shop_back")])
+    return InlineKeyboardMarkup(rows)
+
 
 
 async def fetch_shop(user_id: int):
@@ -2591,6 +2602,7 @@ async def admin_stats(update: Update, context: ContextTypes.DEFAULT_TYPE):
             f"🛍 Всего предметов у пользователей: {int(data.get('purchases') or 0)}",
             f"🎟 Промокодов: {int(data.get('promos') or 0)}",
             f"✨ Кастомных предметов: {int(data.get('customItems') or 0)}",
+            f"🎖 Кастомных титулов: {int(data.get('customTitles') or 0)}",
             f"🎉 Ивент: {event.get('name') if event else 'нет'}",
         ]
         popular = data.get("popular") or []
@@ -3058,6 +3070,93 @@ async def handle_admin_promo_delete(update: Update, context: ContextTypes.DEFAUL
         await query.answer("❌ Сервис промокодов недоступен.", show_alert=True)
 
 
+async def admin_title_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if update.effective_user.id != ADMIN_ID:
+        return
+
+    clear_modes(context)
+    context.user_data["admin_title_waiting"] = True
+    await update.message.reply_text(
+        "🎖 Создание титула\n\n"
+        "Формат:\n"
+        "Название | цена | эмодзи | тип | редкость | видимость\n\n"
+        "Тип: обычный или premium.\n"
+        "Редкость: common/rare/epic/legendary/exclusive.\n"
+        "Видимость: show или hidden.\n\n"
+        "Пример:\n"
+        "Король | 2500 | 👑 | обычный | legendary | show",
+        reply_markup=cancel_keyboard,
+    )
+
+
+async def admin_title_create(update: Update, context: ContextTypes.DEFAULT_TYPE, text: str):
+    if update.effective_user.id != ADMIN_ID:
+        clear_modes(context)
+        return
+
+    parts = [part.strip() for part in text.split("|")]
+    if len(parts) < 2:
+        await update.message.reply_text(
+            "❌ Формат: Название | цена | эмодзи | обычный/premium | редкость | show/hidden",
+            reply_markup=cancel_keyboard,
+        )
+        return
+
+    name = parts[0]
+    price_raw = parts[1].replace(" ", "")
+    emoji = parts[2] if len(parts) > 2 and parts[2] else "🎖"
+    kind = parts[3].lower() if len(parts) > 3 else "обычный"
+    rarity = parts[4].lower() if len(parts) > 4 and parts[4] else "rare"
+    visibility = parts[5].lower() if len(parts) > 5 and parts[5] else "show"
+
+    if not price_raw.isdigit() or int(price_raw) < 1:
+        await update.message.reply_text(
+            "❌ Цена должна быть целым числом от 1 RC.",
+            reply_markup=cancel_keyboard,
+        )
+        return
+
+    payload = {
+        "name": name,
+        "price": int(price_raw),
+        "emoji": emoji,
+        "premiumOnly": kind in {"premium", "премиум", "vip"},
+        "rarity": rarity,
+        "hidden": visibility in {"hidden", "hide", "скрыто"},
+    }
+
+    try:
+        response, data = await api_post("/admin/title", payload)
+        if response.status_code != 200 or not data.get("ok"):
+            await update.message.reply_text(
+                "❌ Не удалось создать титул.",
+                reply_markup=cancel_keyboard,
+            )
+            return
+
+        clear_modes(context)
+        item = data.get("item") or {}
+        await update.message.reply_text(
+            (
+                "✅ Титул создан!\n"
+                f"🎖 {item.get('titleName') or item.get('name')}\n"
+                f"🪙 Цена: {int(item.get('price') or 0):,} RC\n"
+                f"🆔 ID: {item.get('id')}\n"
+                f"💠 Редкость: {item.get('rarity')}\n"
+                f"🔒 Premium: {'да' if item.get('premiumOnly') else 'нет'}\n"
+                f"👁 Видимость: {'скрыт' if item.get('hidden') else 'показан'}"
+            ).replace(",", " "),
+            reply_markup=admin_panel_keyboard,
+        )
+    except Exception:
+        logging.exception("Ошибка создания титула")
+        clear_modes(context)
+        await update.message.reply_text(
+            "❌ Сервис титулов недоступен.",
+            reply_markup=admin_panel_keyboard,
+        )
+
+
 async def admin_exclusive_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if update.effective_user.id != ADMIN_ID:
         return
@@ -3286,6 +3385,31 @@ async def open_case(update: Update, context: ContextTypes.DEFAULT_TYPE):
     except Exception:
         logging.exception("Ошибка кейса")
         await update.message.reply_text("❌ Кейс недоступен.", reply_markup=activities_keyboard)
+
+
+async def handle_shop_titles(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    query = update.callback_query
+    if not query:
+        return
+    await query.answer()
+    try:
+        response, data = await fetch_shop(query.from_user.id)
+        if response.status_code != 200 or not data.get("ok"):
+            await query.answer("❌ Магазин титулов недоступен.", show_alert=True)
+            return
+
+        titles = [item for item in (data.get("items") or []) if item.get("category") == "titles"]
+        text = "🎖 Магазин титулов\n\nКупленный титул сразу становится выбранным."
+        if not titles:
+            text += "\n\nАдминистратор пока не добавил титулы."
+
+        await query.edit_message_text(
+            text,
+            reply_markup=shop_titles_keyboard(data.get("items") or []),
+        )
+    except Exception:
+        logging.exception("Ошибка магазина титулов")
+        await query.answer("❌ Магазин титулов недоступен.", show_alert=True)
 
 
 async def handle_shop_bundles(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -4723,6 +4847,10 @@ async def handle_user_message(update: Update, context: ContextTypes.DEFAULT_TYPE
         await admin_exclusive_start(update, context)
         return
 
+    if text == ADMIN_TITLE_BUTTON:
+        await admin_title_start(update, context)
+        return
+
     if text == ADMIN_STATS_BUTTON:
         await admin_stats(update, context)
         return
@@ -4773,6 +4901,10 @@ async def handle_user_message(update: Update, context: ContextTypes.DEFAULT_TYPE
 
     if context.user_data.get("admin_exclusive_waiting"):
         await admin_exclusive_create(update, context, text)
+        return
+
+    if context.user_data.get("admin_title_waiting"):
+        await admin_title_create(update, context, text)
         return
 
     if context.user_data.get("admin_shop_edit_waiting"):
@@ -4947,6 +5079,7 @@ def main():
     app.add_handler(CallbackQueryHandler(handle_report_ban_callback, pattern=r"^report:ban:-?\d+:(15|20|25|30|60)$"))
     app.add_handler(CallbackQueryHandler(handle_shop_buy, pattern=r"^shop_buy:[a-z0-9_]+$"))
     app.add_handler(CallbackQueryHandler(handle_shop_items, pattern=r"^shop_items$"))
+    app.add_handler(CallbackQueryHandler(handle_shop_titles, pattern=r"^shop_titles$"))
     app.add_handler(CallbackQueryHandler(handle_shop_bundles, pattern=r"^shop_bundles$"))
     app.add_handler(CallbackQueryHandler(handle_bundle_buy, pattern=r"^bundle_buy:bd_[a-z0-9]+$"))
     app.add_handler(CallbackQueryHandler(handle_quest_claim, pattern=r"^quest_claim:[a-z0-9_]+$"))
@@ -4967,7 +5100,7 @@ def main():
     app.add_handler(CallbackQueryHandler(handle_profile_toggle, pattern=r"^profile_toggle:[a-z0-9_]+$"))
     app.add_handler(CallbackQueryHandler(handle_profile_back, pattern=r"^profile_back$"))
     app.add_handler(CallbackQueryHandler(handle_profile_titles, pattern=r"^profile_titles$"))
-    app.add_handler(CallbackQueryHandler(handle_profile_title_set, pattern=r"^profile_title:[a-z_]+$"))
+    app.add_handler(CallbackQueryHandler(handle_profile_title_set, pattern=r"^profile_title:[a-z0-9_]+$"))
     app.add_handler(CallbackQueryHandler(handle_profile_favorite, pattern=r"^profile_favorite$"))
     app.add_handler(CallbackQueryHandler(handle_profile_favorite_set, pattern=r"^profile_fav:[a-z0-9_]+$"))
     app.add_handler(CallbackQueryHandler(handle_gift_buy, pattern=r"^gift_buy:[a-z0-9_]+$"))
