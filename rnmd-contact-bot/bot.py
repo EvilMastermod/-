@@ -434,8 +434,49 @@ async def fetch_profile(user_id: int):
             json={"userId": user_id},
             headers=shop_headers(),
         )
-    data = response.json()
-    return response, data
+
+    try:
+        data = response.json()
+    except Exception:
+        data = {}
+
+    if response.status_code == 200 and data.get("ok"):
+        return response, data
+
+    # Fallback: старый сервер ещё может не иметь /profile.
+    # Тогда строим профиль прямо из уже работающего /shop.
+    shop_response, shop_data = await fetch_shop(user_id)
+    if shop_response.status_code != 200 or not shop_data.get("ok"):
+        return response, data
+
+    items = shop_data.get("items") or []
+    cosmetics = []
+    plus = False
+    premium = False
+    purchases = []
+
+    for item in items:
+        if item.get("owned"):
+            item_id = item.get("id")
+            purchases.append(item_id)
+            if item_id == "plus":
+                plus = True
+            elif item_id == "premium":
+                premium = True
+            elif item.get("category") == "items":
+                cosmetics.append({**item, "equipped": True})
+
+    fallback = {
+        "ok": True,
+        "userId": str(user_id),
+        "balance": int(shop_data.get("balance") or 0),
+        "plus": plus,
+        "premium": premium,
+        "purchases": purchases,
+        "cosmetics": cosmetics,
+        "fallback": True,
+    }
+    return shop_response, fallback
 
 
 def equipped_cosmetic_ids(data):
