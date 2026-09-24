@@ -3,7 +3,9 @@ import re
 import logging
 import time
 import httpx
+from io import BytesIO
 from urllib.parse import quote
+from PIL import Image, ImageDraw, ImageFont
 from telegram import (
     Update,
     ReplyKeyboardMarkup,
@@ -68,6 +70,19 @@ PROFILE_COLOR_OPTIONS = [
     ("light_blue", "🩵", "Голубой"),
     ("blue", "🔵", "Синий"),
 ]
+
+PROFILE_COLOR_RGB = {
+    "green": (34, 197, 94),
+    "white": (255, 255, 255),
+    "gray": (156, 163, 175),
+    "black": (0, 0, 0),
+    "red": (239, 68, 68),
+    "purple": (168, 85, 247),
+    "pink": (236, 72, 153),
+    "dark_green": (20, 83, 45),
+    "light_blue": (56, 189, 248),
+    "blue": (37, 99, 235),
+}
 
 user_main_keyboard = ReplyKeyboardMarkup(
     [
@@ -519,6 +534,143 @@ def profile_has_cosmetic(data, item_id):
     )
 
 
+def load_profile_font(size: int, bold: bool = False):
+    candidates = [
+        "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf" if bold else "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",
+        "/usr/share/fonts/dejavu/DejaVuSans-Bold.ttf" if bold else "/usr/share/fonts/dejavu/DejaVuSans.ttf",
+    ]
+
+    for path in candidates:
+        try:
+            return ImageFont.truetype(path, size=size)
+        except Exception:
+            pass
+
+    return ImageFont.load_default()
+
+
+def make_profile_card(user, data):
+    width, height = 900, 430
+    image = Image.new("RGB", (width, height), (20, 23, 31))
+    draw = ImageDraw.Draw(image)
+
+    title_font = load_profile_font(28, bold=True)
+    name_font = load_profile_font(54, bold=True)
+    small_font = load_profile_font(25)
+    badge_font = load_profile_font(22, bold=True)
+
+    equipped = equipped_cosmetic_ids(data)
+    color_id = data.get("nameColor") or "white"
+    name_color = PROFILE_COLOR_RGB.get(color_id, PROFILE_COLOR_RGB["white"])
+    name = user.full_name or "User"
+    username = f"@{user.username}" if user.username else "Telegram user"
+    status = "PREMIUM" if data.get("premium") else ("PLUS" if data.get("plus") else "STANDARD")
+    balance = f"{int(data.get('balance') or 0):,}".replace(",", " ")
+
+    # Header
+    draw.text((42, 30), "RNMD PROFILE", font=title_font, fill=(220, 225, 235))
+
+    # Purchased profile frame becomes a real visual frame.
+    if "profile_frame" in equipped:
+        draw.rounded_rectangle(
+            (32, 82, width - 32, height - 32),
+            radius=28,
+            outline=(215, 220, 230),
+            width=4,
+        )
+
+    # Center the nickname and draw it with the selected actual RGB color.
+    bbox = draw.textbbox((0, 0), name, font=name_font, stroke_width=3)
+    name_w = bbox[2] - bbox[0]
+    name_x = max(48, (width - name_w) // 2)
+    name_y = 120
+
+    stroke_fill = (245, 245, 245) if color_id == "black" else (8, 10, 15)
+    draw.text(
+        (name_x, name_y),
+        name,
+        font=name_font,
+        fill=name_color,
+        stroke_width=3,
+        stroke_fill=stroke_fill,
+    )
+
+    badges = []
+    if "crown" in equipped:
+        badges.append("CROWN")
+    if "star_badge" in equipped:
+        badges.append("STAR")
+    if "rnmd_badge" in equipped:
+        badges.append("RNMD")
+    if "diamond_badge" in equipped:
+        badges.append("DIAMOND")
+    if "sakura_badge" in equipped:
+        badges.append("SAKURA")
+    if "trophy" in equipped:
+        badges.append("TROPHY")
+    if "random_item" in equipped:
+        badges.append("MYSTERY")
+
+    badge_text = "  •  ".join(badges)
+    if badge_text:
+        badge_bbox = draw.textbbox((0, 0), badge_text, font=badge_font)
+        badge_w = badge_bbox[2] - badge_bbox[0]
+        draw.text(
+            ((width - badge_w) // 2, 205),
+            badge_text,
+            font=badge_font,
+            fill=(190, 196, 210),
+        )
+
+    draw.text((70, 285), username, font=small_font, fill=(210, 215, 225))
+    draw.text((70, 330), f"STATUS: {status}", font=small_font, fill=(210, 215, 225))
+    draw.text((470, 330), f"RANDOM COINS: {balance}", font=small_font, fill=(210, 215, 225))
+
+    buffer = BytesIO()
+    image.save(buffer, format="PNG", optimize=True)
+    buffer.seek(0)
+    buffer.name = "profile.png"
+    return buffer
+
+
+def profile_caption(user, data):
+    balance = int(data.get("balance") or 0)
+    status = "Premium" if data.get("premium") else ("Plus" if data.get("plus") else "Обычный")
+    cosmetics = data.get("cosmetics") or []
+    equipped_count = sum(1 for item in cosmetics if item.get("equipped"))
+    username = f"@{user.username}" if user.username else "нет username"
+
+    lines = [
+        "👤 Профиль",
+        "",
+        f"🔗 {username}",
+        f"🆔 {user.id}",
+        f"💎 Статус: {status}",
+        f"🪙 Random Coins: {balance:,}".replace(",", " "),
+    ]
+
+    if cosmetics:
+        lines.append(f"✨ Украшений: {equipped_count}/{len(cosmetics)}")
+
+    if profile_has_cosmetic(data, "name_color"):
+        _emoji, color_name = profile_color_meta(data.get("nameColor") or "white")
+        lines.append(f"🎨 Цвет ника: {color_name}")
+
+    if "message_style" in equipped_cosmetic_ids(data):
+        lines.append("💬 Особый стиль сообщений: включён")
+
+    return "\n".join(lines)
+
+
+async def send_profile_card(message, user, data):
+    card = make_profile_card(user, data)
+    await message.reply_photo(
+        photo=card,
+        caption=profile_caption(user, data),
+        reply_markup=profile_keyboard(data),
+    )
+
+
 def profile_display_name(user, data):
     name = user.full_name or "Пользователь"
     equipped = equipped_cosmetic_ids(data)
@@ -739,9 +891,10 @@ async def show_profile(update: Update, context: ContextTypes.DEFAULT_TYPE):
             )
             return
 
-        await update.message.reply_text(
-            profile_text(update.effective_user, data),
-            reply_markup=profile_keyboard(data),
+        await send_profile_card(
+            update.message,
+            update.effective_user,
+            data,
         )
     except Exception:
         logging.exception("Ошибка профиля")
@@ -821,8 +974,16 @@ async def handle_profile_back(update: Update, context: ContextTypes.DEFAULT_TYPE
             await query.answer("❌ Профиль сейчас недоступен.", show_alert=True)
             return
 
-        await query.edit_message_text(
-            profile_text(query.from_user, data),
+        try:
+            await query.message.delete()
+        except Exception:
+            pass
+
+        card = make_profile_card(query.from_user, data)
+        await context.bot.send_photo(
+            chat_id=query.message.chat_id,
+            photo=card,
+            caption=profile_caption(query.from_user, data),
             reply_markup=profile_keyboard(data),
         )
     except Exception:
