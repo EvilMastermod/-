@@ -2,7 +2,9 @@ import logging
 import os
 import re
 import sqlite3
-from datetime import time
+import time as time_module
+from collections import defaultdict, deque
+from datetime import time, datetime, timedelta
 from zoneinfo import ZoneInfo
 
 from telegram import (
@@ -33,7 +35,8 @@ DB_PATH = os.environ.get("DB_PATH", "/data/chat-automator.sqlite")
 TZ_NAME = os.environ.get("TZ", "Europe/Kyiv")
 TZ = ZoneInfo(TZ_NAME)
 
-URL_RE = re.compile(r"(https?://|t\.me/|www\.)", re.I)
+URL_RE = re.compile(r"(https?://|t\.me/|www\.|discord\.gg/)", re.I)
+FLOOD = defaultdict(lambda: deque(maxlen=30))
 
 
 def db():
@@ -54,7 +57,12 @@ def init_db():
                 anti_spam INTEGER NOT NULL DEFAULT 1,
                 anti_links INTEGER NOT NULL DEFAULT 0,
                 bad_words_enabled INTEGER NOT NULL DEFAULT 1,
-                warn_limit INTEGER NOT NULL DEFAULT 3
+                warn_limit INTEGER NOT NULL DEFAULT 3,
+                clean_service INTEGER NOT NULL DEFAULT 0,
+                rules TEXT NOT NULL DEFAULT 'Правила пока не настроены.',
+                flood_count INTEGER NOT NULL DEFAULT 6,
+                flood_window INTEGER NOT NULL DEFAULT 10,
+                flood_mute INTEGER NOT NULL DEFAULT 60
             );
 
             CREATE TABLE IF NOT EXISTS bad_words(
@@ -87,6 +95,17 @@ def init_db():
             );
             """
         )
+        for statement in [
+            "ALTER TABLE chats ADD COLUMN clean_service INTEGER NOT NULL DEFAULT 0",
+            "ALTER TABLE chats ADD COLUMN rules TEXT NOT NULL DEFAULT 'Правила пока не настроены.'",
+            "ALTER TABLE chats ADD COLUMN flood_count INTEGER NOT NULL DEFAULT 6",
+            "ALTER TABLE chats ADD COLUMN flood_window INTEGER NOT NULL DEFAULT 10",
+            "ALTER TABLE chats ADD COLUMN flood_mute INTEGER NOT NULL DEFAULT 60",
+        ]:
+            try:
+                c.execute(statement)
+            except sqlite3.OperationalError:
+                pass
 
 
 def ensure_chat(chat_id: int):
@@ -108,6 +127,11 @@ def set_chat(chat_id: int, field: str, value):
         "anti_links",
         "bad_words_enabled",
         "warn_limit",
+        "clean_service",
+        "rules",
+        "flood_count",
+        "flood_window",
+        "flood_mute",
     }
     if field not in allowed:
         raise ValueError("bad field")
@@ -170,6 +194,13 @@ def panel(chat_id: int):
                 InlineKeyboardButton("⏰ Расписание", callback_data="cfg:schedules"),
             ],
             [
+                InlineKeyboardButton(
+                    f"{'✅' if s['clean_service'] else '❌'} Чистить сервис",
+                    callback_data="cfg:clean",
+                ),
+                InlineKeyboardButton("📋 Правила", callback_data="cfg:rules"),
+            ],
+            [
                 InlineKeyboardButton("⚠️ Лимит предупреждений", callback_data="cfg:warnlimit"),
             ],
         ]
@@ -213,6 +244,7 @@ async def config_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "spam": ("anti_spam", "Антиспам"),
         "links": ("anti_links", "Антиссылки"),
         "words": ("bad_words_enabled", "Фильтр слов"),
+        "clean": ("clean_service", "Очистка сервисных сообщений"),
     }
     if action in toggles:
         field, label = toggles[action]
@@ -257,6 +289,13 @@ async def config_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await q.message.reply_text(text)
         return
 
+    if action == "rules":
+        await q.answer()
+        await q.message.reply_text(
+            f"📋 Правила чата:\n\n{s['rules']}\n\nИзменить: /setrules текст правил"
+        )
+        return
+
     if action == "warnlimit":
         await q.answer()
         await q.message.reply_text(
@@ -276,6 +315,24 @@ async def set_welcome(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return
     set_chat(update.effective_chat.id, "welcome_text", text[:1000])
     await update.message.reply_text("✅ Текст приветствия сохранён.")
+
+
+async def set_rules(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if not await require_admin(update):
+        return
+    text = update.message.text.partition(" ")[2].strip()
+    if not text:
+        await update.message.reply_text("Пример: /setrules Не спамить и уважать участников.")
+        return
+    set_chat(update.effective_chat.id, "rules", text[:3000])
+    await update.message.reply_text("✅ Правила сохранены.")
+
+
+async def rules(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if update.effective_chat.type == "private":
+        return
+    s = get_chat(update.effective_chat.id)
+    await update.message.reply_text("📋 Правила чата:\n\n" + s["rules"])
 
 
 async def add_bad_word(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -512,6 +569,80 @@ async def unwarn_user(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text("✅ Одно предупреждение снято.")
 
 
+def parse_duration(raw: str):
+    m = re.fullmatch(r"(\d+)([smhd]?)", (raw or "10m").lower())
+    if not m:
+        return 600
+    n = int(m.group(1))
+    return n * {"": 60, "s": 1, "m": 60, "h": 3600, "d": 86400}[m.group(2)]
+
+
+async def mute_user(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if not await require_admin(update):
+        return
+    if not update.message.reply_to_message:
+        await update.message.reply_text("Ответь /mute 10m на сообщение пользователя.")
+        return
+    user = update.message.reply_to_message.from_user
+    if await is_admin(update, user.id):
+        await update.message.reply_text("❌ Нельзя мутить администратора.")
+        return
+    seconds = parse_duration(context.args[0] if context.args else "10m")
+    try:
+        until = datetime.now(TZ) + timedelta(seconds=seconds)
+        await update.effective_chat.restrict_member(
+            user.id,
+            permissions=ChatPermissions(can_send_messages=False),
+            until_date=until,
+        )
+        await update.message.reply_text(f"🔇 Мут на {seconds} сек.")
+    except Exception:
+        await update.message.reply_text("❌ Не получилось. Проверь права бота.")
+
+
+async def unmute_user(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if not await require_admin(update):
+        return
+    if not update.message.reply_to_message:
+        await update.message.reply_text("Ответь /unmute на сообщение пользователя.")
+        return
+    user = update.message.reply_to_message.from_user
+    perms = ChatPermissions(
+        can_send_messages=True,
+        can_send_audios=True,
+        can_send_documents=True,
+        can_send_photos=True,
+        can_send_videos=True,
+        can_send_video_notes=True,
+        can_send_voice_notes=True,
+        can_send_polls=True,
+        can_send_other_messages=True,
+        can_add_web_page_previews=True,
+    )
+    try:
+        await update.effective_chat.restrict_member(user.id, permissions=perms)
+        await update.message.reply_text("🔊 Мут снят.")
+    except Exception:
+        await update.message.reply_text("❌ Не получилось снять мут.")
+
+
+async def ban_user(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if not await require_admin(update):
+        return
+    if not update.message.reply_to_message:
+        await update.message.reply_text("Ответь /ban на сообщение пользователя.")
+        return
+    user = update.message.reply_to_message.from_user
+    if await is_admin(update, user.id):
+        await update.message.reply_text("❌ Нельзя банить администратора.")
+        return
+    try:
+        await update.effective_chat.ban_member(user.id)
+        await update.message.reply_text("🚫 Пользователь заблокирован.")
+    except Exception:
+        await update.message.reply_text("❌ Не получилось заблокировать.")
+
+
 async def on_new_members(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not update.message or not update.message.new_chat_members:
         return
@@ -527,6 +658,12 @@ async def on_new_members(update: Update, context: ContextTypes.DEFAULT_TYPE):
             .replace("{chat}", update.effective_chat.title or "чат")
         )
         await update.message.reply_text(text)
+
+    if s["clean_service"]:
+        try:
+            await update.message.delete()
+        except Exception:
+            pass
 
 
 async def moderate_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -544,7 +681,28 @@ async def moderate_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return
 
     reason = None
-    if s["anti_links"] and URL_RE.search(text):
+
+    if s["anti_spam"]:
+        key = (chat.id, user.id)
+        now = time_module.time()
+        bucket = FLOOD[key]
+        bucket.append(now)
+        while bucket and now - bucket[0] > int(s["flood_window"]):
+            bucket.popleft()
+        if len(bucket) >= int(s["flood_count"]):
+            reason = "слишком много сообщений подряд"
+            bucket.clear()
+            try:
+                until = datetime.now(TZ) + timedelta(seconds=int(s["flood_mute"]))
+                await chat.restrict_member(
+                    user.id,
+                    permissions=ChatPermissions(can_send_messages=False),
+                    until_date=until,
+                )
+            except Exception:
+                pass
+
+    if not reason and s["anti_links"] and URL_RE.search(text):
         reason = "ссылки запрещены"
 
     if not reason and s["bad_words_enabled"]:
@@ -597,7 +755,9 @@ async def post_init(app: Application):
 
 def main():
     if not BOT_TOKEN:
-        raise RuntimeError("BOT_TOKEN is not set")
+        log.warning("BOT_TOKEN is not set. Service is waiting for the secret.")
+        while True:
+            time_module.sleep(3600)
 
     init_db()
     app = (
@@ -610,6 +770,8 @@ def main():
     app.add_handler(CommandHandler("start", start))
     app.add_handler(CommandHandler("setup", setup))
     app.add_handler(CommandHandler("setwelcome", set_welcome))
+    app.add_handler(CommandHandler("setrules", set_rules))
+    app.add_handler(CommandHandler("rules", rules))
     app.add_handler(CommandHandler("badadd", add_bad_word))
     app.add_handler(CommandHandler("baddel", del_bad_word))
     app.add_handler(CommandHandler("badlist", list_bad_words))
@@ -620,6 +782,9 @@ def main():
     app.add_handler(CommandHandler("warnlimit", warn_limit))
     app.add_handler(CommandHandler("warn", warn_user))
     app.add_handler(CommandHandler("unwarn", unwarn_user))
+    app.add_handler(CommandHandler("mute", mute_user))
+    app.add_handler(CommandHandler("unmute", unmute_user))
+    app.add_handler(CommandHandler("ban", ban_user))
     app.add_handler(CallbackQueryHandler(config_callback, pattern=r"^cfg:"))
     app.add_handler(MessageHandler(filters.StatusUpdate.NEW_CHAT_MEMBERS, on_new_members))
     app.add_handler(MessageHandler(filters.ALL & ~filters.COMMAND, moderate_message))
