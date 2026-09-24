@@ -44,6 +44,12 @@ function load(){
     if(wallet&&typeof wallet==='object'&&(!wallet.purchases||typeof wallet.purchases!=='object'||Array.isArray(wallet.purchases))){
       wallet.purchases={};
     }
+    if(wallet&&typeof wallet==='object'&&(!wallet.decorations||typeof wallet.decorations!=='object'||Array.isArray(wallet.decorations))){
+      wallet.decorations={};
+      for(const itemId of Object.keys(wallet.purchases||{})){
+        if(SHOP[itemId]?.category==='items')wallet.decorations[itemId]=true;
+      }
+    }
   }
 
   if(Number(db.version||0)<3){
@@ -168,10 +174,16 @@ app.get('/stats',(_q,res)=>{
 
 function getWallet(userId){
   if(!db.wallets[userId]){
-    db.wallets[userId]={balance:0,createdAt:Date.now(),purchases:{}};
+    db.wallets[userId]={balance:0,createdAt:Date.now(),purchases:{},decorations:{}};
   }
   if(!db.wallets[userId].purchases||typeof db.wallets[userId].purchases!=='object'){
     db.wallets[userId].purchases={};
+  }
+  if(!db.wallets[userId].decorations||typeof db.wallets[userId].decorations!=='object'||Array.isArray(db.wallets[userId].decorations)){
+    db.wallets[userId].decorations={};
+    for(const itemId of Object.keys(db.wallets[userId].purchases)){
+      if(SHOP[itemId]?.category==='items')db.wallets[userId].decorations[itemId]=true;
+    }
   }
   return db.wallets[userId];
 }
@@ -256,6 +268,9 @@ app.post('/buy',(req,res)=>{
     price:item.price,
     purchasedAt:Date.now()
   };
+  if(item.category==='items'){
+    wallet.decorations[item.id]=true;
+  }
   save();
 
   res.json({
@@ -263,6 +278,59 @@ app.post('/buy',(req,res)=>{
     item,
     balance:wallet.balance,
     purchase:wallet.purchases[item.id]
+  });
+});
+
+app.post('/profile',(req,res)=>{
+  if(!shopAuthorized(req))return res.status(401).json({ok:false,error:'unauthorized'});
+  const userId=String(req.body?.userId??'').trim();
+  if(!/^-?\d{1,20}$/.test(userId))return res.status(400).json({ok:false,error:'invalid user id'});
+
+  const wallet=getWallet(userId);
+  later();
+
+  const purchases=Object.keys(wallet.purchases||{});
+  const cosmetics=Object.values(SHOP)
+    .filter(item=>item.category==='items'&&wallet.purchases?.[item.id])
+    .map(item=>({
+      ...item,
+      equipped:wallet.decorations?.[item.id]!==false
+    }));
+
+  res.json({
+    ok:true,
+    userId,
+    balance:Number(wallet.balance||0),
+    plus:Boolean(wallet.purchases?.plus),
+    premium:Boolean(wallet.purchases?.premium),
+    purchases,
+    cosmetics
+  });
+});
+
+app.post('/profile/decorate',(req,res)=>{
+  if(!shopAuthorized(req))return res.status(401).json({ok:false,error:'unauthorized'});
+  const userId=String(req.body?.userId??'').trim();
+  const itemId=String(req.body?.itemId??'').trim().toLowerCase();
+
+  if(!/^-?\d{1,20}$/.test(userId))return res.status(400).json({ok:false,error:'invalid user id'});
+
+  const item=SHOP[itemId];
+  if(!item||item.category!=='items')return res.status(400).json({ok:false,error:'invalid decoration'});
+
+  const wallet=getWallet(userId);
+  if(!wallet.purchases?.[itemId]){
+    return res.status(403).json({ok:false,error:'decoration not owned'});
+  }
+
+  const enabled=wallet.decorations?.[itemId]!==false;
+  wallet.decorations[itemId]=!enabled;
+  save();
+
+  res.json({
+    ok:true,
+    itemId,
+    equipped:wallet.decorations[itemId]
   });
 });
 
