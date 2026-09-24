@@ -1,4 +1,3 @@
-import asyncio
 import logging
 import os
 import re
@@ -528,8 +527,7 @@ async def business_menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "на экране «Автоматизация чатов».\n\n"
         "Команды прямо в личном чате:\n"
         "• .мут — удалять новые сообщения собеседника\n"
-        "• .размут — снять мут\n"
-        "• .spam 3 текст — повторить текст (максимум 5 раз)\n\n"
+        "• .размут — снять мут\n\n"
         "Удалённые собеседником сообщения бот автоматически сохраняет "
         "и присылает тебе в личный чат с ботом.",
         reply_markup=business_panel(owner_id),
@@ -715,33 +713,6 @@ async def business_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 text="🔊 Мут снят.",
                 business_connection_id=msg.business_connection_id,
             )
-            return
-
-        if low.startswith(".spam ") or low.startswith(".спам "):
-            parts = text.split(maxsplit=2)
-            if len(parts) < 3 or not parts[1].isdigit():
-                await msg.reply_text("Формат: .spam 3 текст", do_quote=False)
-                return
-            count = int(parts[1])
-            spam_text = parts[2].strip()
-            if not (1 <= count <= 5) or not spam_text:
-                await msg.reply_text("Количество: от 1 до 5. Пример: .spam 3 Привет", do_quote=False)
-                return
-            try:
-                if connection["can_delete_sent"]:
-                    await context.bot.delete_business_messages(
-                        business_connection_id=msg.business_connection_id,
-                        message_ids=[msg.message_id],
-                    )
-            except Exception:
-                pass
-            for _ in range(count):
-                await context.bot.send_message(
-                    chat_id=msg.chat_id,
-                    text=spam_text[:4000],
-                    business_connection_id=msg.business_connection_id,
-                )
-                await asyncio.sleep(0.7)
             return
 
         return
