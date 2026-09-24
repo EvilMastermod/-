@@ -56,6 +56,19 @@ MINECRAFT_BACK_BUTTON = "⬅️ В Minecraft"
 CANCEL_BUTTON = "❌ Отменить"
 CHOOSE_USER_BUTTON = "👤 Выбрать получателя"
 
+PROFILE_COLOR_OPTIONS = [
+    ("green", "🟢", "Зелёный"),
+    ("white", "⚪", "Белый"),
+    ("gray", "🩶", "Серый"),
+    ("black", "⚫", "Чёрный"),
+    ("red", "🔴", "Красный"),
+    ("purple", "🟣", "Фиолетовый"),
+    ("pink", "🩷", "Розовый"),
+    ("dark_green", "🟩", "Тёмно-зелёный"),
+    ("light_blue", "🩵", "Голубой"),
+    ("blue", "🔵", "Синий"),
+]
+
 user_main_keyboard = ReplyKeyboardMarkup(
     [
         [KeyboardButton(CONTACT_BUTTON), KeyboardButton(ANON_BUTTON)],
@@ -474,6 +487,11 @@ async def fetch_profile(user_id: int):
         "premium": premium,
         "purchases": purchases,
         "cosmetics": cosmetics,
+        "nameColor": "white",
+        "availableColors": [
+            {"id": color_id, "name": color_name}
+            for color_id, _emoji, color_name in PROFILE_COLOR_OPTIONS
+        ],
         "fallback": True,
     }
     return shop_response, fallback
@@ -487,12 +505,27 @@ def equipped_cosmetic_ids(data):
     }
 
 
+def profile_color_meta(color_id):
+    for option_id, emoji, name in PROFILE_COLOR_OPTIONS:
+        if option_id == color_id:
+            return emoji, name
+    return "⚪", "Белый"
+
+
+def profile_has_cosmetic(data, item_id):
+    return any(
+        item.get("id") == item_id
+        for item in (data.get("cosmetics") or [])
+    )
+
+
 def profile_display_name(user, data):
     name = user.full_name or "Пользователь"
     equipped = equipped_cosmetic_ids(data)
 
     if "name_color" in equipped:
-        name = f"🌈 {name}"
+        color_emoji, _color_name = profile_color_meta(data.get("nameColor") or "white")
+        name = f"{color_emoji} {name} {color_emoji}"
     if "crown" in equipped:
         name = f"👑 {name}"
 
@@ -540,6 +573,10 @@ def profile_text(user, data):
     if cosmetics:
         lines.append(f"✨ Украшений: {equipped_count}/{len(cosmetics)}")
 
+    if profile_has_cosmetic(data, "name_color"):
+        color_emoji, color_name = profile_color_meta(data.get("nameColor") or "white")
+        lines.append(f"🎨 Цвет ника: {color_emoji} {color_name}")
+
     if "message_style" in equipped_cosmetic_ids(data):
         lines.append("💬 Особый стиль сообщений: включён")
 
@@ -561,6 +598,11 @@ def decorations_text(data):
         mark = "✅" if item.get("equipped") else "⚪"
         lines.append(f"{mark} {item.get('name')}")
 
+    if profile_has_cosmetic(data, "name_color"):
+        color_emoji, color_name = profile_color_meta(data.get("nameColor") or "white")
+        lines.append("")
+        lines.append(f"🎨 Выбранный цвет: {color_emoji} {color_name}")
+
     lines.append("")
     lines.append("Нажми на украшение, чтобы включить или выключить его.")
     return "\n".join(lines)
@@ -576,8 +618,112 @@ def decorations_keyboard(data):
                 callback_data=f"profile_toggle:{item.get('id')}",
             )
         ])
+
+    if profile_has_cosmetic(data, "name_color"):
+        color_emoji, color_name = profile_color_meta(data.get("nameColor") or "white")
+        rows.append([
+            InlineKeyboardButton(
+                f"🎨 Цвет: {color_emoji} {color_name}",
+                callback_data="profile_colors",
+            )
+        ])
+
     rows.append([InlineKeyboardButton("⬅️ Назад в профиль", callback_data="profile_back")])
     return InlineKeyboardMarkup(rows)
+
+
+def profile_colors_text(data):
+    color_emoji, color_name = profile_color_meta(data.get("nameColor") or "white")
+    return (
+        "🎨 Цвет ника\n\n"
+        f"Сейчас выбран: {color_emoji} {color_name}\n\n"
+        "Выбери новый цвет:"
+    )
+
+
+def profile_colors_keyboard(data):
+    selected = data.get("nameColor") or "white"
+    buttons = []
+
+    for color_id, emoji, name in PROFILE_COLOR_OPTIONS:
+        prefix = "✅ " if color_id == selected else ""
+        buttons.append(
+            InlineKeyboardButton(
+                f"{prefix}{emoji} {name}",
+                callback_data=f"profile_color:{color_id}",
+            )
+        )
+
+    rows = []
+    for i in range(0, len(buttons), 2):
+        rows.append(buttons[i:i + 2])
+
+    rows.append([InlineKeyboardButton("⬅️ К украшениям", callback_data="profile_decor")])
+    return InlineKeyboardMarkup(rows)
+
+
+async def handle_profile_colors(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    query = update.callback_query
+    if not query:
+        return
+
+    await query.answer()
+
+    try:
+        response, data = await fetch_profile(query.from_user.id)
+        if response.status_code != 200 or not data.get("ok"):
+            await query.answer("❌ Профиль сейчас недоступен.", show_alert=True)
+            return
+
+        if not profile_has_cosmetic(data, "name_color"):
+            await query.answer("Сначала купите «🎨 Цвет ника».", show_alert=True)
+            return
+
+        await query.edit_message_text(
+            profile_colors_text(data),
+            reply_markup=profile_colors_keyboard(data),
+        )
+    except Exception:
+        logging.exception("Ошибка открытия выбора цвета")
+        await query.answer("❌ Цвета сейчас недоступны.", show_alert=True)
+
+
+async def handle_profile_color_set(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    query = update.callback_query
+    if not query:
+        return
+
+    color_id = query.data.split(":", 1)[1]
+    valid_ids = {option_id for option_id, _emoji, _name in PROFILE_COLOR_OPTIONS}
+    if color_id not in valid_ids:
+        await query.answer("❌ Неизвестный цвет.", show_alert=True)
+        return
+
+    try:
+        async with httpx.AsyncClient(timeout=12.0) as client:
+            response = await client.post(
+                f"{SPOOKY_PRICE_API}/profile/color",
+                json={"userId": query.from_user.id, "colorId": color_id},
+                headers=shop_headers(),
+            )
+
+        data = response.json()
+        if response.status_code != 200 or not data.get("ok"):
+            await query.answer("❌ Не удалось изменить цвет.", show_alert=True)
+            return
+
+        emoji, name = profile_color_meta(color_id)
+        await query.answer(f"✅ {name}")
+
+        response2, profile_data = await fetch_profile(query.from_user.id)
+        if response2.status_code == 200 and profile_data.get("ok"):
+            await query.edit_message_text(
+                profile_colors_text(profile_data),
+                reply_markup=profile_colors_keyboard(profile_data),
+            )
+    except Exception:
+        logging.exception("Ошибка изменения цвета ника")
+        await query.answer("❌ Не удалось изменить цвет.", show_alert=True)
 
 
 async def show_profile(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -2162,6 +2308,8 @@ def main():
     app.add_handler(CallbackQueryHandler(handle_shop_back, pattern=r"^shop_back$"))
     app.add_handler(CallbackQueryHandler(handle_shop_owned, pattern=r"^shop_owned$"))
     app.add_handler(CallbackQueryHandler(handle_profile_decor, pattern=r"^profile_decor$"))
+    app.add_handler(CallbackQueryHandler(handle_profile_colors, pattern=r"^profile_colors$"))
+    app.add_handler(CallbackQueryHandler(handle_profile_color_set, pattern=r"^profile_color:(green|white|gray|black|red|purple|pink|dark_green|light_blue|blue)$"))
     app.add_handler(CallbackQueryHandler(handle_profile_toggle, pattern=r"^profile_toggle:[a-z_]+$"))
     app.add_handler(CallbackQueryHandler(handle_profile_back, pattern=r"^profile_back$"))
 
