@@ -139,13 +139,13 @@ public final class SpookyPriceClient implements ClientModInitializer {
         body.addProperty("collector", config.collectorId);
         body.addProperty("auction", currentAnarchy);
         body.addProperty("screenTitle", title);
-        body.addProperty("clientVersion", "1.0.0");
+        body.addProperty("clientVersion", "1.0.1");
 
         JsonArray array = new JsonArray();
         for (Listing listing : listings) {
             JsonObject row = new JsonObject();
             row.addProperty("name", listing.name);
-            row.addProperty("price", listing.price);
+            row.addProperty("rawText", listing.rawText);
             row.addProperty("count", listing.count);
             row.addProperty("slot", listing.slot);
             row.addProperty("fingerprint", listing.fingerprint);
@@ -181,7 +181,7 @@ public final class SpookyPriceClient implements ClientModInitializer {
 
             if (response.statusCode() >= 200 && response.statusCode() < 300) {
                 if (!passive) {
-                    notifyClient("§a[Spooky Price] Отправлено цен: " + listings.size() + " • " + currentAnarchy);
+                    notifyClient("§a[Spooky Price] Отправлено предметов: " + listings.size() + " • " + currentAnarchy);
                 }
             } else {
                 notifyClient("§c[Spooky Price] API " + response.statusCode() + ": " + shortText(response.body()));
@@ -203,11 +203,10 @@ public final class SpookyPriceClient implements ClientModInitializer {
 
             String components = String.valueOf(stack.getComponents());
             String raw = cleanText(name + " " + components);
-            Long price = extractPrice(raw);
-            if (price == null || price <= 0) continue;
+            if (raw.length() > 6000) raw = raw.substring(0, 6000);
 
             String fingerprint = sha256(name + "\n" + components + "\n" + stack.getCount());
-            result.add(new Listing(name, price, stack.getCount(), i, fingerprint));
+            result.add(new Listing(name, raw, stack.getCount(), i, fingerprint));
         }
         return result;
     }
@@ -263,7 +262,14 @@ public final class SpookyPriceClient implements ClientModInitializer {
 
     private static boolean isAuctionTitle(String title) {
         String s = cleanText(title).toLowerCase(Locale.ROOT);
-        return s.contains("аук") || s.contains("auction") || s.contains("торг") || s.equals("ah") || s.contains(" /ah");
+        return s.contains("аук")
+                || s.contains("auction")
+                || s.contains("торг")
+                || s.contains("лоты")
+                || s.contains("market")
+                || s.equals("ah")
+                || s.contains("/ah")
+                || s.contains("спуки");
     }
 
     private static boolean looksLikeNavigation(String name) {
@@ -366,5 +372,5 @@ public final class SpookyPriceClient implements ClientModInitializer {
         String lastAnarchy;
     }
 
-    private record Listing(String name, long price, int count, int slot, String fingerprint) {}
+    private record Listing(String name, String rawText, int count, int slot, String fingerprint) {}
 }
