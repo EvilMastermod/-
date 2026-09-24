@@ -2623,7 +2623,7 @@ async def admin_shop_edit_start(update: Update, context: ContextTypes.DEFAULT_TY
         response, data = await api_post("/admin/shop/list", {})
         items = data.get("items") or []
         if items:
-            rows = ["", "", "Кастомные предметы:"]
+            rows = ["", "", "Предметы магазина:"]
             for item in items[:25]:
                 rows.append(
                     f"• {item.get('id')} — {item.get('name')} — "
@@ -4927,7 +4927,7 @@ def main():
     app.add_handler(CallbackQueryHandler(handle_dnd_callback, pattern="^dnd_(15|30|60|90)$"))
     app.add_handler(CallbackQueryHandler(handle_admin_anon_ban_callback, pattern="^admin_anon_ban_(15|20|25|30|60)$"))
     app.add_handler(CallbackQueryHandler(handle_report_ban_callback, pattern=r"^report:ban:-?\d+:(15|20|25|30|60)$"))
-    app.add_handler(CallbackQueryHandler(handle_shop_buy, pattern=r"^shop_buy:(plus|premium|name_color|crown|star_badge|profile_frame|message_style|random_item|rnmd_badge|diamond_badge|sakura_badge|trophy|premium_gold_frame|premium_star|autumn_frame|pumpkin_badge|ex_[a-z0-9]+)$"))
+    app.add_handler(CallbackQueryHandler(handle_shop_buy, pattern=r"^shop_buy:[a-z0-9_]+$"))
     app.add_handler(CallbackQueryHandler(handle_shop_items, pattern=r"^shop_items$"))
     app.add_handler(CallbackQueryHandler(handle_shop_bundles, pattern=r"^shop_bundles$"))
     app.add_handler(CallbackQueryHandler(handle_bundle_buy, pattern=r"^bundle_buy:bd_[a-z0-9]+$"))
