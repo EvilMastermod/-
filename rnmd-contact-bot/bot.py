@@ -2572,13 +2572,14 @@ async def admin_daily_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     await update.message.reply_text(
         "🎁 Настройка ежедневной награды по дням\n\n"
-        "Формат: коины | ID предмета | on/off | день\n\n"
-        "Последнее число — день серии, на который ставится награда.\n"
+        "Формат: коины | ID предмета | on/off | день | secret/normal\n\n"
+        "4 число — день серии, на который ставится награда.\n"
+        "5 часть необязательная: secret скрывает награду в календаре.\n"
         "Например:\n"
-        "250 | ex_mufvp8asrs | on | 1\n"
-        "500 |  | off | 2\n"
-        "1000 | crown | on | 7\n\n"
-        "1 — коины. 2 — ID предмета. 3 — бонус серии on/off. 4 — номер дня."
+        "250 | ex_mufvp8asrs | on | 1 | normal\n"
+        "500 |  | off | 2 | secret\n"
+        "1000 | crown | on | 7 | normal\n\n"
+        "1 — коины. 2 — ID предмета. 3 — бонус серии on/off. 4 — номер дня. 5 — secret/normal."
         + current_text,
         reply_markup=cancel_keyboard,
     )
@@ -2600,6 +2601,8 @@ async def admin_daily_set(update: Update, context: ContextTypes.DEFAULT_TYPE, te
     item_id = parts[1].strip().lower() if parts[1].strip() else None
     bonus_raw = parts[2].strip().lower()
     day_raw = parts[3].replace(" ", "")
+    surprise_raw = parts[4].strip().lower() if len(parts) > 4 else "normal"
+    surprise = surprise_raw in {"secret", "сюрприз", "скрыто", "hidden"}
 
     if not coins_raw.isdigit():
         await update.message.reply_text(
@@ -2644,6 +2647,7 @@ async def admin_daily_set(update: Update, context: ContextTypes.DEFAULT_TYPE, te
                 "itemId": item_id,
                 "streakBonus": streak_bonus,
                 "day": day,
+                "surprise": surprise,
             },
         )
         if response.status_code != 200 or not data.get("ok"):
@@ -2660,6 +2664,7 @@ async def admin_daily_set(update: Update, context: ContextTypes.DEFAULT_TYPE, te
             f"✅ Награда на день {int(data.get('day') or day)} сохранена.",
             f"🪙 Коины: {int(daily.get('coins') or 0):,}".replace(",", " "),
             f"📅 Бонус серии: {'вкл' if daily.get('streakBonus', True) else 'выкл'}",
+            f"🎁 В календаре: {'СЮРПРИЗ' if daily.get('surprise') else 'показана'}",
         ]
         if item:
             lines.append(f"🎁 Предмет: {item.get('name')} ({item.get('id')})")
@@ -2742,13 +2747,15 @@ async def admin_exclusive_start(update: Update, context: ContextTypes.DEFAULT_TY
     await update.message.reply_text(
         "✨ Создание кастомного эксклюзива\n\n"
         "Формат:\n"
-        "Название | цена | эмодзи | тип | дней\n\n"
-        "Тип: premium, обычный или ежедневка\n"
-        "Если тип «ежедневка», цена может быть 0 — такой эксклюзив нельзя купить, подарить, получить из кейса или промокода.\n"
-        "Дней: 0 = навсегда\n\n"
+        "Название | цена | эмодзи | тип | дней | редкость | видимость\n\n"
+        "Тип: premium, обычный, ежедневка или фон.\n"
+        "Редкость: common/rare/epic/legendary/exclusive.\n"
+        "Видимость: show или hidden.\n"
+        "Дней: 0 = навсегда.\n\n"
         "Примеры:\n"
-        "Молния RNMD | 2500 | ⚡ | premium | 7\n"
-        "Шахед | 0 | 🛩️ | ежедневка | 14",
+        "Молния RNMD | 2500 | ⚡ | premium | 7 | epic | show\n"
+        "Секрет | 3000 | 👻 | обычный | 0 | legendary | hidden\n"
+        "Sakura Sky | 1800 | 🌸 | фон | 0 | epic | show",
         reply_markup=cancel_keyboard,
     )
 
@@ -2771,7 +2778,10 @@ async def admin_exclusive_create(update: Update, context: ContextTypes.DEFAULT_T
     emoji = parts[2] if len(parts) > 2 and parts[2] else "✨"
     kind = parts[3].lower() if len(parts) > 3 else "обычный"
     days_raw = parts[4].replace(" ", "") if len(parts) > 4 else "0"
+    rarity = parts[5].strip().lower() if len(parts) > 5 and parts[5].strip() else "exclusive"
+    visibility = parts[6].strip().lower() if len(parts) > 6 and parts[6].strip() else "show"
     daily_only = kind in {"ежедневка", "daily", "daily_only", "ежедневная"}
+    background_kind = kind in {"фон", "background", "bg"}
 
     if not price_raw.isdigit() or not days_raw.isdigit():
         await update.message.reply_text(
@@ -2794,6 +2804,9 @@ async def admin_exclusive_create(update: Update, context: ContextTypes.DEFAULT_T
         "emoji": emoji,
         "premiumOnly": (kind in {"premium", "премиум", "vip"}) and not daily_only,
         "dailyOnly": daily_only,
+        "kind": "background" if background_kind else "decoration",
+        "rarity": rarity,
+        "hidden": visibility in {"hidden", "скрыто", "hide"},
         "days": int(days_raw),
     }
 
@@ -2817,6 +2830,9 @@ async def admin_exclusive_create(update: Update, context: ContextTypes.DEFAULT_T
             lines.append(f"🔒 Premium: {'да' if item.get('premiumOnly') else 'нет'}")
         lines.extend([
             f"🆔 ID: {item.get('id')}",
+            f"💠 Редкость: {item.get('rarity') or 'exclusive'}",
+            f"👁 Видимость: {'скрыт' if item.get('hidden') else 'показан'}",
+            f"🖼 Тип: {'фон профиля' if item.get('kind') == 'background' else 'украшение'}",
             f"⏳ Срок: {'до ' + until if until else 'навсегда'}",
             "",
         ])
