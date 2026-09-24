@@ -2541,6 +2541,115 @@ async def admin_grant_coins(update: Update, context: ContextTypes.DEFAULT_TYPE, 
         )
 
 
+async def admin_remove_coins_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if update.effective_user.id != ADMIN_ID:
+        await update.message.reply_text(
+            "⛔ Эта кнопка доступна только администратору.",
+            reply_markup=get_main_keyboard(update.effective_user.id),
+        )
+        return
+
+    clear_modes(context)
+    context.user_data["admin_remove_coins_stage"] = "choose"
+
+    await update.message.reply_text(
+        "➖ Выберите пользователя, у которого нужно удалить Random Coins.",
+        reply_markup=admin_remove_coins_keyboard,
+    )
+
+
+async def admin_remove_coins_choose_amount(update: Update, context: ContextTypes.DEFAULT_TYPE, target_id: int):
+    if update.effective_user.id != ADMIN_ID:
+        return
+
+    context.user_data["admin_remove_coins_stage"] = "amount"
+    context.user_data["admin_remove_coins_target_id"] = target_id
+
+    await update.message.reply_text(
+        f"➖ Сколько Random Coins удалить у пользователя {target_id}?\n"
+        "Напишите целое число от 1 до 1 000 000 000.",
+        reply_markup=cancel_keyboard,
+    )
+
+
+async def admin_remove_coins(update: Update, context: ContextTypes.DEFAULT_TYPE, text: str):
+    if update.effective_user.id != ADMIN_ID:
+        clear_modes(context)
+        return
+
+    target_id = context.user_data.get("admin_remove_coins_target_id")
+    if not target_id:
+        clear_modes(context)
+        await update.message.reply_text(
+            "❌ Сначала выберите пользователя.",
+            reply_markup=admin_panel_keyboard,
+        )
+        return
+
+    raw = text.replace(" ", "").replace(",", "")
+    if not raw.isdigit():
+        await update.message.reply_text(
+            "❌ Напишите только число. Например: 1000",
+            reply_markup=cancel_keyboard,
+        )
+        return
+
+    amount = int(raw)
+    if amount < 1 or amount > 1_000_000_000:
+        await update.message.reply_text(
+            "❌ Можно удалить от 1 до 1 000 000 000 Random Coins.",
+            reply_markup=cancel_keyboard,
+        )
+        return
+
+    try:
+        response, data = await api_post(
+            "/admin/coins/remove",
+            {"userId": target_id, "amount": amount},
+        )
+
+        if response.status_code != 200 or not data.get("ok"):
+            error_text = data.get("error") or f"HTTP {response.status_code}"
+            clear_modes(context)
+            await update.message.reply_text(
+                f"❌ Не удалось удалить коины: {error_text}",
+                reply_markup=admin_panel_keyboard,
+            )
+            return
+
+        removed = int(data.get("removed") or 0)
+        balance = int(data.get("balance") or 0)
+        clear_modes(context)
+
+        await update.message.reply_text(
+            (
+                f"✅ Удалено: {removed:,} Random Coins\n"
+                f"👤 Пользователь: {target_id}\n"
+                f"👛 Новый баланс: {balance:,}"
+            ).replace(",", " "),
+            reply_markup=admin_panel_keyboard,
+        )
+
+        try:
+            await context.bot.send_message(
+                chat_id=target_id,
+                text=(
+                    f"➖ Администратор удалил у вас {removed:,} Random Coins.\n"
+                    f"👛 Баланс: {balance:,}"
+                ).replace(",", " "),
+            )
+        except Exception:
+            logging.exception("Не удалось уведомить пользователя об удалении коинов")
+
+    except Exception:
+        logging.exception("Ошибка удаления Random Coins")
+        clear_modes(context)
+        await update.message.reply_text(
+            "❌ Сервис коинов сейчас недоступен.",
+            reply_markup=admin_panel_keyboard,
+        )
+
+
 async def admin_anon_unban_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if update.effective_user.id != ADMIN_ID:
         await update.message.reply_text(
@@ -2833,6 +2942,19 @@ async def handle_users_shared(update: Update, context: ContextTypes.DEFAULT_TYPE
             )
             return
         await admin_coins_choose_amount(update, context, shared[0].user_id)
+        return
+
+    if context.user_data.get("admin_remove_coins_stage") == "choose":
+        if update.effective_user.id != ADMIN_ID:
+            clear_modes(context)
+            return
+        if not shared:
+            await update.message.reply_text(
+                "❌ Пользователь не выбран.",
+                reply_markup=admin_remove_coins_keyboard,
+            )
+            return
+        await admin_remove_coins_choose_amount(update, context, shared[0].user_id)
         return
 
     if context.user_data.get("transfer_stage") == "choose":
@@ -3257,6 +3379,10 @@ async def handle_user_message(update: Update, context: ContextTypes.DEFAULT_TYPE
         await minecraft_section(update, context)
         return
 
+    if text == ADMIN_PANEL_BUTTON:
+        await admin_panel(update, context)
+        return
+
     if text == ADMIN_DND_OFF_BUTTON:
         await admin_dnd_off_start(update, context)
         return
@@ -3275,6 +3401,10 @@ async def handle_user_message(update: Update, context: ContextTypes.DEFAULT_TYPE
 
     if text == ADMIN_COINS_BUTTON:
         await admin_coins_start(update, context)
+        return
+
+    if text == ADMIN_REMOVE_COINS_BUTTON:
+        await admin_remove_coins_start(update, context)
         return
 
     if text == ADMIN_PROMO_BUTTON:
@@ -3299,6 +3429,10 @@ async def handle_user_message(update: Update, context: ContextTypes.DEFAULT_TYPE
 
     if context.user_data.get("admin_coins_stage") == "amount":
         await admin_grant_coins(update, context, text)
+        return
+
+    if context.user_data.get("admin_remove_coins_stage") == "amount":
+        await admin_remove_coins(update, context, text)
         return
 
     if context.user_data.get("admin_promo_waiting"):
