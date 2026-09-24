@@ -34,6 +34,7 @@ SPOOKY_PRICE_API = os.environ.get(
     "https://spooky-auction-bot-production.up.railway.app",
 ).rstrip("/")
 PRICE_API_KEY = os.environ.get("PRICE_API_KEY", "")
+SHOP_API_KEY = os.environ.get("SHOP_API_KEY", "")
 
 CONTACT_BUTTON = "📩 Связь"
 ANON_BUTTON = "🕵️ Анон"
@@ -47,6 +48,7 @@ MINECRAFT_BUTTON = "⛏ Minecraft"
 SPOOKY_BUTTON = "👻 Spooky Time"
 SPOOKY_PRICE_BUTTON = "💰 Средняя цена"
 WALLET_BUTTON = "👛 Кошелёк"
+SHOP_BUTTON = "🛒 Магазин"
 BACK_BUTTON = "⬅️ Назад"
 MINECRAFT_BACK_BUTTON = "⬅️ В Minecraft"
 CANCEL_BUTTON = "❌ Отменить"
@@ -57,6 +59,7 @@ user_main_keyboard = ReplyKeyboardMarkup(
         [KeyboardButton(CONTACT_BUTTON), KeyboardButton(ANON_BUTTON)],
         [KeyboardButton(DND_BUTTON), KeyboardButton(DND_OFF_BUTTON)],
         [KeyboardButton(MINECRAFT_BUTTON), KeyboardButton(WALLET_BUTTON)],
+        [KeyboardButton(SHOP_BUTTON)],
     ],
     resize_keyboard=True,
 )
@@ -66,6 +69,7 @@ admin_main_keyboard = ReplyKeyboardMarkup(
         [KeyboardButton(CONTACT_BUTTON), KeyboardButton(ANON_BUTTON)],
         [KeyboardButton(DND_BUTTON), KeyboardButton(DND_OFF_BUTTON)],
         [KeyboardButton(MINECRAFT_BUTTON), KeyboardButton(WALLET_BUTTON)],
+        [KeyboardButton(SHOP_BUTTON)],
         [KeyboardButton(ADMIN_DND_OFF_BUTTON), KeyboardButton(ADMIN_ANON_BAN_BUTTON)],
         [KeyboardButton(ADMIN_ANON_UNBAN_BUTTON), KeyboardButton(ADMIN_REPORT_LIST_BUTTON)],
     ],
@@ -306,9 +310,21 @@ async def show_wallet(update: Update, context: ContextTypes.DEFAULT_TYPE):
             return
 
         balance = int(data.get("balance") or 0)
+        purchases = data.get("purchases") or []
+        purchase_names = []
+        if "plus" in purchases:
+            purchase_names.append("Plus")
+        if "premium" in purchases:
+            purchase_names.append("Premium")
+
+        purchases_text = ""
+        if purchase_names:
+            purchases_text = "\n🎁 Куплено: " + ", ".join(purchase_names)
+
         await update.message.reply_text(
             "👛 Кошелёк\n\n"
-            f"🪙 Random Coins: {balance:,}".replace(",", " "),
+            f"🪙 Random Coins: {balance:,}".replace(",", " ")
+            + purchases_text,
             reply_markup=get_main_keyboard(update.effective_user.id),
         )
 
@@ -318,6 +334,178 @@ async def show_wallet(update: Update, context: ContextTypes.DEFAULT_TYPE):
             "❌ Кошелёк сейчас недоступен. Попробуйте чуть позже.",
             reply_markup=get_main_keyboard(update.effective_user.id),
         )
+
+
+def shop_headers():
+    headers = {}
+    if SHOP_API_KEY:
+        headers["x-shop-key"] = SHOP_API_KEY
+    return headers
+
+
+def shop_keyboard(items):
+    rows = []
+    for item in items:
+        item_id = item.get("id")
+        name = item.get("name")
+        price = int(item.get("price") or 0)
+        owned = bool(item.get("owned"))
+
+        if owned:
+            text = f"✅ {name} — куплено"
+            callback = "shop_owned"
+        else:
+            text = f"Купить {name} — {price:,} RC".replace(",", " ")
+            callback = f"shop_buy:{item_id}"
+
+        rows.append([InlineKeyboardButton(text, callback_data=callback)])
+
+    return InlineKeyboardMarkup(rows)
+
+
+async def fetch_shop(user_id: int):
+    async with httpx.AsyncClient(timeout=12.0) as client:
+        response = await client.post(
+            f"{SPOOKY_PRICE_API}/shop",
+            json={"userId": user_id},
+            headers=shop_headers(),
+        )
+    data = response.json()
+    return response, data
+
+
+def shop_text(data):
+    balance = int(data.get("balance") or 0)
+    items = data.get("items") or []
+
+    lines = [
+        "🛒 Магазин",
+        "",
+        f"🪙 Баланс: {balance:,} Random Coins".replace(",", " "),
+        "",
+    ]
+
+    for item in items:
+        name = item.get("name")
+        price = int(item.get("price") or 0)
+        status = " ✅" if item.get("owned") else ""
+        lines.append(f"• {name} — {price:,} RC{status}".replace(",", " "))
+
+    return "\n".join(lines)
+
+
+async def show_shop(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    clear_modes(context)
+
+    try:
+        response, data = await fetch_shop(update.effective_user.id)
+        if response.status_code != 200 or not data.get("ok"):
+            error_text = data.get("error") or f"HTTP {response.status_code}"
+            await update.message.reply_text(
+                f"❌ Не удалось открыть магазин: {error_text}",
+                reply_markup=get_main_keyboard(update.effective_user.id),
+            )
+            return
+
+        await update.message.reply_text(
+            shop_text(data),
+            reply_markup=shop_keyboard(data.get("items") or []),
+        )
+
+    except Exception:
+        logging.exception("Ошибка магазина")
+        await update.message.reply_text(
+            "❌ Магазин сейчас недоступен. Попробуйте чуть позже.",
+            reply_markup=get_main_keyboard(update.effective_user.id),
+        )
+
+
+async def handle_shop_owned(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    query = update.callback_query
+    if query:
+        await query.answer("✅ Этот товар уже куплен.", show_alert=True)
+
+
+async def handle_shop_buy(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    query = update.callback_query
+    if not query:
+        return
+
+    await query.answer()
+
+    item_id = query.data.split(":", 1)[1]
+
+    try:
+        async with httpx.AsyncClient(timeout=12.0) as client:
+            response = await client.post(
+                f"{SPOOKY_PRICE_API}/buy",
+                json={
+                    "userId": query.from_user.id,
+                    "itemId": item_id,
+                },
+                headers=shop_headers(),
+            )
+
+        data = response.json()
+
+        if response.status_code != 200 or not data.get("ok"):
+            code = data.get("code")
+            if code == "insufficient_funds":
+                missing = int(data.get("missing") or 0)
+                await query.answer(
+                    f"❌ Не хватает {missing:,} Random Coins".replace(",", " "),
+                    show_alert=True,
+                )
+                return
+
+            if code == "already_owned":
+                await query.answer("✅ Этот товар уже куплен.", show_alert=True)
+            else:
+                await query.answer(
+                    "❌ Не удалось выполнить покупку.",
+                    show_alert=True,
+                )
+            return
+
+        item = data.get("item") or {}
+        balance = int(data.get("balance") or 0)
+        item_name = item.get("name") or item_id
+
+        await query.answer(f"✅ Куплено: {item_name}", show_alert=True)
+
+        try:
+            response2, shop_data = await fetch_shop(query.from_user.id)
+            if response2.status_code == 200 and shop_data.get("ok"):
+                await query.edit_message_text(
+                    shop_text(shop_data),
+                    reply_markup=shop_keyboard(shop_data.get("items") or []),
+                )
+        except Exception:
+            logging.exception("Не удалось обновить магазин после покупки")
+
+        try:
+            username = f"@{query.from_user.username}" if query.from_user.username else "нет username"
+            await context.bot.send_message(
+                chat_id=ADMIN_ID,
+                text=(
+                    "🛒 Покупка в магазине\n\n"
+                    f"👤 {query.from_user.full_name}\n"
+                    f"🔗 {username}\n"
+                    f"🆔 {query.from_user.id}\n"
+                    f"🎁 Товар: {item_name}\n"
+                    f"🪙 Остаток: {balance:,} RC".replace(",", " ")
+                ),
+            )
+        except Exception:
+            logging.exception("Не удалось уведомить администратора о покупке")
+
+    except Exception:
+        logging.exception("Ошибка покупки в магазине")
+        await query.answer(
+            "❌ Магазин сейчас недоступен.",
+            show_alert=True,
+        )
+
 
 def parse_spooky_price_request(text: str):
     match = re.search(r"/an\d{3}", text.lower())
@@ -1199,6 +1387,10 @@ async def handle_user_message(update: Update, context: ContextTypes.DEFAULT_TYPE
         await show_wallet(update, context)
         return
 
+    if text == SHOP_BUTTON:
+        await show_shop(update, context)
+        return
+
     if text == SPOOKY_BUTTON:
         await spooky_section(update, context)
         return
@@ -1360,6 +1552,8 @@ def main():
     app.add_handler(CallbackQueryHandler(handle_dnd_callback, pattern="^dnd_(15|30|60)$"))
     app.add_handler(CallbackQueryHandler(handle_admin_anon_ban_callback, pattern="^admin_anon_ban_(15|20|25|30|60)$"))
     app.add_handler(CallbackQueryHandler(handle_report_ban_callback, pattern=r"^report:ban:-?\d+:(15|20|25|30|60)$"))
+    app.add_handler(CallbackQueryHandler(handle_shop_buy, pattern=r"^shop_buy:(plus|premium)$"))
+    app.add_handler(CallbackQueryHandler(handle_shop_owned, pattern=r"^shop_owned$"))
 
     app.add_handler(
         MessageHandler(
