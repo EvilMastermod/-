@@ -802,6 +802,7 @@ app.post('/admin/daily',(req,res)=>{
   const rawItem=String(req.body?.itemId||'').trim().toLowerCase();
   const itemId=rawItem?rawItem:null;
   const streakBonus=req.body?.streakBonus!==false;
+  const surprise=Boolean(req.body?.surprise);
   const day=Math.round(Number(req.body?.day||1));
 
   if(!Number.isFinite(day)||day<1||day>3650)return res.status(400).json({ok:false,error:'invalid day'});
@@ -812,7 +813,7 @@ app.post('/admin/daily',(req,res)=>{
     db.settings.dailySchedule={};
   }
 
-  const daily={coins,itemId,streakBonus};
+  const daily={coins,itemId,streakBonus,surprise};
   db.settings.dailySchedule[String(day)]=daily;
   save();
   res.json({ok:true,day,daily,item:itemId?getShopItem(itemId):null});
@@ -867,6 +868,9 @@ app.post('/admin/exclusive',(req,res)=>{
   const price=dailyOnly?0:Math.max(1,Math.min(1000000000,rawPrice));
   const premiumOnly=dailyOnly?false:Boolean(req.body?.premiumOnly);
   const days=Math.max(0,Math.min(3650,Math.round(Number(req.body?.days||0))));
+  const rarity=String(req.body?.rarity||'exclusive').trim().toLowerCase().slice(0,20);
+  const hidden=Boolean(req.body?.hidden);
+  const kind=String(req.body?.kind||'decoration').trim().toLowerCase()==='background'?'background':'decoration';
 
   if(!name)return res.status(400).json({ok:false,error:'name required'});
   if(!dailyOnly&&!price)return res.status(400).json({ok:false,error:'price required'});
@@ -882,6 +886,9 @@ app.post('/admin/exclusive',(req,res)=>{
     customExclusive:true,
     dailyOnly,
     premiumOnly,
+    rarity,
+    hidden,
+    kind,
     createdAt:Date.now()
   };
   if(days>0)item.availableUntil=new Date(Date.now()+days*86400000).toISOString();
@@ -1131,6 +1138,11 @@ app.post('/admin/bundle',(req,res)=>{
   if(!shopAuthorized(req))return res.status(401).json({ok:false,error:'unauthorized'});
   const name=strip(req.body?.name).slice(0,60),price=Math.max(1,Math.round(Number(req.body?.price||0))),items=Array.isArray(req.body?.items)?req.body.items.filter(id=>getShopItem(id)).slice(0,10):[];
   if(!name||!items.length)return res.status(400).json({ok:false,error:'invalid'});const id='bd_'+Date.now().toString(36);db.bundles[id]={id,name,price,items};logAdmin('bundle_create',{id,name});save();res.json({ok:true,bundle:db.bundles[id]});
+});
+app.post('/admin/shop/list',(req,res)=>{
+  if(!shopAuthorized(req))return res.status(401).json({ok:false,error:'unauthorized'});
+  const items=Object.values(db.customShop||{}).sort((a,b)=>Number(b.createdAt||0)-Number(a.createdAt||0));
+  res.json({ok:true,items});
 });
 app.post('/admin/shop/edit',(req,res)=>{
   if(!shopAuthorized(req))return res.status(401).json({ok:false,error:'unauthorized'});
