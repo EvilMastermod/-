@@ -2497,6 +2497,7 @@ async def handle_users_shared(update: Update, context: ContextTypes.DEFAULT_TYPE
     )
 
 async def send_anonymous(update: Update, context: ContextTypes.DEFAULT_TYPE, text: str):
+    await track_activity(update.effective_user)
     ban_remaining = get_anon_ban_remaining(context.application, update.effective_user.id)
     if ban_remaining:
         clear_modes(context)
@@ -2689,6 +2690,7 @@ async def handle_anon_report_button(update: Update, context: ContextTypes.DEFAUL
         await query.answer("❌ Не удалось отправить жалобу.", show_alert=True)
 
 async def send_anonymous_reply(update: Update, context: ContextTypes.DEFAULT_TYPE, text: str):
+    await track_activity(update.effective_user)
     ban_remaining = get_anon_ban_remaining(context.application, update.effective_user.id)
     if ban_remaining:
         clear_modes(context)
@@ -2816,6 +2818,42 @@ async def handle_user_message(update: Update, context: ContextTypes.DEFAULT_TYPE
         await show_profile(update, context)
         return
 
+    if text == ACTIVITIES_BUTTON:
+        await activities_section(update, context)
+        return
+
+    if text == DAILY_BUTTON:
+        await claim_daily(update, context)
+        return
+
+    if text == INVENTORY_BUTTON:
+        await show_inventory(update, context)
+        return
+
+    if text == TRANSFER_BUTTON:
+        await transfer_start(update, context)
+        return
+
+    if text == GIFT_BUTTON:
+        await gift_start(update, context)
+        return
+
+    if text == PROMO_BUTTON:
+        await promo_start(update, context)
+        return
+
+    if text == TOP_BUTTON:
+        await top_menu(update, context)
+        return
+
+    if text == LIKE_BUTTON:
+        await like_start(update, context)
+        return
+
+    if text == CASE_BUTTON:
+        await open_case(update, context)
+        return
+
     if text == SPOOKY_BUTTON:
         await spooky_section(update, context)
         return
@@ -2852,12 +2890,35 @@ async def handle_user_message(update: Update, context: ContextTypes.DEFAULT_TYPE
         await admin_coins_start(update, context)
         return
 
+    if text == ADMIN_PROMO_BUTTON:
+        await admin_promo_start(update, context)
+        return
+
     if text == CANCEL_BUTTON:
         await cancel_action(update, context)
         return
 
     if context.user_data.get("admin_coins_stage") == "amount":
         await admin_grant_coins(update, context, text)
+        return
+
+    if context.user_data.get("admin_promo_waiting"):
+        await admin_promo_create(update, context, text)
+        return
+
+    if context.user_data.get("promo_waiting"):
+        await promo_redeem(update, context, text)
+        return
+
+    if context.user_data.get("transfer_stage") == "amount":
+        await transfer_send(update, context, text)
+        return
+
+    if context.user_data.get("gift_stage") == "item":
+        await update.message.reply_text(
+            "🎁 Выберите украшение кнопкой под сообщением или нажмите «❌ Отменить».",
+            reply_markup=cancel_keyboard,
+        )
         return
 
     if context.user_data.get("spooky_price_waiting"):
@@ -2878,6 +2939,8 @@ async def handle_user_message(update: Update, context: ContextTypes.DEFAULT_TYPE
     if context.user_data.get("anon_reply_target_id"):
         await send_anonymous_reply(update, context, text)
         return
+
+    await track_activity(update.effective_user)
 
     # Обычная связь. Если Railway перезапустился между нажатием «Связь»
     # и сообщением, текст всё равно будет доставлен владельцу.
