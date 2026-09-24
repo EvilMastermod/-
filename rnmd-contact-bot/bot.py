@@ -3142,9 +3142,16 @@ async def top_menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
     keyboard = InlineKeyboardMarkup([
         [
             InlineKeyboardButton("⭐ Уровень", callback_data="top:level"),
-            InlineKeyboardButton("🪙 Коины", callback_data="top:coins"),
+            InlineKeyboardButton("⚡ XP", callback_data="top:xp"),
         ],
-        [InlineKeyboardButton("✨ Коллекция", callback_data="top:collection")],
+        [
+            InlineKeyboardButton("🪙 Коины", callback_data="top:coins"),
+            InlineKeyboardButton("✨ Коллекция", callback_data="top:collection"),
+        ],
+        [
+            InlineKeyboardButton("❤️ Лайки", callback_data="top:likes"),
+            InlineKeyboardButton("📅 Серия", callback_data="top:streak"),
+        ],
     ])
     await update.message.reply_text("🏆 Выберите рейтинг:", reply_markup=keyboard)
 
@@ -3160,11 +3167,26 @@ async def handle_top(update: Update, context: ContextTypes.DEFAULT_TYPE):
         if response.status_code != 200 or not data.get("ok"):
             await query.edit_message_text("❌ Рейтинг недоступен.")
             return
-        labels = {"level": "⭐ По уровню", "coins": "🪙 По коинам", "collection": "✨ По коллекции"}
+        labels = {
+            "level": "⭐ По уровню",
+            "xp": "⚡ По XP",
+            "coins": "🪙 По коинам",
+            "collection": "✨ По коллекции",
+            "likes": "❤️ По лайкам",
+            "streak": "📅 По серии входов",
+        }
         lines = [f"🏆 {labels.get(kind, 'Топ')}", ""]
         for i, row in enumerate(data.get("rows") or [], 1):
             who = f"@{row.get('username')}" if row.get("username") else (row.get("displayName") or f"ID {row.get('userId')}")
-            value = row.get("level") if kind == "level" else row.get("balance") if kind == "coins" else row.get("collection")
+            value_map = {
+                "level": row.get("level"),
+                "xp": row.get("xp"),
+                "coins": row.get("balance"),
+                "collection": row.get("collection"),
+                "likes": row.get("likes"),
+                "streak": row.get("streak"),
+            }
+            value = value_map.get(kind)
             lines.append(f"{i}. {who} — {value}")
         await query.edit_message_text("\n".join(lines))
     except Exception:
@@ -4913,7 +4935,7 @@ def main():
     app.add_handler(CallbackQueryHandler(handle_profile_favorite_set, pattern=r"^profile_fav:[a-z0-9_]+$"))
     app.add_handler(CallbackQueryHandler(handle_gift_buy, pattern=r"^gift_buy:[a-z0-9_]+$"))
     app.add_handler(CallbackQueryHandler(handle_gift_cancel, pattern=r"^gift_cancel$"))
-    app.add_handler(CallbackQueryHandler(handle_top, pattern=r"^top:(level|coins|collection)$"))
+    app.add_handler(CallbackQueryHandler(handle_top, pattern=r"^top:(level|xp|coins|collection|likes|streak)$"))
     app.add_handler(CallbackQueryHandler(handle_admin_promo_delete, pattern=r"^promo_del:[A-Z0-9_-]{3,24}$"))
 
     app.add_handler(
