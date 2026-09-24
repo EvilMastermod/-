@@ -1133,7 +1133,20 @@ app.post('/bundle/buy',(req,res)=>{
 });
 app.post('/admin/stats',(req,res)=>{
   if(!shopAuthorized(req))return res.status(401).json({ok:false,error:'unauthorized'});
-  const wallets=Object.values(db.wallets);res.json({ok:true,users:wallets.length,totalCoins:wallets.reduce((s,w)=>s+Number(w.balance||0),0),bankCoins:wallets.reduce((s,w)=>s+Number(w.bank?.balance||0),0),purchases:wallets.reduce((s,w)=>s+Object.keys(w.purchases||{}).length,0),promos:Object.keys(db.promocodes||{}).length,customItems:Object.keys(db.customShop||{}).length,activeEvent:activeEvent()});
+  const wallets=Object.values(db.wallets),counts={};
+  for(const w of wallets)for(const id of Object.keys(w.purchases||{}))counts[id]=(counts[id]||0)+1;
+  const popular=Object.entries(counts).sort((a,b)=>b[1]-a[1]).slice(0,5).map(([id,count])=>({id,name:getShopItem(id)?.name||id,count}));
+  res.json({
+    ok:true,
+    users:wallets.length,
+    totalCoins:wallets.reduce((s,w)=>s+Number(w.balance||0),0),
+    bankCoins:wallets.reduce((s,w)=>s+Number(w.bank?.balance||0),0),
+    purchases:wallets.reduce((s,w)=>s+Object.keys(w.purchases||{}).length,0),
+    promos:Object.keys(db.promocodes||{}).length,
+    customItems:Object.keys(db.customShop||{}).length,
+    popular,
+    activeEvent:activeEvent()
+  });
 });
 app.post('/admin/log',(req,res)=>{if(!shopAuthorized(req))return res.status(401).json({ok:false,error:'unauthorized'});res.json({ok:true,rows:(db.adminLog||[]).slice(-50).reverse()})});
 app.post('/admin/economy-block',(req,res)=>{
