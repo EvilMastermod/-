@@ -46,6 +46,7 @@ ADMIN_REPORT_LIST_BUTTON = "📋 Лист жалоб"
 MINECRAFT_BUTTON = "⛏ Minecraft"
 SPOOKY_BUTTON = "👻 Spooky Time"
 SPOOKY_PRICE_BUTTON = "💰 Средняя цена"
+WALLET_BUTTON = "👛 Кошелёк"
 BACK_BUTTON = "⬅️ Назад"
 MINECRAFT_BACK_BUTTON = "⬅️ В Minecraft"
 CANCEL_BUTTON = "❌ Отменить"
@@ -55,7 +56,7 @@ user_main_keyboard = ReplyKeyboardMarkup(
     [
         [KeyboardButton(CONTACT_BUTTON), KeyboardButton(ANON_BUTTON)],
         [KeyboardButton(DND_BUTTON), KeyboardButton(DND_OFF_BUTTON)],
-        [KeyboardButton(MINECRAFT_BUTTON)],
+        [KeyboardButton(MINECRAFT_BUTTON), KeyboardButton(WALLET_BUTTON)],
     ],
     resize_keyboard=True,
 )
@@ -64,7 +65,7 @@ admin_main_keyboard = ReplyKeyboardMarkup(
     [
         [KeyboardButton(CONTACT_BUTTON), KeyboardButton(ANON_BUTTON)],
         [KeyboardButton(DND_BUTTON), KeyboardButton(DND_OFF_BUTTON)],
-        [KeyboardButton(MINECRAFT_BUTTON)],
+        [KeyboardButton(MINECRAFT_BUTTON), KeyboardButton(WALLET_BUTTON)],
         [KeyboardButton(ADMIN_DND_OFF_BUTTON), KeyboardButton(ADMIN_ANON_BAN_BUTTON)],
         [KeyboardButton(ADMIN_ANON_UNBAN_BUTTON), KeyboardButton(ADMIN_REPORT_LIST_BUTTON)],
     ],
@@ -280,6 +281,44 @@ async def spooky_section(update: Update, context: ContextTypes.DEFAULT_TYPE):
         reply_markup=spooky_keyboard,
     )
 
+async def show_wallet(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    clear_modes(context)
+
+    headers = {}
+    if PRICE_API_KEY:
+        headers["x-api-key"] = PRICE_API_KEY
+
+    try:
+        async with httpx.AsyncClient(timeout=12.0) as client:
+            response = await client.post(
+                f"{SPOOKY_PRICE_API}/wallet",
+                json={"userId": update.effective_user.id},
+                headers=headers,
+            )
+
+        data = response.json()
+        if response.status_code != 200 or not data.get("ok"):
+            error_text = data.get("error") or f"HTTP {response.status_code}"
+            await update.message.reply_text(
+                f"❌ Не удалось открыть кошелёк: {error_text}",
+                reply_markup=get_main_keyboard(update.effective_user.id),
+            )
+            return
+
+        balance = int(data.get("balance") or 0)
+        await update.message.reply_text(
+            "👛 Кошелёк\n\n"
+            f"🪙 Random Coins: {balance:,}".replace(",", " "),
+            reply_markup=get_main_keyboard(update.effective_user.id),
+        )
+
+    except Exception:
+        logging.exception("Ошибка кошелька")
+        await update.message.reply_text(
+            "❌ Кошелёк сейчас недоступен. Попробуйте чуть позже.",
+            reply_markup=get_main_keyboard(update.effective_user.id),
+        )
+
 def parse_spooky_price_request(text: str):
     match = re.search(r"/an\d{3}", text.lower())
     if not match:
@@ -378,10 +417,20 @@ async def spooky_price_lookup(update: Update, context: ContextTypes.DEFAULT_TYPE
         collectors = int(data.get("collectors") or 0)
         age_seconds = int(data.get("ageSeconds") or 0)
         age_minutes = max(0, age_seconds // 60)
+        source_auction = data.get("sourceAuction") or auction
+        fallback = bool(data.get("fallback"))
+
+        fallback_text = ""
+        if fallback and source_auction != auction:
+            fallback_text = (
+                f"⚠️ На {auction} данных нет. "
+                f"Использую цену с {source_auction}.\n"
+            )
 
         await update.message.reply_text(
             f"💰 Предмет: {item}\n"
-            f"📦 Анка: {auction}\n"
+            f"📦 Запрошенная анка: {auction}\n"
+            f"{fallback_text}"
             f"🔎 Найдено цен: {count}\n"
             f"👥 Источников: {collectors}\n"
             f"🕒 Обновлено: {age_minutes} мин назад\n\n"
@@ -1133,6 +1182,10 @@ async def handle_user_message(update: Update, context: ContextTypes.DEFAULT_TYPE
 
     if text == MINECRAFT_BUTTON:
         await minecraft_section(update, context)
+        return
+
+    if text == WALLET_BUTTON:
+        await show_wallet(update, context)
         return
 
     if text == SPOOKY_BUTTON:
