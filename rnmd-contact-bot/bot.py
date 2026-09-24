@@ -1696,30 +1696,34 @@ async def admin_daily_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     try:
         response, data = await api_post("/admin/daily/get", {})
         if response.status_code == 200 and data.get("ok"):
-            daily = data.get("daily") or {}
-            item = data.get("item")
-            current_text = (
-                f"\n\nСейчас: {int(daily.get('coins') or 0):,} RC".replace(",", " ")
-                + (f" + {item.get('name')}" if item else "")
-                + (" + бонусы за серию" if daily.get("streakBonus", True) else "")
-            )
+            schedule = data.get("schedule") or []
+            if schedule:
+                rows = ["", "", "📅 Уже настроено:"]
+                for entry in schedule[:20]:
+                    item = entry.get("item")
+                    reward = f"{int(entry.get('coins') or 0):,} RC".replace(",", " ")
+                    if item:
+                        reward += f" + {item.get('name')}"
+                    bonus = " + бонус серии" if entry.get("streakBonus", True) else ""
+                    rows.append(f"• День {int(entry.get('day') or 0)}: {reward}{bonus}")
+                if len(schedule) > 20:
+                    rows.append(f"… ещё {len(schedule) - 20}")
+                current_text = "\n".join(rows)
     except Exception:
         pass
 
     await update.message.reply_text(
-        "🎁 Настройка ежедневной награды\n\n"
-        "Формат:\n"
-        "1000\n"
-        "1000 | crown\n"
-        "0 | ex_abc123 | off\n\n"
-        "1 часть — коины.\n"
-        "2 часть — ID предмета, можно оставить пустой.\n"
-        "3 часть — on/off для бонусов серии.\n"
-        "Например: 500 | premium_star | on"
+        "🎁 Настройка ежедневной награды по дням\n\n"
+        "Формат: коины | ID предмета | on/off | день\n\n"
+        "Последнее число — день серии, на который ставится награда.\n"
+        "Например:\n"
+        "250 | ex_mufvp8asrs | on | 1\n"
+        "500 |  | off | 2\n"
+        "1000 | crown | on | 7\n\n"
+        "1 — коины. 2 — ID предмета. 3 — бонус серии on/off. 4 — номер дня."
         + current_text,
         reply_markup=cancel_keyboard,
     )
-
 
 async def admin_daily_set(update: Update, context: ContextTypes.DEFAULT_TYPE, text: str):
     if update.effective_user.id != ADMIN_ID:
