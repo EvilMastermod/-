@@ -610,6 +610,10 @@ def profile_display_name(user, data):
     if suffixes:
         name += " " + " ".join(suffixes)
 
+    title = data.get("title")
+    if title:
+        name += f" · [{title}]"
+
     if "profile_frame" in equipped:
         name = f"╔══ ✦ ══╗\n{name}\n╚══ ✦ ══╝"
 
@@ -634,8 +638,25 @@ def profile_text(user, data):
         f"🪙 Random Coins: {balance:,}".replace(",", " "),
     ]
 
+    level = int(data.get("level") or 1)
+    xp = int(data.get("xp") or 0)
+    likes = int(data.get("likes") or 0)
+    streak = int(data.get("streak") or 0)
+    title = data.get("title") or "Новичок"
+    favorite_id = data.get("favoriteDecoration")
+
+    lines.append(f"⭐ Уровень: {level} · XP: {xp}")
+    lines.append(f"🎖 Титул: {title}")
+    lines.append(f"❤️ Лайков: {likes}")
+    lines.append(f"📅 Серия входов: {streak} дн.")
+
     if cosmetics:
         lines.append(f"✨ Украшений: {equipped_count}/{len(cosmetics)}")
+
+    if favorite_id:
+        favorite = next((x for x in cosmetics if x.get("id") == favorite_id), None)
+        if favorite:
+            lines.append(f"⭐ Избранное: {favorite.get('name')}")
 
     if profile_has_cosmetic(data, "name_color"):
         color_emoji, color_name = profile_color_meta(data.get("nameColor") or "white")
@@ -644,6 +665,16 @@ def profile_text(user, data):
     if "message_style" in equipped_cosmetic_ids(data):
         lines.append("💬 Особый стиль сообщений: включён")
 
+    stats = data.get("stats") or {}
+    if stats:
+        lines.append("")
+        lines.append(
+            "📊 Статистика: "
+            f"сообщений {int(stats.get('messages') or 0)}, "
+            f"покупок {int(stats.get('purchases') or 0)}, "
+            f"кейсов {int(stats.get('casesOpened') or 0)}"
+        )
+
     return "\n".join(lines)
 
 
@@ -651,6 +682,9 @@ def profile_keyboard(data):
     rows = []
     if data.get("cosmetics"):
         rows.append([InlineKeyboardButton("✨ Украшения Профиля", callback_data="profile_decor")])
+        rows.append([InlineKeyboardButton("⭐ Избранное украшение", callback_data="profile_favorite")])
+    if data.get("unlockedTitles"):
+        rows.append([InlineKeyboardButton("🎖 Выбрать титул", callback_data="profile_titles")])
     return InlineKeyboardMarkup(rows) if rows else None
 
 
@@ -788,6 +822,133 @@ async def handle_profile_color_set(update: Update, context: ContextTypes.DEFAULT
     except Exception:
         logging.exception("Ошибка изменения цвета ника")
         await query.answer("❌ Не удалось изменить цвет.", show_alert=True)
+
+
+def titles_keyboard(data):
+    selected = data.get("titleId")
+    rows = []
+    for title in data.get("unlockedTitles") or []:
+        mark = "✅ " if title.get("id") == selected else ""
+        rows.append([
+            InlineKeyboardButton(
+                f"{mark}🎖 {title.get('name')}",
+                callback_data=f"profile_title:{title.get('id')}",
+            )
+        ])
+    rows.append([InlineKeyboardButton("⬅️ Назад в профиль", callback_data="profile_back")])
+    return InlineKeyboardMarkup(rows)
+
+
+def favorite_keyboard(data):
+    selected = data.get("favoriteDecoration")
+    rows = []
+    for item in data.get("cosmetics") or []:
+        mark = "⭐ " if item.get("id") == selected else ""
+        rows.append([
+            InlineKeyboardButton(
+                f"{mark}{item.get('name')}",
+                callback_data=f"profile_fav:{item.get('id')}",
+            )
+        ])
+    rows.append([InlineKeyboardButton("⬅️ Назад в профиль", callback_data="profile_back")])
+    return InlineKeyboardMarkup(rows)
+
+
+async def handle_profile_titles(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    query = update.callback_query
+    if not query:
+        return
+    await query.answer()
+    try:
+        response, data = await fetch_profile(query.from_user.id)
+        if response.status_code != 200 or not data.get("ok"):
+            await query.answer("❌ Профиль недоступен.", show_alert=True)
+            return
+        await query.edit_message_text(
+            "🎖 Выберите титул профиля:",
+            reply_markup=titles_keyboard(data),
+        )
+    except Exception:
+        logging.exception("Ошибка меню титулов")
+        await query.answer("❌ Титулы недоступны.", show_alert=True)
+
+
+async def handle_profile_title_set(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    query = update.callback_query
+    if not query:
+        return
+    title_id = query.data.split(":", 1)[1]
+    try:
+        async with httpx.AsyncClient(timeout=12.0) as client:
+            response = await client.post(
+                f"{SPOOKY_PRICE_API}/profile/title",
+                json={"userId": query.from_user.id, "titleId": title_id},
+                headers=shop_headers(),
+            )
+        data = response.json()
+        if response.status_code != 200 or not data.get("ok"):
+            await query.answer("🔒 Этот титул пока недоступен.", show_alert=True)
+            return
+        await query.answer("✅ Титул выбран")
+        response2, profile_data = await fetch_profile(query.from_user.id)
+        if response2.status_code == 200 and profile_data.get("ok"):
+            await query.edit_message_text(
+                "🎖 Выберите титул профиля:",
+                reply_markup=titles_keyboard(profile_data),
+            )
+    except Exception:
+        logging.exception("Ошибка смены титула")
+        await query.answer("❌ Не удалось сменить титул.", show_alert=True)
+
+
+async def handle_profile_favorite(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    query = update.callback_query
+    if not query:
+        return
+    await query.answer()
+    try:
+        response, data = await fetch_profile(query.from_user.id)
+        if response.status_code != 200 or not data.get("ok"):
+            await query.answer("❌ Профиль недоступен.", show_alert=True)
+            return
+        if not data.get("cosmetics"):
+            await query.answer("У вас нет украшений.", show_alert=True)
+            return
+        await query.edit_message_text(
+            "⭐ Выберите главное украшение:",
+            reply_markup=favorite_keyboard(data),
+        )
+    except Exception:
+        logging.exception("Ошибка меню избранного украшения")
+        await query.answer("❌ Избранное недоступно.", show_alert=True)
+
+
+async def handle_profile_favorite_set(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    query = update.callback_query
+    if not query:
+        return
+    item_id = query.data.split(":", 1)[1]
+    try:
+        async with httpx.AsyncClient(timeout=12.0) as client:
+            response = await client.post(
+                f"{SPOOKY_PRICE_API}/profile/favorite",
+                json={"userId": query.from_user.id, "itemId": item_id},
+                headers=shop_headers(),
+            )
+        data = response.json()
+        if response.status_code != 200 or not data.get("ok"):
+            await query.answer("❌ Это украшение недоступно.", show_alert=True)
+            return
+        await query.answer("⭐ Выбрано")
+        response2, profile_data = await fetch_profile(query.from_user.id)
+        if response2.status_code == 200 and profile_data.get("ok"):
+            await query.edit_message_text(
+                "⭐ Выберите главное украшение:",
+                reply_markup=favorite_keyboard(profile_data),
+            )
+    except Exception:
+        logging.exception("Ошибка выбора избранного")
+        await query.answer("❌ Не удалось выбрать.", show_alert=True)
 
 
 async def show_profile(update: Update, context: ContextTypes.DEFAULT_TYPE):
