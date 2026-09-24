@@ -44,6 +44,7 @@ ADMIN_DND_OFF_BUTTON = "🛡 Снять DND у пользователя"
 ADMIN_ANON_BAN_BUTTON = "🚫 Бан анона"
 ADMIN_ANON_UNBAN_BUTTON = "🟢 Отключить бан анона"
 ADMIN_REPORT_LIST_BUTTON = "📋 Лист жалоб"
+ADMIN_COINS_BUTTON = "🪙 Выдать коины"
 MINECRAFT_BUTTON = "⛏ Minecraft"
 SPOOKY_BUTTON = "👻 Spooky Time"
 SPOOKY_PRICE_BUTTON = "💰 Средняя цена"
@@ -72,6 +73,7 @@ admin_main_keyboard = ReplyKeyboardMarkup(
         [KeyboardButton(SHOP_BUTTON)],
         [KeyboardButton(ADMIN_DND_OFF_BUTTON), KeyboardButton(ADMIN_ANON_BAN_BUTTON)],
         [KeyboardButton(ADMIN_ANON_UNBAN_BUTTON), KeyboardButton(ADMIN_REPORT_LIST_BUTTON)],
+        [KeyboardButton(ADMIN_COINS_BUTTON)],
     ],
     resize_keyboard=True,
 )
@@ -140,6 +142,25 @@ admin_dnd_keyboard = ReplyKeyboardMarkup(
                 "👤 Выбрать пользователя",
                 request_users=KeyboardButtonRequestUsers(
                     request_id=778,
+                    user_is_bot=False,
+                    max_quantity=1,
+                    request_name=True,
+                    request_username=True,
+                ),
+            )
+        ],
+        [KeyboardButton(CANCEL_BUTTON)],
+    ],
+    resize_keyboard=True,
+)
+
+admin_coins_keyboard = ReplyKeyboardMarkup(
+    [
+        [
+            KeyboardButton(
+                "👤 Выбрать пользователя для коинов",
+                request_users=KeyboardButtonRequestUsers(
+                    request_id=781,
                     user_is_bot=False,
                     max_quantity=1,
                     request_name=True,
@@ -242,6 +263,8 @@ def clear_modes(context: ContextTypes.DEFAULT_TYPE):
     context.user_data.pop("admin_anon_ban_stage", None)
     context.user_data.pop("admin_anon_ban_target_id", None)
     context.user_data.pop("admin_anon_unban_stage", None)
+    context.user_data.pop("admin_coins_stage", None)
+    context.user_data.pop("admin_coins_target_id", None)
     context.user_data.pop("spooky_price_waiting", None)
 
 async def post_init(application: Application):
@@ -372,6 +395,21 @@ async def fetch_shop(user_id: int):
         )
     data = response.json()
     return response, data
+
+
+async def user_has_premium(user_id: int):
+    try:
+        response, data = await fetch_shop(user_id)
+        if response.status_code != 200 or not data.get("ok"):
+            return False
+
+        for item in data.get("items") or []:
+            if item.get("id") == "premium" and item.get("owned"):
+                return True
+    except Exception:
+        logging.exception("Не удалось проверить Premium")
+
+    return False
 
 
 def shop_text(data):
@@ -713,18 +751,43 @@ async def dnd_menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
         )
         return
 
-    keyboard = InlineKeyboardMarkup(
-        [
+    premium = await user_has_premium(user_id)
+
+    if premium:
+        keyboard = InlineKeyboardMarkup(
             [
-                InlineKeyboardButton("15 мин", callback_data="dnd_15"),
-                InlineKeyboardButton("30 мин", callback_data="dnd_30"),
-                InlineKeyboardButton("1 час", callback_data="dnd_60"),
+                [
+                    InlineKeyboardButton("15 мин", callback_data="dnd_15"),
+                    InlineKeyboardButton("30 мин", callback_data="dnd_30"),
+                    InlineKeyboardButton("1 час", callback_data="dnd_60"),
+                ],
+                [
+                    InlineKeyboardButton("⭐ 1 час 30 мин", callback_data="dnd_90"),
+                ],
             ]
-        ]
-    )
+        )
+        info_text = (
+            "🔕 На сколько включить «Не беспокоить»?\n\n"
+            "⭐ Premium: максимум — 1 час 30 минут. "
+            "После окончания перезарядка 25 минут."
+        )
+    else:
+        keyboard = InlineKeyboardMarkup(
+            [
+                [
+                    InlineKeyboardButton("15 мин", callback_data="dnd_15"),
+                    InlineKeyboardButton("30 мин", callback_data="dnd_30"),
+                    InlineKeyboardButton("1 час", callback_data="dnd_60"),
+                ]
+            ]
+        )
+        info_text = (
+            "🔕 На сколько включить «Не беспокоить»?\n\n"
+            "Максимум — 1 час. После окончания перезарядка 30 минут."
+        )
 
     await update.message.reply_text(
-        "🔕 На сколько включить «Не беспокоить»?\n\nМаксимум — 1 час. После окончания перезарядка 30 минут.",
+        info_text,
         reply_markup=keyboard,
     )
 
@@ -733,13 +796,16 @@ async def dnd_off(update: Update, context: ContextTypes.DEFAULT_TYPE):
     status, remaining = get_dnd_status(context.application, user_id)
 
     if status == "active":
+        premium = await user_has_premium(user_id)
+        cooldown_minutes = 25 if premium else 30
+
         now = time.time()
         get_dnd_map(context.application)[user_id] = {
             "active_until": 0,
-            "cooldown_until": now + 30 * 60,
+            "cooldown_until": now + cooldown_minutes * 60,
         }
         await update.message.reply_text(
-            "🔔 «Не беспокоить» отключён. Перезарядка — 30 минут.",
+            f"🔔 «Не беспокоить» отключён. Перезарядка — {cooldown_minutes} минут.",
             reply_markup=get_main_keyboard(update.effective_user.id),
         )
         return
@@ -791,6 +857,117 @@ async def admin_remove_dnd_for_user(update: Update, context: ContextTypes.DEFAUL
         )
     except Exception:
         logging.exception("Не удалось уведомить пользователя об отключении DND")
+
+async def admin_coins_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if update.effective_user.id != ADMIN_ID:
+        await update.message.reply_text(
+            "⛔ Эта кнопка доступна только администратору.",
+            reply_markup=get_main_keyboard(update.effective_user.id),
+        )
+        return
+
+    clear_modes(context)
+    context.user_data["admin_coins_stage"] = "choose"
+
+    await update.message.reply_text(
+        "🪙 Выберите пользователя, которому нужно выдать Random Coins.",
+        reply_markup=admin_coins_keyboard,
+    )
+
+
+async def admin_coins_choose_amount(update: Update, context: ContextTypes.DEFAULT_TYPE, target_id: int):
+    if update.effective_user.id != ADMIN_ID:
+        return
+
+    context.user_data["admin_coins_stage"] = "amount"
+    context.user_data["admin_coins_target_id"] = target_id
+
+    await update.message.reply_text(
+        f"🪙 Сколько Random Coins выдать пользователю {target_id}?\n"
+        "Напишите целое число от 1 до 1 000 000 000.",
+        reply_markup=cancel_keyboard,
+    )
+
+
+async def admin_grant_coins(update: Update, context: ContextTypes.DEFAULT_TYPE, text: str):
+    if update.effective_user.id != ADMIN_ID:
+        clear_modes(context)
+        return
+
+    target_id = context.user_data.get("admin_coins_target_id")
+    if not target_id:
+        clear_modes(context)
+        await update.message.reply_text(
+            "❌ Сначала выберите пользователя.",
+            reply_markup=get_main_keyboard(update.effective_user.id),
+        )
+        return
+
+    raw = text.replace(" ", "").replace(",", "")
+    if not raw.isdigit():
+        await update.message.reply_text(
+            "❌ Напишите только число. Например: 1000",
+            reply_markup=cancel_keyboard,
+        )
+        return
+
+    amount = int(raw)
+    if amount < 1 or amount > 1_000_000_000:
+        await update.message.reply_text(
+            "❌ Можно выдать от 1 до 1 000 000 000 Random Coins.",
+            reply_markup=cancel_keyboard,
+        )
+        return
+
+    try:
+        async with httpx.AsyncClient(timeout=12.0) as client:
+            response = await client.post(
+                f"{SPOOKY_PRICE_API}/admin/coins",
+                json={"userId": target_id, "amount": amount},
+                headers=shop_headers(),
+            )
+
+        data = response.json()
+        if response.status_code != 200 or not data.get("ok"):
+            error_text = data.get("error") or f"HTTP {response.status_code}"
+            await update.message.reply_text(
+                f"❌ Не удалось выдать коины: {error_text}",
+                reply_markup=get_main_keyboard(update.effective_user.id),
+            )
+            clear_modes(context)
+            return
+
+        balance = int(data.get("balance") or 0)
+        clear_modes(context)
+
+        await update.message.reply_text(
+            (
+                f"✅ Выдано: {amount:,} Random Coins\n"
+                f"👤 Пользователь: {target_id}\n"
+                f"👛 Новый баланс: {balance:,}"
+            ).replace(",", " "),
+            reply_markup=get_main_keyboard(update.effective_user.id),
+        )
+
+        try:
+            await context.bot.send_message(
+                chat_id=target_id,
+                text=(
+                    f"🪙 Администратор выдал вам {amount:,} Random Coins.\n"
+                    f"👛 Баланс: {balance:,}"
+                ).replace(",", " "),
+            )
+        except Exception:
+            logging.exception("Не удалось уведомить пользователя о выдаче коинов")
+
+    except Exception:
+        logging.exception("Ошибка выдачи Random Coins")
+        clear_modes(context)
+        await update.message.reply_text(
+            "❌ Сервис коинов сейчас недоступен.",
+            reply_markup=get_main_keyboard(update.effective_user.id),
+        )
+
 
 async def admin_anon_unban_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if update.effective_user.id != ADMIN_ID:
@@ -985,8 +1162,20 @@ async def handle_dnd_callback(update: Update, context: ContextTypes.DEFAULT_TYPE
         await query.answer("Ошибка", show_alert=True)
         return
 
-    minutes = min(max(minutes, 1), 60)
     user_id = query.from_user.id
+    premium = await user_has_premium(user_id)
+
+    max_minutes = 90 if premium else 60
+    cooldown_minutes = 25 if premium else 30
+
+    if minutes == 90 and not premium:
+        await query.answer(
+            "⭐ 1 час 30 минут доступно только с Premium.",
+            show_alert=True,
+        )
+        return
+
+    minutes = min(max(minutes, 1), max_minutes)
 
     status, remaining = get_dnd_status(context.application, user_id)
     if status == "active":
@@ -1007,12 +1196,13 @@ async def handle_dnd_callback(update: Update, context: ContextTypes.DEFAULT_TYPE
     active_until = now + minutes * 60
     get_dnd_map(context.application)[user_id] = {
         "active_until": active_until,
-        "cooldown_until": active_until + 30 * 60,
+        "cooldown_until": active_until + cooldown_minutes * 60,
     }
 
     await query.answer("Включено")
     await query.edit_message_text(
-        f"🔕 «Не беспокоить» включён на {minutes} мин.\nПосле окончания будет перезарядка 30 минут."
+        f"🔕 «Не беспокоить» включён на {minutes} мин.\n"
+        f"После окончания будет перезарядка {cooldown_minutes} минут."
     )
 
 async def handle_users_shared(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -1058,6 +1248,19 @@ async def handle_users_shared(update: Update, context: ContextTypes.DEFAULT_TYPE
             )
             return
         await admin_remove_anon_ban(update, context, shared[0].user_id)
+        return
+
+    if context.user_data.get("admin_coins_stage") == "choose":
+        if update.effective_user.id != ADMIN_ID:
+            clear_modes(context)
+            return
+        if not shared:
+            await update.message.reply_text(
+                "❌ Пользователь не выбран.",
+                reply_markup=admin_coins_keyboard,
+            )
+            return
+        await admin_coins_choose_amount(update, context, shared[0].user_id)
         return
 
     if context.user_data.get("anon_stage") != "choose":
@@ -1423,8 +1626,16 @@ async def handle_user_message(update: Update, context: ContextTypes.DEFAULT_TYPE
         await admin_report_list(update, context)
         return
 
+    if text == ADMIN_COINS_BUTTON:
+        await admin_coins_start(update, context)
+        return
+
     if text == CANCEL_BUTTON:
         await cancel_action(update, context)
+        return
+
+    if context.user_data.get("admin_coins_stage") == "amount":
+        await admin_grant_coins(update, context, text)
         return
 
     if context.user_data.get("spooky_price_waiting"):
@@ -1549,7 +1760,7 @@ def main():
     app.add_handler(CommandHandler("id", show_id))
     app.add_handler(CallbackQueryHandler(handle_anon_reply_button, pattern="^anon_reply$"))
     app.add_handler(CallbackQueryHandler(handle_anon_report_button, pattern="^anon_report$"))
-    app.add_handler(CallbackQueryHandler(handle_dnd_callback, pattern="^dnd_(15|30|60)$"))
+    app.add_handler(CallbackQueryHandler(handle_dnd_callback, pattern="^dnd_(15|30|60|90)$"))
     app.add_handler(CallbackQueryHandler(handle_admin_anon_ban_callback, pattern="^admin_anon_ban_(15|20|25|30|60)$"))
     app.add_handler(CallbackQueryHandler(handle_report_ban_callback, pattern=r"^report:ban:-?\d+:(15|20|25|30|60)$"))
     app.add_handler(CallbackQueryHandler(handle_shop_buy, pattern=r"^shop_buy:(plus|premium)$"))
