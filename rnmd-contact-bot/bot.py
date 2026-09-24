@@ -549,82 +549,207 @@ def load_profile_font(size: int, bold: bool = False):
     return ImageFont.load_default()
 
 
-def make_profile_card(user, data):
-    width, height = 900, 430
-    image = Image.new("RGB", (width, height), (20, 23, 31))
-    draw = ImageDraw.Draw(image)
+def _center_text_x(draw, text, font, width):
+    box = draw.textbbox((0, 0), text, font=font)
+    return (width - (box[2] - box[0])) // 2
 
-    title_font = load_profile_font(28, bold=True)
-    name_font = load_profile_font(54, bold=True)
-    small_font = load_profile_font(25)
-    badge_font = load_profile_font(22, bold=True)
+
+def _draw_crown(draw, cx, y, fill, outline=None):
+    pts = [
+        (cx - 30, y + 22),
+        (cx - 24, y - 2),
+        (cx - 8, y + 11),
+        (cx, y - 11),
+        (cx + 8, y + 11),
+        (cx + 24, y - 2),
+        (cx + 30, y + 22),
+    ]
+    draw.polygon(pts, fill=fill, outline=outline)
+    draw.rounded_rectangle((cx - 30, y + 18, cx + 30, y + 29), radius=4, fill=fill, outline=outline)
+
+
+def _draw_diamond(draw, cx, cy, size, fill, outline):
+    pts = [
+        (cx, cy - size),
+        (cx + size, cy),
+        (cx, cy + size),
+        (cx - size, cy),
+    ]
+    draw.polygon(pts, fill=fill, outline=outline)
+
+
+def _draw_coin(draw, cx, cy):
+    draw.ellipse((cx - 18, cy - 18, cx + 18, cy + 18), fill=(211, 156, 47), outline=(245, 203, 105), width=3)
+    draw.ellipse((cx - 12, cy - 12, cx + 12, cy + 12), outline=(245, 203, 105), width=2)
+    font = load_profile_font(19, bold=True)
+    draw.text((cx - 6, cy - 12), "$", font=font, fill=(255, 231, 168))
+
+
+def _draw_palette(draw, cx, cy):
+    draw.ellipse((cx - 18, cy - 15, cx + 18, cy + 15), fill=(205, 212, 222), outline=(235, 240, 246), width=2)
+    draw.ellipse((cx + 4, cy + 2, cx + 14, cy + 12), fill=(31, 36, 45))
+    for ox, oy, color in [
+        (-9, -5, (222, 80, 80)),
+        (0, -9, (80, 145, 230)),
+        (8, -4, (230, 190, 70)),
+        (-5, 5, (90, 180, 110)),
+    ]:
+        draw.ellipse((cx + ox - 3, cy + oy - 3, cx + ox + 3, cy + oy + 3), fill=color)
+
+
+def _draw_message_icon(draw, cx, cy):
+    draw.rounded_rectangle((cx - 19, cy - 14, cx + 19, cy + 12), radius=6, fill=(202, 210, 222), outline=(235, 240, 246), width=2)
+    draw.polygon([(cx - 8, cy + 10), (cx - 3, cy + 22), (cx + 4, cy + 10)], fill=(202, 210, 222))
+    for x in (-8, 0, 8):
+        draw.ellipse((cx + x - 2, cy - 2, cx + x + 2, cy + 2), fill=(56, 64, 76))
+
+
+def make_profile_card(user, data):
+    width, height = 900, 1125
+    image = Image.new("RGB", (width, height), (24, 30, 38))
+    draw = ImageDraw.Draw(image)
 
     equipped = equipped_cosmetic_ids(data)
     color_id = data.get("nameColor") or "white"
     name_color = PROFILE_COLOR_RGB.get(color_id, PROFILE_COLOR_RGB["white"])
-    name = user.full_name or "User"
-    username = f"@{user.username}" if user.username else "Telegram user"
-    status = "PREMIUM" if data.get("premium") else ("PLUS" if data.get("plus") else "STANDARD")
+
+    name = user.full_name or "Пользователь"
+    username = f"@{user.username}" if user.username else "нет username"
+    status = "Premium" if data.get("premium") else ("Plus" if data.get("plus") else "Обычный")
     balance = f"{int(data.get('balance') or 0):,}".replace(",", " ")
+    cosmetics = data.get("cosmetics") or []
+    equipped_count = sum(1 for item in cosmetics if item.get("equipped"))
+    total_cosmetics = len(cosmetics)
+    color_name = profile_color_meta(color_id)[1]
+    message_style = "message_style" in equipped
+
+    # Vanilla dark card
+    outer = (42, 38, width - 42, height - 38)
+    frame_color = (198, 151, 65) if "profile_frame" in equipped else (127, 137, 150)
+    draw.rounded_rectangle(outer, radius=26, fill=(31, 37, 46), outline=frame_color, width=4)
 
     # Header
-    draw.text((42, 30), "RNMD PROFILE", font=title_font, fill=(220, 225, 235))
+    title_font = load_profile_font(52, bold=True)
+    title = "Профиль"
+    title_x = _center_text_x(draw, title, title_font, width)
+    draw.text((title_x, 75), title, font=title_font, fill=(226, 230, 235))
+    _draw_crown(draw, width // 2, 39, (214, 167, 74), (245, 210, 135))
 
-    # Purchased profile frame becomes a real visual frame.
-    if "profile_frame" in equipped:
-        draw.rounded_rectangle(
-            (32, 82, width - 32, height - 32),
-            radius=28,
-            outline=(215, 220, 230),
-            width=4,
-        )
+    # Name plate
+    plate = (72, 155, width - 72, 292)
+    draw.rounded_rectangle(plate, radius=18, fill=(229, 225, 211), outline=(176, 148, 88), width=3)
+    name_font = load_profile_font(58, bold=True)
+    stroke = (244, 244, 244) if color_id == "black" else (18, 22, 28)
+    bbox = draw.textbbox((0, 0), name, font=name_font, stroke_width=2)
+    nx = (width - (bbox[2] - bbox[0])) // 2
+    ny = 188
+    draw.text((nx, ny), name, font=name_font, fill=name_color, stroke_width=2, stroke_fill=stroke)
 
-    # Center the nickname and draw it with the selected actual RGB color.
-    bbox = draw.textbbox((0, 0), name, font=name_font, stroke_width=3)
-    name_w = bbox[2] - bbox[0]
-    name_x = max(48, (width - name_w) // 2)
-    name_y = 120
-
-    stroke_fill = (245, 245, 245) if color_id == "black" else (8, 10, 15)
-    draw.text(
-        (name_x, name_y),
-        name,
-        font=name_font,
-        fill=name_color,
-        stroke_width=3,
-        stroke_fill=stroke_fill,
-    )
-
-    badges = []
+    # Small real decoration marks without clutter.
     if "crown" in equipped:
-        badges.append("CROWN")
-    if "star_badge" in equipped:
-        badges.append("STAR")
-    if "rnmd_badge" in equipped:
-        badges.append("RNMD")
-    if "diamond_badge" in equipped:
-        badges.append("DIAMOND")
-    if "sakura_badge" in equipped:
-        badges.append("SAKURA")
-    if "trophy" in equipped:
-        badges.append("TROPHY")
-    if "random_item" in equipped:
-        badges.append("MYSTERY")
+        _draw_crown(draw, width // 2, 153, (214, 167, 74), (244, 211, 140))
 
-    badge_text = "  •  ".join(badges)
-    if badge_text:
-        badge_bbox = draw.textbbox((0, 0), badge_text, font=badge_font)
-        badge_w = badge_bbox[2] - badge_bbox[0]
-        draw.text(
-            ((width - badge_w) // 2, 205),
-            badge_text,
-            font=badge_font,
-            fill=(190, 196, 210),
+    # Common row layout
+    label_font = load_profile_font(26, bold=False)
+    value_font = load_profile_font(30, bold=True)
+    row_left, row_right = 72, width - 72
+    row_h = 95
+    gap = 12
+    start_y = 328
+
+    def row(y, label, value=None, icon="dot", value_fill=(235, 238, 242), extra=None):
+        draw.rounded_rectangle(
+            (row_left, y, row_right, y + row_h),
+            radius=18,
+            fill=(39, 46, 56),
+            outline=(78, 87, 100),
+            width=2,
         )
+        cx, cy = 118, y + row_h // 2
 
-    draw.text((70, 285), username, font=small_font, fill=(210, 215, 225))
-    draw.text((70, 330), f"STATUS: {status}", font=small_font, fill=(210, 215, 225))
-    draw.text((470, 330), f"RANDOM COINS: {balance}", font=small_font, fill=(210, 215, 225))
+        if icon == "link":
+            draw.ellipse((cx - 18, cy - 10, cx - 1, cy + 7), outline=(194, 202, 214), width=4)
+            draw.ellipse((cx + 1, cy - 7, cx + 18, cy + 10), outline=(194, 202, 214), width=4)
+            draw.line((cx - 4, cy + 5, cx + 4, cy - 5), fill=(194, 202, 214), width=4)
+        elif icon == "id":
+            draw.rounded_rectangle((cx - 20, cy - 15, cx + 20, cy + 15), radius=4, outline=(194, 202, 214), width=3)
+            draw.ellipse((cx - 14, cy - 8, cx - 5, cy + 1), fill=(194, 202, 214))
+            draw.line((cx - 15, cy + 7, cx - 4, cy + 7), fill=(194, 202, 214), width=3)
+            draw.line((cx + 2, cy - 4, cx + 14, cy - 4), fill=(194, 202, 214), width=3)
+            draw.line((cx + 2, cy + 5, cx + 14, cy + 5), fill=(194, 202, 214), width=3)
+        elif icon == "crown":
+            _draw_crown(draw, cx, cy - 9, (213, 166, 73), (244, 211, 141))
+        elif icon == "coin":
+            _draw_coin(draw, cx, cy)
+        elif icon == "diamond":
+            _draw_diamond(draw, cx, cy, 18, (104, 163, 219), (198, 224, 247))
+        elif icon == "palette":
+            _draw_palette(draw, cx, cy)
+        elif icon == "message":
+            _draw_message_icon(draw, cx, cy)
+
+        draw.text((164, y + 29), label, font=label_font, fill=(202, 208, 218))
+
+        if extra:
+            extra(y, cy)
+        elif value is not None:
+            vb = draw.textbbox((0, 0), value, font=value_font)
+            vx = row_right - 36 - (vb[2] - vb[0])
+            draw.text((vx, y + 24), value, font=value_font, fill=value_fill)
+
+    # Rows
+    y = start_y
+    row(y, "Ссылка:", username, "link")
+    y += row_h + gap
+    row(y, "ID:", str(user.id), "id")
+    y += row_h + gap
+
+    def status_extra(y0, cy):
+        pill_w, pill_h = 225, 55
+        x2 = row_right - 34
+        x1 = x2 - pill_w
+        fill = (144, 105, 46) if data.get("premium") else ((75, 91, 110) if data.get("plus") else (73, 81, 93))
+        draw.rounded_rectangle((x1, cy - pill_h // 2, x2, cy + pill_h // 2), radius=14, fill=fill, outline=(188, 154, 86), width=2)
+        star_font = load_profile_font(27, bold=True)
+        draw.text((x1 + 18, cy - 18), "★", font=star_font, fill=(245, 210, 111))
+        sf = load_profile_font(29, bold=True)
+        draw.text((x1 + 58, cy - 18), status, font=sf, fill=(245, 242, 233))
+
+    row(y, "Статус:", icon="crown", extra=status_extra)
+    y += row_h + gap
+
+    def coins_extra(y0, cy):
+        _draw_coin(draw, row_right - 220, cy)
+        bf = load_profile_font(34, bold=True)
+        draw.text((row_right - 175, cy - 23), balance, font=bf, fill=(228, 185, 81))
+
+    row(y, "Random Coins:", icon="coin", extra=coins_extra)
+    y += row_h + gap
+
+    deco_value = f"{equipped_count}/{total_cosmetics}" if total_cosmetics else "0/0"
+    row(y, "Украшений:", deco_value, "diamond")
+    y += row_h + gap
+
+    def color_extra(y0, cy):
+        draw.ellipse((row_right - 260, cy - 19, row_right - 222, cy + 19), fill=name_color, outline=(205, 211, 220), width=2)
+        cf = load_profile_font(29, bold=True)
+        draw.text((row_right - 200, cy - 20), color_name, font=cf, fill=(235, 238, 242))
+
+    row(y, "Цвет ника:", icon="palette", extra=color_extra)
+    y += row_h + gap
+
+    def style_extra(y0, cy):
+        sf = load_profile_font(28, bold=True)
+        state_text = "включён" if message_style else "выключен"
+        state_fill = (72, 201, 126) if message_style else (170, 178, 190)
+        draw.text((row_right - 315, cy - 19), state_text, font=sf, fill=state_fill)
+
+        tx1, tx2 = row_right - 120, row_right - 36
+        draw.rounded_rectangle((tx1, cy - 24, tx2, cy + 24), radius=24, fill=((44, 177, 106) if message_style else (88, 96, 108)))
+        knob_x = tx2 - 23 if message_style else tx1 + 23
+        draw.ellipse((knob_x - 18, cy - 18, knob_x + 18, cy + 18), fill=(245, 247, 249))
+
+    row(y, "Особый стиль сообщений:", icon="message", extra=style_extra)
 
     buffer = BytesIO()
     image.save(buffer, format="PNG", optimize=True)
@@ -633,40 +758,10 @@ def make_profile_card(user, data):
     return buffer
 
 
-def profile_caption(user, data):
-    balance = int(data.get("balance") or 0)
-    status = "Premium" if data.get("premium") else ("Plus" if data.get("plus") else "Обычный")
-    cosmetics = data.get("cosmetics") or []
-    equipped_count = sum(1 for item in cosmetics if item.get("equipped"))
-    username = f"@{user.username}" if user.username else "нет username"
-
-    lines = [
-        "👤 Профиль",
-        "",
-        f"🔗 {username}",
-        f"🆔 {user.id}",
-        f"💎 Статус: {status}",
-        f"🪙 Random Coins: {balance:,}".replace(",", " "),
-    ]
-
-    if cosmetics:
-        lines.append(f"✨ Украшений: {equipped_count}/{len(cosmetics)}")
-
-    if profile_has_cosmetic(data, "name_color"):
-        _emoji, color_name = profile_color_meta(data.get("nameColor") or "white")
-        lines.append(f"🎨 Цвет ника: {color_name}")
-
-    if "message_style" in equipped_cosmetic_ids(data):
-        lines.append("💬 Особый стиль сообщений: включён")
-
-    return "\n".join(lines)
-
-
 async def send_profile_card(message, user, data):
     card = make_profile_card(user, data)
     await message.reply_photo(
         photo=card,
-        caption=profile_caption(user, data),
         reply_markup=profile_keyboard(data),
     )
 
