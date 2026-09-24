@@ -1668,11 +1668,10 @@ async def direct_send(update: Update, context: ContextTypes.DEFAULT_TYPE, text: 
     user = update.effective_user
     sender = f"@{user.username}" if user.username else user.full_name
     try:
-        if await notifications_enabled(target_id):
-            await context.bot.send_message(
-                chat_id=target_id,
-                text=f"💌 Личное сообщение от {sender}\n\n{text}",
-            )
+        await context.bot.send_message(
+            chat_id=target_id,
+            text=f"💌 Личное сообщение от {sender}\n\n{text}",
+        )
         clear_modes(context)
         await track_activity(user)
         await update.message.reply_text("✅ Сообщение отправлено.", reply_markup=activities_keyboard)
@@ -2251,6 +2250,7 @@ async def claim_daily(update: Update, context: ContextTypes.DEFAULT_TYPE):
         streak = int(data.get("streak") or 0)
         balance = int(data.get("balance") or 0)
         reward_item = data.get("rewardItem")
+        random_reward = data.get("randomReward")
         item_already_owned = bool(data.get("itemAlreadyOwned"))
         bonus_text = f"\n🎉 Бонус за серию: +{milestone:,} RC".replace(",", " ") if milestone else ""
         item_text = ""
@@ -2259,12 +2259,17 @@ async def claim_daily(update: Update, context: ContextTypes.DEFAULT_TYPE):
         elif item_already_owned:
             item_text = "\nℹ️ Предмет из награды у вас уже есть."
 
+        random_text = ""
+        if random_reward and random_reward.get("coins"):
+            random_text = f"\n🎲 Случайный бонус сработал: +{int(random_reward.get('coins') or 0):,} RC".replace(",", " ")
+
         coins_text = f"🪙 +{reward:,} RC" if reward else "🪙 Без коинов"
         await update.message.reply_text(
             (
                 f"🎁 Ежедневная награда\n"
                 f"{coins_text}"
-                f"{item_text}\n"
+                f"{item_text}"
+                f"{random_text}\n"
                 f"📅 Серия входов: {streak} дн.{bonus_text}\n"
                 f"👛 Баланс: {balance:,} RC"
             ).replace(",", " "),
@@ -2287,8 +2292,16 @@ async def show_inventory(update: Update, context: ContextTypes.DEFAULT_TYPE):
         if not owned:
             lines.append("Пока пусто.")
         else:
+            rarity_labels = {
+                "common": "⚪ Обычный",
+                "rare": "🔵 Редкий",
+                "epic": "🟣 Эпический",
+                "legendary": "🟡 Легендарный",
+                "exclusive": "🔴 Эксклюзивный",
+            }
             for item in owned:
-                lines.append(f"• {item.get('name')}")
+                rarity = rarity_labels.get(item.get("rarity"), "⚪ Обычный")
+                lines.append(f"• {item.get('name')} — {rarity}")
         await update.message.reply_text("\n".join(lines), reply_markup=activities_keyboard)
     except Exception:
         logging.exception("Ошибка инвентаря")
@@ -2332,6 +2345,8 @@ async def transfer_send(update: Update, context: ContextTypes.DEFAULT_TYPE, text
                 msg = f"❌ Не хватает {int(data.get('missing') or 0):,} RC".replace(",", " ")
             elif code == "self_transfer":
                 msg = "❌ Нельзя переводить коины самому себе."
+            elif code == "economy_blocked":
+                msg = "🚫 Переводы для одного из пользователей заблокированы администратором."
             else:
                 msg = "❌ Перевод не выполнен."
             await update.message.reply_text(msg, reply_markup=activities_keyboard)
@@ -2345,10 +2360,11 @@ async def transfer_send(update: Update, context: ContextTypes.DEFAULT_TYPE, text
             reply_markup=activities_keyboard,
         )
         try:
-            await context.bot.send_message(
-                chat_id=target_id,
-                text=f"💸 Вам перевели {amount:,} Random Coins.".replace(",", " "),
-            )
+            if await notifications_enabled(target_id):
+                await context.bot.send_message(
+                    chat_id=target_id,
+                    text=f"💸 Вам перевели {amount:,} Random Coins.".replace(",", " "),
+                )
         except Exception:
             pass
     except Exception:
@@ -2425,6 +2441,7 @@ async def handle_gift_buy(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 "insufficient_funds": "Не хватает Random Coins.",
                 "expired": "Это ограниченное украшение уже недоступно.",
                 "daily_only": "Этот эксклюзив можно получить только из ежедневной награды.",
+                "economy_blocked": "Подарки для одного из пользователей заблокированы администратором.",
             }
             await query.answer(messages.get(code, "❌ Не удалось купить подарок."), show_alert=True)
             return
@@ -2436,10 +2453,11 @@ async def handle_gift_buy(update: Update, context: ContextTypes.DEFAULT_TYPE):
             f"✅ Подарено: {item.get('name')}\n🪙 Остаток: {balance:,} RC".replace(",", " ")
         )
         try:
-            await context.bot.send_message(
-                chat_id=target_id,
-                text=f"🎁 Вам подарили украшение: {item.get('name')}!",
-            )
+            if await notifications_enabled(target_id):
+                await context.bot.send_message(
+                    chat_id=target_id,
+                    text=f"🎁 Вам подарили украшение: {item.get('name')}!",
+                )
         except Exception:
             pass
     except Exception:
@@ -3215,7 +3233,8 @@ async def like_profile(update: Update, context: ContextTypes.DEFAULT_TYPE, targe
         likes = int(data.get("likes") or 0)
         await update.message.reply_text(f"❤️ Лайк поставлен! Теперь у профиля {likes} лайков.", reply_markup=activities_keyboard)
         try:
-            await context.bot.send_message(chat_id=target_id, text="❤️ Ваш профиль получил новый лайк!")
+            if await notifications_enabled(target_id):
+                await context.bot.send_message(chat_id=target_id, text="❤️ Ваш профиль получил новый лайк!")
         except Exception:
             pass
     except Exception:
