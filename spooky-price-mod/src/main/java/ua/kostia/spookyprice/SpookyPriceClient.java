@@ -13,7 +13,9 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.client.option.KeyBinding;
 import net.minecraft.client.util.InputUtil;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.tooltip.TooltipType;
 import net.minecraft.screen.slot.Slot;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
@@ -139,7 +141,7 @@ public final class SpookyPriceClient implements ClientModInitializer {
         body.addProperty("collector", config.collectorId);
         body.addProperty("auction", currentAnarchy);
         body.addProperty("screenTitle", title);
-        body.addProperty("clientVersion", "1.0.1");
+        body.addProperty("clientVersion", "1.0.2");
 
         JsonArray array = new JsonArray();
         for (Listing listing : listings) {
@@ -202,7 +204,29 @@ public final class SpookyPriceClient implements ClientModInitializer {
             if (name.isBlank() || looksLikeNavigation(name)) continue;
 
             String components = String.valueOf(stack.getComponents());
-            String raw = cleanText(name + " " + components);
+
+            StringBuilder tooltipBuilder = new StringBuilder();
+            try {
+                List<Text> tooltip = stack.getTooltip(
+                        Item.TooltipContext.create(client.world),
+                        client.player,
+                        TooltipType.BASIC
+                );
+                for (Text line : tooltip) {
+                    String tooltipLine = cleanText(line.getString());
+                    if (!tooltipLine.isBlank()) {
+                        if (!tooltipBuilder.isEmpty()) tooltipBuilder.append("\n");
+                        tooltipBuilder.append(tooltipLine);
+                    }
+                }
+            } catch (Exception ignored) {
+            }
+
+            String tooltipText = tooltipBuilder.toString();
+            String raw = tooltipText.isBlank()
+                    ? cleanText(name + "\n" + components)
+                    : tooltipText;
+
             if (raw.length() > 6000) raw = raw.substring(0, 6000);
 
             String fingerprint = sha256(name + "\n" + components + "\n" + stack.getCount());
