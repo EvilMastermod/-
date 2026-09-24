@@ -1594,6 +1594,632 @@ async def activities_section(update: Update, context: ContextTypes.DEFAULT_TYPE)
     )
 
 
+async def notifications_enabled(user_id: int):
+    try:
+        response, data = await fetch_profile(user_id)
+        return response.status_code == 200 and data.get("ok") and data.get("notifications", True)
+    except Exception:
+        return True
+
+
+async def friends_menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    clear_modes(context)
+    context.user_data["friends_stage"] = "choose"
+    try:
+        response, data = await api_post("/friends/list", {"userId": update.effective_user.id})
+        friends = data.get("friends") or [] if response.status_code == 200 else []
+        lines = ["🧑‍🤝‍🧑 Друзья", ""]
+        if friends:
+            for friend in friends[:30]:
+                who = f"@{friend.get('username')}" if friend.get("username") else (friend.get("displayName") or f"ID {friend.get('userId')}")
+                lines.append(f"• {who} · ур. {int(friend.get('level') or 1)}")
+        else:
+            lines.append("Список друзей пока пуст.")
+        lines.append("")
+        lines.append("Нажми кнопку ниже, чтобы добавить или удалить друга.")
+        await update.message.reply_text("\n".join(lines), reply_markup=friends_user_keyboard)
+    except Exception:
+        logging.exception("Ошибка списка друзей")
+        await update.message.reply_text("❌ Друзья сейчас недоступны.", reply_markup=activities_keyboard)
+
+
+async def toggle_friend(update: Update, context: ContextTypes.DEFAULT_TYPE, target_id: int):
+    try:
+        response, data = await api_post(
+            "/friends/toggle",
+            {"userId": update.effective_user.id, "targetId": target_id},
+        )
+        clear_modes(context)
+        if response.status_code != 200 or not data.get("ok"):
+            await update.message.reply_text("❌ Не удалось изменить список друзей.", reply_markup=activities_keyboard)
+            return
+        text = "✅ Пользователь добавлен в друзья." if data.get("enabled") else "➖ Пользователь удалён из друзей."
+        await update.message.reply_text(text, reply_markup=activities_keyboard)
+    except Exception:
+        logging.exception("Ошибка изменения друзей")
+        clear_modes(context)
+        await update.message.reply_text("❌ Друзья сейчас недоступны.", reply_markup=activities_keyboard)
+
+
+async def direct_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    clear_modes(context)
+    context.user_data["direct_stage"] = "choose"
+    await update.message.reply_text(
+        "💌 Выберите пользователя, которому хотите написать через бота.",
+        reply_markup=direct_user_keyboard,
+    )
+
+
+async def direct_choose_message(update: Update, context: ContextTypes.DEFAULT_TYPE, target_id: int):
+    context.user_data["direct_stage"] = "message"
+    context.user_data["direct_target_id"] = target_id
+    await update.message.reply_text(
+        "✍️ Напишите сообщение:",
+        reply_markup=cancel_keyboard,
+    )
+
+
+async def direct_send(update: Update, context: ContextTypes.DEFAULT_TYPE, text: str):
+    target_id = context.user_data.get("direct_target_id")
+    if not target_id:
+        clear_modes(context)
+        await update.message.reply_text("❌ Получатель не найден.", reply_markup=activities_keyboard)
+        return
+    user = update.effective_user
+    sender = f"@{user.username}" if user.username else user.full_name
+    try:
+        if await notifications_enabled(target_id):
+            await context.bot.send_message(
+                chat_id=target_id,
+                text=f"💌 Личное сообщение от {sender}\n\n{text}",
+            )
+        clear_modes(context)
+        await track_activity(user)
+        await update.message.reply_text("✅ Сообщение отправлено.", reply_markup=activities_keyboard)
+    except Exception:
+        logging.exception("Ошибка личного сообщения")
+        clear_modes(context)
+        await update.message.reply_text("❌ Не удалось доставить сообщение.", reply_markup=activities_keyboard)
+
+
+async def show_achievements(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    clear_modes(context)
+    try:
+        response, data = await api_post("/achievements", {"userId": update.effective_user.id})
+        if response.status_code != 200 or not data.get("ok"):
+            raise RuntimeError("achievements api")
+        lines = ["🏅 Достижения", ""]
+        for a in data.get("achievements") or []:
+            lines.append(f"{'✅' if a.get('unlocked') else '🔒'} {a.get('name')}")
+        await update.message.reply_text("\n".join(lines), reply_markup=activities_keyboard)
+    except Exception:
+        logging.exception("Ошибка достижений")
+        await update.message.reply_text("❌ Достижения недоступны.", reply_markup=activities_keyboard)
+
+
+async def show_quests(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    clear_modes(context)
+    try:
+        response, data = await api_post("/quests", {"userId": update.effective_user.id})
+        if response.status_code != 200 or not data.get("ok"):
+            raise RuntimeError("quests api")
+        rows = []
+        lines = ["🎯 Задания на сегодня", ""]
+        for q in data.get("quests") or []:
+            progress = min(int(q.get("progress") or 0), int(q.get("target") or 0))
+            target = int(q.get("target") or 0)
+            mark = "✅" if q.get("claimed") else ("🟢" if q.get("done") else "⚪")
+            lines.append(f"{mark} {q.get('name')} — {progress}/{target} · +{int(q.get('reward') or 0)} RC")
+            if q.get("done") and not q.get("claimed"):
+                rows.append([InlineKeyboardButton(
+                    f"🎁 Забрать: {q.get('name')}",
+                    callback_data=f"quest_claim:{q.get('id')}",
+                )])
+        await update.message.reply_text(
+            "\n".join(lines),
+            reply_markup=InlineKeyboardMarkup(rows) if rows else activities_keyboard,
+        )
+    except Exception:
+        logging.exception("Ошибка заданий")
+        await update.message.reply_text("❌ Задания недоступны.", reply_markup=activities_keyboard)
+
+
+async def handle_quest_claim(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    query = update.callback_query
+    if not query:
+        return
+    quest_id = query.data.split(":", 1)[1]
+    try:
+        response, data = await api_post("/quests/claim", {"userId": query.from_user.id, "questId": quest_id})
+        if response.status_code != 200 or not data.get("ok"):
+            await query.answer("❌ Награду пока нельзя забрать.", show_alert=True)
+            return
+        await query.answer(f"🎁 +{int(data.get('reward') or 0)} RC", show_alert=True)
+        await query.edit_message_text(
+            f"✅ Задание выполнено!\n🪙 +{int(data.get('reward') or 0)} RC\n👛 Баланс: {int(data.get('balance') or 0)} RC"
+        )
+    except Exception:
+        logging.exception("Ошибка получения награды задания")
+        await query.answer("❌ Задания недоступны.", show_alert=True)
+
+
+async def bank_menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    clear_modes(context)
+    try:
+        response, data = await api_post("/bank", {"userId": update.effective_user.id})
+        if response.status_code != 200 or not data.get("ok"):
+            raise RuntimeError("bank api")
+        keyboard = InlineKeyboardMarkup([
+            [
+                InlineKeyboardButton("➕ Положить", callback_data="bank:deposit"),
+                InlineKeyboardButton("➖ Снять", callback_data="bank:withdraw"),
+            ]
+        ])
+        await update.message.reply_text(
+            (
+                "🏦 Банк\n\n"
+                f"👛 Кошелёк: {int(data.get('balance') or 0):,} RC\n"
+                f"🏦 На депозите: {int(data.get('bankBalance') or 0):,} RC\n"
+                f"📈 Бонус: {data.get('rateDaily', 1)}% в сутки"
+            ).replace(",", " "),
+            reply_markup=keyboard,
+        )
+    except Exception:
+        logging.exception("Ошибка банка")
+        await update.message.reply_text("❌ Банк недоступен.", reply_markup=activities_keyboard)
+
+
+async def handle_bank_action(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    query = update.callback_query
+    if not query:
+        return
+    action = query.data.split(":", 1)[1]
+    context.user_data["bank_stage"] = action
+    await query.answer()
+    await query.message.reply_text(
+        "Введите сумму Random Coins:",
+        reply_markup=cancel_keyboard,
+    )
+
+
+async def bank_amount(update: Update, context: ContextTypes.DEFAULT_TYPE, text: str):
+    action = context.user_data.get("bank_stage")
+    raw = text.replace(" ", "").replace(",", "")
+    if not raw.isdigit() or int(raw) < 1:
+        await update.message.reply_text("❌ Введите целое число больше 0.", reply_markup=cancel_keyboard)
+        return
+    amount = int(raw)
+    path = "/bank/deposit" if action == "deposit" else "/bank/withdraw"
+    try:
+        response, data = await api_post(path, {"userId": update.effective_user.id, "amount": amount})
+        clear_modes(context)
+        if response.status_code != 200 or not data.get("ok"):
+            await update.message.reply_text("❌ Недостаточно средств или неверная сумма.", reply_markup=activities_keyboard)
+            return
+        await update.message.reply_text(
+            (
+                f"✅ Операция выполнена.\n"
+                f"👛 Кошелёк: {int(data.get('balance') or 0):,} RC\n"
+                f"🏦 Банк: {int(data.get('bankBalance') or 0):,} RC"
+            ).replace(",", " "),
+            reply_markup=activities_keyboard,
+        )
+    except Exception:
+        logging.exception("Ошибка банка")
+        clear_modes(context)
+        await update.message.reply_text("❌ Банк недоступен.", reply_markup=activities_keyboard)
+
+
+async def show_season(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    clear_modes(context)
+    try:
+        response, data = await api_post("/season", {"userId": update.effective_user.id})
+        season = data.get("season") or {}
+        if response.status_code != 200 or not data.get("ok"):
+            raise RuntimeError("season api")
+        lines = [f"🎫 {season.get('name') or 'Сезон'}", f"⭐ Ваш уровень: {int(season.get('level') or 1)}", ""]
+        rows = []
+        for tier in season.get("tiers") or []:
+            mark = "✅" if tier.get("claimed") else ("🟢" if tier.get("unlocked") else "🔒")
+            lines.append(f"{mark} Этап {tier.get('tier')} · нужен ур. {tier.get('need')} · {tier.get('reward')} RC")
+            if tier.get("unlocked") and not tier.get("claimed"):
+                rows.append([InlineKeyboardButton(
+                    f"🎁 Забрать этап {tier.get('tier')}",
+                    callback_data=f"season_claim:{tier.get('tier')}",
+                )])
+        await update.message.reply_text(
+            "\n".join(lines),
+            reply_markup=InlineKeyboardMarkup(rows) if rows else activities_keyboard,
+        )
+    except Exception:
+        logging.exception("Ошибка сезона")
+        await update.message.reply_text("❌ Сезон недоступен.", reply_markup=activities_keyboard)
+
+
+async def handle_season_claim(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    query = update.callback_query
+    if not query:
+        return
+    tier = int(query.data.split(":", 1)[1])
+    try:
+        response, data = await api_post("/season/claim", {"userId": query.from_user.id, "tier": tier})
+        if response.status_code != 200 or not data.get("ok"):
+            await query.answer("❌ Награда недоступна.", show_alert=True)
+            return
+        await query.answer(f"🎁 +{int(data.get('reward') or 0)} RC", show_alert=True)
+        await query.edit_message_text(f"✅ Награда сезона получена. Баланс: {int(data.get('balance') or 0)} RC")
+    except Exception:
+        await query.answer("❌ Сезон недоступен.", show_alert=True)
+
+
+async def show_daily_calendar(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    clear_modes(context)
+    try:
+        response, data = await api_post("/calendar", {})
+        if response.status_code != 200 or not data.get("ok"):
+            raise RuntimeError("calendar")
+        lines = ["📅 Календарь ежедневных наград", ""]
+        days = data.get("days") or []
+        if not days:
+            lines.append("Администратор ещё не настроил календарь.")
+        for day in days[:30]:
+            if day.get("surprise"):
+                lines.append(f"🎁 День {day.get('day')}: СЮРПРИЗ")
+            else:
+                parts = []
+                if int(day.get("coins") or 0):
+                    parts.append(f"{int(day.get('coins') or 0)} RC")
+                if day.get("item"):
+                    parts.append(day.get("item", {}).get("name"))
+                lines.append(f"• День {day.get('day')}: " + (" + ".join(parts) if parts else "без награды"))
+        await update.message.reply_text("\n".join(lines), reply_markup=activities_keyboard)
+    except Exception:
+        logging.exception("Ошибка календаря")
+        await update.message.reply_text("❌ Календарь недоступен.", reply_markup=activities_keyboard)
+
+
+async def show_rotation(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    clear_modes(context)
+    try:
+        response, data = await fetch_shop(update.effective_user.id)
+        items = [x for x in (data.get("items") or []) if x.get("rotating")]
+        lines = ["🔄 Ротация магазина сегодня", ""]
+        if not items:
+            lines.append("Сегодня отдельной ротации нет.")
+        for item in items:
+            lines.append(f"• {item.get('name')} — {int(item.get('price') or 0):,} RC".replace(",", " "))
+        await update.message.reply_text("\n".join(lines), reply_markup=activities_keyboard)
+    except Exception:
+        logging.exception("Ошибка ротации")
+        await update.message.reply_text("❌ Ротация недоступна.", reply_markup=activities_keyboard)
+
+
+async def show_balance_history(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    clear_modes(context)
+    try:
+        response, data = await api_post("/balance/history", {"userId": update.effective_user.id})
+        rows = data.get("history") or []
+        lines = ["📈 История баланса", ""]
+        if not rows:
+            lines.append("История пока пустая.")
+        labels = {
+            "purchase":"Покупка","daily":"Ежедневка","transfer_out":"Перевод",
+            "transfer_in":"Получено","gift":"Подарок","quest":"Задание",
+            "bank_deposit":"В банк","bank_withdraw":"Из банка","sell":"Продажа",
+            "season":"Сезон","bundle":"Набор","admin_add":"Админ +","admin_remove":"Админ -",
+        }
+        for row in rows[:20]:
+            amount = int(row.get("amount") or 0)
+            sign = "+" if amount > 0 else ""
+            lines.append(f"• {labels.get(row.get('type'), row.get('type'))}: {sign}{amount:,} RC".replace(",", " "))
+        await update.message.reply_text("\n".join(lines), reply_markup=activities_keyboard)
+    except Exception:
+        logging.exception("Ошибка истории баланса")
+        await update.message.reply_text("❌ История недоступна.", reply_markup=activities_keyboard)
+
+
+async def toggle_notifications(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    clear_modes(context)
+    try:
+        response, data = await api_post("/notifications", {"userId": update.effective_user.id})
+        current = bool(data.get("enabled", True))
+        response2, data2 = await api_post("/notifications", {"userId": update.effective_user.id, "enabled": not current})
+        enabled = bool(data2.get("enabled", not current))
+        await update.message.reply_text(
+            f"🔔 Уведомления: {'включены' if enabled else 'выключены'}",
+            reply_markup=activities_keyboard,
+        )
+    except Exception:
+        logging.exception("Ошибка уведомлений")
+        await update.message.reply_text("❌ Не удалось изменить уведомления.", reply_markup=activities_keyboard)
+
+
+async def status_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    clear_modes(context)
+    context.user_data["status_waiting"] = True
+    await update.message.reply_text(
+        "🪪 Напишите статус профиля до 80 символов.\nЧтобы очистить — отправьте «-».",
+        reply_markup=cancel_keyboard,
+    )
+
+
+async def status_set(update: Update, context: ContextTypes.DEFAULT_TYPE, text: str):
+    value = "" if text.strip() == "-" else text.strip()[:80]
+    try:
+        response, data = await api_post("/profile/status", {"userId": update.effective_user.id, "status": value})
+        clear_modes(context)
+        if response.status_code != 200 or not data.get("ok"):
+            raise RuntimeError("status")
+        await update.message.reply_text(
+            f"✅ Статус профиля {'обновлён' if value else 'очищен'}.",
+            reply_markup=activities_keyboard,
+        )
+    except Exception:
+        logging.exception("Ошибка статуса")
+        clear_modes(context)
+        await update.message.reply_text("❌ Не удалось изменить статус.", reply_markup=activities_keyboard)
+
+
+async def show_event(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    clear_modes(context)
+    try:
+        response, data = await fetch_shop(update.effective_user.id)
+        event = data.get("event")
+        if not event:
+            text = "🎉 Сейчас активного ивента нет."
+        else:
+            text = (
+                f"🎉 Ивент: {event.get('name') or 'Без названия'}\n"
+                f"🎁 Бонус к ежедневке: +{int(event.get('dailyBonus') or 0)} RC"
+            )
+        await update.message.reply_text(text, reply_markup=activities_keyboard)
+    except Exception:
+        await update.message.reply_text("❌ Ивент сейчас недоступен.", reply_markup=activities_keyboard)
+
+
+async def show_bundles(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    clear_modes(context)
+    try:
+        response, data = await fetch_shop(update.effective_user.id)
+        bundles = data.get("bundles") or []
+        lines = ["📦 Наборы", ""]
+        rows = []
+        if not bundles:
+            lines.append("Наборов пока нет.")
+        for bundle in bundles:
+            lines.append(f"• {bundle.get('name')} — {int(bundle.get('price') or 0):,} RC".replace(",", " "))
+            rows.append([InlineKeyboardButton(
+                f"Купить {bundle.get('name')}",
+                callback_data=f"bundle_buy:{bundle.get('id')}",
+            )])
+        await update.message.reply_text(
+            "\n".join(lines),
+            reply_markup=InlineKeyboardMarkup(rows) if rows else activities_keyboard,
+        )
+    except Exception:
+        logging.exception("Ошибка наборов")
+        await update.message.reply_text("❌ Наборы недоступны.", reply_markup=activities_keyboard)
+
+
+async def handle_bundle_buy(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    query = update.callback_query
+    if not query:
+        return
+    bundle_id = query.data.split(":", 1)[1]
+    try:
+        response, data = await api_post("/bundle/buy", {"userId": query.from_user.id, "bundleId": bundle_id})
+        if response.status_code != 200 or not data.get("ok"):
+            await query.answer("❌ Не хватает коинов или набор недоступен.", show_alert=True)
+            return
+        await query.answer("📦 Набор куплен!", show_alert=True)
+        granted = ", ".join(x.get("name") for x in (data.get("granted") or [])) or "все предметы уже были"
+        await query.edit_message_text(
+            f"✅ Набор куплен.\n🎁 Получено: {granted}\n👛 Баланс: {int(data.get('balance') or 0)} RC"
+        )
+    except Exception:
+        await query.answer("❌ Наборы недоступны.", show_alert=True)
+
+
+async def sell_menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    clear_modes(context)
+    try:
+        response, data = await fetch_shop(update.effective_user.id)
+        items = [
+            x for x in (data.get("items") or [])
+            if x.get("category") == "items" and x.get("owned") and not x.get("dailyOnly")
+        ]
+        rows = [[InlineKeyboardButton(
+            f"🗑 {x.get('name')}",
+            callback_data=f"sell_item:{x.get('id')}",
+        )] for x in items]
+        await update.message.reply_text(
+            "🗑 Продажа украшений\n\nВозврат — 50% от цены покупки. Бесплатные/эксклюзивные награды продать нельзя.",
+            reply_markup=InlineKeyboardMarkup(rows) if rows else activities_keyboard,
+        )
+    except Exception:
+        await update.message.reply_text("❌ Продажа недоступна.", reply_markup=activities_keyboard)
+
+
+async def handle_sell_item(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    query = update.callback_query
+    if not query:
+        return
+    item_id = query.data.split(":", 1)[1]
+    try:
+        response, data = await api_post("/sell", {"userId": query.from_user.id, "itemId": item_id})
+        if response.status_code != 200 or not data.get("ok"):
+            await query.answer("❌ Этот предмет нельзя продать.", show_alert=True)
+            return
+        await query.answer(f"🪙 +{int(data.get('refund') or 0)} RC", show_alert=True)
+        await query.edit_message_text(
+            f"✅ Предмет продан.\n🪙 Получено: {int(data.get('refund') or 0)} RC\n👛 Баланс: {int(data.get('balance') or 0)} RC"
+        )
+    except Exception:
+        await query.answer("❌ Продажа недоступна.", show_alert=True)
+
+
+async def trade_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    clear_modes(context)
+    context.user_data["trade_stage"] = "choose"
+    await update.message.reply_text(
+        "🔁 Выберите пользователя для обмена украшениями.",
+        reply_markup=trade_user_keyboard,
+    )
+
+
+async def trade_choose_partner(update: Update, context: ContextTypes.DEFAULT_TYPE, target_id: int):
+    context.user_data["trade_stage"] = "give"
+    context.user_data["trade_target_id"] = target_id
+    try:
+        response, data = await fetch_shop(update.effective_user.id)
+        items = [x for x in (data.get("items") or []) if x.get("category") == "items" and x.get("owned") and not x.get("dailyOnly")]
+        rows = [[InlineKeyboardButton(
+            x.get("name"),
+            callback_data=f"trade_give:{x.get('id')}",
+        )] for x in items]
+        await update.message.reply_text(
+            "🔁 Выберите украшение, которое вы отдаёте:",
+            reply_markup=InlineKeyboardMarkup(rows) if rows else activities_keyboard,
+        )
+    except Exception:
+        clear_modes(context)
+        await update.message.reply_text("❌ Обмен недоступен.", reply_markup=activities_keyboard)
+
+
+async def handle_trade_give(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    query = update.callback_query
+    if not query:
+        return
+    item_id = query.data.split(":", 1)[1]
+    target_id = context.user_data.get("trade_target_id")
+    if not target_id:
+        await query.answer("Сначала выберите пользователя.", show_alert=True)
+        return
+    context.user_data["trade_give_item"] = item_id
+    context.user_data["trade_stage"] = "want"
+    try:
+        response, data = await fetch_shop(target_id)
+        items = [x for x in (data.get("items") or []) if x.get("category") == "items" and x.get("owned") and not x.get("dailyOnly")]
+        rows = [[InlineKeyboardButton(
+            x.get("name"),
+            callback_data=f"trade_want:{x.get('id')}",
+        )] for x in items]
+        await query.answer()
+        await query.edit_message_text(
+            "🔁 Теперь выберите украшение, которое хотите получить:",
+            reply_markup=InlineKeyboardMarkup(rows),
+        )
+    except Exception:
+        await query.answer("❌ Не удалось открыть инвентарь пользователя.", show_alert=True)
+
+
+async def handle_trade_want(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    query = update.callback_query
+    if not query:
+        return
+    want_item = query.data.split(":", 1)[1]
+    target_id = context.user_data.get("trade_target_id")
+    give_item = context.user_data.get("trade_give_item")
+    if not target_id or not give_item:
+        await query.answer("Обмен устарел.", show_alert=True)
+        return
+    try:
+        response, data = await api_post(
+            "/trade/create",
+            {
+                "fromUserId": query.from_user.id,
+                "toUserId": target_id,
+                "giveItem": give_item,
+                "wantItem": want_item,
+            },
+        )
+        if response.status_code != 200 or not data.get("ok"):
+            await query.answer("❌ Не удалось создать обмен.", show_alert=True)
+            return
+        trade = data.get("trade") or {}
+        trade_id = trade.get("id")
+        clear_modes(context)
+        await query.edit_message_text("✅ Предложение обмена отправлено пользователю.")
+        if await notifications_enabled(target_id):
+            await context.bot.send_message(
+                chat_id=target_id,
+                text="🔁 Вам предложили обмен украшениями. Принять?",
+                reply_markup=InlineKeyboardMarkup([[
+                    InlineKeyboardButton("✅ Принять", callback_data=f"trade_resp:{trade_id}:yes"),
+                    InlineKeyboardButton("❌ Отклонить", callback_data=f"trade_resp:{trade_id}:no"),
+                ]]),
+            )
+    except Exception:
+        logging.exception("Ошибка создания обмена")
+        await query.answer("❌ Обмен недоступен.", show_alert=True)
+
+
+async def handle_trade_response(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    query = update.callback_query
+    if not query:
+        return
+    _, trade_id, answer = query.data.split(":", 2)
+    try:
+        response, data = await api_post(
+            "/trade/respond",
+            {"tradeId": trade_id, "userId": query.from_user.id, "accept": answer == "yes"},
+        )
+        if response.status_code != 200 or not data.get("ok"):
+            await query.answer("❌ Обмен уже недоступен.", show_alert=True)
+            return
+        await query.answer("✅ Готово" if answer == "yes" else "❌ Отклонено", show_alert=True)
+        await query.edit_message_text("✅ Обмен выполнен." if answer == "yes" else "❌ Обмен отклонён.")
+    except Exception:
+        await query.answer("❌ Обмен недоступен.", show_alert=True)
+
+
+async def profile_status_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    query = update.callback_query
+    if not query:
+        return
+    await query.answer()
+    clear_modes(context)
+    context.user_data["status_waiting"] = True
+    await query.message.reply_text(
+        "🪪 Напишите новый статус профиля до 80 символов. Для очистки отправьте «-».",
+        reply_markup=cancel_keyboard,
+    )
+
+
+async def profile_background_menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    query = update.callback_query
+    if not query:
+        return
+    try:
+        response, data = await fetch_profile(query.from_user.id)
+        backgrounds = [x for x in (data.get("cosmetics") or []) if x.get("kind") == "background"]
+        rows = [[InlineKeyboardButton(
+            x.get("name"),
+            callback_data=f"profile_bg:{x.get('id')}",
+        )] for x in backgrounds]
+        rows.append([InlineKeyboardButton("⬅️ Назад", callback_data="profile_back")])
+        await query.answer()
+        await query.edit_message_text("🖼 Выберите фон профиля:", reply_markup=InlineKeyboardMarkup(rows))
+    except Exception:
+        await query.answer("❌ Фоны недоступны.", show_alert=True)
+
+
+async def profile_background_set(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    query = update.callback_query
+    if not query:
+        return
+    item_id = query.data.split(":", 1)[1]
+    try:
+        response, data = await api_post("/profile/background", {"userId": query.from_user.id, "itemId": item_id})
+        if response.status_code != 200 or not data.get("ok"):
+            await query.answer("❌ Этот фон недоступен.", show_alert=True)
+            return
+        await query.answer("✅ Фон выбран", show_alert=True)
+        await query.edit_message_text(f"🖼 Выбран фон: {data.get('item', {}).get('name')}")
+    except Exception:
+        await query.answer("❌ Не удалось выбрать фон.", show_alert=True)
+
+
 async def claim_daily(update: Update, context: ContextTypes.DEFAULT_TYPE):
     clear_modes(context)
     user = update.effective_user
