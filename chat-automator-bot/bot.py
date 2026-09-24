@@ -16,6 +16,7 @@ from telegram import (
 from telegram.constants import ChatMemberStatus, ParseMode
 from telegram.ext import (
     Application,
+    BusinessConnectionHandler,
     CallbackQueryHandler,
     ChatMemberHandler,
     CommandHandler,
@@ -93,6 +94,39 @@ def init_db():
                 text TEXT NOT NULL,
                 enabled INTEGER NOT NULL DEFAULT 1
             );
+
+            CREATE TABLE IF NOT EXISTS business_connections(
+                connection_id TEXT PRIMARY KEY,
+                owner_user_id INTEGER NOT NULL,
+                user_chat_id INTEGER NOT NULL,
+                is_enabled INTEGER NOT NULL DEFAULT 1,
+                can_reply INTEGER NOT NULL DEFAULT 0,
+                updated_at INTEGER NOT NULL
+            );
+
+            CREATE TABLE IF NOT EXISTS business_settings(
+                owner_user_id INTEGER PRIMARY KEY,
+                automation_enabled INTEGER NOT NULL DEFAULT 1,
+                fallback_enabled INTEGER NOT NULL DEFAULT 0,
+                fallback_text TEXT NOT NULL DEFAULT '👋 Спасибо за сообщение! Я скоро отвечу.',
+                welcome_enabled INTEGER NOT NULL DEFAULT 1,
+                welcome_text TEXT NOT NULL DEFAULT '👋 Привет, {name}! Спасибо за сообщение.',
+                mark_read INTEGER NOT NULL DEFAULT 0
+            );
+
+            CREATE TABLE IF NOT EXISTS business_replies(
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                owner_user_id INTEGER NOT NULL,
+                trigger TEXT NOT NULL,
+                reply TEXT NOT NULL
+            );
+
+            CREATE TABLE IF NOT EXISTS business_seen_chats(
+                owner_user_id INTEGER NOT NULL,
+                chat_id INTEGER NOT NULL,
+                first_seen_at INTEGER NOT NULL,
+                PRIMARY KEY(owner_user_id, chat_id)
+            );
             """
         )
         for statement in [
@@ -138,6 +172,103 @@ def set_chat(chat_id: int, field: str, value):
     ensure_chat(chat_id)
     with db() as c:
         c.execute(f"UPDATE chats SET {field}=? WHERE chat_id=?", (value, chat_id))
+
+
+def ensure_business_settings(owner_user_id: int):
+    with db() as c:
+        c.execute(
+            "INSERT OR IGNORE INTO business_settings(owner_user_id) VALUES(?)",
+            (owner_user_id,),
+        )
+
+
+def get_business_settings(owner_user_id: int):
+    ensure_business_settings(owner_user_id)
+    with db() as c:
+        return c.execute(
+            "SELECT * FROM business_settings WHERE owner_user_id=?",
+            (owner_user_id,),
+        ).fetchone()
+
+
+def set_business_setting(owner_user_id: int, field: str, value):
+    allowed = {
+        "automation_enabled",
+        "fallback_enabled",
+        "fallback_text",
+        "welcome_enabled",
+        "welcome_text",
+        "mark_read",
+    }
+    if field not in allowed:
+        raise ValueError("bad business field")
+    ensure_business_settings(owner_user_id)
+    with db() as c:
+        c.execute(
+            f"UPDATE business_settings SET {field}=? WHERE owner_user_id=?",
+            (value, owner_user_id),
+        )
+
+
+def get_business_connection(connection_id: str):
+    with db() as c:
+        return c.execute(
+            "SELECT * FROM business_connections WHERE connection_id=?",
+            (connection_id,),
+        ).fetchone()
+
+
+def owner_business_connection(owner_user_id: int):
+    with db() as c:
+        return c.execute(
+            """
+            SELECT * FROM business_connections
+            WHERE owner_user_id=?
+            ORDER BY updated_at DESC
+            LIMIT 1
+            """,
+            (owner_user_id,),
+        ).fetchone()
+
+
+def business_panel(owner_user_id: int):
+    s = get_business_settings(owner_user_id)
+    connection = owner_business_connection(owner_user_id)
+    connected = bool(connection and connection["is_enabled"])
+    return InlineKeyboardMarkup(
+        [
+            [
+                InlineKeyboardButton(
+                    f"{'✅' if connected else '❌'} Подключение Telegram Business",
+                    callback_data="biz:status",
+                )
+            ],
+            [
+                InlineKeyboardButton(
+                    f"{'✅' if s['automation_enabled'] else '❌'} Автоматизация",
+                    callback_data="biz:automation",
+                ),
+                InlineKeyboardButton(
+                    f"{'✅' if s['fallback_enabled'] else '❌'} Общий автоответ",
+                    callback_data="biz:fallback",
+                ),
+            ],
+            [
+                InlineKeyboardButton(
+                    f"{'✅' if s['welcome_enabled'] else '❌'} Первое сообщение",
+                    callback_data="biz:welcome",
+                ),
+                InlineKeyboardButton(
+                    f"{'✅' if s['mark_read'] else '❌'} Читать сообщения",
+                    callback_data="biz:read",
+                ),
+            ],
+            [
+                InlineKeyboardButton("🗯 Ответы по словам", callback_data="biz:replies"),
+                InlineKeyboardButton("📝 Тексты автоответов", callback_data="biz:texts"),
+            ],
+        ]
+    )
 
 
 async def is_admin(update: Update, user_id: int | None = None) -> bool:
@@ -211,11 +342,291 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if update.effective_chat.type == "private":
         await update.message.reply_text(
             "🤖 Я RNMD Chat Automator.\n\n"
-            "Добавь меня в группу и выдай права администратора. "
-            "Потом напиши /setup."
+            "Я могу работать как Telegram Business-бот: получать сообщения "
+            "из выбранных личных чатов и отвечать от твоего имени.\n\n"
+            "Настройки Business: /business\n"
+            "Настройки групп: /setup"
         )
     else:
         await update.message.reply_text("🤖 Готов. Админ-панель: /setup")
+
+
+async def business_menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if update.effective_chat.type != "private":
+        await update.effective_message.reply_text("⚠️ Открой эту команду в личном чате с ботом.")
+        return
+    owner_id = update.effective_user.id
+    ensure_business_settings(owner_id)
+    connection = owner_business_connection(owner_id)
+    status = "✅ подключён" if connection and connection["is_enabled"] else "❌ ещё не подключён"
+    await update.effective_message.reply_text(
+        "💼 Автоматизация личных чатов\n\n"
+        f"Telegram Business: {status}\n\n"
+        "Чаты, к которым бот получает доступ, выбираются прямо в Telegram "
+        "на экране «Автоматизация чатов».",
+        reply_markup=business_panel(owner_id),
+    )
+
+
+async def business_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    q = update.callback_query
+    if not q:
+        return
+    owner_id = q.from_user.id
+    action = q.data.split(":", 1)[1]
+    s = get_business_settings(owner_id)
+
+    toggles = {
+        "automation": ("automation_enabled", "Автоматизация"),
+        "fallback": ("fallback_enabled", "Общий автоответ"),
+        "welcome": ("welcome_enabled", "Первое сообщение"),
+        "read": ("mark_read", "Пометка прочитанным"),
+    }
+    if action in toggles:
+        field, label = toggles[action]
+        value = 0 if s[field] else 1
+        set_business_setting(owner_id, field, value)
+        await q.answer(f"{label}: {'включено' if value else 'выключено'}")
+        await q.edit_message_reply_markup(reply_markup=business_panel(owner_id))
+        return
+
+    if action == "status":
+        connection = owner_business_connection(owner_id)
+        if connection and connection["is_enabled"]:
+            text = (
+                "✅ Telegram Business подключён.\n"
+                f"Право отвечать: {'да' if connection['can_reply'] else 'нет'}.\n\n"
+                "Доступные чаты и исключения настраиваются в самом Telegram."
+            )
+        else:
+            text = (
+                "❌ Telegram Business ещё не подключён.\n\n"
+                "Сначала включи Secretary Mode у бота в @BotFather, "
+                "потом в Telegram открой Настройки → Telegram Business → "
+                "Автоматизация чатов и выбери этого бота."
+            )
+        await q.answer()
+        await q.message.reply_text(text)
+        return
+
+    if action == "replies":
+        with db() as c:
+            rows = c.execute(
+                """
+                SELECT id,trigger,reply FROM business_replies
+                WHERE owner_user_id=? ORDER BY id DESC LIMIT 30
+                """,
+                (owner_id,),
+            ).fetchall()
+        text = "🗯 Ответы по словам\n\n"
+        text += "\n".join(
+            f"#{r['id']} «{r['trigger']}» → {r['reply']}" for r in rows
+        ) or "Пока нет."
+        text += (
+            "\n\nДобавить: /bizreplyadd привет | Привет! Чем помочь?"
+            "\nУдалить: /bizreplydel ID"
+        )
+        await q.answer()
+        await q.message.reply_text(text)
+        return
+
+    if action == "texts":
+        await q.answer()
+        await q.message.reply_text(
+            "📝 Тексты Business-автоответов\n\n"
+            f"Первое сообщение:\n{s['welcome_text']}\n\n"
+            f"Общий автоответ:\n{s['fallback_text']}\n\n"
+            "Изменить первое сообщение:\n"
+            "/bizwelcome Привет, {name}! Чем помочь?\n\n"
+            "Изменить общий автоответ:\n"
+            "/bizfallback Спасибо! Я скоро отвечу."
+        )
+
+
+async def business_connection_update(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    bc = update.business_connection
+    if not bc:
+        return
+    can_reply = int(bool(getattr(bc.rights, "can_reply", False))) if bc.rights else 0
+    with db() as c:
+        c.execute(
+            """
+            INSERT INTO business_connections(
+                connection_id,owner_user_id,user_chat_id,is_enabled,can_reply,updated_at
+            ) VALUES(?,?,?,?,?,?)
+            ON CONFLICT(connection_id) DO UPDATE SET
+                owner_user_id=excluded.owner_user_id,
+                user_chat_id=excluded.user_chat_id,
+                is_enabled=excluded.is_enabled,
+                can_reply=excluded.can_reply,
+                updated_at=excluded.updated_at
+            """,
+            (
+                bc.id,
+                bc.user.id,
+                bc.user_chat_id,
+                int(bool(bc.is_enabled)),
+                can_reply,
+                int(time_module.time()),
+            ),
+        )
+    ensure_business_settings(bc.user.id)
+    try:
+        await context.bot.send_message(
+            chat_id=bc.user_chat_id,
+            text=(
+                "✅ Telegram Business подключён к RNMD Chat Automator."
+                if bc.is_enabled
+                else "⚠️ Telegram Business отключён от RNMD Chat Automator."
+            ),
+        )
+    except Exception:
+        log.exception("Could not notify business owner")
+
+
+async def business_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    msg = update.business_message
+    if not msg or not msg.business_connection_id:
+        return
+
+    connection = get_business_connection(msg.business_connection_id)
+    if not connection or not connection["is_enabled"]:
+        return
+
+    owner_id = int(connection["owner_user_id"])
+
+    # Do not answer messages sent by the account owner or by a business bot.
+    if msg.from_user and msg.from_user.id == owner_id:
+        return
+    if getattr(msg, "sender_business_bot", None):
+        return
+
+    s = get_business_settings(owner_id)
+    if not s["automation_enabled"]:
+        return
+
+    if s["mark_read"]:
+        try:
+            await msg.read_business_message()
+        except Exception:
+            log.debug("Cannot mark business message as read", exc_info=True)
+
+    text = (msg.text or msg.caption or "").strip()
+    low = text.lower()
+    sender_name = msg.from_user.full_name if msg.from_user else "друг"
+
+    chosen_reply = None
+    if text:
+        with db() as c:
+            rows = c.execute(
+                """
+                SELECT trigger,reply FROM business_replies
+                WHERE owner_user_id=? ORDER BY LENGTH(trigger) DESC,id ASC
+                """,
+                (owner_id,),
+            ).fetchall()
+        for row in rows:
+            if row["trigger"].lower() in low:
+                chosen_reply = row["reply"]
+                break
+
+    first_seen = False
+    with db() as c:
+        existing = c.execute(
+            """
+            SELECT 1 FROM business_seen_chats
+            WHERE owner_user_id=? AND chat_id=?
+            """,
+            (owner_id, msg.chat_id),
+        ).fetchone()
+        if not existing:
+            first_seen = True
+            c.execute(
+                """
+                INSERT OR IGNORE INTO business_seen_chats(owner_user_id,chat_id,first_seen_at)
+                VALUES(?,?,?)
+                """,
+                (owner_id, msg.chat_id, int(time_module.time())),
+            )
+
+    if chosen_reply is None and first_seen and s["welcome_enabled"]:
+        chosen_reply = s["welcome_text"]
+    elif chosen_reply is None and s["fallback_enabled"]:
+        chosen_reply = s["fallback_text"]
+
+    if not chosen_reply:
+        return
+
+    chosen_reply = (
+        chosen_reply
+        .replace("{name}", sender_name)
+        .replace("{username}", f"@{msg.from_user.username}" if msg.from_user and msg.from_user.username else "")
+    )
+
+    try:
+        # reply_text automatically forwards business_connection_id, so the
+        # message is sent on behalf of the connected Business account.
+        await msg.reply_text(chosen_reply, do_quote=False)
+    except Exception:
+        log.exception("Failed to send business reply")
+
+
+async def biz_reply_add(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if update.effective_chat.type != "private":
+        return
+    raw = update.message.text.partition(" ")[2].strip()
+    if "|" not in raw:
+        await update.message.reply_text("Пример: /bizreplyadd привет | Привет! Чем помочь?")
+        return
+    trigger, reply = [x.strip() for x in raw.split("|", 1)]
+    if not trigger or not reply:
+        await update.message.reply_text("❌ Нужны триггер и ответ.")
+        return
+    owner_id = update.effective_user.id
+    ensure_business_settings(owner_id)
+    with db() as c:
+        c.execute(
+            "INSERT INTO business_replies(owner_user_id,trigger,reply) VALUES(?,?,?)",
+            (owner_id, trigger.lower()[:150], reply[:2000]),
+        )
+    await update.message.reply_text("✅ Business-автоответ добавлен.")
+
+
+async def biz_reply_del(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if update.effective_chat.type != "private":
+        return
+    raw = update.message.text.partition(" ")[2].strip()
+    if not raw.isdigit():
+        await update.message.reply_text("Пример: /bizreplydel 3")
+        return
+    with db() as c:
+        c.execute(
+            "DELETE FROM business_replies WHERE owner_user_id=? AND id=?",
+            (update.effective_user.id, int(raw)),
+        )
+    await update.message.reply_text("✅ Business-автоответ удалён.")
+
+
+async def biz_fallback(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if update.effective_chat.type != "private":
+        return
+    text = update.message.text.partition(" ")[2].strip()
+    if not text:
+        await update.message.reply_text("Пример: /bizfallback Спасибо! Я скоро отвечу.")
+        return
+    set_business_setting(update.effective_user.id, "fallback_text", text[:2000])
+    await update.message.reply_text("✅ Общий Business-автоответ сохранён.")
+
+
+async def biz_welcome(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if update.effective_chat.type != "private":
+        return
+    text = update.message.text.partition(" ")[2].strip()
+    if not text:
+        await update.message.reply_text("Пример: /bizwelcome Привет, {name}! Чем помочь?")
+        return
+    set_business_setting(update.effective_user.id, "welcome_text", text[:2000])
+    await update.message.reply_text("✅ Приветствие для нового чата сохранено.")
 
 
 async def setup(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -767,7 +1178,15 @@ def main():
         .build()
     )
 
+    app.add_handler(BusinessConnectionHandler(business_connection_update))
+    app.add_handler(MessageHandler(filters.UpdateType.BUSINESS_MESSAGE, business_message))
     app.add_handler(CommandHandler("start", start))
+    app.add_handler(CommandHandler("business", business_menu))
+    app.add_handler(CommandHandler("bizreplyadd", biz_reply_add))
+    app.add_handler(CommandHandler("bizreplydel", biz_reply_del))
+    app.add_handler(CommandHandler("bizfallback", biz_fallback))
+    app.add_handler(CommandHandler("bizwelcome", biz_welcome))
+    app.add_handler(CallbackQueryHandler(business_callback, pattern=r"^biz:"))
     app.add_handler(CommandHandler("setup", setup))
     app.add_handler(CommandHandler("setwelcome", set_welcome))
     app.add_handler(CommandHandler("setrules", set_rules))
