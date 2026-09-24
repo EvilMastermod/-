@@ -800,6 +800,18 @@ def profile_display_name(user, data):
     if title:
         name += f" · [{title}]"
 
+    background_id = data.get("selectedBackground")
+    if background_id == "bg_night":
+        name = f"🌌 {name} 🌌"
+    elif background_id == "bg_sakura":
+        name = f"🌸 {name} 🌸"
+    elif background_id == "bg_gold":
+        name = f"👑 {name} 👑"
+    elif background_id:
+        bg = next((x for x in (data.get("cosmetics") or []) if x.get("id") == background_id), None)
+        if bg:
+            name = f"🖼 {name} · {bg.get('name')}"
+
     if "premium_gold_frame" in equipped:
         name = f"╔══ 👑 PREMIUM 👑 ══╗\n{name}\n╚══════════════════╝"
     elif "autumn_frame" in equipped:
@@ -2581,6 +2593,12 @@ async def admin_stats(update: Update, context: ContextTypes.DEFAULT_TYPE):
             f"✨ Кастомных предметов: {int(data.get('customItems') or 0)}",
             f"🎉 Ивент: {event.get('name') if event else 'нет'}",
         ]
+        popular = data.get("popular") or []
+        if popular:
+            lines.append("")
+            lines.append("🔥 Популярные предметы:")
+            for item in popular:
+                lines.append(f"• {item.get('name')} — {int(item.get('count') or 0)}")
         await update.message.reply_text("\n".join(lines), reply_markup=admin_panel_keyboard)
     except Exception:
         logging.exception("Ошибка админ статистики")
