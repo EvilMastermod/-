@@ -427,6 +427,19 @@ async def spooky_price_lookup(update: Update, context: ContextTypes.DEFAULT_TYPE
                 f"Использую цену с {source_auction}.\n"
             )
 
+        min_price = int(data["min"])
+        avg_price = int(data["average"])
+        max_price = int(data["max"])
+
+        if min_price == max_price:
+            price_text = f"💵 Цена: {money(avg_price)}"
+        else:
+            price_text = (
+                f"📉 Минимум: {money(min_price)}\n"
+                f"📊 Средняя: {money(avg_price)}\n"
+                f"📈 Максимум: {money(max_price)}"
+            )
+
         await update.message.reply_text(
             f"💰 Предмет: {item}\n"
             f"📦 Запрошенная анка: {auction}\n"
@@ -434,9 +447,7 @@ async def spooky_price_lookup(update: Update, context: ContextTypes.DEFAULT_TYPE
             f"🔎 Найдено цен: {count}\n"
             f"👥 Источников: {collectors}\n"
             f"🕒 Обновлено: {age_minutes} мин назад\n\n"
-            f"📉 Минимум: {money(data['min'])}\n"
-            f"📊 Средняя: {money(data['average'])}\n"
-            f"📈 Максимум: {money(data['max'])}",
+            f"{price_text}",
             reply_markup=spooky_keyboard,
         )
 
