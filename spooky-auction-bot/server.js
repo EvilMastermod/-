@@ -791,7 +791,8 @@ app.post('/leaderboard',(req,res)=>{
   if(!shopAuthorized(req))return res.status(401).json({ok:false,error:'unauthorized'});
   const type=String(req.body?.type||'level');
   const rows=Object.entries(db.wallets).map(([userId,w])=>({userId,...publicWallet(userId,getWallet(userId))}));
-  const key=type==='coins'?'balance':(type==='collection'?'collection':'level');
+  const keys={level:'level',xp:'xp',coins:'balance',collection:'collection',likes:'likes',streak:'streak'};
+  const key=keys[type]||'level';
   rows.sort((a,b)=>Number(b[key]||0)-Number(a[key]||0)||Number(b.xp||0)-Number(a.xp||0));
   res.json({ok:true,type,rows:rows.slice(0,10)});
 });
