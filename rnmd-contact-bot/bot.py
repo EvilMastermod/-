@@ -2929,6 +2929,30 @@ async def open_case(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text("❌ Кейс недоступен.", reply_markup=activities_keyboard)
 
 
+async def handle_shop_bundles(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    query = update.callback_query
+    if not query:
+        return
+    await query.answer()
+    try:
+        response, data = await fetch_shop(query.from_user.id)
+        bundles = data.get("bundles") or []
+        rows = []
+        lines = ["📦 Наборы", ""]
+        if not bundles:
+            lines.append("Наборов пока нет.")
+        for bundle in bundles:
+            lines.append(f"• {bundle.get('name')} — {int(bundle.get('price') or 0):,} RC".replace(",", " "))
+            rows.append([InlineKeyboardButton(
+                f"Купить {bundle.get('name')}",
+                callback_data=f"bundle_buy:{bundle.get('id')}",
+            )])
+        rows.append([InlineKeyboardButton("⬅️ Назад в магазин", callback_data="shop_back")])
+        await query.edit_message_text("\n".join(lines), reply_markup=InlineKeyboardMarkup(rows))
+    except Exception:
+        await query.answer("❌ Наборы недоступны.", show_alert=True)
+
+
 def parse_spooky_price_request(text: str):
     match = re.search(r"/an\d{3}", text.lower())
     if not match:
@@ -3714,6 +3738,37 @@ async def handle_users_shared(update: Update, context: ContextTypes.DEFAULT_TYPE
         await show_other_profile(update, context, shared[0])
         return
 
+    if context.user_data.get("friends_stage") == "choose":
+        if not shared:
+            await update.message.reply_text("❌ Пользователь не выбран.", reply_markup=friends_user_keyboard)
+            return
+        await toggle_friend(update, context, shared[0].user_id)
+        return
+
+    if context.user_data.get("direct_stage") == "choose":
+        if not shared:
+            await update.message.reply_text("❌ Пользователь не выбран.", reply_markup=direct_user_keyboard)
+            return
+        await direct_choose_message(update, context, shared[0].user_id)
+        return
+
+    if context.user_data.get("trade_stage") == "choose":
+        if not shared:
+            await update.message.reply_text("❌ Пользователь не выбран.", reply_markup=trade_user_keyboard)
+            return
+        await trade_choose_partner(update, context, shared[0].user_id)
+        return
+
+    if context.user_data.get("admin_economy_stage") == "choose":
+        if update.effective_user.id != ADMIN_ID:
+            clear_modes(context)
+            return
+        if not shared:
+            await update.message.reply_text("❌ Пользователь не выбран.", reply_markup=admin_economy_user_keyboard)
+            return
+        await admin_toggle_economy_block(update, context, shared[0].user_id)
+        return
+
     if context.user_data.get("admin_dnd_stage"):
         if update.effective_user.id != ADMIN_ID:
             clear_modes(context)
@@ -4161,6 +4216,38 @@ async def handle_user_message(update: Update, context: ContextTypes.DEFAULT_TYPE
         await claim_daily(update, context)
         return
 
+    if text == FRIENDS_BUTTON:
+        await friends_menu(update, context)
+        return
+
+    if text == DIRECT_BUTTON:
+        await direct_start(update, context)
+        return
+
+    if text == ACHIEVEMENTS_BUTTON:
+        await show_achievements(update, context)
+        return
+
+    if text == QUESTS_BUTTON:
+        await show_quests(update, context)
+        return
+
+    if text == BANK_BUTTON:
+        await bank_menu(update, context)
+        return
+
+    if text == SEASON_BUTTON:
+        await show_season(update, context)
+        return
+
+    if text == CALENDAR_BUTTON:
+        await show_daily_calendar(update, context)
+        return
+
+    if text == ROTATION_BUTTON:
+        await show_rotation(update, context)
+        return
+
     if text == INVENTORY_BUTTON:
         await show_inventory(update, context)
         return
@@ -4173,8 +4260,20 @@ async def handle_user_message(update: Update, context: ContextTypes.DEFAULT_TYPE
         await gift_start(update, context)
         return
 
+    if text == TRADE_BUTTON:
+        await trade_start(update, context)
+        return
+
+    if text == SELL_BUTTON:
+        await sell_menu(update, context)
+        return
+
     if text == PROMO_BUTTON:
         await promo_start(update, context)
+        return
+
+    if text == BUNDLES_BUTTON:
+        await show_bundles(update, context)
         return
 
     if text == TOP_BUTTON:
@@ -4183,6 +4282,22 @@ async def handle_user_message(update: Update, context: ContextTypes.DEFAULT_TYPE
 
     if text == LIKE_BUTTON:
         await like_start(update, context)
+        return
+
+    if text == HISTORY_BUTTON:
+        await show_balance_history(update, context)
+        return
+
+    if text == NOTIFICATIONS_BUTTON:
+        await toggle_notifications(update, context)
+        return
+
+    if text == STATUS_BUTTON:
+        await status_start(update, context)
+        return
+
+    if text == EVENT_BUTTON:
+        await show_event(update, context)
         return
 
     if text == CASE_BUTTON:
@@ -4275,6 +4390,18 @@ async def handle_user_message(update: Update, context: ContextTypes.DEFAULT_TYPE
 
     if context.user_data.get("promo_waiting"):
         await promo_redeem(update, context, text)
+        return
+
+    if context.user_data.get("direct_stage") == "message":
+        await direct_send(update, context, text)
+        return
+
+    if context.user_data.get("bank_stage") in {"deposit", "withdraw"}:
+        await bank_amount(update, context, text)
+        return
+
+    if context.user_data.get("status_waiting"):
+        await status_set(update, context, text)
         return
 
     if context.user_data.get("transfer_stage") == "amount":
@@ -4417,6 +4544,18 @@ def main():
     app.add_handler(CallbackQueryHandler(handle_report_ban_callback, pattern=r"^report:ban:-?\d+:(15|20|25|30|60)$"))
     app.add_handler(CallbackQueryHandler(handle_shop_buy, pattern=r"^shop_buy:(plus|premium|name_color|crown|star_badge|profile_frame|message_style|random_item|rnmd_badge|diamond_badge|sakura_badge|trophy|premium_gold_frame|premium_star|autumn_frame|pumpkin_badge|ex_[a-z0-9]+)$"))
     app.add_handler(CallbackQueryHandler(handle_shop_items, pattern=r"^shop_items$"))
+    app.add_handler(CallbackQueryHandler(handle_shop_bundles, pattern=r"^shop_bundles$"))
+    app.add_handler(CallbackQueryHandler(handle_bundle_buy, pattern=r"^bundle_buy:bd_[a-z0-9]+$"))
+    app.add_handler(CallbackQueryHandler(handle_quest_claim, pattern=r"^quest_claim:[a-z0-9_]+$"))
+    app.add_handler(CallbackQueryHandler(handle_bank_action, pattern=r"^bank:(deposit|withdraw)$"))
+    app.add_handler(CallbackQueryHandler(handle_season_claim, pattern=r"^season_claim:\d+$"))
+    app.add_handler(CallbackQueryHandler(handle_sell_item, pattern=r"^sell_item:[a-z0-9_]+$"))
+    app.add_handler(CallbackQueryHandler(handle_trade_give, pattern=r"^trade_give:[a-z0-9_]+$"))
+    app.add_handler(CallbackQueryHandler(handle_trade_want, pattern=r"^trade_want:[a-z0-9_]+$"))
+    app.add_handler(CallbackQueryHandler(handle_trade_response, pattern=r"^trade_resp:tr_[a-z0-9]+:(yes|no)$"))
+    app.add_handler(CallbackQueryHandler(profile_status_callback, pattern=r"^profile_status$"))
+    app.add_handler(CallbackQueryHandler(profile_background_menu, pattern=r"^profile_background$"))
+    app.add_handler(CallbackQueryHandler(profile_background_set, pattern=r"^profile_bg:[a-z0-9_]+$"))
     app.add_handler(CallbackQueryHandler(handle_shop_back, pattern=r"^shop_back$"))
     app.add_handler(CallbackQueryHandler(handle_shop_owned, pattern=r"^shop_owned$"))
     app.add_handler(CallbackQueryHandler(handle_profile_decor, pattern=r"^profile_decor$"))
