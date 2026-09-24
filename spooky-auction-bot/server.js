@@ -218,6 +218,7 @@ function getShopItem(id){return SHOP[id]||db.customShop?.[id]||null}
 
 function itemAccessAllowed(wallet,item){
   if(!isItemAvailable(item))return {ok:false,code:'expired'};
+  if(item.dailyOnly)return {ok:false,code:'daily_only'};
   if(item.premiumOnly && !wallet.purchases?.premium)return {ok:false,code:'premium_required'};
   return {ok:true};
 }
@@ -331,7 +332,7 @@ app.post('/shop',(req,res)=>{
   later();
 
   const items=allShopItems()
-    .filter(item=>isItemAvailable(item)||wallet.purchases?.[item.id])
+    .filter(item=>wallet.purchases?.[item.id] || (!item.dailyOnly && isItemAvailable(item)))
     .map(item=>({
       ...item,
       owned:Boolean(wallet.purchases?.[item.id]),
@@ -594,7 +595,7 @@ app.post('/case/open',(req,res)=>{
   const wallet=getWallet(userId);
   if(Number(wallet.balance||0)<CASE_COST)return res.status(400).json({ok:false,code:'insufficient_funds',missing:CASE_COST-Number(wallet.balance||0)});
   wallet.balance-=CASE_COST;wallet.stats.spent+=CASE_COST;wallet.stats.casesOpened+=1;addXp(wallet,10);
-  const available=allShopItems().filter(item=>item.category==='items'&&isItemAvailable(item)&&!item.premiumOnly&&!wallet.purchases?.[item.id]);
+  const available=allShopItems().filter(item=>item.category==='items'&&isItemAvailable(item)&&!item.premiumOnly&&!item.dailyOnly&&!wallet.purchases?.[item.id]);
   let reward;
   if(available.length&&Math.random()<0.25){
     const item=available[Math.floor(Math.random()*available.length)];
@@ -687,12 +688,14 @@ app.post('/admin/exclusive',(req,res)=>{
 
   const name=strip(req.body?.name).slice(0,60);
   const emoji=strip(req.body?.emoji||'✨').slice(0,8);
-  const price=Math.max(1,Math.min(1000000000,Math.round(Number(req.body?.price||0))));
-  const premiumOnly=Boolean(req.body?.premiumOnly);
+  const dailyOnly=Boolean(req.body?.dailyOnly);
+  const rawPrice=Math.round(Number(req.body?.price||0));
+  const price=dailyOnly?0:Math.max(1,Math.min(1000000000,rawPrice));
+  const premiumOnly=dailyOnly?false:Boolean(req.body?.premiumOnly);
   const days=Math.max(0,Math.min(3650,Math.round(Number(req.body?.days||0))));
 
   if(!name)return res.status(400).json({ok:false,error:'name required'});
-  if(!price)return res.status(400).json({ok:false,error:'price required'});
+  if(!dailyOnly&&!price)return res.status(400).json({ok:false,error:'price required'});
 
   let id;
   do{id='ex_'+Date.now().toString(36)+Math.floor(Math.random()*1296).toString(36).padStart(2,'0')}while(db.customShop[id]);
@@ -703,6 +706,7 @@ app.post('/admin/exclusive',(req,res)=>{
     price,
     category:'items',
     customExclusive:true,
+    dailyOnly,
     premiumOnly,
     createdAt:Date.now()
   };
@@ -720,8 +724,10 @@ app.post('/admin/promo',(req,res)=>{
   const itemId=String(req.body?.itemId||'').trim().toLowerCase();
   const maxUses=Math.max(1,Math.min(100000,Math.round(Number(req.body?.maxUses||100))));
   if(!/^[A-Z0-9_-]{3,24}$/.test(code))return res.status(400).json({ok:false,error:'invalid code'});
-  if(!amount&&!getShopItem(itemId))return res.status(400).json({ok:false,error:'reward required'});
-  db.promocodes[code]={code,amount,itemId:getShopItem(itemId)?itemId:null,maxUses,usedBy:{},createdAt:Date.now()};
+  const promoItem=getShopItem(itemId);
+  if(!amount&&!promoItem)return res.status(400).json({ok:false,error:'reward required'});
+  if(promoItem?.dailyOnly)return res.status(400).json({ok:false,code:'daily_only_item',error:'daily-only item cannot be used in promo'});
+  db.promocodes[code]={code,amount,itemId:promoItem?itemId:null,maxUses,usedBy:{},createdAt:Date.now()};
   save();
   res.json({ok:true,promo:db.promocodes[code]});
 });
@@ -757,6 +763,7 @@ app.post('/gift/buy',(req,res)=>{
   if(!/^-?\d{1,20}$/.test(fromId)||!/^-?\d{1,20}$/.test(toId))return res.status(400).json({ok:false,error:'invalid user id'});
   if(fromId===toId)return res.status(400).json({ok:false,code:'self_gift'});
   const item=getShopItem(itemId);if(!item||item.category!=='items')return res.status(400).json({ok:false,error:'invalid item'});
+  if(item.dailyOnly)return res.status(403).json({ok:false,code:'daily_only'});
   const from=getWallet(fromId),to=getWallet(toId);
   if(!isItemAvailable(item))return res.status(403).json({ok:false,code:'expired'});
   if(item.premiumOnly&&!to.purchases?.premium)return res.status(403).json({ok:false,code:'recipient_premium_required'});
