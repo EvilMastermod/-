@@ -1,1 +1,2 @@
 python-telegram-bot[webhooks,job-queue]==22.5
+Pillow==11.3.0
