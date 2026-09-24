@@ -39,48 +39,62 @@ function load(){
 }
 function save(){mkdir();try{const t=FILE+'.tmp';fs.writeFileSync(t,JSON.stringify(db));fs.renameSync(t,FILE)}catch(e){console.error('[DB] save',e.message)}}
 function later(){if(saveTimer)return;saveTimer=setTimeout(()=>{saveTimer=null;save()},400)}
+function parseNumericPrice(number,suffix){
+  let n=String(number||'').replace(/\s/g,'').trim();
+  const unit=String(suffix||'').toLowerCase();
+  if(!n)return null;
+
+  const seps=(n.match(/[.,]/g)||[]).length;
+  if(seps>1 || /[.,]\d{3}(?:[.,]\d{3})*$/.test(n)){
+    n=n.replace(/[.,]/g,'');
+  }else{
+    n=n.replace(',','.');
+  }
+
+  let multiplier=1;
+  if(['к','k','тыс'].includes(unit))multiplier=1000;
+  if(['м','m','млн'].includes(unit))multiplier=1000000;
+
+  const base=Number(n);
+  const value=Math.round(base*multiplier);
+  return Number.isFinite(value)&&value>0&&value<=1e15?value:null;
+}
+
 function parsePrice(rawValue){
   let s=strip(rawValue);
   if(!s)return null;
 
   s=s
-    .replace(/\\\\n/g,' ')
-    .replace(/\\n/g,' ')
-    .replace(/[{}\[\]"']/g,' ')
-    .replace(/_/g,' ')
-    .replace(/\s+/g,' ');
+    .replace(/\\\\n/g,'\n')
+    .replace(/\\n/g,'\n')
+    .replace(/§[0-9A-FK-OR]/gi,'');
 
-  const marker='(?:цена|стоимость|price|за\\s*штуку|монет(?:а|ы)?|coins?|коин(?:а|ов|ы)?)';
-  const patterns=[
-    new RegExp(marker+'[^0-9]{0,80}([0-9][0-9\\s.,]*)(?:\\s*)(к|k|тыс|м|m|млн)?','iu'),
-    new RegExp('([0-9][0-9\\s.,]*)(?:\\s*)(к|k|тыс|м|m|млн)?[^0-9]{0,50}'+marker,'iu'),
-    /[$₽]\s*([0-9][0-9\s.,]*)(?:\s*)(к|k|тыс|м|m|млн)?/iu
-  ];
+  const lines=s
+    .split(/\r?\n/)
+    .map(x=>x.replace(/[{}\[\]"']/g,' ').replace(/_/g,' ').replace(/\s+/g,' ').trim())
+    .filter(Boolean);
 
-  for(const re of patterns){
-    const m=s.match(re);
-    if(!m)continue;
+  const marker=/(?:цена|стоимость|price|за\s*штуку|купить|продажа|монет(?:а|ы)?|coins?|коин(?:а|ов|ы)?)/iu;
+  const currency=/[$₽]/u;
+  const numberRe=/([0-9][0-9\s.,]*?)(?:\s*)(к|k|тыс|м|m|млн)?(?=\s|$|[$₽])/giu;
 
-    let number=String(m[1]||'').replace(/\s/g,'').trim();
-    const suffix=String(m[2]||'').toLowerCase();
+  for(const line of lines){
+    if(!marker.test(line) && !currency.test(line))continue;
 
-    let multiplier=1;
-    if(['к','k','тыс'].includes(suffix))multiplier=1000;
-    if(['м','m','млн'].includes(suffix))multiplier=1000000;
-
-    const seps=(number.match(/[.,]/g)||[]).length;
-    if(seps>1 || /[.,]\d{3}(?:[.,]\d{3})*$/.test(number)){
-      number=number.replace(/[.,]/g,'');
-    }else{
-      number=number.replace(',','.');
+    const values=[];
+    numberRe.lastIndex=0;
+    let m;
+    while((m=numberRe.exec(line))!==null){
+      const value=parseNumericPrice(m[1],m[2]);
+      if(value!==null)values.push(value);
     }
 
-    const n=Number(number);
-    const value=Math.round(n*multiplier);
-    if(Number.isFinite(value)&&value>0&&value<=1e15)return value;
+    if(values.length)return Math.max(...values);
   }
+
   return null;
 }
+
 function clean(r){
   const name=strip(r?.name).slice(0,160),
         rawText=strip(r?.rawText||'').slice(0,6000),
