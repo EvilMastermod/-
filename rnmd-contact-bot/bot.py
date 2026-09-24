@@ -1270,6 +1270,8 @@ async def handle_shop_buy(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 await query.answer("🔒 Это украшение доступно только с Premium.", show_alert=True)
             elif code == "expired":
                 await query.answer("⏳ Это ограниченное украшение уже недоступно.", show_alert=True)
+            elif code == "daily_only":
+                await query.answer("🎁 Этот эксклюзив можно получить только из ежедневной награды.", show_alert=True)
             else:
                 await query.answer(
                     "❌ Не удалось выполнить покупку.",
@@ -1564,6 +1566,7 @@ async def handle_gift_buy(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 "recipient_premium_required": "Это украшение можно подарить только пользователю с Premium.",
                 "insufficient_funds": "Не хватает Random Coins.",
                 "expired": "Это ограниченное украшение уже недоступно.",
+                "daily_only": "Этот эксклюзив можно получить только из ежедневной награды.",
             }
             await query.answer(messages.get(code, "❌ Не удалось купить подарок."), show_alert=True)
             return
@@ -1666,7 +1669,11 @@ async def admin_promo_create(update: Update, context: ContextTypes.DEFAULT_TYPE,
         response, data = await api_post("/admin/promo", payload)
         clear_modes(context)
         if response.status_code != 200 or not data.get("ok"):
-            await update.message.reply_text("❌ Не удалось создать промокод.", reply_markup=get_main_keyboard(update.effective_user.id))
+            if data.get("code") == "daily_only_item":
+                msg = "❌ Эксклюзив «только ежедневка» нельзя выдавать промокодом."
+            else:
+                msg = "❌ Не удалось создать промокод."
+            await update.message.reply_text(msg, reply_markup=get_main_keyboard(update.effective_user.id))
             return
         await update.message.reply_text(
             f"✅ Промокод {code} создан. Лимит: {max_uses}.",
@@ -1846,10 +1853,12 @@ async def admin_exclusive_start(update: Update, context: ContextTypes.DEFAULT_TY
         "✨ Создание кастомного эксклюзива\n\n"
         "Формат:\n"
         "Название | цена | эмодзи | тип | дней\n\n"
-        "Тип: premium или обычный\n"
+        "Тип: premium, обычный или ежедневка\n"
+        "Если тип «ежедневка», цена может быть 0 — такой эксклюзив нельзя купить, подарить, получить из кейса или промокода.\n"
         "Дней: 0 = навсегда\n\n"
-        "Пример:\n"
-        "Молния RNMD | 2500 | ⚡ | premium | 7",
+        "Примеры:\n"
+        "Молния RNMD | 2500 | ⚡ | premium | 7\n"
+        "Шахед | 0 | 🛩️ | ежедневка | 14",
         reply_markup=cancel_keyboard,
     )
 
@@ -1872,6 +1881,7 @@ async def admin_exclusive_create(update: Update, context: ContextTypes.DEFAULT_T
     emoji = parts[2] if len(parts) > 2 and parts[2] else "✨"
     kind = parts[3].lower() if len(parts) > 3 else "обычный"
     days_raw = parts[4].replace(" ", "") if len(parts) > 4 else "0"
+    daily_only = kind in {"ежедневка", "daily", "daily_only", "ежедневная"}
 
     if not price_raw.isdigit() or not days_raw.isdigit():
         await update.message.reply_text(
@@ -1880,11 +1890,20 @@ async def admin_exclusive_create(update: Update, context: ContextTypes.DEFAULT_T
         )
         return
 
+    price = int(price_raw)
+    if price < 1 and not daily_only:
+        await update.message.reply_text(
+            "❌ Для обычного/Premium эксклюзива цена должна быть от 1 RC. Для типа «ежедневка» можно поставить 0.",
+            reply_markup=cancel_keyboard,
+        )
+        return
+
     payload = {
         "name": name,
-        "price": int(price_raw),
+        "price": price,
         "emoji": emoji,
-        "premiumOnly": kind in {"premium", "премиум", "vip"},
+        "premiumOnly": (kind in {"premium", "премиум", "vip"}) and not daily_only,
+        "dailyOnly": daily_only,
         "days": int(days_raw),
     }
 
@@ -1900,13 +1919,21 @@ async def admin_exclusive_create(update: Update, context: ContextTypes.DEFAULT_T
         lines = [
             "✅ Эксклюзив создан!",
             f"✨ {item.get('name')}",
-            f"🪙 Цена: {int(item.get('price') or 0):,} RC".replace(",", " "),
+        ]
+        if item.get("dailyOnly"):
+            lines.append("🎁 Получение: только ежедневная награда")
+        else:
+            lines.append(f"🪙 Цена: {int(item.get('price') or 0):,} RC".replace(",", " "))
+            lines.append(f"🔒 Premium: {'да' if item.get('premiumOnly') else 'нет'}")
+        lines.extend([
             f"🆔 ID: {item.get('id')}",
-            f"🔒 Premium: {'да' if item.get('premiumOnly') else 'нет'}",
             f"⏳ Срок: {'до ' + until if until else 'навсегда'}",
             "",
-            "Этот ID можно использовать в промокодах и ежедневной награде.",
-        ]
+        ])
+        if item.get("dailyOnly"):
+            lines.append("Вставь этот ID в «🎁 Настроить ежедневку». В магазине его не будет.")
+        else:
+            lines.append("Этот ID можно использовать в промокодах и ежедневной награде.")
         await update.message.reply_text(
             "\n".join(lines),
             reply_markup=get_main_keyboard(update.effective_user.id),
