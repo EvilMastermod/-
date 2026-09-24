@@ -367,7 +367,9 @@ def shop_headers():
 
 
 def shop_keyboard(items):
-    rows = []
+    rows = [
+        [InlineKeyboardButton("📦 Предметы", callback_data="shop_items")]
+    ]
     for item in items:
         item_id = item.get("id")
         name = item.get("name")
@@ -456,6 +458,44 @@ async def show_shop(update: Update, context: ContextTypes.DEFAULT_TYPE):
             "❌ Магазин сейчас недоступен. Попробуйте чуть позже.",
             reply_markup=get_main_keyboard(update.effective_user.id),
         )
+
+
+async def handle_shop_items(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    query = update.callback_query
+    if not query:
+        return
+
+    await query.answer()
+
+    await query.edit_message_text(
+        "📦 Предметы\n\n"
+        "Здесь будут игровые предметы, которые можно купить за Random Coins.",
+        reply_markup=InlineKeyboardMarkup(
+            [[InlineKeyboardButton("⬅️ Назад в магазин", callback_data="shop_back")]]
+        ),
+    )
+
+
+async def handle_shop_back(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    query = update.callback_query
+    if not query:
+        return
+
+    await query.answer()
+
+    try:
+        response, data = await fetch_shop(query.from_user.id)
+        if response.status_code != 200 or not data.get("ok"):
+            await query.answer("❌ Магазин сейчас недоступен.", show_alert=True)
+            return
+
+        await query.edit_message_text(
+            shop_text(data),
+            reply_markup=shop_keyboard(data.get("items") or []),
+        )
+    except Exception:
+        logging.exception("Не удалось вернуться в магазин")
+        await query.answer("❌ Магазин сейчас недоступен.", show_alert=True)
 
 
 async def handle_shop_owned(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -1764,6 +1804,8 @@ def main():
     app.add_handler(CallbackQueryHandler(handle_admin_anon_ban_callback, pattern="^admin_anon_ban_(15|20|25|30|60)$"))
     app.add_handler(CallbackQueryHandler(handle_report_ban_callback, pattern=r"^report:ban:-?\d+:(15|20|25|30|60)$"))
     app.add_handler(CallbackQueryHandler(handle_shop_buy, pattern=r"^shop_buy:(plus|premium)$"))
+    app.add_handler(CallbackQueryHandler(handle_shop_items, pattern=r"^shop_items$"))
+    app.add_handler(CallbackQueryHandler(handle_shop_back, pattern=r"^shop_back$"))
     app.add_handler(CallbackQueryHandler(handle_shop_owned, pattern=r"^shop_owned$"))
 
     app.add_handler(
