@@ -1917,7 +1917,7 @@ async def show_balance_history(update: Update, context: ContextTypes.DEFAULT_TYP
             "purchase":"Покупка","daily":"Ежедневка","transfer_out":"Перевод",
             "transfer_in":"Получено","gift":"Подарок","quest":"Задание",
             "bank_deposit":"В банк","bank_withdraw":"Из банка","sell":"Продажа",
-            "season":"Сезон","bundle":"Набор","admin_add":"Админ +","admin_remove":"Админ -",
+            "season":"Сезон","bundle":"Набор","promo":"Промокод","case":"Кейс","case_reward":"Награда кейса","admin_add":"Админ +","admin_remove":"Админ -",
         }
         for row in rows[:20]:
             amount = int(row.get("amount") or 0)
