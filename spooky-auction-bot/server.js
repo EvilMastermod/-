@@ -257,13 +257,22 @@ function addXp(wallet,amount){
 }
 function unlockedTitles(wallet){
   const level=levelFromXp(wallet.xp);
-  return Object.values(TITLES).filter(t=>{
+  const base=Object.values(TITLES).filter(t=>{
     if(t.level && level<t.level)return false;
     if(t.requires==='plus'&&!wallet.purchases?.plus)return false;
     if(t.requires==='premium'&&!wallet.purchases?.premium)return false;
     if(t.requires==='rnmd_badge'&&!wallet.purchases?.rnmd_badge)return false;
     return true;
   });
+  const purchased=allShopItems()
+    .filter(item=>item.category==='titles'&&wallet.purchases?.[item.id])
+    .map(item=>({
+      id:item.id,
+      name:item.titleName||item.name||'Титул',
+      purchased:true,
+      rarity:rarityOf(item)
+    }));
+  return [...base,...purchased];
 }
 function collectionCount(wallet){
   return Object.keys(wallet.purchases||{}).filter(id=>getShopItem(id)?.category==='items').length;
@@ -530,6 +539,9 @@ app.post('/buy',(req,res)=>{
   if(item.category==='items'){
     wallet.decorations[item.id]=true;
   }
+  if(item.category==='titles'){
+    wallet.titleId=item.id;
+  }
   if(item.id==='name_color'&&!PROFILE_COLORS[wallet.nameColor]){
     wallet.nameColor='white';
   }
@@ -697,6 +709,7 @@ app.post('/daily',(req,res)=>{
       }else{
         wallet.purchases[item.id]={name:item.name,price:0,purchasedAt:Date.now(),source:'daily'};
         if(item.category==='items')wallet.decorations[item.id]=true;
+        if(item.category==='titles')wallet.titleId=item.id;
         rewardItem=item;
       }
     }
@@ -869,6 +882,43 @@ app.post('/admin/promo/delete',(req,res)=>{
   res.json({ok:true,code});
 });
 
+app.post('/admin/title',(req,res)=>{
+  if(!shopAuthorized(req))return res.status(401).json({ok:false,error:'unauthorized'});
+
+  const titleName=strip(req.body?.name).slice(0,40);
+  const emoji=strip(req.body?.emoji||'🎖').slice(0,8);
+  const price=Math.max(1,Math.min(1000000000,Math.round(Number(req.body?.price||0))));
+  const premiumOnly=Boolean(req.body?.premiumOnly);
+  const rarity=String(req.body?.rarity||'rare').trim().toLowerCase().slice(0,20);
+  const hidden=Boolean(req.body?.hidden);
+
+  if(!titleName)return res.status(400).json({ok:false,error:'name required'});
+  if(!price)return res.status(400).json({ok:false,error:'price required'});
+
+  let id;
+  do{id='title_'+Date.now().toString(36)+Math.floor(Math.random()*1296).toString(36).padStart(2,'0')}while(db.customShop[id]);
+
+  const displayTitle=(emoji?emoji+' ':'')+titleName;
+  const item={
+    id,
+    name:'🎖 '+displayTitle,
+    titleName:displayTitle,
+    price,
+    category:'titles',
+    kind:'title',
+    customTitle:true,
+    premiumOnly,
+    rarity,
+    hidden,
+    createdAt:Date.now()
+  };
+
+  db.customShop[id]=item;
+  logAdmin('title_create',{itemId:id,name:displayTitle,price});
+  save();
+  res.json({ok:true,item});
+});
+
 app.post('/admin/exclusive',(req,res)=>{
   if(!shopAuthorized(req))return res.status(401).json({ok:false,error:'unauthorized'});
 
@@ -944,6 +994,7 @@ app.post('/promo/redeem',(req,res)=>{
     const item=getShopItem(promo.itemId);
     wallet.purchases[promo.itemId]={name:item.name,price:0,purchasedAt:Date.now(),source:'promo'};
     if(item.category==='items')wallet.decorations[promo.itemId]=true;
+    if(item.category==='titles')wallet.titleId=promo.itemId;
     reward.item=item;
   }
   if(!promo.usedBy||typeof promo.usedBy!=='object')promo.usedBy={};
@@ -1132,7 +1183,7 @@ app.post('/bundle/buy',(req,res)=>{
   const userId=String(req.body?.userId??'').trim(),bundleId=String(req.body?.bundleId||'').trim(),w=getWallet(userId),bundle=db.bundles?.[bundleId];
   if(!bundle)return res.status(404).json({ok:false,error:'bundle'});if(Number(w.balance||0)<Number(bundle.price||0))return res.status(400).json({ok:false,code:'insufficient_funds'});
   w.balance-=bundle.price;addHistory(w,'bundle',-bundle.price,{bundleId});const granted=[];
-  for(const id of bundle.items||[]){const item=getShopItem(id);if(item&&!w.purchases?.[id]){w.purchases[id]={name:item.name,price:0,purchasedAt:Date.now(),source:'bundle'};w.decorations[id]=true;granted.push(item)}}
+  for(const id of bundle.items||[]){const item=getShopItem(id);if(item&&!w.purchases?.[id]){w.purchases[id]={name:item.name,price:0,purchasedAt:Date.now(),source:'bundle'};if(item.category==='items')w.decorations[id]=true;if(item.category==='titles')w.titleId=id;granted.push(item)}}
   save();res.json({ok:true,bundle,granted,balance:w.balance});
 });
 app.post('/admin/stats',(req,res)=>{
@@ -1148,6 +1199,7 @@ app.post('/admin/stats',(req,res)=>{
     purchases:wallets.reduce((s,w)=>s+Object.keys(w.purchases||{}).length,0),
     promos:Object.keys(db.promocodes||{}).length,
     customItems:Object.keys(db.customShop||{}).length,
+    customTitles:Object.values(db.customShop||{}).filter(x=>x.category==='titles').length,
     popular,
     activeEvent:activeEvent()
   });
