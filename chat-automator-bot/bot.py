@@ -526,8 +526,8 @@ async def business_menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "Чаты, к которым бот получает доступ, выбираются прямо в Telegram "
         "на экране «Автоматизация чатов».\n\n"
         "Команды прямо в личном чате:\n"
-        "• .мут — удалять новые сообщения собеседника\n"
-        "• .размут — снять мут\n\n"
+        "• .mute — удалять новые сообщения собеседника\n"
+        "• .unmute — снять мут\n\n"
         "Удалённые собеседником сообщения бот автоматически сохраняет "
         "и присылает тебе в личный чат с ботом.",
         reply_markup=business_panel(owner_id),
@@ -676,7 +676,7 @@ async def business_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if msg.from_user and msg.from_user.id == owner_id:
         low = text.lower()
 
-        if low in {".мут", ".mute"}:
+        if low == ".mute":
             if not connection["can_delete_all"]:
                 await msg.reply_text(
                     "❌ Для .мут включи боту право удалять все сообщения в Telegram Business.",
@@ -698,7 +698,7 @@ async def business_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
             )
             return
 
-        if low in {".размут", ".unmute"}:
+        if low == ".unmute":
             set_business_chat_muted(owner_id, msg.chat_id, False)
             try:
                 if connection["can_delete_sent"]:
