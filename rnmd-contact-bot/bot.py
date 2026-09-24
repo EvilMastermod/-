@@ -414,7 +414,7 @@ def shop_item_button(item):
 def shop_keyboard(items):
     main_items = [item for item in items if item.get("category") == "main"]
     rows = [
-        [InlineKeyboardButton("📦 Предметы", callback_data="shop_items")]
+        [InlineKeyboardButton("✨ Украшения", callback_data="shop_items")]
     ]
 
     for item in main_items:
@@ -879,7 +879,7 @@ def shop_text(data):
         lines.append(f"• {name} — {price:,} RC{status}".replace(",", " "))
 
     lines.append("")
-    lines.append("📦 Нажми «Предметы», чтобы открыть виртуальные предметы.")
+    lines.append("✨ Нажми «Украшения», чтобы открыть украшения профиля.")
 
     return "\n".join(lines)
 
@@ -892,7 +892,7 @@ def shop_items_text(data):
     ]
 
     lines = [
-        "📦 Предметы",
+        "✨ Украшения",
         "",
         f"🪙 Баланс: {balance:,} Random Coins".replace(",", " "),
         "",
@@ -951,8 +951,8 @@ async def handle_shop_items(update: Update, context: ContextTypes.DEFAULT_TYPE):
             reply_markup=shop_items_keyboard(data.get("items") or []),
         )
     except Exception:
-        logging.exception("Не удалось открыть предметы")
-        await query.answer("❌ Предметы сейчас недоступны.", show_alert=True)
+        logging.exception("Не удалось открыть украшения магазина")
+        await query.answer("❌ Украшения сейчас недоступны.", show_alert=True)
 
 
 async def handle_shop_back(update: Update, context: ContextTypes.DEFAULT_TYPE):
