@@ -45,6 +45,8 @@ ADMIN_ANON_BAN_BUTTON = "🚫 Бан анона"
 ADMIN_ANON_UNBAN_BUTTON = "🟢 Отключить бан анона"
 ADMIN_REPORT_LIST_BUTTON = "📋 Лист жалоб"
 ADMIN_COINS_BUTTON = "🪙 Выдать коины"
+ADMIN_REMOVE_COINS_BUTTON = "➖ Удалить коины"
+ADMIN_PANEL_BUTTON = "🛠 Админ панель"
 MINECRAFT_BUTTON = "⛏ Minecraft"
 SPOOKY_BUTTON = "👻 Spooky Time"
 SPOOKY_PRICE_BUTTON = "💰 Средняя цена"
@@ -101,17 +103,25 @@ admin_main_keyboard = ReplyKeyboardMarkup(
         [KeyboardButton(MINECRAFT_BUTTON), KeyboardButton(WALLET_BUTTON)],
         [KeyboardButton(SHOP_BUTTON), KeyboardButton(PROFILE_BUTTON)],
         [KeyboardButton(ACTIVITIES_BUTTON)],
-        [KeyboardButton(ADMIN_DND_OFF_BUTTON), KeyboardButton(ADMIN_ANON_BAN_BUTTON)],
-        [KeyboardButton(ADMIN_ANON_UNBAN_BUTTON), KeyboardButton(ADMIN_REPORT_LIST_BUTTON)],
-        [KeyboardButton(ADMIN_COINS_BUTTON), KeyboardButton(ADMIN_PROMO_BUTTON)],
-        [KeyboardButton(ADMIN_DAILY_BUTTON), KeyboardButton(ADMIN_PROMO_DELETE_BUTTON)],
-        [KeyboardButton(ADMIN_EXCLUSIVE_BUTTON)],
+        [KeyboardButton(ADMIN_PANEL_BUTTON)],
     ],
     resize_keyboard=True,
 )
 
 def get_main_keyboard(user_id: int):
     return admin_main_keyboard if user_id == ADMIN_ID else user_main_keyboard
+
+admin_panel_keyboard = ReplyKeyboardMarkup(
+    [
+        [KeyboardButton(ADMIN_DND_OFF_BUTTON), KeyboardButton(ADMIN_ANON_BAN_BUTTON)],
+        [KeyboardButton(ADMIN_ANON_UNBAN_BUTTON), KeyboardButton(ADMIN_REPORT_LIST_BUTTON)],
+        [KeyboardButton(ADMIN_COINS_BUTTON), KeyboardButton(ADMIN_REMOVE_COINS_BUTTON)],
+        [KeyboardButton(ADMIN_PROMO_BUTTON), KeyboardButton(ADMIN_PROMO_DELETE_BUTTON)],
+        [KeyboardButton(ADMIN_DAILY_BUTTON), KeyboardButton(ADMIN_EXCLUSIVE_BUTTON)],
+        [KeyboardButton(BACK_BUTTON)],
+    ],
+    resize_keyboard=True,
+)
 
 activities_keyboard = ReplyKeyboardMarkup(
     [
@@ -249,6 +259,25 @@ admin_coins_keyboard = ReplyKeyboardMarkup(
     resize_keyboard=True,
 )
 
+admin_remove_coins_keyboard = ReplyKeyboardMarkup(
+    [
+        [
+            KeyboardButton(
+                "👤 Выбрать пользователя для удаления коинов",
+                request_users=KeyboardButtonRequestUsers(
+                    request_id=785,
+                    user_is_bot=False,
+                    max_quantity=1,
+                    request_name=True,
+                    request_username=True,
+                ),
+            )
+        ],
+        [KeyboardButton(CANCEL_BUTTON)],
+    ],
+    resize_keyboard=True,
+)
+
 cancel_keyboard = ReplyKeyboardMarkup(
     [[KeyboardButton(CANCEL_BUTTON)]],
     resize_keyboard=True,
@@ -341,6 +370,8 @@ def clear_modes(context: ContextTypes.DEFAULT_TYPE):
     context.user_data.pop("admin_anon_unban_stage", None)
     context.user_data.pop("admin_coins_stage", None)
     context.user_data.pop("admin_coins_target_id", None)
+    context.user_data.pop("admin_remove_coins_stage", None)
+    context.user_data.pop("admin_remove_coins_target_id", None)
     context.user_data.pop("transfer_stage", None)
     context.user_data.pop("transfer_target_id", None)
     context.user_data.pop("gift_stage", None)
@@ -378,6 +409,21 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "Привет! 👋\n\nВыберите действие.",
         reply_markup=get_main_keyboard(update.effective_user.id),
     )
+
+async def admin_panel(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if update.effective_user.id != ADMIN_ID:
+        await update.message.reply_text(
+            "⛔ Эта кнопка доступна только администратору.",
+            reply_markup=get_main_keyboard(update.effective_user.id),
+        )
+        return
+
+    clear_modes(context)
+    await update.message.reply_text(
+        "🛠 Админ панель\n\nВыберите действие:",
+        reply_markup=admin_panel_keyboard,
+    )
+
 
 async def minecraft_section(update: Update, context: ContextTypes.DEFAULT_TYPE):
     clear_modes(context)
