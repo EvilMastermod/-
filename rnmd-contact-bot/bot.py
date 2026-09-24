@@ -2448,6 +2448,27 @@ async def handle_users_shared(update: Update, context: ContextTypes.DEFAULT_TYPE
         await admin_coins_choose_amount(update, context, shared[0].user_id)
         return
 
+    if context.user_data.get("transfer_stage") == "choose":
+        if not shared:
+            await update.message.reply_text("❌ Пользователь не выбран.", reply_markup=transfer_user_keyboard)
+            return
+        await transfer_choose_amount(update, context, shared[0].user_id)
+        return
+
+    if context.user_data.get("gift_stage") == "choose":
+        if not shared:
+            await update.message.reply_text("❌ Пользователь не выбран.", reply_markup=gift_user_keyboard)
+            return
+        await gift_choose_item(update, context, shared[0].user_id)
+        return
+
+    if context.user_data.get("like_stage") == "choose":
+        if not shared:
+            await update.message.reply_text("❌ Пользователь не выбран.", reply_markup=like_user_keyboard)
+            return
+        await like_profile(update, context, shared[0].user_id)
+        return
+
     if context.user_data.get("anon_stage") != "choose":
         await update.message.reply_text(
             "Сначала нажмите «🕵️ Анон».",
