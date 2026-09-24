@@ -83,6 +83,13 @@ function load(){
   if(!db.settings.randomDaily||typeof db.settings.randomDaily!=='object')db.settings.randomDaily={enabled:false,rewards:[]};
   if(!db.settings.season||typeof db.settings.season!=='object')db.settings.season={id:'s1',name:'Сезон 1',endsAt:0};
   if(!db.settings.event||typeof db.settings.event!=='object')db.settings.event={active:false};
+  if(!Array.isArray(db.settings.dailyQuests)){
+    db.settings.dailyQuests=[
+      {id:'msg3',type:'messages',name:'Отправить 3 сообщения',target:3,reward:120},
+      {id:'daily1',type:'daily',name:'Забрать ежедневку',target:1,reward:150},
+      {id:'spend500',type:'spent',name:'Потратить 500 RC',target:500,reward:200}
+    ];
+  }
   if(!db.bundles||typeof db.bundles!=='object'||Array.isArray(db.bundles))db.bundles={};
   if(!db.trades||typeof db.trades!=='object'||Array.isArray(db.trades))db.trades={};
   if(!Array.isArray(db.adminLog))db.adminLog=[];
@@ -352,36 +359,79 @@ function achievementList(wallet){
   ];
   return defs.map(([id,name,unlocked])=>({id,name,unlocked:Boolean(unlocked)}));
 }
+function questMetric(wallet,type){
+  ensureStats(wallet);
+  if(type==='messages')return Number(wallet.stats.messages||0);
+  if(type==='daily')return Number(wallet.stats.dailyClaims||0);
+  if(type==='spent')return Number(wallet.stats.spent||0);
+  if(type==='cases')return Number(wallet.stats.casesOpened||0);
+  if(type==='purchases')return Number(wallet.stats.purchases||0);
+  if(type==='transferred')return Number(wallet.stats.transferred||0);
+  return 0;
+}
 function questSnapshot(wallet){
   const day=new Date().toISOString().slice(0,10);
   ensureStats(wallet);
+  const configs=(Array.isArray(db.settings?.dailyQuests)?db.settings.dailyQuests:[]).filter(x=>x&&x.id&&x.type);
   if(!wallet.questState||wallet.questState.day!==day){
-    wallet.questState={
-      day,
-      baseMessages:wallet.stats.messages,
-      baseSpent:wallet.stats.spent,
-      baseDaily:wallet.stats.dailyClaims,
-      claimed:{}
-    };
+    const base={};
+    for(const type of ['messages','daily','spent','cases','purchases','transferred'])base[type]=questMetric(wallet,type);
+    wallet.questState={day,base,claimed:{}};
   }
   const q=wallet.questState;
-  return [
-    {id:'msg3',name:'Отправить 3 сообщения',progress:Math.max(0,wallet.stats.messages-q.baseMessages),target:3,reward:120},
-    {id:'daily1',name:'Забрать ежедневку',progress:Math.max(0,wallet.stats.dailyClaims-q.baseDaily),target:1,reward:150},
-    {id:'spend500',name:'Потратить 500 RC',progress:Math.max(0,wallet.stats.spent-q.baseSpent),target:500,reward:200}
-  ].map(x=>({...x,done:x.progress>=x.target,claimed:Boolean(q.claimed?.[x.id])}));
+  if(!q.base||typeof q.base!=='object'){
+    q.base={
+      messages:Number(q.baseMessages??wallet.stats.messages??0),
+      daily:Number(q.baseDaily??wallet.stats.dailyClaims??0),
+      spent:Number(q.baseSpent??wallet.stats.spent??0),
+      cases:Number(wallet.stats.casesOpened||0),
+      purchases:Number(wallet.stats.purchases||0),
+      transferred:Number(wallet.stats.transferred||0)
+    };
+  }
+  if(!q.claimed||typeof q.claimed!=='object')q.claimed={};
+  for(const type of ['messages','daily','spent','cases','purchases','transferred']){
+    if(!Number.isFinite(Number(q.base[type])))q.base[type]=questMetric(wallet,type);
+  }
+  return configs.map(cfg=>{
+    const target=Math.max(1,Math.round(Number(cfg.target||1)));
+    const reward=Math.max(0,Math.round(Number(cfg.reward||0)));
+    const progress=Math.max(0,questMetric(wallet,cfg.type)-Number(q.base[cfg.type]||0));
+    return {
+      id:String(cfg.id),
+      type:String(cfg.type),
+      name:strip(cfg.name||'Задание').slice(0,80),
+      progress,
+      target,
+      reward,
+      done:progress>=target,
+      claimed:Boolean(q.claimed?.[cfg.id])
+    };
+  });
 }
 function seasonData(wallet){
   const cfg=db.settings?.season||{id:'s1',name:'Сезон 1',endsAt:0};
   const level=levelFromXp(wallet.xp);
-  const tiers=[
-    {tier:1,need:1,reward:100},
-    {tier:2,need:3,reward:250},
-    {tier:3,need:5,reward:500},
-    {tier:4,need:10,reward:1000},
-    {tier:5,need:20,reward:2500}
-  ].map(t=>({...t,unlocked:level>=t.need,claimed:Boolean(wallet.seasonClaims?.[cfg.id+':'+t.tier])}));
-  return {id:cfg.id,name:cfg.name,endsAt:Number(cfg.endsAt||0),level,tiers};
+  const source=Array.isArray(cfg.tiers)&&cfg.tiers.length?cfg.tiers:[
+    {tier:1,need:1,reward:100,itemId:null},
+    {tier:2,need:3,reward:250,itemId:null},
+    {tier:3,need:5,reward:500,itemId:null},
+    {tier:4,need:10,reward:1000,itemId:null},
+    {tier:5,need:20,reward:2500,itemId:null}
+  ];
+  const tiers=source.map((raw,index)=>{
+    const itemId=raw.itemId&&getShopItem(raw.itemId)?raw.itemId:null;
+    return {
+      tier:Number(raw.tier||index+1),
+      need:Math.max(1,Math.round(Number(raw.need||1))),
+      reward:Math.max(0,Math.round(Number(raw.reward||0))),
+      itemId,
+      item:itemId?getShopItem(itemId):null,
+      unlocked:level>=Math.max(1,Math.round(Number(raw.need||1))),
+      claimed:Boolean(wallet.seasonClaims?.[cfg.id+':'+Number(raw.tier||index+1)])
+    };
+  });
+  return {id:cfg.id,name:cfg.name||'Сезон',endsAt:Number(cfg.endsAt||0),level,tiers};
 }
 function rotationItems(){
   const pool=allShopItems().filter(x=>x.category==='items'&&!x.dailyOnly&&!x.hidden&&isItemAvailable(x));
@@ -1137,7 +1187,22 @@ app.post('/season/claim',(req,res)=>{
   if(!shopAuthorized(req))return res.status(401).json({ok:false,error:'unauthorized'});
   const userId=String(req.body?.userId??'').trim(),tier=Math.round(Number(req.body?.tier||0));const w=getWallet(userId);const s=seasonData(w),t=s.tiers.find(x=>x.tier===tier);
   if(!t)return res.status(404).json({ok:false,error:'tier'});if(!t.unlocked)return res.status(403).json({ok:false,code:'locked'});if(t.claimed)return res.status(409).json({ok:false,code:'claimed'});
-  w.seasonClaims[s.id+':'+tier]=Date.now();w.balance=Number(w.balance||0)+t.reward;addHistory(w,'season',t.reward,{tier});save();res.json({ok:true,reward:t.reward,balance:w.balance});
+  w.seasonClaims[s.id+':'+tier]=Date.now();
+  if(t.reward>0){w.balance=Number(w.balance||0)+t.reward;w.stats.received+=t.reward;addHistory(w,'season',t.reward,{tier})}
+  let rewardItem=null,itemAlreadyOwned=false;
+  if(t.itemId){
+    const item=getShopItem(t.itemId);
+    if(item){
+      if(w.purchases?.[item.id])itemAlreadyOwned=true;
+      else{
+        w.purchases[item.id]={name:item.name,price:0,purchasedAt:Date.now(),source:'season',seasonId:s.id,tier};
+        if(item.category==='items')w.decorations[item.id]=true;
+        if(item.category==='titles')w.titleId=item.id;
+        rewardItem=item;
+      }
+    }
+  }
+  save();res.json({ok:true,reward:t.reward,rewardItem,itemAlreadyOwned,balance:w.balance});
 });
 app.post('/calendar',(req,res)=>{
   if(!shopAuthorized(req))return res.status(401).json({ok:false,error:'unauthorized'});
@@ -1186,6 +1251,75 @@ app.post('/bundle/buy',(req,res)=>{
   for(const id of bundle.items||[]){const item=getShopItem(id);if(item&&!w.purchases?.[id]){w.purchases[id]={name:item.name,price:0,purchasedAt:Date.now(),source:'bundle'};if(item.category==='items')w.decorations[id]=true;if(item.category==='titles')w.titleId=id;granted.push(item)}}
   save();res.json({ok:true,bundle,granted,balance:w.balance});
 });
+app.post('/admin/season/get',(req,res)=>{
+  if(!shopAuthorized(req))return res.status(401).json({ok:false,error:'unauthorized'});
+  const cfg=db.settings?.season||{id:'s1',name:'Сезон 1',endsAt:0};
+  res.json({ok:true,season:{...cfg,tiers:(Array.isArray(cfg.tiers)?cfg.tiers:[]).map(x=>({...x,item:x.itemId?getShopItem(x.itemId):null}))}});
+});
+app.post('/admin/season',(req,res)=>{
+  if(!shopAuthorized(req))return res.status(401).json({ok:false,error:'unauthorized'});
+  const mode=String(req.body?.mode||'edit').toLowerCase();
+  const name=strip(req.body?.name||'Сезон').slice(0,60);
+  const days=Math.max(0,Math.min(3650,Math.round(Number(req.body?.days||0))));
+  const rawTiers=Array.isArray(req.body?.tiers)?req.body.tiers.slice(0,50):[];
+  if(!name||!rawTiers.length)return res.status(400).json({ok:false,error:'name and tiers required'});
+  const tiers=[];
+  for(let i=0;i<rawTiers.length;i++){
+    const raw=rawTiers[i]||{};
+    const need=Math.max(1,Math.min(100000,Math.round(Number(raw.need||0))));
+    const reward=Math.max(0,Math.min(1000000000,Math.round(Number(raw.reward||0))));
+    const itemId=String(raw.itemId||'').trim().toLowerCase()||null;
+    const item=itemId?getShopItem(itemId):null;
+    if(itemId&&!item)return res.status(400).json({ok:false,error:'invalid item',itemId});
+    if(item?.dailyOnly)return res.status(400).json({ok:false,error:'daily-only item not allowed',itemId});
+    if(!reward&&!itemId)return res.status(400).json({ok:false,error:'empty tier reward'});
+    tiers.push({tier:i+1,need,reward,itemId});
+  }
+  const current=db.settings?.season||{};
+  const id=mode==='new'
+    ? 'season_'+Date.now().toString(36)
+    : String(current.id||('season_'+Date.now().toString(36)));
+  db.settings.season={id,name,endsAt:days?Date.now()+days*86400000:0,tiers};
+  logAdmin('season_set',{mode,id,name,days,tiers:tiers.length});
+  save();
+  res.json({ok:true,season:{...db.settings.season,tiers:tiers.map(x=>({...x,item:x.itemId?getShopItem(x.itemId):null}))}});
+});
+app.post('/admin/quests/get',(req,res)=>{
+  if(!shopAuthorized(req))return res.status(401).json({ok:false,error:'unauthorized'});
+  res.json({ok:true,quests:Array.isArray(db.settings?.dailyQuests)?db.settings.dailyQuests:[]});
+});
+app.post('/admin/quests',(req,res)=>{
+  if(!shopAuthorized(req))return res.status(401).json({ok:false,error:'unauthorized'});
+  if(!Array.isArray(db.settings.dailyQuests))db.settings.dailyQuests=[];
+  const action=String(req.body?.action||'').trim().toLowerCase();
+  if(action==='delete'){
+    const id=String(req.body?.id||'').trim();
+    const before=db.settings.dailyQuests.length;
+    db.settings.dailyQuests=db.settings.dailyQuests.filter(x=>x.id!==id);
+    if(db.settings.dailyQuests.length===before)return res.status(404).json({ok:false,error:'quest not found'});
+    logAdmin('quest_delete',{id});save();return res.json({ok:true,quests:db.settings.dailyQuests});
+  }
+  const allowed=new Set(['messages','daily','spent','cases','purchases','transferred']);
+  const type=String(req.body?.type||'').trim().toLowerCase();
+  const name=strip(req.body?.name).slice(0,80);
+  const target=Math.max(1,Math.min(1000000000,Math.round(Number(req.body?.target||0))));
+  const reward=Math.max(0,Math.min(1000000000,Math.round(Number(req.body?.reward||0))));
+  if(!allowed.has(type)||!name||target<1||reward<1)return res.status(400).json({ok:false,error:'invalid quest'});
+  if(action==='add'){
+    let id;
+    do{id='q_'+Date.now().toString(36)+Math.floor(Math.random()*1296).toString(36)}while(db.settings.dailyQuests.some(x=>x.id===id));
+    const quest={id,type,name,target,reward};
+    db.settings.dailyQuests.push(quest);logAdmin('quest_add',{id,type,target,reward});save();return res.json({ok:true,quest,quests:db.settings.dailyQuests});
+  }
+  if(action==='edit'){
+    const id=String(req.body?.id||'').trim();
+    const q=db.settings.dailyQuests.find(x=>x.id===id);
+    if(!q)return res.status(404).json({ok:false,error:'quest not found'});
+    Object.assign(q,{type,name,target,reward});logAdmin('quest_edit',{id,type,target,reward});save();return res.json({ok:true,quest:q,quests:db.settings.dailyQuests});
+  }
+  return res.status(400).json({ok:false,error:'invalid action'});
+});
+
 app.post('/admin/stats',(req,res)=>{
   if(!shopAuthorized(req))return res.status(401).json({ok:false,error:'unauthorized'});
   const wallets=Object.values(db.wallets),counts={};
