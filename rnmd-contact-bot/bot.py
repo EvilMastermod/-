@@ -91,6 +91,8 @@ ADMIN_ECONOMY_BLOCK_BUTTON = "🚫 Блок экономики"
 ADMIN_RANDOM_DAILY_BUTTON = "🎲 Случайная ежедневка"
 ADMIN_BUNDLE_BUTTON = "📦 Создать набор"
 ADMIN_EVENT_BUTTON = "🎉 Настроить ивент"
+ADMIN_SEASON_BUTTON = "🎫 Настроить сезон"
+ADMIN_QUESTS_BUTTON = "🎯 Редактор заданий"
 BACK_BUTTON = "⬅️ Назад"
 MINECRAFT_BACK_BUTTON = "⬅️ В Minecraft"
 CANCEL_BUTTON = "❌ Отменить"
@@ -147,6 +149,7 @@ admin_panel_keyboard = ReplyKeyboardMarkup(
         [KeyboardButton(ADMIN_STATS_BUTTON), KeyboardButton(ADMIN_LOG_BUTTON)],
         [KeyboardButton(ADMIN_SHOP_EDIT_BUTTON), KeyboardButton(ADMIN_ECONOMY_BLOCK_BUTTON)],
         [KeyboardButton(ADMIN_RANDOM_DAILY_BUTTON), KeyboardButton(ADMIN_BUNDLE_BUTTON)],
+        [KeyboardButton(ADMIN_SEASON_BUTTON), KeyboardButton(ADMIN_QUESTS_BUTTON)],
         [KeyboardButton(ADMIN_EVENT_BUTTON)],
         [KeyboardButton(BACK_BUTTON)],
     ],
@@ -487,6 +490,8 @@ def clear_modes(context: ContextTypes.DEFAULT_TYPE):
     context.user_data.pop("admin_random_daily_waiting", None)
     context.user_data.pop("admin_bundle_waiting", None)
     context.user_data.pop("admin_event_waiting", None)
+    context.user_data.pop("admin_season_waiting", None)
+    context.user_data.pop("admin_quests_waiting", None)
     context.user_data.pop("promo_waiting", None)
     context.user_data.pop("admin_promo_waiting", None)
     context.user_data.pop("admin_daily_waiting", None)
@@ -1548,6 +1553,11 @@ async def handle_shop_buy(update: Update, context: ContextTypes.DEFAULT_TYPE):
                         shop_items_text(shop_data),
                         reply_markup=shop_items_keyboard(shop_data.get("items") or []),
                     )
+                elif item.get("category") == "titles":
+                    await query.edit_message_text(
+                        "🎖 Магазин титулов\n\nКупленный титул сразу становится выбранным.",
+                        reply_markup=shop_titles_keyboard(shop_data.get("items") or []),
+                    )
                 else:
                     await query.edit_message_text(
                         shop_text(shop_data),
@@ -1839,16 +1849,38 @@ async def show_season(update: Update, context: ContextTypes.DEFAULT_TYPE):
         season = data.get("season") or {}
         if response.status_code != 200 or not data.get("ok"):
             raise RuntimeError("season api")
-        lines = [f"🎫 {season.get('name') or 'Сезон'}", f"⭐ Ваш уровень: {int(season.get('level') or 1)}", ""]
+
+        lines = [
+            f"🎫 {season.get('name') or 'Сезон'}",
+            f"⭐ Ваш уровень: {int(season.get('level') or 1)}",
+        ]
+        ends_at = int(season.get("endsAt") or 0)
+        if ends_at:
+            remain_ms = max(0, ends_at - int(time.time() * 1000))
+            days_left = (remain_ms + 86_399_999) // 86_400_000
+            lines.append(f"⏳ Осталось примерно: {days_left} дн.")
+        lines.append("")
+
         rows = []
         for tier in season.get("tiers") or []:
             mark = "✅" if tier.get("claimed") else ("🟢" if tier.get("unlocked") else "🔒")
-            lines.append(f"{mark} Этап {tier.get('tier')} · нужен ур. {tier.get('need')} · {tier.get('reward')} RC")
+            rewards = []
+            coins = int(tier.get("reward") or 0)
+            if coins:
+                rewards.append(f"{coins:,} RC".replace(",", " "))
+            item = tier.get("item")
+            if item:
+                rewards.append(item.get("name") or tier.get("itemId"))
+            reward_text = " + ".join(rewards) if rewards else "без награды"
+            lines.append(
+                f"{mark} Этап {tier.get('tier')} · нужен ур. {tier.get('need')} · {reward_text}"
+            )
             if tier.get("unlocked") and not tier.get("claimed"):
                 rows.append([InlineKeyboardButton(
                     f"🎁 Забрать этап {tier.get('tier')}",
                     callback_data=f"season_claim:{tier.get('tier')}",
                 )])
+
         await update.message.reply_text(
             "\n".join(lines),
             reply_markup=InlineKeyboardMarkup(rows) if rows else activities_keyboard,
@@ -1868,8 +1900,23 @@ async def handle_season_claim(update: Update, context: ContextTypes.DEFAULT_TYPE
         if response.status_code != 200 or not data.get("ok"):
             await query.answer("❌ Награда недоступна.", show_alert=True)
             return
-        await query.answer(f"🎁 +{int(data.get('reward') or 0)} RC", show_alert=True)
-        await query.edit_message_text(f"✅ Награда сезона получена. Баланс: {int(data.get('balance') or 0)} RC")
+
+        rewards = []
+        coins = int(data.get("reward") or 0)
+        if coins:
+            rewards.append(f"+{coins:,} RC".replace(",", " "))
+        item = data.get("rewardItem")
+        if item:
+            rewards.append(item.get("name") or "предмет")
+        elif data.get("itemAlreadyOwned"):
+            rewards.append("предмет уже был в коллекции")
+
+        reward_text = " + ".join(rewards) if rewards else "награда получена"
+        await query.answer(f"🎁 {reward_text}", show_alert=True)
+        await query.edit_message_text(
+            f"✅ Награда сезона получена: {reward_text}\n"
+            f"👛 Баланс: {int(data.get('balance') or 0):,} RC".replace(",", " ")
+        )
     except Exception:
         await query.answer("❌ Сезон недоступен.", show_alert=True)
 
@@ -2829,6 +2876,300 @@ async def admin_bundle_create(update: Update, context: ContextTypes.DEFAULT_TYPE
     except Exception:
         clear_modes(context)
         await update.message.reply_text("❌ Не удалось создать набор.", reply_markup=admin_panel_keyboard)
+
+
+async def admin_season_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if update.effective_user.id != ADMIN_ID:
+        return
+
+    clear_modes(context)
+    context.user_data["admin_season_waiting"] = True
+    current_text = ""
+
+    try:
+        response, data = await api_post("/admin/season/get", {})
+        season = data.get("season") or {}
+        if response.status_code == 200 and data.get("ok"):
+            rows = [
+                "",
+                "",
+                f"Сейчас: {season.get('name') or 'Сезон'}",
+                f"ID: {season.get('id') or '-'}",
+            ]
+            tiers = season.get("tiers") or []
+            if tiers:
+                rows.append("Этапы:")
+                for tier in tiers[:25]:
+                    rewards = []
+                    if int(tier.get("reward") or 0):
+                        rewards.append(f"{int(tier.get('reward') or 0)} RC")
+                    if tier.get("item"):
+                        rewards.append(tier.get("item", {}).get("name") or tier.get("itemId"))
+                    rows.append(
+                        f"• ур. {int(tier.get('need') or 1)} = "
+                        + (" + ".join(rewards) if rewards else "без награды")
+                    )
+            current_text = "\n".join(rows)
+    except Exception:
+        pass
+
+    await update.message.reply_text(
+        "🎫 Настройка сезонного пропуска\n\n"
+        "Формат:\n"
+        "new/edit | Название | дней | этапы\n\n"
+        "Этап: уровень=награда. Этапы разделяй точкой с запятой.\n"
+        "Награда может быть коинами, предметом или обоими сразу.\n\n"
+        "Пример нового сезона:\n"
+        "new | Sakura Season | 30 | 1=100; 3=250; 5=500+item:crown; 10=item:premium_star\n\n"
+        "Чтобы изменить текущий сезон без сброса уже забранных этапов, вместо new используй edit.\n"
+        "Дней 0 = без даты окончания."
+        + current_text,
+        reply_markup=cancel_keyboard,
+    )
+
+
+async def admin_season_set(update: Update, context: ContextTypes.DEFAULT_TYPE, text: str):
+    parts = [x.strip() for x in text.split("|", 3)]
+    if len(parts) < 4:
+        await update.message.reply_text(
+            "❌ Формат: new/edit | Название | дней | 1=100; 3=250+item:crown",
+            reply_markup=cancel_keyboard,
+        )
+        return
+
+    mode = parts[0].lower()
+    if mode not in {"new", "edit"}:
+        await update.message.reply_text("❌ Первый параметр только new или edit.", reply_markup=cancel_keyboard)
+        return
+
+    name = parts[1][:60]
+    days_raw = parts[2].replace(" ", "")
+    if not days_raw.isdigit():
+        await update.message.reply_text("❌ Количество дней должно быть числом.", reply_markup=cancel_keyboard)
+        return
+
+    tiers = []
+    try:
+        for raw_tier in [x.strip() for x in parts[3].split(";") if x.strip()]:
+            need_s, reward_s = [x.strip() for x in raw_tier.split("=", 1)]
+            need = int(need_s)
+            if need < 1:
+                raise ValueError
+
+            coins = 0
+            item_id = None
+            for reward_part in [x.strip() for x in reward_s.split("+") if x.strip()]:
+                if reward_part.lower().startswith("item:"):
+                    item_id = reward_part.split(":", 1)[1].strip().lower()
+                else:
+                    coins += int(reward_part.replace(" ", ""))
+
+            if coins < 0 or (coins == 0 and not item_id):
+                raise ValueError
+
+            tiers.append({
+                "need": need,
+                "reward": coins,
+                "itemId": item_id,
+            })
+    except Exception:
+        await update.message.reply_text(
+            "❌ Ошибка в этапах. Пример: 1=100; 5=500+item:crown; 10=item:premium_star",
+            reply_markup=cancel_keyboard,
+        )
+        return
+
+    if not tiers:
+        await update.message.reply_text("❌ Добавь хотя бы один этап.", reply_markup=cancel_keyboard)
+        return
+
+    tiers.sort(key=lambda x: x["need"])
+
+    try:
+        response, data = await api_post(
+            "/admin/season",
+            {
+                "mode": mode,
+                "name": name,
+                "days": int(days_raw),
+                "tiers": tiers,
+            },
+        )
+        if response.status_code != 200 or not data.get("ok"):
+            error = data.get("error") or "неизвестная ошибка"
+            item_id = data.get("itemId")
+            if item_id:
+                error += f" ({item_id})"
+            await update.message.reply_text(
+                f"❌ Не удалось сохранить сезон: {error}",
+                reply_markup=cancel_keyboard,
+            )
+            return
+
+        clear_modes(context)
+        season = data.get("season") or {}
+        lines = [
+            "✅ Сезонный пропуск сохранён.",
+            f"🎫 {season.get('name')}",
+            f"🆔 {season.get('id')}",
+            f"🎁 Этапов: {len(season.get('tiers') or [])}",
+        ]
+        if mode == "new":
+            lines.append("🔄 Это новый сезон — награды этапов можно получать заново.")
+        else:
+            lines.append("✏️ Текущий сезон изменён без нового ID.")
+
+        await update.message.reply_text("\n".join(lines), reply_markup=admin_panel_keyboard)
+    except Exception:
+        logging.exception("Ошибка настройки сезона")
+        clear_modes(context)
+        await update.message.reply_text("❌ Сервис сезона недоступен.", reply_markup=admin_panel_keyboard)
+
+
+QUEST_TYPE_ALIASES = {
+    "messages": "messages",
+    "message": "messages",
+    "сообщения": "messages",
+    "сообщение": "messages",
+    "daily": "daily",
+    "ежедневка": "daily",
+    "ежедневная": "daily",
+    "spent": "spent",
+    "потратить": "spent",
+    "траты": "spent",
+    "cases": "cases",
+    "кейсы": "cases",
+    "кейс": "cases",
+    "purchases": "purchases",
+    "покупки": "purchases",
+    "покупка": "purchases",
+    "transferred": "transferred",
+    "переводы": "transferred",
+    "перевод": "transferred",
+}
+
+
+async def admin_quests_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if update.effective_user.id != ADMIN_ID:
+        return
+
+    clear_modes(context)
+    context.user_data["admin_quests_waiting"] = True
+    current_text = ""
+
+    try:
+        response, data = await api_post("/admin/quests/get", {})
+        quests = data.get("quests") or []
+        if response.status_code == 200 and data.get("ok") and quests:
+            rows = ["", "", "Текущие задания:"]
+            for q in quests[:30]:
+                rows.append(
+                    f"• {q.get('id')} | {q.get('type')} | "
+                    f"{int(q.get('target') or 0)} | {int(q.get('reward') or 0)} RC | {q.get('name')}"
+                )
+            current_text = "\n".join(rows)
+    except Exception:
+        pass
+
+    await update.message.reply_text(
+        "🎯 Редактор заданий на день\n\n"
+        "Добавить:\n"
+        "add | тип | цель | награда_RC | название\n"
+        "Пример: add | messages | 5 | 200 | Отправить 5 сообщений\n\n"
+        "Изменить:\n"
+        "edit | ID | тип | цель | награда_RC | название\n\n"
+        "Удалить:\n"
+        "delete | ID\n\n"
+        "Типы: messages, daily, spent, cases, purchases, transferred.\n"
+        "Можно также писать: сообщения, ежедневка, потратить, кейсы, покупки, переводы."
+        + current_text,
+        reply_markup=cancel_keyboard,
+    )
+
+
+async def admin_quests_apply(update: Update, context: ContextTypes.DEFAULT_TYPE, text: str):
+    parts = [x.strip() for x in text.split("|")]
+    if not parts:
+        return
+
+    action = parts[0].lower()
+
+    if action == "delete":
+        if len(parts) < 2:
+            await update.message.reply_text("❌ Формат: delete | ID", reply_markup=cancel_keyboard)
+            return
+        payload = {"action": "delete", "id": parts[1]}
+
+    elif action == "add":
+        if len(parts) < 5:
+            await update.message.reply_text(
+                "❌ Формат: add | тип | цель | награда_RC | название",
+                reply_markup=cancel_keyboard,
+            )
+            return
+        quest_type = QUEST_TYPE_ALIASES.get(parts[1].lower())
+        if not quest_type or not parts[2].replace(" ", "").isdigit() or not parts[3].replace(" ", "").isdigit():
+            await update.message.reply_text("❌ Проверь тип, цель и награду.", reply_markup=cancel_keyboard)
+            return
+        payload = {
+            "action": "add",
+            "type": quest_type,
+            "target": int(parts[2].replace(" ", "")),
+            "reward": int(parts[3].replace(" ", "")),
+            "name": "|".join(parts[4:]).strip(),
+        }
+
+    elif action == "edit":
+        if len(parts) < 6:
+            await update.message.reply_text(
+                "❌ Формат: edit | ID | тип | цель | награда_RC | название",
+                reply_markup=cancel_keyboard,
+            )
+            return
+        quest_type = QUEST_TYPE_ALIASES.get(parts[2].lower())
+        if not quest_type or not parts[3].replace(" ", "").isdigit() or not parts[4].replace(" ", "").isdigit():
+            await update.message.reply_text("❌ Проверь тип, цель и награду.", reply_markup=cancel_keyboard)
+            return
+        payload = {
+            "action": "edit",
+            "id": parts[1],
+            "type": quest_type,
+            "target": int(parts[3].replace(" ", "")),
+            "reward": int(parts[4].replace(" ", "")),
+            "name": "|".join(parts[5:]).strip(),
+        }
+
+    else:
+        await update.message.reply_text(
+            "❌ Используй add, edit или delete.",
+            reply_markup=cancel_keyboard,
+        )
+        return
+
+    try:
+        response, data = await api_post("/admin/quests", payload)
+        if response.status_code != 200 or not data.get("ok"):
+            await update.message.reply_text(
+                f"❌ Не удалось изменить задания: {data.get('error') or 'ошибка'}",
+                reply_markup=cancel_keyboard,
+            )
+            return
+
+        clear_modes(context)
+        if action == "delete":
+            result = "🗑 Задание удалено."
+        elif action == "add":
+            q = data.get("quest") or {}
+            result = f"✅ Задание создано. ID: {q.get('id')}"
+        else:
+            q = data.get("quest") or {}
+            result = f"✅ Задание {q.get('id')} обновлено."
+
+        await update.message.reply_text(result, reply_markup=admin_panel_keyboard)
+    except Exception:
+        logging.exception("Ошибка редактора заданий")
+        clear_modes(context)
+        await update.message.reply_text("❌ Редактор заданий недоступен.", reply_markup=admin_panel_keyboard)
 
 
 async def admin_event_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -4875,6 +5216,14 @@ async def handle_user_message(update: Update, context: ContextTypes.DEFAULT_TYPE
         await admin_bundle_start(update, context)
         return
 
+    if text == ADMIN_SEASON_BUTTON:
+        await admin_season_start(update, context)
+        return
+
+    if text == ADMIN_QUESTS_BUTTON:
+        await admin_quests_start(update, context)
+        return
+
     if text == ADMIN_EVENT_BUTTON:
         await admin_event_start(update, context)
         return
@@ -4917,6 +5266,14 @@ async def handle_user_message(update: Update, context: ContextTypes.DEFAULT_TYPE
 
     if context.user_data.get("admin_bundle_waiting"):
         await admin_bundle_create(update, context, text)
+        return
+
+    if context.user_data.get("admin_season_waiting"):
+        await admin_season_set(update, context, text)
+        return
+
+    if context.user_data.get("admin_quests_waiting"):
+        await admin_quests_apply(update, context, text)
         return
 
     if context.user_data.get("admin_event_waiting"):
