@@ -29,7 +29,7 @@ jobs:
         run: |
           python3 - <<'PY'
           import zipfile,json
-          p='spooky-price-mod/build/libs/SpookyPriceCollector-1.21.11-Fabric-1.0.0.jar'
+          p='spooky-price-mod/build/libs/SpookyPriceCollector-1.21.11-Fabric-1.0.1.jar'
           with zipfile.ZipFile(p) as z:
               assert 'ua/kostia/spookyprice/SpookyPriceClient.class' in z.namelist()
               assert json.loads(z.read('fabric.mod.json'))['id']=='spookyprice'
@@ -37,5 +37,5 @@ jobs:
       - uses: actions/upload-artifact@v4
         with:
           name: SpookyPriceCollector-1.21.11-Fabric
-          path: spooky-price-mod/build/libs/SpookyPriceCollector-1.21.11-Fabric-1.0.0.jar
+          path: spooky-price-mod/build/libs/SpookyPriceCollector-1.21.11-Fabric-1.0.1.jar
           if-no-files-found: error
