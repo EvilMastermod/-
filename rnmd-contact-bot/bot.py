@@ -50,6 +50,7 @@ SPOOKY_BUTTON = "👻 Spooky Time"
 SPOOKY_PRICE_BUTTON = "💰 Средняя цена"
 WALLET_BUTTON = "👛 Кошелёк"
 SHOP_BUTTON = "🛒 Магазин"
+PROFILE_BUTTON = "👤 Профиль"
 BACK_BUTTON = "⬅️ Назад"
 MINECRAFT_BACK_BUTTON = "⬅️ В Minecraft"
 CANCEL_BUTTON = "❌ Отменить"
@@ -60,7 +61,7 @@ user_main_keyboard = ReplyKeyboardMarkup(
         [KeyboardButton(CONTACT_BUTTON), KeyboardButton(ANON_BUTTON)],
         [KeyboardButton(DND_BUTTON), KeyboardButton(DND_OFF_BUTTON)],
         [KeyboardButton(MINECRAFT_BUTTON), KeyboardButton(WALLET_BUTTON)],
-        [KeyboardButton(SHOP_BUTTON)],
+        [KeyboardButton(SHOP_BUTTON), KeyboardButton(PROFILE_BUTTON)],
     ],
     resize_keyboard=True,
 )
@@ -70,7 +71,7 @@ admin_main_keyboard = ReplyKeyboardMarkup(
         [KeyboardButton(CONTACT_BUTTON), KeyboardButton(ANON_BUTTON)],
         [KeyboardButton(DND_BUTTON), KeyboardButton(DND_OFF_BUTTON)],
         [KeyboardButton(MINECRAFT_BUTTON), KeyboardButton(WALLET_BUTTON)],
-        [KeyboardButton(SHOP_BUTTON)],
+        [KeyboardButton(SHOP_BUTTON), KeyboardButton(PROFILE_BUTTON)],
         [KeyboardButton(ADMIN_DND_OFF_BUTTON), KeyboardButton(ADMIN_ANON_BAN_BUTTON)],
         [KeyboardButton(ADMIN_ANON_UNBAN_BUTTON), KeyboardButton(ADMIN_REPORT_LIST_BUTTON)],
         [KeyboardButton(ADMIN_COINS_BUTTON)],
@@ -424,6 +425,234 @@ async def fetch_shop(user_id: int):
         )
     data = response.json()
     return response, data
+
+
+async def fetch_profile(user_id: int):
+    async with httpx.AsyncClient(timeout=12.0) as client:
+        response = await client.post(
+            f"{SPOOKY_PRICE_API}/profile",
+            json={"userId": user_id},
+            headers=shop_headers(),
+        )
+    data = response.json()
+    return response, data
+
+
+def equipped_cosmetic_ids(data):
+    return {
+        item.get("id")
+        for item in (data.get("cosmetics") or [])
+        if item.get("equipped")
+    }
+
+
+def profile_display_name(user, data):
+    name = user.full_name or "Пользователь"
+    equipped = equipped_cosmetic_ids(data)
+
+    if "name_color" in equipped:
+        name = f"🌈 {name}"
+    if "crown" in equipped:
+        name = f"👑 {name}"
+
+    suffixes = []
+    if "star_badge" in equipped:
+        suffixes.append("⭐")
+    if "rnmd_badge" in equipped:
+        suffixes.append("🔥RNMD")
+    if "diamond_badge" in equipped:
+        suffixes.append("💎")
+    if "sakura_badge" in equipped:
+        suffixes.append("🌸")
+    if "trophy" in equipped:
+        suffixes.append("🏆")
+    if "random_item" in equipped:
+        suffixes.append("🎁")
+
+    if suffixes:
+        name += " " + " ".join(suffixes)
+
+    if "profile_frame" in equipped:
+        name = f"╔══ ✦ ══╗\n{name}\n╚══ ✦ ══╝"
+
+    return name
+
+
+def profile_text(user, data):
+    balance = int(data.get("balance") or 0)
+    status = "Premium" if data.get("premium") else ("Plus" if data.get("plus") else "Обычный")
+    cosmetics = data.get("cosmetics") or []
+    equipped_count = sum(1 for item in cosmetics if item.get("equipped"))
+    username = f"@{user.username}" if user.username else "нет username"
+
+    lines = [
+        "👤 Профиль",
+        "",
+        profile_display_name(user, data),
+        "",
+        f"🔗 {username}",
+        f"🆔 {user.id}",
+        f"💎 Статус: {status}",
+        f"🪙 Random Coins: {balance:,}".replace(",", " "),
+    ]
+
+    if cosmetics:
+        lines.append(f"✨ Украшений: {equipped_count}/{len(cosmetics)}")
+
+    if "message_style" in equipped_cosmetic_ids(data):
+        lines.append("💬 Особый стиль сообщений: включён")
+
+    return "\n".join(lines)
+
+
+def profile_keyboard(data):
+    rows = []
+    if data.get("cosmetics"):
+        rows.append([InlineKeyboardButton("✨ Украшения Профиля", callback_data="profile_decor")])
+    return InlineKeyboardMarkup(rows) if rows else None
+
+
+def decorations_text(data):
+    cosmetics = data.get("cosmetics") or []
+    lines = ["✨ Украшения Профиля", ""]
+
+    for item in cosmetics:
+        mark = "✅" if item.get("equipped") else "⚪"
+        lines.append(f"{mark} {item.get('name')}")
+
+    lines.append("")
+    lines.append("Нажми на украшение, чтобы включить или выключить его.")
+    return "\n".join(lines)
+
+
+def decorations_keyboard(data):
+    rows = []
+    for item in data.get("cosmetics") or []:
+        mark = "✅" if item.get("equipped") else "⚪"
+        rows.append([
+            InlineKeyboardButton(
+                f"{mark} {item.get('name')}",
+                callback_data=f"profile_toggle:{item.get('id')}",
+            )
+        ])
+    rows.append([InlineKeyboardButton("⬅️ Назад в профиль", callback_data="profile_back")])
+    return InlineKeyboardMarkup(rows)
+
+
+async def show_profile(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    clear_modes(context)
+
+    try:
+        response, data = await fetch_profile(update.effective_user.id)
+        if response.status_code != 200 or not data.get("ok"):
+            error_text = data.get("error") or f"HTTP {response.status_code}"
+            await update.message.reply_text(
+                f"❌ Не удалось открыть профиль: {error_text}",
+                reply_markup=get_main_keyboard(update.effective_user.id),
+            )
+            return
+
+        await update.message.reply_text(
+            profile_text(update.effective_user, data),
+            reply_markup=profile_keyboard(data),
+        )
+    except Exception:
+        logging.exception("Ошибка профиля")
+        await update.message.reply_text(
+            "❌ Профиль сейчас недоступен.",
+            reply_markup=get_main_keyboard(update.effective_user.id),
+        )
+
+
+async def handle_profile_decor(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    query = update.callback_query
+    if not query:
+        return
+    await query.answer()
+
+    try:
+        response, data = await fetch_profile(query.from_user.id)
+        if response.status_code != 200 or not data.get("ok"):
+            await query.answer("❌ Профиль сейчас недоступен.", show_alert=True)
+            return
+
+        if not data.get("cosmetics"):
+            await query.answer("У вас пока нет украшений.", show_alert=True)
+            return
+
+        await query.edit_message_text(
+            decorations_text(data),
+            reply_markup=decorations_keyboard(data),
+        )
+    except Exception:
+        logging.exception("Ошибка открытия украшений")
+        await query.answer("❌ Украшения сейчас недоступны.", show_alert=True)
+
+
+async def handle_profile_toggle(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    query = update.callback_query
+    if not query:
+        return
+
+    item_id = query.data.split(":", 1)[1]
+
+    try:
+        async with httpx.AsyncClient(timeout=12.0) as client:
+            response = await client.post(
+                f"{SPOOKY_PRICE_API}/profile/decorate",
+                json={"userId": query.from_user.id, "itemId": item_id},
+                headers=shop_headers(),
+            )
+
+        data = response.json()
+        if response.status_code != 200 or not data.get("ok"):
+            await query.answer("❌ Не удалось изменить украшение.", show_alert=True)
+            return
+
+        await query.answer("✅ Обновлено")
+
+        response2, profile_data = await fetch_profile(query.from_user.id)
+        if response2.status_code == 200 and profile_data.get("ok"):
+            await query.edit_message_text(
+                decorations_text(profile_data),
+                reply_markup=decorations_keyboard(profile_data),
+            )
+    except Exception:
+        logging.exception("Ошибка переключения украшения")
+        await query.answer("❌ Не удалось изменить украшение.", show_alert=True)
+
+
+async def handle_profile_back(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    query = update.callback_query
+    if not query:
+        return
+    await query.answer()
+
+    try:
+        response, data = await fetch_profile(query.from_user.id)
+        if response.status_code != 200 or not data.get("ok"):
+            await query.answer("❌ Профиль сейчас недоступен.", show_alert=True)
+            return
+
+        await query.edit_message_text(
+            profile_text(query.from_user, data),
+            reply_markup=profile_keyboard(data),
+        )
+    except Exception:
+        logging.exception("Ошибка возврата в профиль")
+        await query.answer("❌ Профиль сейчас недоступен.", show_alert=True)
+
+
+async def has_message_style(user_id: int):
+    try:
+        response, data = await fetch_profile(user_id)
+        return (
+            response.status_code == 200
+            and data.get("ok")
+            and "message_style" in equipped_cosmetic_ids(data)
+        )
+    except Exception:
+        return False
 
 
 async def user_has_premium(user_id: int):
@@ -1437,9 +1666,15 @@ async def send_anonymous(update: Update, context: ContextTypes.DEFAULT_TYPE, tex
 
     try:
         reply_keyboard = anon_message_keyboard()
+        styled = await has_message_style(update.effective_user.id)
+        anon_text = (
+            f"✨╭─ Анонимное сообщение ─╮\n\n{text}\n\n╰────────────╯"
+            if styled
+            else f"📨 Анонимное сообщение\n\n{text}"
+        )
         sent = await context.bot.send_message(
             chat_id=target_id,
-            text=f"📨 Анонимное сообщение\n\n{text}",
+            text=anon_text,
             reply_markup=reply_keyboard,
         )
 
@@ -1623,9 +1858,15 @@ async def send_anonymous_reply(update: Update, context: ContextTypes.DEFAULT_TYP
 
     try:
         reply_keyboard = anon_message_keyboard()
+        styled = await has_message_style(update.effective_user.id)
+        reply_text = (
+            f"✨╭─ Анонимный ответ ─╮\n\n{text}\n\n╰───────────╯"
+            if styled
+            else f"💬 Анонимный ответ\n\n{text}"
+        )
         sent = await context.bot.send_message(
             chat_id=target_id,
-            text=f"💬 Анонимный ответ\n\n{text}",
+            text=reply_text,
             reply_markup=reply_keyboard,
         )
 
@@ -1700,6 +1941,10 @@ async def handle_user_message(update: Update, context: ContextTypes.DEFAULT_TYPE
 
     if text == SHOP_BUTTON:
         await show_shop(update, context)
+        return
+
+    if text == PROFILE_BUTTON:
+        await show_profile(update, context)
         return
 
     if text == SPOOKY_BUTTON:
@@ -1875,6 +2120,9 @@ def main():
     app.add_handler(CallbackQueryHandler(handle_shop_items, pattern=r"^shop_items$"))
     app.add_handler(CallbackQueryHandler(handle_shop_back, pattern=r"^shop_back$"))
     app.add_handler(CallbackQueryHandler(handle_shop_owned, pattern=r"^shop_owned$"))
+    app.add_handler(CallbackQueryHandler(handle_profile_decor, pattern=r"^profile_decor$"))
+    app.add_handler(CallbackQueryHandler(handle_profile_toggle, pattern=r"^profile_toggle:[a-z_]+$"))
+    app.add_handler(CallbackQueryHandler(handle_profile_back, pattern=r"^profile_back$"))
 
     app.add_handler(
         MessageHandler(
