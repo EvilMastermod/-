@@ -1731,37 +1731,66 @@ async def admin_daily_set(update: Update, context: ContextTypes.DEFAULT_TYPE, te
         return
 
     parts = [part.strip() for part in text.split("|")]
-    if not parts or not parts[0].replace(" ", "").isdigit():
+    if len(parts) < 4:
         await update.message.reply_text(
-            "❌ Первый параметр должен быть количеством коинов. Например: 1000 | crown | on",
+            "❌ Нужно 4 части. Например: 250 | ex_mufvp8asrs | on | 1",
             reply_markup=cancel_keyboard,
         )
         return
 
-    coins = int(parts[0].replace(" ", ""))
-    item_id = parts[1].strip().lower() if len(parts) > 1 and parts[1].strip() else None
-    streak_bonus = True
-    if len(parts) > 2:
-        value = parts[2].strip().lower()
-        if value in {"off", "0", "нет", "false"}:
-            streak_bonus = False
-        elif value in {"on", "1", "да", "true"}:
-            streak_bonus = True
-        else:
-            await update.message.reply_text(
-                "❌ Третий параметр только on или off.",
-                reply_markup=cancel_keyboard,
-            )
-            return
+    coins_raw = parts[0].replace(" ", "")
+    item_id = parts[1].strip().lower() if parts[1].strip() else None
+    bonus_raw = parts[2].strip().lower()
+    day_raw = parts[3].replace(" ", "")
+
+    if not coins_raw.isdigit():
+        await update.message.reply_text(
+            "❌ Первый параметр должен быть количеством коинов.",
+            reply_markup=cancel_keyboard,
+        )
+        return
+
+    if bonus_raw in {"off", "0", "нет", "false"}:
+        streak_bonus = False
+    elif bonus_raw in {"on", "1", "да", "true"}:
+        streak_bonus = True
+    else:
+        await update.message.reply_text(
+            "❌ Третий параметр только on или off.",
+            reply_markup=cancel_keyboard,
+        )
+        return
+
+    if not day_raw.isdigit():
+        await update.message.reply_text(
+            "❌ Последний параметр должен быть номером дня.",
+            reply_markup=cancel_keyboard,
+        )
+        return
+
+    day = int(day_raw)
+    if day < 1 or day > 3650:
+        await update.message.reply_text(
+            "❌ День должен быть от 1 до 3650.",
+            reply_markup=cancel_keyboard,
+        )
+        return
+
+    coins = int(coins_raw)
 
     try:
         response, data = await api_post(
             "/admin/daily",
-            {"coins": coins, "itemId": item_id, "streakBonus": streak_bonus},
+            {
+                "coins": coins,
+                "itemId": item_id,
+                "streakBonus": streak_bonus,
+                "day": day,
+            },
         )
         if response.status_code != 200 or not data.get("ok"):
             await update.message.reply_text(
-                "❌ Не удалось сохранить награду. Проверь ID предмета.",
+                "❌ Не удалось сохранить награду. Проверь ID предмета и номер дня.",
                 reply_markup=cancel_keyboard,
             )
             return
@@ -1770,9 +1799,9 @@ async def admin_daily_set(update: Update, context: ContextTypes.DEFAULT_TYPE, te
         daily = data.get("daily") or {}
         item = data.get("item")
         lines = [
-            "✅ Ежедневная награда изменена.",
+            f"✅ Награда на день {int(data.get('day') or day)} сохранена.",
             f"🪙 Коины: {int(daily.get('coins') or 0):,}".replace(",", " "),
-            f"📅 Бонусы серии: {'вкл' if daily.get('streakBonus', True) else 'выкл'}",
+            f"📅 Бонус серии: {'вкл' if daily.get('streakBonus', True) else 'выкл'}",
         ]
         if item:
             lines.append(f"🎁 Предмет: {item.get('name')} ({item.get('id')})")
@@ -1787,7 +1816,6 @@ async def admin_daily_set(update: Update, context: ContextTypes.DEFAULT_TYPE, te
             "❌ Сервис наград недоступен.",
             reply_markup=get_main_keyboard(update.effective_user.id),
         )
-
 
 async def admin_promos_delete_menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if update.effective_user.id != ADMIN_ID:
