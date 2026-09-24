@@ -687,40 +687,60 @@ async def business_chat_callback(update: Update, context: ContextTypes.DEFAULT_T
         await q.answer("❌ Эта кнопка относится к другому чату.", show_alert=True)
         return
 
+    business_connection_id = getattr(q.message, "business_connection_id", None)
+    if not business_connection_id:
+        await q.answer("❌ Нет Business-подключения.", show_alert=True)
+        return
+
     if action == "unmute":
         set_business_chat_muted(owner_id, chat_id, False)
-        await q.answer("🔊 Можно говорить")
-        try:
-            await q.edit_message_text(
-                "🔊 Говорить",
-                reply_markup=InlineKeyboardMarkup(
-                    [[InlineKeyboardButton("🔇 Молчать", callback_data=f"bizchat:mute:{owner_id}:{chat_id}")]]
-                ),
-            )
-        except Exception:
-            log.exception("Failed to edit Business mute control")
+        await q.answer("🔊 Говорить")
+        await context.bot.edit_message_text(
+            business_connection_id=business_connection_id,
+            chat_id=chat_id,
+            message_id=q.message.message_id,
+            text="🔊 Говорить",
+            reply_markup=InlineKeyboardMarkup(
+                [[InlineKeyboardButton(
+                    "🔇 Молчать",
+                    callback_data=f"bizchat:mute:{owner_id}:{chat_id}",
+                )]]
+            ),
+        )
         return
 
     if action == "mute":
-        connection_id = getattr(q.message, "business_connection_id", None)
-        connection = get_business_connection(connection_id) if connection_id else None
-        if connection and not connection["can_delete_all"]:
+        try:
+            bc = await context.bot.get_business_connection(business_connection_id)
+            can_delete_all = bool(
+                bc.rights and getattr(bc.rights, "can_delete_all_messages", False)
+            )
+        except Exception:
+            can_delete_all = False
+
+        if not can_delete_all:
             await q.answer(
-                "❌ У бота нет права удалять все сообщения.",
+                "❌ Дай боту право удалять все сообщения в Telegram Business.",
                 show_alert=True,
             )
             return
+
         set_business_chat_muted(owner_id, chat_id, True)
         await q.answer("🔇 Молчать")
-        try:
-            await q.edit_message_text(
-                "🔇 Молчать",
-                reply_markup=InlineKeyboardMarkup(
-                    [[InlineKeyboardButton("🔊 Говори", callback_data=f"bizchat:unmute:{owner_id}:{chat_id}")]]
-                ),
-            )
-        except Exception:
-            log.exception("Failed to edit Business mute control")
+        await context.bot.edit_message_text(
+            business_connection_id=business_connection_id,
+            chat_id=chat_id,
+            message_id=q.message.message_id,
+            text="🔇 Молчать",
+            reply_markup=InlineKeyboardMarkup(
+                [[InlineKeyboardButton(
+                    "🔊 Говори",
+                    callback_data=f"bizchat:unmute:{owner_id}:{chat_id}",
+                )]]
+            ),
+        )
+
+
 
 
 async def business_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -782,54 +802,61 @@ async def business_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
         low = text.lower()
 
         if low == ".mute":
-            if not connection["can_delete_all"]:
-                await msg.reply_text(
-                    "❌ Для .mute включи боту право удалять все сообщения в Telegram Business.",
-                    do_quote=False,
-                )
-                return
-            set_business_chat_muted(owner_id, msg.chat_id, True)
             try:
-                await context.bot.delete_business_messages(
-                    business_connection_id=msg.business_connection_id,
-                    message_ids=[msg.message_id],
+                bc = await context.bot.get_business_connection(msg.business_connection_id)
+                can_delete_all = bool(
+                    bc.rights and getattr(bc.rights, "can_delete_all_messages", False)
                 )
             except Exception:
-                pass
-            await context.bot.send_message(
-                chat_id=msg.chat_id,
-                text="🔇 Молчать",
-                business_connection_id=msg.business_connection_id,
-                reply_markup=InlineKeyboardMarkup(
-                    [[InlineKeyboardButton(
-                        "🔊 Говори",
-                        callback_data=f"bizchat:unmute:{owner_id}:{msg.chat_id}",
-                    )]]
-                ),
-            )
+                can_delete_all = False
+
+            if not can_delete_all:
+                try:
+                    await context.bot.edit_message_text(
+                        business_connection_id=msg.business_connection_id,
+                        chat_id=msg.chat_id,
+                        message_id=msg.message_id,
+                        text="❌ Включи боту право «Удаление сообщений» в Telegram Business.",
+                    )
+                except Exception:
+                    log.exception("Failed to edit .mute permission error")
+                return
+
+            set_business_chat_muted(owner_id, msg.chat_id, True)
+            try:
+                await context.bot.edit_message_text(
+                    business_connection_id=msg.business_connection_id,
+                    chat_id=msg.chat_id,
+                    message_id=msg.message_id,
+                    text="🔇 Молчать",
+                    reply_markup=InlineKeyboardMarkup(
+                        [[InlineKeyboardButton(
+                            "🔊 Говори",
+                            callback_data=f"bizchat:unmute:{owner_id}:{msg.chat_id}",
+                        )]]
+                    ),
+                )
+            except Exception:
+                log.exception("Failed to transform .mute Business message")
             return
 
         if low == ".unmute":
             set_business_chat_muted(owner_id, msg.chat_id, False)
             try:
-                if connection["can_delete_sent"]:
-                    await context.bot.delete_business_messages(
-                        business_connection_id=msg.business_connection_id,
-                        message_ids=[msg.message_id],
-                    )
+                await context.bot.edit_message_text(
+                    business_connection_id=msg.business_connection_id,
+                    chat_id=msg.chat_id,
+                    message_id=msg.message_id,
+                    text="🔊 Говорить",
+                    reply_markup=InlineKeyboardMarkup(
+                        [[InlineKeyboardButton(
+                            "🔇 Молчать",
+                            callback_data=f"bizchat:mute:{owner_id}:{msg.chat_id}",
+                        )]]
+                    ),
+                )
             except Exception:
-                pass
-            await context.bot.send_message(
-                chat_id=msg.chat_id,
-                text="🔊 Говорить",
-                business_connection_id=msg.business_connection_id,
-                reply_markup=InlineKeyboardMarkup(
-                    [[InlineKeyboardButton(
-                        "🔇 Молчать",
-                        callback_data=f"bizchat:mute:{owner_id}:{msg.chat_id}",
-                    )]]
-                ),
-            )
+                log.exception("Failed to transform .unmute Business message")
             return
 
         return
@@ -840,7 +867,7 @@ async def business_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     # Save every incoming Business message before any automation/deletion.
     archive_business_message(msg.business_connection_id, owner_id, msg)
 
-    # .мут works like a local mute: every new incoming message is deleted.
+    # Muted Business chats automatically delete every new incoming message.
     if business_chat_is_muted(owner_id, msg.chat_id):
         if connection["can_delete_all"]:
             try:
