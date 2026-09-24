@@ -51,6 +51,16 @@ SPOOKY_PRICE_BUTTON = "💰 Средняя цена"
 WALLET_BUTTON = "👛 Кошелёк"
 SHOP_BUTTON = "🛒 Магазин"
 PROFILE_BUTTON = "👤 Профиль"
+ACTIVITIES_BUTTON = "🎮 Активности"
+DAILY_BUTTON = "🎁 Ежедневная награда"
+INVENTORY_BUTTON = "🧰 Инвентарь"
+TRANSFER_BUTTON = "💸 Перевод"
+GIFT_BUTTON = "🎁 Подарок"
+PROMO_BUTTON = "🎟 Промокод"
+TOP_BUTTON = "🏆 Топ"
+LIKE_BUTTON = "❤️ Лайк профиля"
+CASE_BUTTON = "🎁 Кейс"
+ADMIN_PROMO_BUTTON = "🎟 Создать промокод"
 BACK_BUTTON = "⬅️ Назад"
 MINECRAFT_BACK_BUTTON = "⬅️ В Minecraft"
 CANCEL_BUTTON = "❌ Отменить"
@@ -76,6 +86,7 @@ user_main_keyboard = ReplyKeyboardMarkup(
         [KeyboardButton(DND_BUTTON), KeyboardButton(DND_OFF_BUTTON)],
         [KeyboardButton(MINECRAFT_BUTTON), KeyboardButton(WALLET_BUTTON)],
         [KeyboardButton(SHOP_BUTTON), KeyboardButton(PROFILE_BUTTON)],
+        [KeyboardButton(ACTIVITIES_BUTTON)],
     ],
     resize_keyboard=True,
 )
@@ -86,15 +97,60 @@ admin_main_keyboard = ReplyKeyboardMarkup(
         [KeyboardButton(DND_BUTTON), KeyboardButton(DND_OFF_BUTTON)],
         [KeyboardButton(MINECRAFT_BUTTON), KeyboardButton(WALLET_BUTTON)],
         [KeyboardButton(SHOP_BUTTON), KeyboardButton(PROFILE_BUTTON)],
+        [KeyboardButton(ACTIVITIES_BUTTON)],
         [KeyboardButton(ADMIN_DND_OFF_BUTTON), KeyboardButton(ADMIN_ANON_BAN_BUTTON)],
         [KeyboardButton(ADMIN_ANON_UNBAN_BUTTON), KeyboardButton(ADMIN_REPORT_LIST_BUTTON)],
-        [KeyboardButton(ADMIN_COINS_BUTTON)],
+        [KeyboardButton(ADMIN_COINS_BUTTON), KeyboardButton(ADMIN_PROMO_BUTTON)],
     ],
     resize_keyboard=True,
 )
 
 def get_main_keyboard(user_id: int):
     return admin_main_keyboard if user_id == ADMIN_ID else user_main_keyboard
+
+activities_keyboard = ReplyKeyboardMarkup(
+    [
+        [KeyboardButton(DAILY_BUTTON), KeyboardButton(INVENTORY_BUTTON)],
+        [KeyboardButton(TRANSFER_BUTTON), KeyboardButton(GIFT_BUTTON)],
+        [KeyboardButton(PROMO_BUTTON), KeyboardButton(TOP_BUTTON)],
+        [KeyboardButton(LIKE_BUTTON), KeyboardButton(CASE_BUTTON)],
+        [KeyboardButton(BACK_BUTTON)],
+    ],
+    resize_keyboard=True,
+)
+
+transfer_user_keyboard = ReplyKeyboardMarkup(
+    [[KeyboardButton(
+        "👤 Выбрать получателя перевода",
+        request_users=KeyboardButtonRequestUsers(
+            request_id=782, user_is_bot=False, max_quantity=1,
+            request_name=True, request_username=True,
+        ),
+    )], [KeyboardButton(CANCEL_BUTTON)]],
+    resize_keyboard=True,
+)
+
+gift_user_keyboard = ReplyKeyboardMarkup(
+    [[KeyboardButton(
+        "👤 Выбрать получателя подарка",
+        request_users=KeyboardButtonRequestUsers(
+            request_id=783, user_is_bot=False, max_quantity=1,
+            request_name=True, request_username=True,
+        ),
+    )], [KeyboardButton(CANCEL_BUTTON)]],
+    resize_keyboard=True,
+)
+
+like_user_keyboard = ReplyKeyboardMarkup(
+    [[KeyboardButton(
+        "👤 Выбрать профиль для лайка",
+        request_users=KeyboardButtonRequestUsers(
+            request_id=784, user_is_bot=False, max_quantity=1,
+            request_name=True, request_username=True,
+        ),
+    )], [KeyboardButton(CANCEL_BUTTON)]],
+    resize_keyboard=True,
+)
 
 minecraft_keyboard = ReplyKeyboardMarkup(
     [
@@ -280,6 +336,13 @@ def clear_modes(context: ContextTypes.DEFAULT_TYPE):
     context.user_data.pop("admin_anon_unban_stage", None)
     context.user_data.pop("admin_coins_stage", None)
     context.user_data.pop("admin_coins_target_id", None)
+    context.user_data.pop("transfer_stage", None)
+    context.user_data.pop("transfer_target_id", None)
+    context.user_data.pop("gift_stage", None)
+    context.user_data.pop("gift_target_id", None)
+    context.user_data.pop("like_stage", None)
+    context.user_data.pop("promo_waiting", None)
+    context.user_data.pop("admin_promo_waiting", None)
     context.user_data.pop("spooky_price_waiting", None)
 
 async def post_init(application: Application):
