@@ -4664,6 +4664,34 @@ async def handle_user_message(update: Update, context: ContextTypes.DEFAULT_TYPE
         await admin_exclusive_start(update, context)
         return
 
+    if text == ADMIN_STATS_BUTTON:
+        await admin_stats(update, context)
+        return
+
+    if text == ADMIN_LOG_BUTTON:
+        await admin_log_show(update, context)
+        return
+
+    if text == ADMIN_SHOP_EDIT_BUTTON:
+        await admin_shop_edit_start(update, context)
+        return
+
+    if text == ADMIN_ECONOMY_BLOCK_BUTTON:
+        await admin_economy_block_start(update, context)
+        return
+
+    if text == ADMIN_RANDOM_DAILY_BUTTON:
+        await admin_random_daily_start(update, context)
+        return
+
+    if text == ADMIN_BUNDLE_BUTTON:
+        await admin_bundle_start(update, context)
+        return
+
+    if text == ADMIN_EVENT_BUTTON:
+        await admin_event_start(update, context)
+        return
+
     if text == CANCEL_BUTTON:
         await cancel_action(update, context)
         return
@@ -4686,6 +4714,22 @@ async def handle_user_message(update: Update, context: ContextTypes.DEFAULT_TYPE
 
     if context.user_data.get("admin_exclusive_waiting"):
         await admin_exclusive_create(update, context, text)
+        return
+
+    if context.user_data.get("admin_shop_edit_waiting"):
+        await admin_shop_edit_apply(update, context, text)
+        return
+
+    if context.user_data.get("admin_random_daily_waiting"):
+        await admin_random_daily_set(update, context, text)
+        return
+
+    if context.user_data.get("admin_bundle_waiting"):
+        await admin_bundle_create(update, context, text)
+        return
+
+    if context.user_data.get("admin_event_waiting"):
+        await admin_event_set(update, context, text)
         return
 
     if context.user_data.get("promo_waiting"):
