@@ -21,7 +21,10 @@ const SHOP=Object.freeze({
   premium_gold_frame:{id:'premium_gold_frame',name:'👑 Золотая Premium-рамка',price:2200,category:'items',premiumOnly:true},
   premium_star:{id:'premium_star',name:'🌟 Premium-звезда',price:1600,category:'items',premiumOnly:true},
   autumn_frame:{id:'autumn_frame',name:'🍂 Осенняя рамка',price:1800,category:'items',availableUntil:'2026-10-31T23:59:59Z'},
-  pumpkin_badge:{id:'pumpkin_badge',name:'🎃 Тыквенный значок',price:1200,category:'items',availableUntil:'2026-11-02T23:59:59Z'}
+  pumpkin_badge:{id:'pumpkin_badge',name:'🎃 Тыквенный значок',price:1200,category:'items',availableUntil:'2026-11-02T23:59:59Z'},
+  bg_night:{id:'bg_night',name:'🌌 Фон профиля: Ночь',price:1400,category:'items',kind:'background',rarity:'rare'},
+  bg_sakura:{id:'bg_sakura',name:'🌸 Фон профиля: Sakura',price:2200,category:'items',kind:'background',rarity:'epic'},
+  bg_gold:{id:'bg_gold',name:'👑 Фон профиля: Gold',price:3500,category:'items',kind:'background',rarity:'legendary',premiumOnly:true}
 });
 const PROFILE_COLORS=Object.freeze({
   green:{id:'green',name:'Зелёный'},
@@ -76,6 +79,12 @@ function load(){
   if(!db.settings.dailySchedule||typeof db.settings.dailySchedule!=='object'||Array.isArray(db.settings.dailySchedule)){
     db.settings.dailySchedule={};
   }
+  if(!db.settings.randomDaily||typeof db.settings.randomDaily!=='object')db.settings.randomDaily={enabled:false,rewards:[]};
+  if(!db.settings.season||typeof db.settings.season!=='object')db.settings.season={id:'s1',name:'Сезон 1',endsAt:0};
+  if(!db.settings.event||typeof db.settings.event!=='object')db.settings.event={active:false};
+  if(!db.bundles||typeof db.bundles!=='object'||Array.isArray(db.bundles))db.bundles={};
+  if(!db.trades||typeof db.trades!=='object'||Array.isArray(db.trades))db.trades={};
+  if(!Array.isArray(db.adminLog))db.adminLog=[];
   for(const wallet of Object.values(db.wallets)){
     if(wallet&&typeof wallet==='object'&&(!wallet.purchases||typeof wallet.purchases!=='object'||Array.isArray(wallet.purchases))){
       wallet.purchases={};
@@ -268,8 +277,106 @@ function publicWallet(userId,wallet){
     collection:collectionCount(wallet),
     streak:Number(wallet.dailyStreak||0),
     favoriteDecoration:wallet.favoriteDecoration||null,
+    rank:rankOf(levelFromXp(wallet.xp)),
+    customStatus:wallet.customStatus||'',
+    selectedBackground:wallet.selectedBackground||null,
+    notifications:wallet.notifications!==false,
+    bankBalance:Number(wallet.bank?.balance||0),
     stats:{...wallet.stats}
   };
+}
+
+function rarityOf(item){
+  if(item?.rarity)return item.rarity;
+  if(item?.dailyOnly||item?.customExclusive)return 'exclusive';
+  if(item?.premiumOnly)return 'epic';
+  const p=Number(item?.price||0);
+  if(p>=3000)return 'legendary';
+  if(p>=1800)return 'epic';
+  if(p>=900)return 'rare';
+  return 'common';
+}
+function rankOf(level){
+  if(level>=25)return 'Легенда';
+  if(level>=15)return 'Элита';
+  if(level>=8)return 'VIP';
+  if(level>=4)return 'Активный';
+  return 'Новичок';
+}
+function addHistory(wallet,type,amount,meta={}){
+  if(!Array.isArray(wallet.balanceHistory))wallet.balanceHistory=[];
+  wallet.balanceHistory.push({type,amount:Number(amount||0),at:Date.now(),...meta});
+  if(wallet.balanceHistory.length>100)wallet.balanceHistory.splice(0,wallet.balanceHistory.length-100);
+}
+function logAdmin(action,data={}){
+  if(!Array.isArray(db.adminLog))db.adminLog=[];
+  db.adminLog.push({action,at:Date.now(),...data});
+  if(db.adminLog.length>200)db.adminLog.splice(0,db.adminLog.length-200);
+}
+function applyBankInterest(wallet){
+  if(!wallet.bank||typeof wallet.bank!=='object')wallet.bank={balance:0,lastInterestAt:Date.now()};
+  const now=Date.now(),last=Number(wallet.bank.lastInterestAt||now),days=Math.min(30,Math.floor((now-last)/86400000));
+  if(days>0&&Number(wallet.bank.balance||0)>0){
+    for(let i=0;i<days;i++)wallet.bank.balance=Math.floor(Number(wallet.bank.balance||0)*1.01);
+    wallet.bank.lastInterestAt=last+days*86400000;
+  }
+}
+function achievementList(wallet){
+  ensureStats(wallet);
+  const level=levelFromXp(wallet.xp),collection=collectionCount(wallet),streak=Number(wallet.dailyStreak||0);
+  const defs=[
+    ['first_message','Первое сообщение',wallet.stats.messages>=1],
+    ['messages_100','100 сообщений',wallet.stats.messages>=100],
+    ['buyer_10','10 покупок',wallet.stats.purchases>=10],
+    ['collector_5','Коллекционер 5',collection>=5],
+    ['streak_7','7 дней подряд',streak>=7],
+    ['level_10','10 уровень',level>=10],
+    ['cases_10','10 кейсов',wallet.stats.casesOpened>=10]
+  ];
+  return defs.map(([id,name,unlocked])=>({id,name,unlocked:Boolean(unlocked)}));
+}
+function questSnapshot(wallet){
+  const day=new Date().toISOString().slice(0,10);
+  ensureStats(wallet);
+  if(!wallet.questState||wallet.questState.day!==day){
+    wallet.questState={
+      day,
+      baseMessages:wallet.stats.messages,
+      baseSpent:wallet.stats.spent,
+      baseDaily:wallet.stats.dailyClaims,
+      claimed:{}
+    };
+  }
+  const q=wallet.questState;
+  return [
+    {id:'msg3',name:'Отправить 3 сообщения',progress:Math.max(0,wallet.stats.messages-q.baseMessages),target:3,reward:120},
+    {id:'daily1',name:'Забрать ежедневку',progress:Math.max(0,wallet.stats.dailyClaims-q.baseDaily),target:1,reward:150},
+    {id:'spend500',name:'Потратить 500 RC',progress:Math.max(0,wallet.stats.spent-q.baseSpent),target:500,reward:200}
+  ].map(x=>({...x,done:x.progress>=x.target,claimed:Boolean(q.claimed?.[x.id])}));
+}
+function seasonData(wallet){
+  const cfg=db.settings?.season||{id:'s1',name:'Сезон 1',endsAt:0};
+  const level=levelFromXp(wallet.xp);
+  const tiers=[
+    {tier:1,need:1,reward:100},
+    {tier:2,need:3,reward:250},
+    {tier:3,need:5,reward:500},
+    {tier:4,need:10,reward:1000},
+    {tier:5,need:20,reward:2500}
+  ].map(t=>({...t,unlocked:level>=t.need,claimed:Boolean(wallet.seasonClaims?.[cfg.id+':'+t.tier])}));
+  return {id:cfg.id,name:cfg.name,endsAt:Number(cfg.endsAt||0),level,tiers};
+}
+function rotationItems(){
+  const pool=allShopItems().filter(x=>x.category==='items'&&!x.dailyOnly&&!x.hidden&&isItemAvailable(x));
+  if(!pool.length)return[];
+  const d=Math.floor(Date.now()/86400000);
+  return pool.filter((_,i)=>((i+d)%Math.max(1,pool.length))<Math.min(4,pool.length)).slice(0,4).map(x=>x.id);
+}
+function activeEvent(){
+  const e=db.settings?.event||{active:false};
+  if(!e.active)return null;
+  if(e.endsAt&&Date.now()>Number(e.endsAt)){e.active=false;return null}
+  return e;
 }
 
 app.get('/health',(_q,res)=>{prune();res.json({ok:true,mode:'community-price-database',listings:db.listings.length,wallets:Object.keys(db.wallets).length,freshHours:FRESH/3600000,persistentFile:FILE})});
@@ -286,7 +393,9 @@ function getWallet(userId){
     db.wallets[userId]={
       balance:0,createdAt:Date.now(),purchases:{},decorations:{},nameColor:'white',
       xp:0,titleId:'newbie',likesBy:{},dailyStreak:0,lastDailyAt:0,
-      favoriteDecoration:null,stats:{}
+      favoriteDecoration:null,stats:{},friends:{},bank:{balance:0,lastInterestAt:Date.now()},
+      balanceHistory:[],customStatus:'',notifications:true,economyBlocked:false,
+      seasonClaims:{},questState:null,selectedBackground:null
     };
   }
   const wallet=db.wallets[userId];
@@ -302,6 +411,16 @@ function getWallet(userId){
   if(!wallet.titleId)wallet.titleId='newbie';
   if(!Number.isFinite(Number(wallet.xp)))wallet.xp=0;
   if(!Number.isFinite(Number(wallet.dailyStreak)))wallet.dailyStreak=0;
+  if(!wallet.friends||typeof wallet.friends!=='object'||Array.isArray(wallet.friends))wallet.friends={};
+  if(!wallet.bank||typeof wallet.bank!=='object')wallet.bank={balance:0,lastInterestAt:Date.now()};
+  if(!Number.isFinite(Number(wallet.bank.balance)))wallet.bank.balance=0;
+  if(!Array.isArray(wallet.balanceHistory))wallet.balanceHistory=[];
+  if(typeof wallet.customStatus!=='string')wallet.customStatus='';
+  if(typeof wallet.notifications!=='boolean')wallet.notifications=true;
+  if(typeof wallet.economyBlocked!=='boolean')wallet.economyBlocked=false;
+  if(!wallet.seasonClaims||typeof wallet.seasonClaims!=='object'||Array.isArray(wallet.seasonClaims))wallet.seasonClaims={};
+  if(!('questState' in wallet))wallet.questState=null;
+  if(!('selectedBackground' in wallet))wallet.selectedBackground=null;
   ensureStats(wallet);
   return wallet;
 }
@@ -335,9 +454,11 @@ app.post('/shop',(req,res)=>{
   later();
 
   const items=allShopItems()
-    .filter(item=>wallet.purchases?.[item.id] || (!item.dailyOnly && isItemAvailable(item)))
+    .filter(item=>wallet.purchases?.[item.id] || (!item.dailyOnly && !item.hidden && isItemAvailable(item)))
     .map(item=>({
       ...item,
+      rarity:rarityOf(item),
+      rotating:rotationItems().includes(item.id),
       owned:Boolean(wallet.purchases?.[item.id]),
       locked:Boolean(item.premiumOnly&&!wallet.purchases?.premium)
     }));
@@ -346,7 +467,10 @@ app.post('/shop',(req,res)=>{
     ok:true,
     balance:Number(wallet.balance||0),
     currency:'Random Coins',
-    items
+    items,
+    rotation:rotationItems(),
+    bundles:Object.values(db.bundles||{}),
+    event:activeEvent()
   });
 });
 
@@ -386,6 +510,7 @@ app.post('/buy',(req,res)=>{
   }
 
   wallet.balance=balance-item.price;
+  addHistory(wallet,'purchase',-item.price,{itemId:item.id});
   wallet.stats.spent+=item.price;
   wallet.stats.purchases+=1;
   addXp(wallet,25);
@@ -438,7 +563,10 @@ app.post('/profile',(req,res)=>{
     availableColors:Object.values(PROFILE_COLORS),
     ...publicWallet(userId,wallet),
     unlockedTitles:unlockedTitles(wallet),
-    favoriteDecoration:wallet.favoriteDecoration||null
+    favoriteDecoration:wallet.favoriteDecoration||null,
+    achievements:achievementList(wallet),
+    friends:Object.keys(wallet.friends||{}).length,
+    event:activeEvent()
   });
 });
 
@@ -498,6 +626,7 @@ app.post('/activity',(req,res)=>{
   const wallet=getWallet(userId);
   touchIdentity(wallet,req.body);
   const kind=String(req.body?.kind||'message');
+  questSnapshot(wallet);
   if(kind==='message'){wallet.stats.messages+=1;addXp(wallet,5)}
   else addXp(wallet,1);
   later();
@@ -530,9 +659,24 @@ app.post('/daily',(req,res)=>{
   const milestone=cfg.streakBonus===false?0:({3:150,7:500,14:1200,30:3000}[wallet.dailyStreak]||0);
   const reward=baseCoins+milestone;
 
-  if(reward>0){
-    wallet.balance=Number(wallet.balance||0)+reward;
-    wallet.stats.received+=reward;
+  let finalReward=reward;
+  const ev=activeEvent();
+  if(ev?.dailyBonus)finalReward+=Math.max(0,Math.round(Number(ev.dailyBonus||0)));
+  const randomCfg=db.settings?.randomDaily||{enabled:false,rewards:[]};
+  let randomReward=null;
+  if(randomCfg.enabled&&Array.isArray(randomCfg.rewards)&&randomCfg.rewards.length){
+    const roll=Math.random()*100;
+    let acc=0;
+    for(const r of randomCfg.rewards){
+      acc+=Math.max(0,Number(r.chance||0));
+      if(roll<=acc){randomReward=r;break}
+    }
+    if(randomReward?.coins)finalReward+=Math.max(0,Math.round(Number(randomReward.coins||0)));
+  }
+  if(finalReward>0){
+    wallet.balance=Number(wallet.balance||0)+finalReward;
+    wallet.stats.received+=finalReward;
+    addHistory(wallet,'daily',finalReward,{streak:wallet.dailyStreak});
   }
 
   let rewardItem=null;
@@ -556,10 +700,11 @@ app.post('/daily',(req,res)=>{
 
   res.json({
     ok:true,
-    reward,
+    reward:finalReward,
     baseCoins,
     milestone,
     rewardItem,
+    randomReward,
     itemAlreadyOwned,
     streak:wallet.dailyStreak,
     balance:wallet.balance,
@@ -575,8 +720,11 @@ app.post('/transfer',(req,res)=>{
   if(fromId===toId)return res.status(400).json({ok:false,code:'self_transfer',error:'self transfer'});
   if(!Number.isFinite(amount)||amount<1||amount>1000000000)return res.status(400).json({ok:false,error:'invalid amount'});
   const from=getWallet(fromId),to=getWallet(toId);
+  if(from.economyBlocked||to.economyBlocked)return res.status(403).json({ok:false,code:'economy_blocked'});
   if(Number(from.balance||0)<amount)return res.status(400).json({ok:false,code:'insufficient_funds',missing:amount-Number(from.balance||0)});
   from.balance-=amount; to.balance=Number(to.balance||0)+amount;
+  addHistory(from,'transfer_out',-amount,{toUserId:toId});
+  addHistory(to,'transfer_in',amount,{fromUserId:fromId});
   from.stats.transferred+=amount; to.stats.received+=amount;
   addXp(from,5);
   save();
@@ -791,11 +939,12 @@ app.post('/gift/buy',(req,res)=>{
   const item=getShopItem(itemId);if(!item||item.category!=='items')return res.status(400).json({ok:false,error:'invalid item'});
   if(item.dailyOnly)return res.status(403).json({ok:false,code:'daily_only'});
   const from=getWallet(fromId),to=getWallet(toId);
+  if(from.economyBlocked||to.economyBlocked)return res.status(403).json({ok:false,code:'economy_blocked'});
   if(!isItemAvailable(item))return res.status(403).json({ok:false,code:'expired'});
   if(item.premiumOnly&&!to.purchases?.premium)return res.status(403).json({ok:false,code:'recipient_premium_required'});
   if(to.purchases?.[itemId])return res.status(409).json({ok:false,code:'already_owned'});
   if(Number(from.balance||0)<item.price)return res.status(400).json({ok:false,code:'insufficient_funds',missing:item.price-Number(from.balance||0)});
-  from.balance-=item.price;from.stats.spent+=item.price;from.stats.giftsSent+=1;to.stats.giftsReceived+=1;
+  from.balance-=item.price;addHistory(from,'gift',-item.price,{toUserId:toId,itemId});from.stats.spent+=item.price;from.stats.giftsSent+=1;to.stats.giftsReceived+=1;
   to.purchases[itemId]={name:item.name,price:0,purchasedAt:Date.now(),source:'gift',fromUserId:fromId};to.decorations[itemId]=true;
   addXp(from,15);save();
   res.json({ok:true,item,balance:from.balance});
@@ -818,6 +967,8 @@ app.post('/admin/coins',(req,res)=>{
   const wallet=getWallet(userId);
   const before=Number(wallet.balance||0);
   wallet.balance=before+amount;
+  addHistory(wallet,'admin_add',amount);
+  logAdmin('coins_add',{userId,amount});
   save();
 
   res.json({
@@ -839,10 +990,162 @@ app.post('/admin/coins/remove',(req,res)=>{
   const before=Math.max(0,Number(wallet.balance||0));
   const removed=Math.min(before,amount);
   wallet.balance=before-removed;
+  addHistory(wallet,'admin_remove',-removed);
+  logAdmin('coins_remove',{userId,amount:removed});
   save();
   res.json({ok:true,userId,requested:amount,removed,before,balance:wallet.balance});
 });
 
+
+// ---- RNMD social / progression / economy extensions ----
+app.post('/friends/list',(req,res)=>{
+  if(!shopAuthorized(req))return res.status(401).json({ok:false,error:'unauthorized'});
+  const userId=String(req.body?.userId??'').trim(); if(!/^-?\d{1,20}$/.test(userId))return res.status(400).json({ok:false,error:'invalid user id'});
+  const w=getWallet(userId);
+  const friends=Object.keys(w.friends||{}).map(id=>({userId:id,...publicWallet(id,getWallet(id))}));
+  res.json({ok:true,friends});
+});
+app.post('/friends/toggle',(req,res)=>{
+  if(!shopAuthorized(req))return res.status(401).json({ok:false,error:'unauthorized'});
+  const userId=String(req.body?.userId??'').trim(),targetId=String(req.body?.targetId??'').trim();
+  if(!/^-?\d{1,20}$/.test(userId)||!/^-?\d{1,20}$/.test(targetId)||userId===targetId)return res.status(400).json({ok:false,error:'invalid user'});
+  const w=getWallet(userId); const enabled=!w.friends?.[targetId];
+  if(enabled)w.friends[targetId]=Date.now();else delete w.friends[targetId];
+  save();res.json({ok:true,enabled});
+});
+app.post('/profile/status',(req,res)=>{
+  if(!shopAuthorized(req))return res.status(401).json({ok:false,error:'unauthorized'});
+  const userId=String(req.body?.userId??'').trim(),status=strip(req.body?.status).slice(0,80);
+  if(!/^-?\d{1,20}$/.test(userId))return res.status(400).json({ok:false,error:'invalid user'});
+  const w=getWallet(userId);w.customStatus=status;save();res.json({ok:true,status});
+});
+app.post('/profile/background',(req,res)=>{
+  if(!shopAuthorized(req))return res.status(401).json({ok:false,error:'unauthorized'});
+  const userId=String(req.body?.userId??'').trim(),itemId=String(req.body?.itemId||'').trim();
+  const w=getWallet(userId),item=getShopItem(itemId);
+  if(!item||item.kind!=='background'||!w.purchases?.[itemId])return res.status(403).json({ok:false,error:'background not owned'});
+  w.selectedBackground=itemId;save();res.json({ok:true,item});
+});
+app.post('/achievements',(req,res)=>{
+  if(!shopAuthorized(req))return res.status(401).json({ok:false,error:'unauthorized'});
+  const userId=String(req.body?.userId??'').trim(); const w=getWallet(userId);res.json({ok:true,achievements:achievementList(w)});
+});
+app.post('/quests',(req,res)=>{
+  if(!shopAuthorized(req))return res.status(401).json({ok:false,error:'unauthorized'});
+  const userId=String(req.body?.userId??'').trim(); const w=getWallet(userId);const quests=questSnapshot(w);later();res.json({ok:true,quests});
+});
+app.post('/quests/claim',(req,res)=>{
+  if(!shopAuthorized(req))return res.status(401).json({ok:false,error:'unauthorized'});
+  const userId=String(req.body?.userId??'').trim(),questId=String(req.body?.questId||'').trim();const w=getWallet(userId);
+  const q=questSnapshot(w).find(x=>x.id===questId);if(!q)return res.status(404).json({ok:false,error:'quest not found'});
+  if(!q.done)return res.status(400).json({ok:false,code:'not_done'});if(q.claimed)return res.status(409).json({ok:false,code:'already_claimed'});
+  w.questState.claimed[questId]=true;w.balance=Number(w.balance||0)+q.reward;w.stats.received+=q.reward;addHistory(w,'quest',q.reward,{questId});save();
+  res.json({ok:true,reward:q.reward,balance:w.balance});
+});
+app.post('/bank',(req,res)=>{
+  if(!shopAuthorized(req))return res.status(401).json({ok:false,error:'unauthorized'});
+  const userId=String(req.body?.userId??'').trim();const w=getWallet(userId);applyBankInterest(w);save();res.json({ok:true,balance:w.balance,bankBalance:w.bank.balance,rateDaily:1});
+});
+app.post('/bank/deposit',(req,res)=>{
+  if(!shopAuthorized(req))return res.status(401).json({ok:false,error:'unauthorized'});
+  const userId=String(req.body?.userId??'').trim(),amount=Math.round(Number(req.body?.amount||0));const w=getWallet(userId);applyBankInterest(w);
+  if(amount<1||amount>Number(w.balance||0))return res.status(400).json({ok:false,code:'invalid_amount'});
+  w.balance-=amount;w.bank.balance=Number(w.bank.balance||0)+amount;addHistory(w,'bank_deposit',-amount);save();res.json({ok:true,balance:w.balance,bankBalance:w.bank.balance});
+});
+app.post('/bank/withdraw',(req,res)=>{
+  if(!shopAuthorized(req))return res.status(401).json({ok:false,error:'unauthorized'});
+  const userId=String(req.body?.userId??'').trim(),amount=Math.round(Number(req.body?.amount||0));const w=getWallet(userId);applyBankInterest(w);
+  if(amount<1||amount>Number(w.bank.balance||0))return res.status(400).json({ok:false,code:'invalid_amount'});
+  w.bank.balance-=amount;w.balance=Number(w.balance||0)+amount;addHistory(w,'bank_withdraw',amount);save();res.json({ok:true,balance:w.balance,bankBalance:w.bank.balance});
+});
+app.post('/season',(req,res)=>{
+  if(!shopAuthorized(req))return res.status(401).json({ok:false,error:'unauthorized'});
+  const userId=String(req.body?.userId??'').trim();const w=getWallet(userId);res.json({ok:true,season:seasonData(w)});
+});
+app.post('/season/claim',(req,res)=>{
+  if(!shopAuthorized(req))return res.status(401).json({ok:false,error:'unauthorized'});
+  const userId=String(req.body?.userId??'').trim(),tier=Math.round(Number(req.body?.tier||0));const w=getWallet(userId);const s=seasonData(w),t=s.tiers.find(x=>x.tier===tier);
+  if(!t)return res.status(404).json({ok:false,error:'tier'});if(!t.unlocked)return res.status(403).json({ok:false,code:'locked'});if(t.claimed)return res.status(409).json({ok:false,code:'claimed'});
+  w.seasonClaims[s.id+':'+tier]=Date.now();w.balance=Number(w.balance||0)+t.reward;addHistory(w,'season',t.reward,{tier});save();res.json({ok:true,reward:t.reward,balance:w.balance});
+});
+app.post('/calendar',(req,res)=>{
+  if(!shopAuthorized(req))return res.status(401).json({ok:false,error:'unauthorized'});
+  const schedule=db.settings?.dailySchedule||{};const days=Object.entries(schedule).map(([day,x])=>({day:Number(day),coins:Number(x.coins||0),itemId:x.itemId||null,surprise:Boolean(x.surprise),item:x.surprise?null:(x.itemId?getShopItem(x.itemId):null)})).sort((a,b)=>a.day-b.day);
+  res.json({ok:true,days});
+});
+app.post('/balance/history',(req,res)=>{
+  if(!shopAuthorized(req))return res.status(401).json({ok:false,error:'unauthorized'});
+  const userId=String(req.body?.userId??'').trim();const w=getWallet(userId);res.json({ok:true,history:(w.balanceHistory||[]).slice(-30).reverse()});
+});
+app.post('/notifications',(req,res)=>{
+  if(!shopAuthorized(req))return res.status(401).json({ok:false,error:'unauthorized'});
+  const userId=String(req.body?.userId??'').trim();const w=getWallet(userId);
+  if(typeof req.body?.enabled==='boolean')w.notifications=req.body.enabled;
+  save();res.json({ok:true,enabled:w.notifications!==false});
+});
+app.post('/sell',(req,res)=>{
+  if(!shopAuthorized(req))return res.status(401).json({ok:false,error:'unauthorized'});
+  const userId=String(req.body?.userId??'').trim(),itemId=String(req.body?.itemId||'').trim();const w=getWallet(userId),item=getShopItem(itemId),purchase=w.purchases?.[itemId];
+  if(!item||!purchase||item.dailyOnly||Number(purchase.price||0)<=0)return res.status(403).json({ok:false,code:'not_sellable'});
+  const refund=Math.max(1,Math.floor(Number(purchase.price||item.price||0)*0.5));delete w.purchases[itemId];delete w.decorations[itemId];if(w.favoriteDecoration===itemId)w.favoriteDecoration=null;if(w.selectedBackground===itemId)w.selectedBackground=null;
+  w.balance=Number(w.balance||0)+refund;addHistory(w,'sell',refund,{itemId});save();res.json({ok:true,refund,balance:w.balance});
+});
+app.post('/trade/create',(req,res)=>{
+  if(!shopAuthorized(req))return res.status(401).json({ok:false,error:'unauthorized'});
+  const fromId=String(req.body?.fromUserId??'').trim(),toId=String(req.body?.toUserId??'').trim(),giveItem=String(req.body?.giveItem||'').trim(),wantItem=String(req.body?.wantItem||'').trim();
+  const a=getWallet(fromId),b=getWallet(toId);if(fromId===toId||!a.purchases?.[giveItem]||!b.purchases?.[wantItem])return res.status(400).json({ok:false,error:'invalid trade'});
+  if(getShopItem(giveItem)?.dailyOnly||getShopItem(wantItem)?.dailyOnly)return res.status(403).json({ok:false,code:'daily_only'});
+  const id='tr_'+Date.now().toString(36)+Math.floor(Math.random()*1296).toString(36);db.trades[id]={id,fromId,toId,giveItem,wantItem,status:'pending',createdAt:Date.now()};save();res.json({ok:true,trade:db.trades[id]});
+});
+app.post('/trade/respond',(req,res)=>{
+  if(!shopAuthorized(req))return res.status(401).json({ok:false,error:'unauthorized'});
+  const tradeId=String(req.body?.tradeId||''),userId=String(req.body?.userId??''),accept=Boolean(req.body?.accept),t=db.trades?.[tradeId];
+  if(!t||t.status!=='pending'||t.toId!==userId)return res.status(404).json({ok:false,error:'trade'});
+  if(!accept){t.status='declined';save();return res.json({ok:true,status:t.status})}
+  const a=getWallet(t.fromId),b=getWallet(t.toId);if(!a.purchases?.[t.giveItem]||!b.purchases?.[t.wantItem])return res.status(409).json({ok:false,code:'changed'});
+  const pa=a.purchases[t.giveItem],pb=b.purchases[t.wantItem];delete a.purchases[t.giveItem];delete b.purchases[t.wantItem];delete a.decorations[t.giveItem];delete b.decorations[t.wantItem];
+  a.purchases[t.wantItem]={...pb,source:'trade'};b.purchases[t.giveItem]={...pa,source:'trade'};a.decorations[t.wantItem]=true;b.decorations[t.giveItem]=true;t.status='accepted';save();res.json({ok:true,status:t.status});
+});
+app.post('/bundle/buy',(req,res)=>{
+  if(!shopAuthorized(req))return res.status(401).json({ok:false,error:'unauthorized'});
+  const userId=String(req.body?.userId??'').trim(),bundleId=String(req.body?.bundleId||'').trim(),w=getWallet(userId),bundle=db.bundles?.[bundleId];
+  if(!bundle)return res.status(404).json({ok:false,error:'bundle'});if(Number(w.balance||0)<Number(bundle.price||0))return res.status(400).json({ok:false,code:'insufficient_funds'});
+  w.balance-=bundle.price;addHistory(w,'bundle',-bundle.price,{bundleId});const granted=[];
+  for(const id of bundle.items||[]){const item=getShopItem(id);if(item&&!w.purchases?.[id]){w.purchases[id]={name:item.name,price:0,purchasedAt:Date.now(),source:'bundle'};w.decorations[id]=true;granted.push(item)}}
+  save();res.json({ok:true,bundle,granted,balance:w.balance});
+});
+app.post('/admin/stats',(req,res)=>{
+  if(!shopAuthorized(req))return res.status(401).json({ok:false,error:'unauthorized'});
+  const wallets=Object.values(db.wallets);res.json({ok:true,users:wallets.length,totalCoins:wallets.reduce((s,w)=>s+Number(w.balance||0),0),bankCoins:wallets.reduce((s,w)=>s+Number(w.bank?.balance||0),0),purchases:wallets.reduce((s,w)=>s+Object.keys(w.purchases||{}).length,0),promos:Object.keys(db.promocodes||{}).length,customItems:Object.keys(db.customShop||{}).length,activeEvent:activeEvent()});
+});
+app.post('/admin/log',(req,res)=>{if(!shopAuthorized(req))return res.status(401).json({ok:false,error:'unauthorized'});res.json({ok:true,rows:(db.adminLog||[]).slice(-50).reverse()})});
+app.post('/admin/economy-block',(req,res)=>{
+  if(!shopAuthorized(req))return res.status(401).json({ok:false,error:'unauthorized'});
+  const userId=String(req.body?.userId??'').trim(),w=getWallet(userId);w.economyBlocked=!w.economyBlocked;logAdmin('economy_block',{userId,enabled:w.economyBlocked});save();res.json({ok:true,enabled:w.economyBlocked});
+});
+app.post('/admin/random-daily',(req,res)=>{
+  if(!shopAuthorized(req))return res.status(401).json({ok:false,error:'unauthorized'});
+  const enabled=Boolean(req.body?.enabled),rewards=Array.isArray(req.body?.rewards)?req.body.rewards.slice(0,20):[];db.settings.randomDaily={enabled,rewards};logAdmin('random_daily',{enabled,count:rewards.length});save();res.json({ok:true,randomDaily:db.settings.randomDaily});
+});
+app.post('/admin/bundle',(req,res)=>{
+  if(!shopAuthorized(req))return res.status(401).json({ok:false,error:'unauthorized'});
+  const name=strip(req.body?.name).slice(0,60),price=Math.max(1,Math.round(Number(req.body?.price||0))),items=Array.isArray(req.body?.items)?req.body.items.filter(id=>getShopItem(id)).slice(0,10):[];
+  if(!name||!items.length)return res.status(400).json({ok:false,error:'invalid'});const id='bd_'+Date.now().toString(36);db.bundles[id]={id,name,price,items};logAdmin('bundle_create',{id,name});save();res.json({ok:true,bundle:db.bundles[id]});
+});
+app.post('/admin/shop/edit',(req,res)=>{
+  if(!shopAuthorized(req))return res.status(401).json({ok:false,error:'unauthorized'});
+  const itemId=String(req.body?.itemId||'').trim(),item=db.customShop?.[itemId];if(!item)return res.status(404).json({ok:false,error:'custom item only'});
+  if(req.body?.delete===true){delete db.customShop[itemId];logAdmin('shop_delete',{itemId});save();return res.json({ok:true,deleted:true})}
+  if(Number.isFinite(Number(req.body?.price)))item.price=Math.max(0,Math.round(Number(req.body.price)));
+  if(typeof req.body?.hidden==='boolean')item.hidden=req.body.hidden;
+  if(req.body?.rarity)item.rarity=String(req.body.rarity).slice(0,20);
+  logAdmin('shop_edit',{itemId});save();res.json({ok:true,item});
+});
+app.post('/admin/event',(req,res)=>{
+  if(!shopAuthorized(req))return res.status(401).json({ok:false,error:'unauthorized'});
+  const active=Boolean(req.body?.active),name=strip(req.body?.name).slice(0,60),days=Math.max(0,Math.round(Number(req.body?.days||0))),dailyBonus=Math.max(0,Math.round(Number(req.body?.dailyBonus||0)));
+  db.settings.event={active,name,dailyBonus,endsAt:active&&days?Date.now()+days*86400000:0};logAdmin('event',{active,name,days,dailyBonus});save();res.json({ok:true,event:db.settings.event});
+});
 app.post('/submit',(req,res)=>{
   const collector=String(req.body?.collector||'').trim().slice(0,80),
         auction=an(req.body?.auction),
