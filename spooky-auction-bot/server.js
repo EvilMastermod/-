@@ -73,6 +73,9 @@ function load(){
   if(!db.settings.daily||typeof db.settings.daily!=='object'){
     db.settings.daily={coins:250,itemId:null,streakBonus:true};
   }
+  if(!db.settings.dailySchedule||typeof db.settings.dailySchedule!=='object'||Array.isArray(db.settings.dailySchedule)){
+    db.settings.dailySchedule={};
+  }
   for(const wallet of Object.values(db.wallets)){
     if(wallet&&typeof wallet==='object'&&(!wallet.purchases||typeof wallet.purchases!=='object'||Array.isArray(wallet.purchases))){
       wallet.purchases={};
@@ -517,7 +520,12 @@ app.post('/daily',(req,res)=>{
   else wallet.dailyStreak=1;
   wallet.lastDailyAt=now;
 
-  const cfg=db.settings?.daily||{coins:250,itemId:null,streakBonus:true};
+  const schedule=db.settings?.dailySchedule||{};
+  const hasSchedule=Object.keys(schedule).length>0;
+  const cfg=schedule[String(wallet.dailyStreak)]
+    || (hasSchedule
+      ? {coins:0,itemId:null,streakBonus:false}
+      : (db.settings?.daily||{coins:250,itemId:null,streakBonus:true}));
   const baseCoins=Math.max(0,Math.round(Number(cfg.coins||0)));
   const milestone=cfg.streakBonus===false?0:({3:150,7:500,14:1200,30:3000}[wallet.dailyStreak]||0);
   const reward=baseCoins+milestone;
@@ -646,19 +654,37 @@ app.post('/admin/daily',(req,res)=>{
   const rawItem=String(req.body?.itemId||'').trim().toLowerCase();
   const itemId=rawItem?rawItem:null;
   const streakBonus=req.body?.streakBonus!==false;
+  const day=Math.round(Number(req.body?.day||1));
 
+  if(!Number.isFinite(day)||day<1||day>3650)return res.status(400).json({ok:false,error:'invalid day'});
   if(itemId&&!getShopItem(itemId))return res.status(400).json({ok:false,error:'invalid item'});
   if(coins===0&&!itemId)return res.status(400).json({ok:false,error:'reward required'});
 
-  db.settings.daily={coins,itemId,streakBonus};
+  if(!db.settings.dailySchedule||typeof db.settings.dailySchedule!=='object'||Array.isArray(db.settings.dailySchedule)){
+    db.settings.dailySchedule={};
+  }
+
+  const daily={coins,itemId,streakBonus};
+  db.settings.dailySchedule[String(day)]=daily;
   save();
-  res.json({ok:true,daily:db.settings.daily,item:itemId?getShopItem(itemId):null});
+  res.json({ok:true,day,daily,item:itemId?getShopItem(itemId):null});
 });
 
 app.post('/admin/daily/get',(req,res)=>{
   if(!shopAuthorized(req))return res.status(401).json({ok:false,error:'unauthorized'});
   const daily=db.settings?.daily||{coins:250,itemId:null,streakBonus:true};
-  res.json({ok:true,daily,item:daily.itemId?getShopItem(daily.itemId):null});
+  const scheduleObj=db.settings?.dailySchedule||{};
+  const schedule=Object.entries(scheduleObj)
+    .map(([day,cfg])=>({
+      day:Number(day),
+      coins:Number(cfg?.coins||0),
+      itemId:cfg?.itemId||null,
+      streakBonus:cfg?.streakBonus!==false,
+      item:cfg?.itemId?getShopItem(cfg.itemId):null
+    }))
+    .filter(x=>Number.isFinite(x.day)&&x.day>=1)
+    .sort((a,b)=>a.day-b.day);
+  res.json({ok:true,daily,item:daily.itemId?getShopItem(daily.itemId):null,schedule});
 });
 
 app.post('/admin/promos',(req,res)=>{
