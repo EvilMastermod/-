@@ -1,3 +1,4 @@
+import asyncio
 import logging
 import os
 import re
@@ -17,6 +18,7 @@ from telegram.constants import ChatMemberStatus, ParseMode
 from telegram.ext import (
     Application,
     BusinessConnectionHandler,
+    BusinessMessagesDeletedHandler,
     CallbackQueryHandler,
     ChatMemberHandler,
     CommandHandler,
@@ -101,6 +103,9 @@ def init_db():
                 user_chat_id INTEGER NOT NULL,
                 is_enabled INTEGER NOT NULL DEFAULT 1,
                 can_reply INTEGER NOT NULL DEFAULT 0,
+                can_read INTEGER NOT NULL DEFAULT 0,
+                can_delete_sent INTEGER NOT NULL DEFAULT 0,
+                can_delete_all INTEGER NOT NULL DEFAULT 0,
                 updated_at INTEGER NOT NULL
             );
 
@@ -127,6 +132,27 @@ def init_db():
                 first_seen_at INTEGER NOT NULL,
                 PRIMARY KEY(owner_user_id, chat_id)
             );
+
+            CREATE TABLE IF NOT EXISTS business_muted_chats(
+                owner_user_id INTEGER NOT NULL,
+                chat_id INTEGER NOT NULL,
+                muted_at INTEGER NOT NULL,
+                PRIMARY KEY(owner_user_id, chat_id)
+            );
+
+            CREATE TABLE IF NOT EXISTS business_message_archive(
+                connection_id TEXT NOT NULL,
+                owner_user_id INTEGER NOT NULL,
+                chat_id INTEGER NOT NULL,
+                message_id INTEGER NOT NULL,
+                sender_user_id INTEGER,
+                sender_name TEXT,
+                text_content TEXT,
+                media_type TEXT,
+                file_id TEXT,
+                created_at INTEGER NOT NULL,
+                PRIMARY KEY(connection_id, chat_id, message_id)
+            );
             """
         )
         for statement in [
@@ -135,6 +161,9 @@ def init_db():
             "ALTER TABLE chats ADD COLUMN flood_count INTEGER NOT NULL DEFAULT 6",
             "ALTER TABLE chats ADD COLUMN flood_window INTEGER NOT NULL DEFAULT 10",
             "ALTER TABLE chats ADD COLUMN flood_mute INTEGER NOT NULL DEFAULT 60",
+            "ALTER TABLE business_connections ADD COLUMN can_read INTEGER NOT NULL DEFAULT 0",
+            "ALTER TABLE business_connections ADD COLUMN can_delete_sent INTEGER NOT NULL DEFAULT 0",
+            "ALTER TABLE business_connections ADD COLUMN can_delete_all INTEGER NOT NULL DEFAULT 0",
         ]:
             try:
                 c.execute(statement)
@@ -271,6 +300,139 @@ def business_panel(owner_user_id: int):
     )
 
 
+def business_chat_is_muted(owner_user_id: int, chat_id: int) -> bool:
+    with db() as c:
+        return c.execute(
+            "SELECT 1 FROM business_muted_chats WHERE owner_user_id=? AND chat_id=?",
+            (owner_user_id, chat_id),
+        ).fetchone() is not None
+
+
+def set_business_chat_muted(owner_user_id: int, chat_id: int, muted: bool):
+    with db() as c:
+        if muted:
+            c.execute(
+                """
+                INSERT INTO business_muted_chats(owner_user_id,chat_id,muted_at)
+                VALUES(?,?,?)
+                ON CONFLICT(owner_user_id,chat_id) DO UPDATE SET muted_at=excluded.muted_at
+                """,
+                (owner_user_id, chat_id, int(time_module.time())),
+            )
+        else:
+            c.execute(
+                "DELETE FROM business_muted_chats WHERE owner_user_id=? AND chat_id=?",
+                (owner_user_id, chat_id),
+            )
+
+
+def business_message_payload(msg):
+    text_content = (msg.text or msg.caption or "").strip()
+    media_type = None
+    file_id = None
+
+    if msg.photo:
+        media_type = "photo"
+        file_id = msg.photo[-1].file_id
+    elif msg.video:
+        media_type = "video"
+        file_id = msg.video.file_id
+    elif msg.document:
+        media_type = "document"
+        file_id = msg.document.file_id
+        if not text_content and msg.document.file_name:
+            text_content = msg.document.file_name
+    elif msg.voice:
+        media_type = "voice"
+        file_id = msg.voice.file_id
+    elif msg.audio:
+        media_type = "audio"
+        file_id = msg.audio.file_id
+    elif msg.animation:
+        media_type = "animation"
+        file_id = msg.animation.file_id
+    elif msg.sticker:
+        media_type = "sticker"
+        file_id = msg.sticker.file_id
+        if not text_content:
+            text_content = msg.sticker.emoji or "стикер"
+    elif msg.video_note:
+        media_type = "video_note"
+        file_id = msg.video_note.file_id
+
+    return text_content, media_type, file_id
+
+
+def archive_business_message(connection_id: str, owner_user_id: int, msg):
+    text_content, media_type, file_id = business_message_payload(msg)
+    sender = msg.from_user
+    with db() as c:
+        c.execute(
+            """
+            INSERT OR REPLACE INTO business_message_archive(
+                connection_id,owner_user_id,chat_id,message_id,
+                sender_user_id,sender_name,text_content,media_type,file_id,created_at
+            ) VALUES(?,?,?,?,?,?,?,?,?,?)
+            """,
+            (
+                connection_id,
+                owner_user_id,
+                msg.chat_id,
+                msg.message_id,
+                sender.id if sender else None,
+                sender.full_name if sender else None,
+                text_content,
+                media_type,
+                file_id,
+                int(time_module.time()),
+            ),
+        )
+
+
+async def send_deleted_archive(context: ContextTypes.DEFAULT_TYPE, owner_chat_id: int, row):
+    sender = row["sender_name"] or (
+        f"ID {row['sender_user_id']}" if row["sender_user_id"] else "Неизвестный"
+    )
+    body = row["text_content"] or ""
+    header = (
+        "🗑 Удалено сообщение\n"
+        f"👤 {sender}\n"
+        f"💬 Chat ID: {row['chat_id']}\n"
+        f"🆔 Message ID: {row['message_id']}\n"
+    )
+
+    media_type = row["media_type"]
+    file_id = row["file_id"]
+    caption = (header + (f"\n📝 {body}" if body else ""))[:1024]
+
+    try:
+        if media_type == "photo" and file_id:
+            await context.bot.send_photo(owner_chat_id, file_id, caption=caption)
+        elif media_type == "video" and file_id:
+            await context.bot.send_video(owner_chat_id, file_id, caption=caption)
+        elif media_type == "document" and file_id:
+            await context.bot.send_document(owner_chat_id, file_id, caption=caption)
+        elif media_type == "voice" and file_id:
+            await context.bot.send_voice(owner_chat_id, file_id, caption=caption)
+        elif media_type == "audio" and file_id:
+            await context.bot.send_audio(owner_chat_id, file_id, caption=caption)
+        elif media_type == "animation" and file_id:
+            await context.bot.send_animation(owner_chat_id, file_id, caption=caption)
+        elif media_type == "sticker" and file_id:
+            await context.bot.send_message(owner_chat_id, header + (f"\n📝 {body}" if body else ""))
+            await context.bot.send_sticker(owner_chat_id, file_id)
+        elif media_type == "video_note" and file_id:
+            await context.bot.send_message(owner_chat_id, header + (f"\n📝 {body}" if body else ""))
+            await context.bot.send_video_note(owner_chat_id, file_id)
+        else:
+            await context.bot.send_message(
+                owner_chat_id,
+                (header + (f"\n📝 {body}" if body else "\n📝 [без текста]"))[:4000],
+            )
+    except Exception:
+        log.exception("Failed to send deleted message archive")
+
+
 async def is_admin(update: Update, user_id: int | None = None) -> bool:
     chat = update.effective_chat
     if not chat or chat.type == "private":
@@ -363,7 +525,13 @@ async def business_menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "💼 Автоматизация личных чатов\n\n"
         f"Telegram Business: {status}\n\n"
         "Чаты, к которым бот получает доступ, выбираются прямо в Telegram "
-        "на экране «Автоматизация чатов».",
+        "на экране «Автоматизация чатов».\n\n"
+        "Команды прямо в личном чате:\n"
+        "• .мут — удалять новые сообщения собеседника\n"
+        "• .размут — снять мут\n"
+        "• .spam 3 текст — повторить текст (максимум 5 раз)\n\n"
+        "Удалённые собеседником сообщения бот автоматически сохраняет "
+        "и присылает тебе в личный чат с ботом.",
         reply_markup=business_panel(owner_id),
     )
 
@@ -448,17 +616,24 @@ async def business_connection_update(update: Update, context: ContextTypes.DEFAU
     if not bc:
         return
     can_reply = int(bool(getattr(bc.rights, "can_reply", False))) if bc.rights else 0
+    can_read = int(bool(getattr(bc.rights, "can_read_messages", False))) if bc.rights else 0
+    can_delete_sent = int(bool(getattr(bc.rights, "can_delete_sent_messages", False))) if bc.rights else 0
+    can_delete_all = int(bool(getattr(bc.rights, "can_delete_all_messages", False))) if bc.rights else 0
     with db() as c:
         c.execute(
             """
             INSERT INTO business_connections(
-                connection_id,owner_user_id,user_chat_id,is_enabled,can_reply,updated_at
-            ) VALUES(?,?,?,?,?,?)
+                connection_id,owner_user_id,user_chat_id,is_enabled,
+                can_reply,can_read,can_delete_sent,can_delete_all,updated_at
+            ) VALUES(?,?,?,?,?,?,?,?,?)
             ON CONFLICT(connection_id) DO UPDATE SET
                 owner_user_id=excluded.owner_user_id,
                 user_chat_id=excluded.user_chat_id,
                 is_enabled=excluded.is_enabled,
                 can_reply=excluded.can_reply,
+                can_read=excluded.can_read,
+                can_delete_sent=excluded.can_delete_sent,
+                can_delete_all=excluded.can_delete_all,
                 updated_at=excluded.updated_at
             """,
             (
@@ -467,6 +642,9 @@ async def business_connection_update(update: Update, context: ContextTypes.DEFAU
                 bc.user_chat_id,
                 int(bool(bc.is_enabled)),
                 can_reply,
+                can_read,
+                can_delete_sent,
+                can_delete_all,
                 int(time_module.time()),
             ),
         )
@@ -494,11 +672,96 @@ async def business_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return
 
     owner_id = int(connection["owner_user_id"])
+    text = (msg.text or msg.caption or "").strip()
 
-    # Do not answer messages sent by the account owner or by a business bot.
+    # Commands written by the owner directly inside a managed personal chat.
     if msg.from_user and msg.from_user.id == owner_id:
+        low = text.lower()
+
+        if low in {".мут", ".mute"}:
+            if not connection["can_delete_all"]:
+                await msg.reply_text(
+                    "❌ Для .мут включи боту право удалять все сообщения в Telegram Business.",
+                    do_quote=False,
+                )
+                return
+            set_business_chat_muted(owner_id, msg.chat_id, True)
+            try:
+                await context.bot.delete_business_messages(
+                    business_connection_id=msg.business_connection_id,
+                    message_ids=[msg.message_id],
+                )
+            except Exception:
+                pass
+            await context.bot.send_message(
+                chat_id=msg.chat_id,
+                text="🔇 Чат замьючен. Новые сообщения собеседника будут удаляться.",
+                business_connection_id=msg.business_connection_id,
+            )
+            return
+
+        if low in {".размут", ".unmute"}:
+            set_business_chat_muted(owner_id, msg.chat_id, False)
+            try:
+                if connection["can_delete_sent"]:
+                    await context.bot.delete_business_messages(
+                        business_connection_id=msg.business_connection_id,
+                        message_ids=[msg.message_id],
+                    )
+            except Exception:
+                pass
+            await context.bot.send_message(
+                chat_id=msg.chat_id,
+                text="🔊 Мут снят.",
+                business_connection_id=msg.business_connection_id,
+            )
+            return
+
+        if low.startswith(".spam ") or low.startswith(".спам "):
+            parts = text.split(maxsplit=2)
+            if len(parts) < 3 or not parts[1].isdigit():
+                await msg.reply_text("Формат: .spam 3 текст", do_quote=False)
+                return
+            count = int(parts[1])
+            spam_text = parts[2].strip()
+            if not (1 <= count <= 5) or not spam_text:
+                await msg.reply_text("Количество: от 1 до 5. Пример: .spam 3 Привет", do_quote=False)
+                return
+            try:
+                if connection["can_delete_sent"]:
+                    await context.bot.delete_business_messages(
+                        business_connection_id=msg.business_connection_id,
+                        message_ids=[msg.message_id],
+                    )
+            except Exception:
+                pass
+            for _ in range(count):
+                await context.bot.send_message(
+                    chat_id=msg.chat_id,
+                    text=spam_text[:4000],
+                    business_connection_id=msg.business_connection_id,
+                )
+                await asyncio.sleep(0.7)
+            return
+
         return
+
     if getattr(msg, "sender_business_bot", None):
+        return
+
+    # Save every incoming Business message before any automation/deletion.
+    archive_business_message(msg.business_connection_id, owner_id, msg)
+
+    # .мут works like a local mute: every new incoming message is deleted.
+    if business_chat_is_muted(owner_id, msg.chat_id):
+        if connection["can_delete_all"]:
+            try:
+                await context.bot.delete_business_messages(
+                    business_connection_id=msg.business_connection_id,
+                    message_ids=[msg.message_id],
+                )
+            except Exception:
+                log.exception("Failed to delete muted business message")
         return
 
     s = get_business_settings(owner_id)
@@ -511,7 +774,6 @@ async def business_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
         except Exception:
             log.debug("Cannot mark business message as read", exc_info=True)
 
-    text = (msg.text or msg.caption or "").strip()
     low = text.lower()
     sender_name = msg.from_user.full_name if msg.from_user else "друг"
 
@@ -564,11 +826,47 @@ async def business_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     )
 
     try:
-        # reply_text automatically forwards business_connection_id, so the
-        # message is sent on behalf of the connected Business account.
         await msg.reply_text(chosen_reply, do_quote=False)
     except Exception:
         log.exception("Failed to send business reply")
+
+
+async def deleted_business_messages(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    deleted = update.deleted_business_messages
+    if not deleted:
+        return
+
+    connection = get_business_connection(deleted.business_connection_id)
+    if not connection:
+        return
+
+    owner_id = int(connection["owner_user_id"])
+    owner_chat_id = int(connection["user_chat_id"])
+
+    with db() as c:
+        for message_id in deleted.message_ids:
+            row = c.execute(
+                """
+                SELECT * FROM business_message_archive
+                WHERE connection_id=? AND chat_id=? AND message_id=?
+                """,
+                (deleted.business_connection_id, deleted.chat.id, message_id),
+            ).fetchone()
+            if not row:
+                continue
+
+            # Only report messages that came from the other person.
+            if row["sender_user_id"] == owner_id:
+                continue
+
+            await send_deleted_archive(context, owner_chat_id, row)
+            c.execute(
+                """
+                DELETE FROM business_message_archive
+                WHERE connection_id=? AND chat_id=? AND message_id=?
+                """,
+                (deleted.business_connection_id, deleted.chat.id, message_id),
+            )
 
 
 async def biz_reply_add(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -1179,6 +1477,7 @@ def main():
     )
 
     app.add_handler(BusinessConnectionHandler(business_connection_update))
+    app.add_handler(BusinessMessagesDeletedHandler(deleted_business_messages))
     app.add_handler(MessageHandler(filters.UpdateType.BUSINESS_MESSAGE, business_message))
     app.add_handler(CommandHandler("start", start))
     app.add_handler(CommandHandler("business", business_menu))
