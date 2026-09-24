@@ -16,7 +16,12 @@ const SHOP=Object.freeze({
   rnmd_badge:{id:'rnmd_badge',name:'🔥 Редкий значок RNMD',price:2000,category:'items'},
   diamond_badge:{id:'diamond_badge',name:'💎 Алмазный значок',price:2500,category:'items'},
   sakura_badge:{id:'sakura_badge',name:'🌸 Sakura-значок',price:1200,category:'items'},
-  trophy:{id:'trophy',name:'🏆 Коллекционный трофей',price:3000,category:'items'}
+  trophy:{id:'trophy',name:'🏆 Коллекционный трофей',price:3000,category:'items'},
+
+  premium_gold_frame:{id:'premium_gold_frame',name:'👑 Золотая Premium-рамка',price:2200,category:'items',premiumOnly:true},
+  premium_star:{id:'premium_star',name:'🌟 Premium-звезда',price:1600,category:'items',premiumOnly:true},
+  autumn_frame:{id:'autumn_frame',name:'🍂 Осенняя рамка',price:1800,category:'items',availableUntil:'2026-10-31T23:59:59Z'},
+  pumpkin_badge:{id:'pumpkin_badge',name:'🎃 Тыквенный значок',price:1200,category:'items',availableUntil:'2026-11-02T23:59:59Z'}
 });
 const PROFILE_COLORS=Object.freeze({
   green:{id:'green',name:'Зелёный'},
@@ -29,6 +34,16 @@ const PROFILE_COLORS=Object.freeze({
   dark_green:{id:'dark_green',name:'Тёмно-зелёный'},
   light_blue:{id:'light_blue',name:'Голубой'},
   blue:{id:'blue',name:'Синий'}
+});
+const CASE_COST=400;
+const TITLES=Object.freeze({
+  newbie:{id:'newbie',name:'Новичок',level:1},
+  active:{id:'active',name:'Активист',level:3},
+  collector:{id:'collector',name:'Коллекционер',level:5},
+  veteran:{id:'veteran',name:'Ветеран',level:10},
+  vip:{id:'vip',name:'VIP',requires:'plus'},
+  premium:{id:'premium',name:'Premium',requires:'premium'},
+  rnmd:{id:'rnmd',name:'RNMD',requires:'rnmd_badge'}
 });
 const FILE=path.join(DIR,'spooky-prices.json');
 const FRESH=Number(process.env.PRICE_FRESH_MS||7200000), RETAIN=Number(process.env.PRICE_RETAIN_MS||259200000);
@@ -52,6 +67,7 @@ function load(){
   if(!db||typeof db!=='object')db={version:3,listings:[],wallets:{}};
   if(!Array.isArray(db.listings))db.listings=[];
   if(!db.wallets||typeof db.wallets!=='object'||Array.isArray(db.wallets))db.wallets={};
+  if(!db.promocodes||typeof db.promocodes!=='object'||Array.isArray(db.promocodes))db.promocodes={};
   for(const wallet of Object.values(db.wallets)){
     if(wallet&&typeof wallet==='object'&&(!wallet.purchases||typeof wallet.purchases!=='object'||Array.isArray(wallet.purchases))){
       wallet.purchases={};
@@ -64,6 +80,13 @@ function load(){
     }
     if(wallet&&typeof wallet==='object'&&!PROFILE_COLORS[wallet.nameColor]){
       wallet.nameColor='white';
+    }
+    if(wallet&&typeof wallet==='object'){
+      if(!wallet.likesBy||typeof wallet.likesBy!=='object'||Array.isArray(wallet.likesBy))wallet.likesBy={};
+      if(!wallet.titleId)wallet.titleId='newbie';
+      if(!Number.isFinite(Number(wallet.xp)))wallet.xp=0;
+      if(!Number.isFinite(Number(wallet.dailyStreak)))wallet.dailyStreak=0;
+      ensureStats(wallet);
     }
   }
 
@@ -178,6 +201,64 @@ function summarize(rows,item,requestedAuction,sourceAuction,fallback){
   };
 }
 
+function levelFromXp(xp){return Math.max(1,Math.floor(Number(xp||0)/100)+1)}
+function isItemAvailable(item){
+  if(!item)return false;
+  if(item.availableUntil && Date.now()>Date.parse(item.availableUntil))return false;
+  return true;
+}
+function itemAccessAllowed(wallet,item){
+  if(!isItemAvailable(item))return {ok:false,code:'expired'};
+  if(item.premiumOnly && !wallet.purchases?.premium)return {ok:false,code:'premium_required'};
+  return {ok:true};
+}
+function ensureStats(wallet){
+  if(!wallet.stats||typeof wallet.stats!=='object'||Array.isArray(wallet.stats))wallet.stats={};
+  const keys=['messages','purchases','spent','received','transferred','giftsSent','giftsReceived','casesOpened','dailyClaims'];
+  for(const k of keys)wallet.stats[k]=Math.max(0,Number(wallet.stats[k]||0));
+}
+function touchIdentity(wallet,raw){
+  if(raw?.displayName)wallet.displayName=strip(raw.displayName).slice(0,100);
+  if(raw?.username)wallet.username=strip(raw.username).replace(/^@/,'').slice(0,64);
+}
+function addXp(wallet,amount){
+  wallet.xp=Math.max(0,Number(wallet.xp||0)+Math.max(0,Math.round(Number(amount||0))));
+  return levelFromXp(wallet.xp);
+}
+function unlockedTitles(wallet){
+  const level=levelFromXp(wallet.xp);
+  return Object.values(TITLES).filter(t=>{
+    if(t.level && level<t.level)return false;
+    if(t.requires==='plus'&&!wallet.purchases?.plus)return false;
+    if(t.requires==='premium'&&!wallet.purchases?.premium)return false;
+    if(t.requires==='rnmd_badge'&&!wallet.purchases?.rnmd_badge)return false;
+    return true;
+  });
+}
+function collectionCount(wallet){
+  return Object.keys(wallet.purchases||{}).filter(id=>SHOP[id]?.category==='items').length;
+}
+function publicWallet(userId,wallet){
+  ensureStats(wallet);
+  const titles=unlockedTitles(wallet);
+  if(!titles.some(t=>t.id===wallet.titleId))wallet.titleId=titles[0]?.id||'newbie';
+  return{
+    userId,
+    displayName:wallet.displayName||null,
+    username:wallet.username||null,
+    balance:Number(wallet.balance||0),
+    xp:Number(wallet.xp||0),
+    level:levelFromXp(wallet.xp),
+    titleId:wallet.titleId,
+    title:titles.find(t=>t.id===wallet.titleId)?.name||'Новичок',
+    likes:Object.keys(wallet.likesBy||{}).length,
+    collection:collectionCount(wallet),
+    streak:Number(wallet.dailyStreak||0),
+    favoriteDecoration:wallet.favoriteDecoration||null,
+    stats:{...wallet.stats}
+  };
+}
+
 app.get('/health',(_q,res)=>{prune();res.json({ok:true,mode:'community-price-database',listings:db.listings.length,wallets:Object.keys(db.wallets).length,freshHours:FRESH/3600000,persistentFile:FILE})});
 
 app.get('/stats',(_q,res)=>{
@@ -189,21 +270,27 @@ app.get('/stats',(_q,res)=>{
 
 function getWallet(userId){
   if(!db.wallets[userId]){
-    db.wallets[userId]={balance:0,createdAt:Date.now(),purchases:{},decorations:{},nameColor:'white'};
+    db.wallets[userId]={
+      balance:0,createdAt:Date.now(),purchases:{},decorations:{},nameColor:'white',
+      xp:0,titleId:'newbie',likesBy:{},dailyStreak:0,lastDailyAt:0,
+      favoriteDecoration:null,stats:{}
+    };
   }
-  if(!db.wallets[userId].purchases||typeof db.wallets[userId].purchases!=='object'){
-    db.wallets[userId].purchases={};
-  }
-  if(!db.wallets[userId].decorations||typeof db.wallets[userId].decorations!=='object'||Array.isArray(db.wallets[userId].decorations)){
-    db.wallets[userId].decorations={};
-    for(const itemId of Object.keys(db.wallets[userId].purchases)){
-      if(SHOP[itemId]?.category==='items')db.wallets[userId].decorations[itemId]=true;
+  const wallet=db.wallets[userId];
+  if(!wallet.purchases||typeof wallet.purchases!=='object')wallet.purchases={};
+  if(!wallet.decorations||typeof wallet.decorations!=='object'||Array.isArray(wallet.decorations)){
+    wallet.decorations={};
+    for(const itemId of Object.keys(wallet.purchases)){
+      if(SHOP[itemId]?.category==='items')wallet.decorations[itemId]=true;
     }
   }
-  if(!PROFILE_COLORS[db.wallets[userId].nameColor]){
-    db.wallets[userId].nameColor='white';
-  }
-  return db.wallets[userId];
+  if(!PROFILE_COLORS[wallet.nameColor])wallet.nameColor='white';
+  if(!wallet.likesBy||typeof wallet.likesBy!=='object'||Array.isArray(wallet.likesBy))wallet.likesBy={};
+  if(!wallet.titleId)wallet.titleId='newbie';
+  if(!Number.isFinite(Number(wallet.xp)))wallet.xp=0;
+  if(!Number.isFinite(Number(wallet.dailyStreak)))wallet.dailyStreak=0;
+  ensureStats(wallet);
+  return wallet;
 }
 
 function shopAuthorized(req){
@@ -234,10 +321,13 @@ app.post('/shop',(req,res)=>{
   const wallet=getWallet(userId);
   later();
 
-  const items=Object.values(SHOP).map(item=>({
-    ...item,
-    owned:Boolean(wallet.purchases?.[item.id])
-  }));
+  const items=Object.values(SHOP)
+    .filter(item=>isItemAvailable(item)||wallet.purchases?.[item.id])
+    .map(item=>({
+      ...item,
+      owned:Boolean(wallet.purchases?.[item.id]),
+      locked:Boolean(item.premiumOnly&&!wallet.purchases?.premium)
+    }));
 
   res.json({
     ok:true,
@@ -257,6 +347,8 @@ app.post('/buy',(req,res)=>{
   if(!item)return res.status(400).json({ok:false,error:'invalid item'});
 
   const wallet=getWallet(userId);
+  const access=itemAccessAllowed(wallet,item);
+  if(!access.ok)return res.status(403).json({ok:false,code:access.code,error:access.code,item});
   const balance=Number(wallet.balance||0);
 
   if(wallet.purchases?.[item.id]){
@@ -281,6 +373,9 @@ app.post('/buy',(req,res)=>{
   }
 
   wallet.balance=balance-item.price;
+  wallet.stats.spent+=item.price;
+  wallet.stats.purchases+=1;
+  addXp(wallet,25);
   wallet.purchases[item.id]={
     name:item.name,
     price:item.price,
@@ -327,7 +422,10 @@ app.post('/profile',(req,res)=>{
     purchases,
     cosmetics,
     nameColor:wallet.nameColor||'white',
-    availableColors:Object.values(PROFILE_COLORS)
+    availableColors:Object.values(PROFILE_COLORS),
+    ...publicWallet(userId,wallet),
+    unlockedTitles:unlockedTitles(wallet),
+    favoriteDecoration:wallet.favoriteDecoration||null
   });
 });
 
@@ -378,6 +476,178 @@ app.post('/profile/color',(req,res)=>{
     nameColor:colorId,
     color:PROFILE_COLORS[colorId]
   });
+});
+
+app.post('/activity',(req,res)=>{
+  if(!shopAuthorized(req))return res.status(401).json({ok:false,error:'unauthorized'});
+  const userId=String(req.body?.userId??'').trim();
+  if(!/^-?\d{1,20}$/.test(userId))return res.status(400).json({ok:false,error:'invalid user id'});
+  const wallet=getWallet(userId);
+  touchIdentity(wallet,req.body);
+  const kind=String(req.body?.kind||'message');
+  if(kind==='message'){wallet.stats.messages+=1;addXp(wallet,5)}
+  else addXp(wallet,1);
+  later();
+  res.json({ok:true,...publicWallet(userId,wallet)});
+});
+
+app.post('/daily',(req,res)=>{
+  if(!shopAuthorized(req))return res.status(401).json({ok:false,error:'unauthorized'});
+  const userId=String(req.body?.userId??'').trim();
+  if(!/^-?\d{1,20}$/.test(userId))return res.status(400).json({ok:false,error:'invalid user id'});
+  const wallet=getWallet(userId);
+  touchIdentity(wallet,req.body);
+  const now=Date.now(),last=Number(wallet.lastDailyAt||0),cooldown=24*60*60*1000;
+  if(last&&now-last<cooldown){
+    return res.status(429).json({ok:false,code:'daily_cooldown',remainingMs:cooldown-(now-last),streak:Number(wallet.dailyStreak||0)});
+  }
+  if(last&&now-last<=48*60*60*1000)wallet.dailyStreak=Math.max(1,Number(wallet.dailyStreak||0)+1);
+  else wallet.dailyStreak=1;
+  wallet.lastDailyAt=now;
+  const milestone={3:150,7:500,14:1200,30:3000}[wallet.dailyStreak]||0;
+  const reward=200+Math.min(wallet.dailyStreak,10)*25+milestone;
+  wallet.balance=Number(wallet.balance||0)+reward;
+  wallet.stats.received+=reward;
+  wallet.stats.dailyClaims+=1;
+  addXp(wallet,20);
+  save();
+  res.json({ok:true,reward,milestone,streak:wallet.dailyStreak,balance:wallet.balance,level:levelFromXp(wallet.xp)});
+});
+
+app.post('/transfer',(req,res)=>{
+  if(!shopAuthorized(req))return res.status(401).json({ok:false,error:'unauthorized'});
+  const fromId=String(req.body?.fromUserId??'').trim(),toId=String(req.body?.toUserId??'').trim();
+  const amount=Math.round(Number(req.body?.amount));
+  if(!/^-?\d{1,20}$/.test(fromId)||!^-?\d{1,20}$/.test(toId))return res.status(400).json({ok:false,error:'invalid user id'});
+  if(fromId===toId)return res.status(400).json({ok:false,code:'self_transfer',error:'self transfer'});
+  if(!Number.isFinite(amount)||amount<1||amount>1000000000)return res.status(400).json({ok:false,error:'invalid amount'});
+  const from=getWallet(fromId),to=getWallet(toId);
+  if(Number(from.balance||0)<amount)return res.status(400).json({ok:false,code:'insufficient_funds',missing:amount-Number(from.balance||0)});
+  from.balance-=amount; to.balance=Number(to.balance||0)+amount;
+  from.stats.transferred+=amount; to.stats.received+=amount;
+  addXp(from,5);
+  save();
+  res.json({ok:true,amount,fromBalance:from.balance,toBalance:to.balance});
+});
+
+app.post('/like',(req,res)=>{
+  if(!shopAuthorized(req))return res.status(401).json({ok:false,error:'unauthorized'});
+  const fromId=String(req.body?.fromUserId??'').trim(),toId=String(req.body?.toUserId??'').trim();
+  if(!/^-?\d{1,20}$/.test(fromId)||!^-?\d{1,20}$/.test(toId))return res.status(400).json({ok:false,error:'invalid user id'});
+  if(fromId===toId)return res.status(400).json({ok:false,code:'self_like'});
+  const target=getWallet(toId);
+  if(target.likesBy[fromId])return res.status(409).json({ok:false,code:'already_liked',likes:Object.keys(target.likesBy).length});
+  target.likesBy[fromId]=Date.now();
+  addXp(target,2);
+  save();
+  res.json({ok:true,likes:Object.keys(target.likesBy).length});
+});
+
+app.post('/case/open',(req,res)=>{
+  if(!shopAuthorized(req))return res.status(401).json({ok:false,error:'unauthorized'});
+  const userId=String(req.body?.userId??'').trim();
+  if(!/^-?\d{1,20}$/.test(userId))return res.status(400).json({ok:false,error:'invalid user id'});
+  const wallet=getWallet(userId);
+  if(Number(wallet.balance||0)<CASE_COST)return res.status(400).json({ok:false,code:'insufficient_funds',missing:CASE_COST-Number(wallet.balance||0)});
+  wallet.balance-=CASE_COST;wallet.stats.spent+=CASE_COST;wallet.stats.casesOpened+=1;addXp(wallet,10);
+  const available=Object.values(SHOP).filter(item=>item.category==='items'&&isItemAvailable(item)&&!item.premiumOnly&&!wallet.purchases?.[item.id]);
+  let reward;
+  if(available.length&&Math.random()<0.25){
+    const item=available[Math.floor(Math.random()*available.length)];
+    wallet.purchases[item.id]={name:item.name,price:0,purchasedAt:Date.now(),source:'case'};
+    wallet.decorations[item.id]=true;
+    reward={type:'item',item};
+  }else{
+    const amount=[150,200,250,300,500,750,1000][Math.floor(Math.random()*7)];
+    wallet.balance+=amount;wallet.stats.received+=amount;
+    reward={type:'coins',amount};
+  }
+  save();
+  res.json({ok:true,cost:CASE_COST,reward,balance:wallet.balance});
+});
+
+app.post('/profile/title',(req,res)=>{
+  if(!shopAuthorized(req))return res.status(401).json({ok:false,error:'unauthorized'});
+  const userId=String(req.body?.userId??'').trim(),titleId=String(req.body?.titleId??'').trim();
+  if(!/^-?\d{1,20}$/.test(userId))return res.status(400).json({ok:false,error:'invalid user id'});
+  const wallet=getWallet(userId),titles=unlockedTitles(wallet);
+  if(!titles.some(t=>t.id===titleId))return res.status(403).json({ok:false,error:'title locked'});
+  wallet.titleId=titleId;save();
+  res.json({ok:true,titleId,title:titles.find(t=>t.id===titleId)});
+});
+
+app.post('/profile/favorite',(req,res)=>{
+  if(!shopAuthorized(req))return res.status(401).json({ok:false,error:'unauthorized'});
+  const userId=String(req.body?.userId??'').trim(),itemId=String(req.body?.itemId??'').trim();
+  if(!/^-?\d{1,20}$/.test(userId))return res.status(400).json({ok:false,error:'invalid user id'});
+  const wallet=getWallet(userId),item=SHOP[itemId];
+  if(!item||item.category!=='items'||!wallet.purchases?.[itemId])return res.status(403).json({ok:false,error:'not owned'});
+  wallet.favoriteDecoration=itemId;save();
+  res.json({ok:true,itemId});
+});
+
+app.post('/leaderboard',(req,res)=>{
+  if(!shopAuthorized(req))return res.status(401).json({ok:false,error:'unauthorized'});
+  const type=String(req.body?.type||'level');
+  const rows=Object.entries(db.wallets).map(([userId,w])=>({userId,...publicWallet(userId,getWallet(userId))}));
+  const key=type==='coins'?'balance':(type==='collection'?'collection':'level');
+  rows.sort((a,b)=>Number(b[key]||0)-Number(a[key]||0)||Number(b.xp||0)-Number(a.xp||0));
+  res.json({ok:true,type,rows:rows.slice(0,10)});
+});
+
+app.post('/admin/promo',(req,res)=>{
+  if(!shopAuthorized(req))return res.status(401).json({ok:false,error:'unauthorized'});
+  const code=String(req.body?.code||'').trim().toUpperCase().replace(/\s+/g,'');
+  const amount=Math.max(0,Math.round(Number(req.body?.amount||0)));
+  const itemId=String(req.body?.itemId||'').trim().toLowerCase();
+  const maxUses=Math.max(1,Math.min(100000,Math.round(Number(req.body?.maxUses||100))));
+  if(!/^[A-Z0-9_-]{3,24}$/.test(code))return res.status(400).json({ok:false,error:'invalid code'});
+  if(!amount&&!SHOP[itemId])return res.status(400).json({ok:false,error:'reward required'});
+  db.promocodes[code]={code,amount,itemId:SHOP[itemId]?itemId:null,maxUses,usedBy:{},createdAt:Date.now()};
+  save();
+  res.json({ok:true,promo:db.promocodes[code]});
+});
+
+app.post('/promo/redeem',(req,res)=>{
+  if(!shopAuthorized(req))return res.status(401).json({ok:false,error:'unauthorized'});
+  const userId=String(req.body?.userId??'').trim(),code=String(req.body?.code||'').trim().toUpperCase().replace(/\s+/g,'');
+  if(!/^-?\d{1,20}$/.test(userId))return res.status(400).json({ok:false,error:'invalid user id'});
+  const promo=db.promocodes?.[code];
+  if(!promo)return res.status(404).json({ok:false,code:'promo_not_found'});
+  if(promo.usedBy?.[userId])return res.status(409).json({ok:false,code:'promo_used'});
+  if(Object.keys(promo.usedBy||{}).length>=Number(promo.maxUses||0))return res.status(410).json({ok:false,code:'promo_limit'});
+  const wallet=getWallet(userId);
+  let reward={};
+  if(promo.amount){
+    wallet.balance=Number(wallet.balance||0)+promo.amount;wallet.stats.received+=promo.amount;
+    reward.amount=promo.amount;
+  }
+  if(promo.itemId&&SHOP[promo.itemId]&&!wallet.purchases?.[promo.itemId]){
+    const item=SHOP[promo.itemId];
+    wallet.purchases[promo.itemId]={name:item.name,price:0,purchasedAt:Date.now(),source:'promo'};
+    if(item.category==='items')wallet.decorations[promo.itemId]=true;
+    reward.item=item;
+  }
+  if(!promo.usedBy||typeof promo.usedBy!=='object')promo.usedBy={};
+  promo.usedBy[userId]=Date.now();addXp(wallet,10);save();
+  res.json({ok:true,reward,balance:wallet.balance});
+});
+
+app.post('/gift/buy',(req,res)=>{
+  if(!shopAuthorized(req))return res.status(401).json({ok:false,error:'unauthorized'});
+  const fromId=String(req.body?.fromUserId??'').trim(),toId=String(req.body?.toUserId??'').trim(),itemId=String(req.body?.itemId??'').trim().toLowerCase();
+  if(!/^-?\d{1,20}$/.test(fromId)||!^-?\d{1,20}$/.test(toId))return res.status(400).json({ok:false,error:'invalid user id'});
+  if(fromId===toId)return res.status(400).json({ok:false,code:'self_gift'});
+  const item=SHOP[itemId];if(!item||item.category!=='items')return res.status(400).json({ok:false,error:'invalid item'});
+  const from=getWallet(fromId),to=getWallet(toId);
+  if(!isItemAvailable(item))return res.status(403).json({ok:false,code:'expired'});
+  if(item.premiumOnly&&!to.purchases?.premium)return res.status(403).json({ok:false,code:'recipient_premium_required'});
+  if(to.purchases?.[itemId])return res.status(409).json({ok:false,code:'already_owned'});
+  if(Number(from.balance||0)<item.price)return res.status(400).json({ok:false,code:'insufficient_funds',missing:item.price-Number(from.balance||0)});
+  from.balance-=item.price;from.stats.spent+=item.price;from.stats.giftsSent+=1;to.stats.giftsReceived+=1;
+  to.purchases[itemId]={name:item.name,price:0,purchasedAt:Date.now(),source:'gift',fromUserId:fromId};to.decorations[itemId]=true;
+  addXp(from,15);save();
+  res.json({ok:true,item,balance:from.balance});
 });
 
 app.post('/admin/coins',(req,res)=>{
