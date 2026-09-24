@@ -1015,7 +1015,7 @@ async def handle_profile_decor(update: Update, context: ContextTypes.DEFAULT_TYP
             await query.answer("У вас пока нет украшений.", show_alert=True)
             return
 
-        await query.edit_message_text(
+        await query.message.reply_text(
             decorations_text(data),
             reply_markup=decorations_keyboard(data),
         )
@@ -1078,7 +1078,6 @@ async def handle_profile_back(update: Update, context: ContextTypes.DEFAULT_TYPE
         await context.bot.send_photo(
             chat_id=query.message.chat_id,
             photo=card,
-            caption=profile_caption(query.from_user, data),
             reply_markup=profile_keyboard(data),
         )
     except Exception:
