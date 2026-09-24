@@ -37,11 +37,58 @@ function load(){
 }
 function save(){mkdir();try{const t=FILE+'.tmp';fs.writeFileSync(t,JSON.stringify(db));fs.renameSync(t,FILE)}catch(e){console.error('[DB] save',e.message)}}
 function later(){if(saveTimer)return;saveTimer=setTimeout(()=>{saveTimer=null;save()},400)}
+function parsePrice(rawValue){
+  let s=strip(rawValue);
+  if(!s)return null;
+
+  s=s
+    .replace(/\\\\n/g,' ')
+    .replace(/\\n/g,' ')
+    .replace(/[{}\[\]"']/g,' ')
+    .replace(/_/g,' ')
+    .replace(/\s+/g,' ');
+
+  const marker='(?:цена|стоимость|price|за\\s*штуку|монет(?:а|ы)?|coins?|коин(?:а|ов|ы)?)';
+  const patterns=[
+    new RegExp(marker+'[^0-9]{0,80}([0-9][0-9\\s.,]*)(?:\\s*)(к|k|тыс|м|m|млн)?','iu'),
+    new RegExp('([0-9][0-9\\s.,]*)(?:\\s*)(к|k|тыс|м|m|млн)?[^0-9]{0,50}'+marker,'iu'),
+    /[$₽]\s*([0-9][0-9\s.,]*)(?:\s*)(к|k|тыс|м|m|млн)?/iu
+  ];
+
+  for(const re of patterns){
+    const m=s.match(re);
+    if(!m)continue;
+
+    let number=String(m[1]||'').replace(/\s/g,'').trim();
+    const suffix=String(m[2]||'').toLowerCase();
+
+    let multiplier=1;
+    if(['к','k','тыс'].includes(suffix))multiplier=1000;
+    if(['м','m','млн'].includes(suffix))multiplier=1000000;
+
+    const seps=(number.match(/[.,]/g)||[]).length;
+    if(seps>1 || /[.,]\d{3}(?:[.,]\d{3})*$/.test(number)){
+      number=number.replace(/[.,]/g,'');
+    }else{
+      number=number.replace(',','.');
+    }
+
+    const n=Number(number);
+    const value=Math.round(n*multiplier);
+    if(Number.isFinite(value)&&value>0&&value<=1e15)return value;
+  }
+  return null;
+}
 function clean(r){
-  const name=strip(r?.name).slice(0,160),price=Math.round(Number(r?.price)),
+  const name=strip(r?.name).slice(0,160),
+        rawText=strip(r?.rawText||'').slice(0,6000),
+        supplied=Math.round(Number(r?.price||0)),
+        parsed=parsePrice(rawText||name),
+        price=(Number.isFinite(supplied)&&supplied>0)?supplied:parsed,
         count=Math.max(1,Math.min(9999,Math.round(Number(r?.count||1)))),
         slot=Math.max(-1,Math.min(9999,Math.round(Number(r?.slot??-1)))),
         fingerprint=String(r?.fingerprint||'').trim().slice(0,128);
+
   if(!name||!Number.isFinite(price)||price<=0||price>1e15||!/^[a-f0-9]{16,128}$/i.test(fingerprint))return null;
   return{name,normalizedName:norm(name),price,count,slot,fingerprint};
 }
@@ -118,6 +165,7 @@ app.post('/submit',(req,res)=>{
   }
   if(!accepted)return res.status(400).json({ok:false,error:'no valid price listings found'});
   prune();later();
+  console.log('[SUBMIT]', auction, collector.slice(0,8), 'raw='+raw.length, 'accepted='+accepted, 'added='+added);
   res.json({ok:true,auction,accepted,added,databaseSize:db.listings.length});
 });
 
@@ -126,15 +174,21 @@ app.post('/price',(req,res)=>{
   if(!item||!ALLOWED.test(auction))return res.status(400).json({ok:false,error:'item and valid auction are required'});
 
   prune();
-  const q=norm(item),cut=Date.now()-FRESH;
-  const freshMatches=db.listings.filter(x=>x.lastSeen>=cut&&itemMatches(x,q));
+  const q=norm(item),freshCut=Date.now()-FRESH;
+  const all=db.listings.filter(x=>itemMatches(x,q));
 
-  const exact=freshMatches.filter(x=>x.auction===auction);
-  if(exact.length)return res.json(summarize(exact,item,auction,auction,false));
+  const exactFresh=all.filter(x=>x.auction===auction&&x.lastSeen>=freshCut);
+  if(exactFresh.length)return res.json({...summarize(exactFresh,item,auction,auction,false),stale:false});
+
+  const exactAny=all.filter(x=>x.auction===auction);
+  if(exactAny.length)return res.json({...summarize(exactAny,item,auction,auction,false),stale:true});
+
+  const freshOther=all.filter(x=>x.auction!==auction&&x.lastSeen>=freshCut);
+  const pool=freshOther.length?freshOther:all.filter(x=>x.auction!==auction);
+  const stale=!freshOther.length;
 
   const byAuction=new Map();
-  for(const row of freshMatches){
-    if(row.auction===auction)continue;
+  for(const row of pool){
     if(!byAuction.has(row.auction))byAuction.set(row.auction,[]);
     byAuction.get(row.auction).push(row);
   }
@@ -145,8 +199,8 @@ app.post('/price',(req,res)=>{
     if(seen>bestSeen){bestSeen=seen;bestAuction=source;bestRows=rows}
   }
 
-  if(bestRows.length)return res.json(summarize(bestRows,item,auction,bestAuction,true));
-  return res.json(summarize([],item,auction,null,false));
+  if(bestRows.length)return res.json({...summarize(bestRows,item,auction,bestAuction,true),stale});
+  return res.json({...summarize([],item,auction,null,false),stale:false});
 });
 
 process.on('SIGTERM',()=>{save();process.exit(0)});
