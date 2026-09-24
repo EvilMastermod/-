@@ -518,7 +518,7 @@ app.post('/transfer',(req,res)=>{
   if(!shopAuthorized(req))return res.status(401).json({ok:false,error:'unauthorized'});
   const fromId=String(req.body?.fromUserId??'').trim(),toId=String(req.body?.toUserId??'').trim();
   const amount=Math.round(Number(req.body?.amount));
-  if(!/^-?\d{1,20}$/.test(fromId)||!^-?\d{1,20}$/.test(toId))return res.status(400).json({ok:false,error:'invalid user id'});
+  if(!/^-?\d{1,20}$/.test(fromId)||!/^-?\d{1,20}$/.test(toId))return res.status(400).json({ok:false,error:'invalid user id'});
   if(fromId===toId)return res.status(400).json({ok:false,code:'self_transfer',error:'self transfer'});
   if(!Number.isFinite(amount)||amount<1||amount>1000000000)return res.status(400).json({ok:false,error:'invalid amount'});
   const from=getWallet(fromId),to=getWallet(toId);
@@ -533,7 +533,7 @@ app.post('/transfer',(req,res)=>{
 app.post('/like',(req,res)=>{
   if(!shopAuthorized(req))return res.status(401).json({ok:false,error:'unauthorized'});
   const fromId=String(req.body?.fromUserId??'').trim(),toId=String(req.body?.toUserId??'').trim();
-  if(!/^-?\d{1,20}$/.test(fromId)||!^-?\d{1,20}$/.test(toId))return res.status(400).json({ok:false,error:'invalid user id'});
+  if(!/^-?\d{1,20}$/.test(fromId)||!/^-?\d{1,20}$/.test(toId))return res.status(400).json({ok:false,error:'invalid user id'});
   if(fromId===toId)return res.status(400).json({ok:false,code:'self_like'});
   const target=getWallet(toId);
   if(target.likesBy[fromId])return res.status(409).json({ok:false,code:'already_liked',likes:Object.keys(target.likesBy).length});
@@ -636,7 +636,7 @@ app.post('/promo/redeem',(req,res)=>{
 app.post('/gift/buy',(req,res)=>{
   if(!shopAuthorized(req))return res.status(401).json({ok:false,error:'unauthorized'});
   const fromId=String(req.body?.fromUserId??'').trim(),toId=String(req.body?.toUserId??'').trim(),itemId=String(req.body?.itemId??'').trim().toLowerCase();
-  if(!/^-?\d{1,20}$/.test(fromId)||!^-?\d{1,20}$/.test(toId))return res.status(400).json({ok:false,error:'invalid user id'});
+  if(!/^-?\d{1,20}$/.test(fromId)||!/^-?\d{1,20}$/.test(toId))return res.status(400).json({ok:false,error:'invalid user id'});
   if(fromId===toId)return res.status(400).json({ok:false,code:'self_gift'});
   const item=SHOP[itemId];if(!item||item.category!=='items')return res.status(400).json({ok:false,error:'invalid item'});
   const from=getWallet(fromId),to=getWallet(toId);
