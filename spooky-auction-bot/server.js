@@ -34,6 +34,8 @@ function load(){
   db.version=3;
   prune();
   save();
+  console.log('[DB] loaded listings='+db.listings.length);
+  console.log('[DB] sample names:', db.listings.slice(0,25).map(x=>x.name).join(' | '));
 }
 function save(){mkdir();try{const t=FILE+'.tmp';fs.writeFileSync(t,JSON.stringify(db));fs.renameSync(t,FILE)}catch(e){console.error('[DB] save',e.message)}}
 function later(){if(saveTimer)return;saveTimer=setTimeout(()=>{saveTimer=null;save()},400)}
