@@ -1,3 +1,4 @@
+import asyncio
 import logging
 import os
 import re
@@ -31,6 +32,7 @@ logging.basicConfig(
     level=logging.INFO,
 )
 log = logging.getLogger("chat-automator")
+logging.getLogger("httpx").setLevel(logging.WARNING)
 # Business mute v2 deployment marker
 
 BOT_TOKEN = os.environ.get("BOT_TOKEN", "").strip()
@@ -40,6 +42,7 @@ TZ = ZoneInfo(TZ_NAME)
 
 URL_RE = re.compile(r"(https?://|t\.me/|www\.|discord\.gg/)", re.I)
 FLOOD = defaultdict(lambda: deque(maxlen=30))
+SPAM_ACTIVE = set()
 
 
 def db():
@@ -908,6 +911,24 @@ async def resolve_owner_business_connection(context: ContextTypes.DEFAULT_TYPE, 
         ).fetchone()
 
 
+async def send_business_repeat(bot, connection_id: str, chat_id: int, count: int, body: str):
+    """Send a small, owner-requested batch without blocking message deletion."""
+    key = (connection_id, chat_id)
+    try:
+        for index in range(count):
+            await bot.send_message(
+                chat_id=chat_id,
+                business_connection_id=connection_id,
+                text=body,
+            )
+            if index + 1 < count:
+                await asyncio.sleep(0.8)
+    except Exception as exc:
+        log.warning("Business repeat stopped in chat %s: %s", chat_id, exc)
+    finally:
+        SPAM_ACTIVE.discard(key)
+
+
 async def business_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     msg = update.business_message
     if not msg or not msg.business_connection_id:
@@ -935,10 +956,7 @@ async def business_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
         low = text.lower()
 
         if low == ".mute":
-            # Enable mute first. Telegram may not allow editing the owner's
-            # Business message until the peer has sent an incoming message
-            # within the last 24 hours, so keep the command message as a
-            # pending control and render it as soon as that becomes possible.
+            # Create the control once. Incoming messages never recreate it.
             set_business_chat_muted(owner_id, msg.chat_id, True)
             save_business_mute_control(
                 owner_id,
@@ -949,10 +967,25 @@ async def business_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
             rendered = await render_mute_control(context, owner_id, msg.chat_id)
             if not rendered:
-                # Do not send the mute control to the bot's private chat.
-                # We keep it pending and render it inside this exact Business chat
-                # as soon as Telegram considers the peer writable.
-                log.info("Mute control pending for Business chat %s", msg.chat_id)
+                log.info("Use .unmute to remove mute in Business chat %s", msg.chat_id)
+            return
+
+        if low.startswith(".spam"):
+            match = re.fullmatch(r"\.spam\s+(\d+)\s+([\s\S]+)", text, re.I)
+            if not match or not 1 <= int(match.group(1)) <= 10 or not match.group(2).strip():
+                await msg.reply_text("Формат: .spam 5 Привет (от 1 до 10 раз)", do_quote=False)
+                return
+            key = (msg.business_connection_id, msg.chat_id)
+            if key in SPAM_ACTIVE:
+                await msg.reply_text("Предыдущая отправка ещё идёт.", do_quote=False)
+                return
+            SPAM_ACTIVE.add(key)
+            context.application.create_task(
+                send_business_repeat(
+                    context.bot, msg.business_connection_id, msg.chat_id,
+                    int(match.group(1)), match.group(2).strip()[:4096],
+                )
+            )
             return
 
         if low == ".unmute":
@@ -989,8 +1022,8 @@ async def business_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     # Save every incoming Business message before any automation/deletion.
     archive_business_message(msg.business_connection_id, owner_id, msg)
 
-    # Muted Business chats: delete the incoming message and keep the
-    # mute controller in THIS exact Business conversation, never in bot DM.
+    # Muted chats: one deletion request per incoming message. Re-editing the
+    # unchanged mute control made Telegram reject it and produced duplicates.
     if business_chat_is_muted(owner_id, msg.chat_id):
         try:
             await context.bot.delete_business_messages(
@@ -999,29 +1032,6 @@ async def business_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
             )
         except Exception as exc:
             log.warning("Muted Business message delete failed: %s", str(exc))
-
-        rendered = await render_mute_control(context, owner_id, msg.chat_id)
-        if not rendered:
-            try:
-                control_msg = await context.bot.send_message(
-                    chat_id=msg.chat_id,
-                    text="🔇 Молчать",
-                    business_connection_id=msg.business_connection_id,
-                    reply_markup=InlineKeyboardMarkup(
-                        [[InlineKeyboardButton(
-                            "🔊 Говори",
-                            callback_data=f"bizchat:unmute:{owner_id}:{msg.chat_id}",
-                        )]]
-                    ),
-                )
-                save_business_mute_control(
-                    owner_id,
-                    msg.chat_id,
-                    msg.business_connection_id,
-                    control_msg.message_id,
-                )
-            except Exception as exc:
-                log.warning("Could not place mute control in Business chat yet: %s", str(exc))
         return
 
     s = get_business_settings(owner_id)
