@@ -31,6 +31,7 @@ logging.basicConfig(
     level=logging.INFO,
 )
 log = logging.getLogger("chat-automator")
+# Business mute v2 deployment marker
 
 BOT_TOKEN = os.environ.get("BOT_TOKEN", "").strip()
 DB_PATH = os.environ.get("DB_PATH", "/data/chat-automator.sqlite")
