@@ -745,35 +745,6 @@ async def business_connection_update(update: Update, context: ContextTypes.DEFAU
         log.exception("Could not notify business owner")
 
 
-async def business_owner_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    q = update.callback_query
-    if not q or not q.data:
-        return
-
-    parts = q.data.split(":")
-    if len(parts) != 4 or parts[0] != "bizowner":
-        return
-
-    action = parts[1]
-    try:
-        owner_id = int(parts[2])
-        chat_id = int(parts[3])
-    except ValueError:
-        await q.answer("❌ Ошибка.", show_alert=True)
-        return
-
-    if q.from_user.id != owner_id:
-        await q.answer("⛔ Эта кнопка не для тебя.", show_alert=True)
-        return
-
-    if action == "unmute":
-        set_business_chat_muted(owner_id, chat_id, False)
-        delete_business_mute_control(owner_id, chat_id)
-        await q.answer("🔊 Мут снят")
-        await q.edit_message_text("🔊 Мут снят.")
-        return
-
-
 async def business_chat_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
     q = update.callback_query
     if not q or not q.data or not q.message:
@@ -931,36 +902,10 @@ async def business_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
             rendered = await render_mute_control(context, owner_id, msg.chat_id)
             if not rendered:
-                try:
-                    bc = await context.bot.get_business_connection(msg.business_connection_id)
-                    rights = bc.rights
-                    can_reply = bool(rights and getattr(rights, "can_reply", False))
-                    can_delete_all = bool(
-                        rights and getattr(rights, "can_delete_all_messages", False)
-                    )
-                except Exception:
-                    can_reply = False
-                    can_delete_all = False
-
-                try:
-                    await context.bot.send_message(
-                        chat_id=int(connection["user_chat_id"]),
-                        text=(
-                            "🔇 Мут включён.\n\n"
-                            f"💬 Ответы/редактирование: {'✅' if can_reply else '❌'}\n"
-                            f"🗑 Удаление сообщений: {'✅' if can_delete_all else '❌'}\n\n"
-                            "Telegram пока не разрешил заменить .mute кнопкой прямо в этой переписке. "
-                            "Кнопка ниже управляет мутом сразу."
-                        ),
-                        reply_markup=InlineKeyboardMarkup(
-                            [[InlineKeyboardButton(
-                                "🔊 Говори",
-                                callback_data=f"bizowner:unmute:{owner_id}:{msg.chat_id}",
-                            )]]
-                        ),
-                    )
-                except Exception:
-                    log.exception("Failed to notify owner that mute is enabled")
+                # Do not send the mute control to the bot's private chat.
+                # We keep it pending and render it inside this exact Business chat
+                # as soon as Telegram considers the peer writable.
+                log.info("Mute control pending for Business chat %s", msg.chat_id)
             return
 
         if low == ".unmute":
@@ -997,35 +942,39 @@ async def business_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     # Save every incoming Business message before any automation/deletion.
     archive_business_message(msg.business_connection_id, owner_id, msg)
 
-    # Muted Business chats: try the real delete operation instead of trusting
-    # a cached rights flag. Some Telegram clients update Business rights with delay.
+    # Muted Business chats: delete the incoming message and keep the
+    # mute controller in THIS exact Business conversation, never in bot DM.
     if business_chat_is_muted(owner_id, msg.chat_id):
-        deleted_ok = False
         try:
             await context.bot.delete_business_messages(
                 business_connection_id=msg.business_connection_id,
                 message_ids=[msg.message_id],
             )
-            deleted_ok = True
         except Exception as exc:
-            log.warning("Muted Business message delete failed: %s", type(exc).__name__)
+            log.warning("Muted Business message delete failed: %s", str(exc))
 
-        # An incoming message makes this peer eligible for Business reply/edit
-        # for the next 24 hours, so render the pending .mute control now.
-        await render_mute_control(context, owner_id, msg.chat_id)
-
-        if not deleted_ok:
+        rendered = await render_mute_control(context, owner_id, msg.chat_id)
+        if not rendered:
             try:
-                await context.bot.send_message(
-                    chat_id=int(connection["user_chat_id"]),
-                    text=(
-                        "⚠️ Мут включён, но Telegram не дал удалить входящее сообщение. "
-                        "Переподключи бота в Telegram Business и заново включи право "
-                        "на удаление сообщений."
+                control_msg = await context.bot.send_message(
+                    chat_id=msg.chat_id,
+                    text="🔇 Молчать",
+                    business_connection_id=msg.business_connection_id,
+                    reply_markup=InlineKeyboardMarkup(
+                        [[InlineKeyboardButton(
+                            "🔊 Говори",
+                            callback_data=f"bizchat:unmute:{owner_id}:{msg.chat_id}",
+                        )]]
                     ),
                 )
-            except Exception:
-                log.exception("Failed to notify owner about Business delete failure")
+                save_business_mute_control(
+                    owner_id,
+                    msg.chat_id,
+                    msg.business_connection_id,
+                    control_msg.message_id,
+                )
+            except Exception as exc:
+                log.warning("Could not place mute control in Business chat yet: %s", str(exc))
         return
 
     s = get_business_settings(owner_id)
@@ -1751,7 +1700,6 @@ def main():
     app.add_handler(CommandHandler("bizwelcome", biz_welcome))
     app.add_handler(CallbackQueryHandler(business_callback, pattern=r"^biz:"))
     app.add_handler(CallbackQueryHandler(business_chat_callback, pattern=r"^bizchat:"))
-    app.add_handler(CallbackQueryHandler(business_owner_callback, pattern=r"^bizowner:"))
     app.add_handler(CommandHandler("setup", setup))
     app.add_handler(CommandHandler("setwelcome", set_welcome))
     app.add_handler(CommandHandler("setrules", set_rules))
