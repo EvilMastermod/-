@@ -23,7 +23,7 @@ globalThis.fetch = async (url, init) => {
   const method = url.split('/').at(-1);
   const params = JSON.parse(init.body);
   calls.push({ method, params });
-  return Response.json({ ok: true, result: method === 'getBusinessConnection' ? null : true });
+  return Response.json({ ok: true, result: method === 'getChatMember' ? { status: 'administrator' } : true });
 };
 const env = { DB, BOT_TOKEN: 'test-token', WEBHOOK_SECRET: 'test-secret' };
 let id = 1;
@@ -49,4 +49,18 @@ assert.equal((await webhook({ business_message: { ...owner, message_id: 6, text:
 assert.equal(calls.filter(c => c.method === 'sendMessage' && c.params.chat_id === 22).length, 2);
 assert.equal((await webhook({ business_message: { ...owner, message_id: 7, text: '.spam 5000 Привет' } })).status, 200);
 assert.equal(calls.filter(c => c.method === 'sendMessage' && c.params.chat_id === 22).length, 3);
+const group = { chat: { id: -44, type: 'supergroup', title: 'Test' },
+  from: { id: 11, first_name: 'Owner' }, message_id: 8, text: '/setup' };
+assert.equal((await webhook({ message: group })).status, 200);
+assert.equal(calls.filter(c => c.method === 'sendMessage' && c.params.chat_id === -44).length, 1);
+assert.equal((await webhook({ message: { ...group, message_id: 9, text: '/badadd грубо' } })).status, 200);
+assert.equal(sqlite.prepare('SELECT word FROM bad_words WHERE chat_id=-44').get().word, 'грубо');
+const parts = Object.fromEntries(new Intl.DateTimeFormat('en-GB', {
+  timeZone: 'Europe/Kyiv', hour: '2-digit', minute: '2-digit', hourCycle: 'h23',
+}).formatToParts(new Date()).map(p => [p.type, p.value]));
+sqlite.prepare('INSERT INTO schedules(chat_id,hh,mm,text) VALUES(?,?,?,?)')
+  .run(-44, Number(parts.hour), Number(parts.minute), 'Scheduled');
+await worker.scheduled({}, env);
+await worker.scheduled({}, env);
+assert.equal(calls.filter(c => c.method === 'sendMessage' && c.params.text === 'Scheduled').length, 1);
 console.log('Business webhook smoke checks passed');
