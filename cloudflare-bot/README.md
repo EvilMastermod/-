@@ -1,16 +1,18 @@
 # RNMD Chat Automator for Cloudflare (Business prototype)
 
-This is a separate webhook implementation of the Telegram Business features of
+This is a separate webhook implementation of the Telegram Business and group features of
 `chat-automator-bot/bot.py`. The existing Railway bot remains the production
 version until the D1 data and all other features have been migrated.
 
 Implemented: Telegram Business connection updates, permission status, settings,
 first-message and keyword replies, muted-chat deletion and inline controls,
-deleted-message archive forwarding, and `.spam N text` (1–10 messages).
+deleted-message archive forwarding, and `.spam N text` (1–10 messages). Group
+features include configuration, greeting, link/word/flood filtering, warnings,
+moderation commands and daily schedules (a once-per-minute Worker cron).
 
-Not implemented yet: group moderation, group configuration, warnings, scheduled
-messages, and transfer of the Railway SQLite database. Do not switch this bot's
-Telegram webhook until those features and the existing data have been reviewed.
+Not implemented yet: transfer of the Railway SQLite database and integration
+testing on a live Cloudflare account. Do not switch this bot's Telegram webhook
+until the existing data and rights have been reviewed and verified.
 
 ## Prepare a Cloudflare account
 
