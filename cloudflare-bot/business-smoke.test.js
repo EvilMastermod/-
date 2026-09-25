@@ -12,7 +12,10 @@ const DB = {
       return {
         first: async () => stmt.get(...params) ?? null,
         all: async () => ({ results: stmt.all(...params) }),
-        run: async () => ({ meta: { changes: Number(stmt.run(...params).changes) } }),
+        run: async () => {
+          const result = stmt.run(...params);
+          return { meta: { changes: Number(result.changes), last_row_id: Number(result.lastInsertRowid) } };
+        },
       };
     } };
   },
@@ -58,8 +61,8 @@ assert.equal(sqlite.prepare('SELECT word FROM bad_words WHERE chat_id=-44').get(
 const parts = Object.fromEntries(new Intl.DateTimeFormat('en-GB', {
   timeZone: 'Europe/Kyiv', hour: '2-digit', minute: '2-digit', hourCycle: 'h23',
 }).formatToParts(new Date()).map(p => [p.type, p.value]));
-sqlite.prepare('INSERT INTO schedules(chat_id,hh,mm,text) VALUES(?,?,?,?)')
-  .run(-44, Number(parts.hour), Number(parts.minute), 'Scheduled');
+assert.equal((await webhook({ message: { ...group, message_id: 10,
+  text: `/schedule ${parts.hour}:${parts.minute} | Scheduled` } })).status, 200);
 await worker.scheduled({}, env);
 await worker.scheduled({}, env);
 assert.equal(calls.filter(c => c.method === 'sendMessage' && c.params.text === 'Scheduled').length, 1);
