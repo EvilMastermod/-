@@ -9,4 +9,4 @@ crons = ["* * * * *"]
 [[d1_databases]]
 binding = "DB"
 database_name = "rnmd-chat-automator"
-database_id = "REPLACE_WITH_YOUR_D1_DATABASE_ID"
+database_id = "bc967a3b-78ab-4dc0-856e-00ac478ff337"
