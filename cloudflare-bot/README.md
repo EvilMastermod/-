@@ -1,0 +1,48 @@
+# RNMD Chat Automator for Cloudflare (Business prototype)
+
+This is a separate webhook implementation of the Telegram Business and group features of
+`chat-automator-bot/bot.py`. The existing Railway bot remains the production
+version until the D1 data and all other features have been migrated.
+
+Implemented: Telegram Business connection updates, permission status, settings,
+first-message and keyword replies, muted-chat deletion and inline controls,
+deleted-message archive forwarding, and `.spam N text` (1–10 messages). Group
+features include configuration, greeting, link/word/flood filtering, warnings,
+moderation commands and daily schedules (a once-per-minute Worker cron).
+
+Not implemented yet: transfer of the Railway SQLite database and integration
+testing on a live Cloudflare account. Do not switch this bot's Telegram webhook
+until the existing data and rights have been reviewed and verified.
+
+## Prepare a Cloudflare account
+
+1. Create a D1 database named `rnmd-chat-automator` in Cloudflare.
+2. Copy its database ID to `database_id` in `wrangler.toml`.
+3. From this folder, use `npx wrangler d1 execute rnmd-chat-automator --remote --file=schema.sql`
+   to create the tables (this is a fresh empty database).
+4. Set `BOT_TOKEN` and `WEBHOOK_SECRET` as **Worker secrets**, never commit them.
+   Use a new, random `WEBHOOK_SECRET` consisting of letters, numbers, `_`, `-`.
+5. Deploy with `npx wrangler deploy`. Only after a tested cutover, stop Railway's
+   bot and set the Telegram webhook to `https://<worker>.workers.dev/webhook`
+   with the same `secret_token`. `getUpdates` and webhooks cannot run together.
+
+The Worker rejects webhook requests without the matching
+`X-Telegram-Bot-Api-Secret-Token`. It keeps update IDs in D1 to avoid repeats
+when Telegram retries delivery. The public root URL is a health response.
+
+Before cutover, export and import the existing SQLite data:
+
+```sh
+python export_sqlite.py /path/to/chat-automator.sqlite d1-data.sql
+npx wrangler d1 execute rnmd-chat-automator --remote --file=d1-data.sql
+```
+
+Run `schema.sql` first. The export contains private message archives. Keep the
+SQL file off GitHub, protect it from other users, and delete it after checking
+that rows imported correctly. Stop Railway's bot while making the final export
+to prevent changes during cutover; until then it can keep serving production.
+If Railway's `/data` is not backed by a persistent volume, previous deployments
+may have lost old settings; only rows present in the current file can be moved.
+
+`BOT_TOKEN` was previously included in old HTTP request logs on Railway, so
+rotate it in BotFather before cutover, then update the secret in the chosen host.

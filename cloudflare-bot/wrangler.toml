@@ -1,0 +1,12 @@
+name = "rnmd-chat-automator"
+main = "src/worker.js"
+compatibility_date = "2026-09-25"
+workers_dev = true
+
+[triggers]
+crons = ["* * * * *"]
+
+[[d1_databases]]
+binding = "DB"
+database_name = "rnmd-chat-automator"
+database_id = "bc967a3b-78ab-4dc0-856e-00ac478ff337"
