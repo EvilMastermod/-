@@ -30,6 +30,19 @@ The Worker rejects webhook requests without the matching
 `X-Telegram-Bot-Api-Secret-Token`. It keeps update IDs in D1 to avoid repeats
 when Telegram retries delivery. The public root URL is a health response.
 
-Review the existing SQLite data and export/import it to D1 before switching.
+Before cutover, export and import the existing SQLite data:
+
+```sh
+python export_sqlite.py /path/to/chat-automator.sqlite d1-data.sql
+npx wrangler d1 execute rnmd-chat-automator --remote --file=d1-data.sql
+```
+
+Run `schema.sql` first. The export contains private message archives. Keep the
+SQL file off GitHub, protect it from other users, and delete it after checking
+that rows imported correctly. Stop Railway's bot while making the final export
+to prevent changes during cutover; until then it can keep serving production.
+If Railway's `/data` is not backed by a persistent volume, previous deployments
+may have lost old settings; only rows present in the current file can be moved.
+
 `BOT_TOKEN` was previously included in old HTTP request logs on Railway, so
 rotate it in BotFather before cutover, then update the secret in the chosen host.
