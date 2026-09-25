@@ -1,5 +1,6 @@
 // Telegram webhook version of the Business features in ../chat-automator-bot/bot.py.
 // D1 persists state; Railway continues to serve the existing bot until cutover.
+import { handleGroup, groupCallback, scheduled } from './group.js';
 const now = () => Math.floor(Date.now() / 1000);
 const one = (db, sql, ...args) => db.prepare(sql).bind(...args).first();
 const all = async (db, sql, ...args) => (await db.prepare(sql).bind(...args).all()).results;
@@ -196,6 +197,7 @@ async function handleDeleted(env, deleted) {
 
 async function callback(env, q) {
   const data = q.data || '', owner = q.from.id, chat = q.message?.chat?.id;
+  if (data.startsWith('cfg:')) return groupCallback(env, api, send, q);
   const answer = (text, show_alert = false) => api(env, 'answerCallbackQuery', { callback_query_id: q.id, ...(text ? { text, show_alert } : {}) });
   if (data.startsWith('bizchat:')) {
     const [, action, ownerId, chatId] = data.split(':');
@@ -286,6 +288,8 @@ async function dispatch(env, update) {
   if (update.business_message) return handleBusinessMessage(env, update.business_message);
   if (update.deleted_business_messages) return handleDeleted(env, update.deleted_business_messages);
   if (update.callback_query) return callback(env, update.callback_query);
+  if (update.message && update.message.chat.type !== 'private')
+    return handleGroup(env, api, send, update.message, update.update_id);
   if (update.message) return privateCommand(env, update.message);
 }
 
@@ -311,5 +315,8 @@ export default {
       console.error('Telegram webhook failed:', String(error));
       return new Response('Retry', { status: 500 });
     }
+  },
+  async scheduled(_event, env) {
+    await scheduled(env, send);
   },
 };
