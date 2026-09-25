@@ -639,33 +639,18 @@ async def business_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if action == "status":
         connection = await resolve_owner_business_connection(context, owner_id)
         if connection and connection["is_enabled"]:
-            try:
-                connection = await sync_business_connection(
-                    context,
-                    connection["connection_id"],
-                )
-                bc = await context.bot.get_business_connection(connection["connection_id"])
-                rights = bc.rights
-                can_reply = bool(rights and getattr(rights, "can_reply", False))
-                can_delete_all = bool(
-                    rights and getattr(rights, "can_delete_all_messages", False)
-                )
-                can_delete_sent = bool(
-                    rights and getattr(rights, "can_delete_sent_messages", False)
-                )
-                text = (
-                    "✅ Telegram Business подключён.\n\n"
-                    f"💬 Ответы/редактирование: {'✅' if can_reply else '❌'}\n"
-                    f"🗑 Удаление входящих: {'✅' if can_delete_all else '❌'}\n"
-                    f"🧹 Удаление исходящих бота: {'✅' if can_delete_sent else '❌'}\n\n"
-                    "Показываются права именно самого нового активного "
-                    "Business-подключения Telegram."
-                )
-            except Exception:
-                text = (
-                    "⚠️ Подключение найдено, но Telegram не дал прочитать его права. "
-                    "Переподключи бота в Telegram Business."
-                )
+            can_reply = bool(connection["can_reply"])
+            can_delete_all = bool(connection["can_delete_all"])
+            can_delete_sent = bool(connection["can_delete_sent"])
+            updated_at = int(connection["updated_at"] or 0)
+            age = max(0, int(time_module.time()) - updated_at)
+            text = (
+                "✅ Telegram Business подключён.\n\n"
+                f"💬 Ответы/редактирование: {'✅' if can_reply else '❌'}\n"
+                f"🗑 Удаление входящих: {'✅' if can_delete_all else '❌'}\n"
+                f"🧹 Удаление исходящих бота: {'✅' if can_delete_sent else '❌'}\n\n"
+                f"Последнее обновление прав от Telegram: {age} сек. назад."
+            )
         else:
             text = (
                 "❌ Бот пока не получил Business-подключение.\n\n"
@@ -753,6 +738,15 @@ async def business_connection_update(update: Update, context: ContextTypes.DEFAU
             ),
         )
     ensure_business_settings(bc.user.id)
+    log.info(
+        "BusinessConnection update owner=%s enabled=%s rights(reply=%s read=%s delete_sent=%s delete_all=%s)",
+        bc.user.id,
+        bool(bc.is_enabled),
+        bool(can_reply),
+        bool(can_read),
+        bool(can_delete_sent),
+        bool(can_delete_all),
+    )
     try:
         await context.bot.send_message(
             chat_id=bc.user_chat_id,
@@ -815,13 +809,8 @@ async def business_chat_callback(update: Update, context: ContextTypes.DEFAULT_T
         return
 
     if action == "mute":
-        try:
-            bc = await context.bot.get_business_connection(business_connection_id)
-            can_delete_all = bool(
-                bc.rights and getattr(bc.rights, "can_delete_all_messages", False)
-            )
-        except Exception:
-            can_delete_all = False
+        current = get_business_connection(business_connection_id)
+        can_delete_all = bool(current and current["can_delete_all"])
 
         if not can_delete_all:
             await q.answer(
@@ -850,8 +839,19 @@ async def business_chat_callback(update: Update, context: ContextTypes.DEFAULT_T
 
 
 
-async def sync_business_connection(context: ContextTypes.DEFAULT_TYPE, connection_id: str):
-    """Refresh one Business connection from Telegram and make it the newest row."""
+async def bootstrap_business_connection(context: ContextTypes.DEFAULT_TYPE, connection_id: str):
+    """Fetch a Business connection only when we have never seen its update.
+
+    Telegram's MTProto docs explicitly say connection changes are delivered as
+    new BusinessConnection updates; getBusinessConnection is for recovering a
+    connection that wasn't cached yet. Re-fetching a known connection can
+    overwrite newer permission updates with stale rights, so never use this
+    helper for an already stored connection.
+    """
+    existing = get_business_connection(connection_id)
+    if existing:
+        return existing
+
     bc = await context.bot.get_business_connection(connection_id)
     rights = bc.rights
     can_reply = int(bool(getattr(rights, "can_reply", False))) if rights else 0
@@ -895,39 +895,17 @@ async def sync_business_connection(context: ContextTypes.DEFAULT_TYPE, connectio
 
 
 async def resolve_owner_business_connection(context: ContextTypes.DEFAULT_TYPE, owner_user_id: int):
-    """Resolve the newest ACTIVE Business connection for this owner.
-
-    A user can reconnect a bot and receive a new connection_id. Older builds
-    could keep an old active-looking row and /business would show its stale
-    rights. Refresh all known IDs, then choose the newest by Telegram's
-    connection establishment date.
-    """
+    """Return the newest active connection using BusinessConnection updates."""
     with db() as conn:
-        rows = conn.execute(
+        return conn.execute(
             """
-            SELECT connection_id FROM business_connections
-            WHERE owner_user_id=?
+            SELECT * FROM business_connections
+            WHERE owner_user_id=? AND is_enabled=1
             ORDER BY established_at DESC, updated_at DESC
+            LIMIT 1
             """,
             (owner_user_id,),
-        ).fetchall()
-
-    best = None
-    best_date = -1
-    for row in rows:
-        connection_id = row["connection_id"]
-        try:
-            current = await sync_business_connection(context, connection_id)
-        except Exception:
-            continue
-        if not current or not current["is_enabled"]:
-            continue
-        established = int(current["established_at"] or 0)
-        if established > best_date:
-            best = current
-            best_date = established
-
-    return best
+        ).fetchone()
 
 
 async def business_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -935,19 +913,15 @@ async def business_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not msg or not msg.business_connection_id:
         return
 
-    try:
-        # Refresh on EVERY Business message. Telegram may keep the same
-        # connection_id when permissions are changed, and older builds kept
-        # stale rights in SQLite. This also makes the connection that actually
-        # delivered the message the newest one used by /business.
-        connection = await sync_business_connection(
-            context,
-            msg.business_connection_id,
-        )
-    except Exception:
-        log.exception("Could not refresh Business connection from incoming message")
-        connection = get_business_connection(msg.business_connection_id)
-        if not connection:
+    connection = get_business_connection(msg.business_connection_id)
+    if not connection:
+        try:
+            connection = await bootstrap_business_connection(
+                context,
+                msg.business_connection_id,
+            )
+        except Exception:
+            log.exception("Could not bootstrap unknown Business connection")
             return
 
     if not connection or not connection["is_enabled"]:
