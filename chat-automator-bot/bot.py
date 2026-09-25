@@ -106,6 +106,7 @@ def init_db():
                 can_read INTEGER NOT NULL DEFAULT 0,
                 can_delete_sent INTEGER NOT NULL DEFAULT 0,
                 can_delete_all INTEGER NOT NULL DEFAULT 0,
+                established_at INTEGER NOT NULL DEFAULT 0,
                 updated_at INTEGER NOT NULL
             );
 
@@ -172,6 +173,7 @@ def init_db():
             "ALTER TABLE business_connections ADD COLUMN can_read INTEGER NOT NULL DEFAULT 0",
             "ALTER TABLE business_connections ADD COLUMN can_delete_sent INTEGER NOT NULL DEFAULT 0",
             "ALTER TABLE business_connections ADD COLUMN can_delete_all INTEGER NOT NULL DEFAULT 0",
+            "ALTER TABLE business_connections ADD COLUMN established_at INTEGER NOT NULL DEFAULT 0",
         ]:
             try:
                 c.execute(statement)
@@ -247,6 +249,19 @@ def set_business_setting(owner_user_id: int, field: str, value):
         )
 
 
+def business_connection_unix_date(bc) -> int:
+    value = getattr(bc, "date", None)
+    if value is None:
+        return 0
+    try:
+        return int(value.timestamp())
+    except AttributeError:
+        try:
+            return int(value)
+        except Exception:
+            return 0
+
+
 def get_business_connection(connection_id: str):
     with db() as c:
         return c.execute(
@@ -261,7 +276,7 @@ def owner_business_connection(owner_user_id: int):
             """
             SELECT * FROM business_connections
             WHERE owner_user_id=?
-            ORDER BY updated_at DESC
+            ORDER BY established_at DESC, updated_at DESC
             LIMIT 1
             """,
             (owner_user_id,),
@@ -583,7 +598,7 @@ async def business_menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return
     owner_id = update.effective_user.id
     ensure_business_settings(owner_id)
-    connection = owner_business_connection(owner_id)
+    connection = await resolve_owner_business_connection(context, owner_id)
     status = "✅ подключён" if connection and connection["is_enabled"] else "❌ ещё не подключён"
     await update.effective_message.reply_text(
         "💼 Автоматизация личных чатов\n\n"
@@ -622,7 +637,7 @@ async def business_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return
 
     if action == "status":
-        connection = owner_business_connection(owner_id)
+        connection = await resolve_owner_business_connection(context, owner_id)
         if connection and connection["is_enabled"]:
             try:
                 connection = await sync_business_connection(
@@ -641,10 +656,10 @@ async def business_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 text = (
                     "✅ Telegram Business подключён.\n\n"
                     f"💬 Ответы/редактирование: {'✅' if can_reply else '❌'}\n"
-                    f"🗑 Удаление всех сообщений: {'✅' if can_delete_all else '❌'}\n"
-                    f"🧹 Удаление сообщений бота: {'✅' if can_delete_sent else '❌'}\n\n"
-                    "Для .mute нужны права «Ответы на сообщения» и "
-                    "«Удаление сообщений»."
+                    f"🗑 Удаление входящих: {'✅' if can_delete_all else '❌'}\n"
+                    f"🧹 Удаление исходящих бота: {'✅' if can_delete_sent else '❌'}\n\n"
+                    "Показываются права именно самого нового активного "
+                    "Business-подключения Telegram."
                 )
             except Exception:
                 text = (
@@ -711,8 +726,8 @@ async def business_connection_update(update: Update, context: ContextTypes.DEFAU
             """
             INSERT INTO business_connections(
                 connection_id,owner_user_id,user_chat_id,is_enabled,
-                can_reply,can_read,can_delete_sent,can_delete_all,updated_at
-            ) VALUES(?,?,?,?,?,?,?,?,?)
+                can_reply,can_read,can_delete_sent,can_delete_all,established_at,updated_at
+            ) VALUES(?,?,?,?,?,?,?,?,?,?)
             ON CONFLICT(connection_id) DO UPDATE SET
                 owner_user_id=excluded.owner_user_id,
                 user_chat_id=excluded.user_chat_id,
@@ -721,6 +736,7 @@ async def business_connection_update(update: Update, context: ContextTypes.DEFAU
                 can_read=excluded.can_read,
                 can_delete_sent=excluded.can_delete_sent,
                 can_delete_all=excluded.can_delete_all,
+                established_at=excluded.established_at,
                 updated_at=excluded.updated_at
             """,
             (
@@ -732,6 +748,7 @@ async def business_connection_update(update: Update, context: ContextTypes.DEFAU
                 can_read,
                 can_delete_sent,
                 can_delete_all,
+                business_connection_unix_date(bc),
                 int(time_module.time()),
             ),
         )
@@ -847,8 +864,8 @@ async def sync_business_connection(context: ContextTypes.DEFAULT_TYPE, connectio
             """
             INSERT INTO business_connections(
                 connection_id,owner_user_id,user_chat_id,is_enabled,
-                can_reply,can_read,can_delete_sent,can_delete_all,updated_at
-            ) VALUES(?,?,?,?,?,?,?,?,?)
+                can_reply,can_read,can_delete_sent,can_delete_all,established_at,updated_at
+            ) VALUES(?,?,?,?,?,?,?,?,?,?)
             ON CONFLICT(connection_id) DO UPDATE SET
                 owner_user_id=excluded.owner_user_id,
                 user_chat_id=excluded.user_chat_id,
@@ -857,6 +874,7 @@ async def sync_business_connection(context: ContextTypes.DEFAULT_TYPE, connectio
                 can_read=excluded.can_read,
                 can_delete_sent=excluded.can_delete_sent,
                 can_delete_all=excluded.can_delete_all,
+                established_at=excluded.established_at,
                 updated_at=excluded.updated_at
             """,
             (
@@ -868,11 +886,48 @@ async def sync_business_connection(context: ContextTypes.DEFAULT_TYPE, connectio
                 can_read,
                 can_delete_sent,
                 can_delete_all,
+                business_connection_unix_date(bc),
                 int(time_module.time()),
             ),
         )
     ensure_business_settings(bc.user.id)
     return get_business_connection(connection_id)
+
+
+async def resolve_owner_business_connection(context: ContextTypes.DEFAULT_TYPE, owner_user_id: int):
+    """Resolve the newest ACTIVE Business connection for this owner.
+
+    A user can reconnect a bot and receive a new connection_id. Older builds
+    could keep an old active-looking row and /business would show its stale
+    rights. Refresh all known IDs, then choose the newest by Telegram's
+    connection establishment date.
+    """
+    with db() as conn:
+        rows = conn.execute(
+            """
+            SELECT connection_id FROM business_connections
+            WHERE owner_user_id=?
+            ORDER BY established_at DESC, updated_at DESC
+            """,
+            (owner_user_id,),
+        ).fetchall()
+
+    best = None
+    best_date = -1
+    for row in rows:
+        connection_id = row["connection_id"]
+        try:
+            current = await sync_business_connection(context, connection_id)
+        except Exception:
+            continue
+        if not current or not current["is_enabled"]:
+            continue
+        established = int(current["established_at"] or 0)
+        if established > best_date:
+            best = current
+            best_date = established
+
+    return best
 
 
 async def business_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
