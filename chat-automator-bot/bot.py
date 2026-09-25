@@ -492,8 +492,8 @@ async def render_mute_control(context: ContextTypes.DEFAULT_TYPE, owner_user_id:
             ),
         )
         return True
-    except Exception:
-        log.debug("Mute control cannot be rendered yet", exc_info=True)
+    except Exception as exc:
+        log.warning("Mute control render failed: %s", str(exc))
         return False
 
 
@@ -932,11 +932,31 @@ async def business_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
             rendered = await render_mute_control(context, owner_id, msg.chat_id)
             if not rendered:
                 try:
+                    bc = await context.bot.get_business_connection(msg.business_connection_id)
+                    rights = bc.rights
+                    can_reply = bool(rights and getattr(rights, "can_reply", False))
+                    can_delete_all = bool(
+                        rights and getattr(rights, "can_delete_all_messages", False)
+                    )
+                except Exception:
+                    can_reply = False
+                    can_delete_all = False
+
+                try:
                     await context.bot.send_message(
                         chat_id=int(connection["user_chat_id"]),
                         text=(
-                            "🔇 Мут включён. Кнопка появится в переписке, "
-                            "как только Telegram разрешит боту редактирование этого Business-чата."
+                            "🔇 Мут включён.\n\n"
+                            f"💬 Ответы/редактирование: {'✅' if can_reply else '❌'}\n"
+                            f"🗑 Удаление сообщений: {'✅' if can_delete_all else '❌'}\n\n"
+                            "Telegram пока не разрешил заменить .mute кнопкой прямо в этой переписке. "
+                            "Кнопка ниже управляет мутом сразу."
+                        ),
+                        reply_markup=InlineKeyboardMarkup(
+                            [[InlineKeyboardButton(
+                                "🔊 Говори",
+                                callback_data=f"bizowner:unmute:{owner_id}:{msg.chat_id}",
+                            )]]
                         ),
                     )
                 except Exception:
