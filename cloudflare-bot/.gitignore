@@ -1,0 +1,5 @@
+.wrangler/
+.dev.vars
+d1-data.sql
+*.sqlite
+*.sqlite3
