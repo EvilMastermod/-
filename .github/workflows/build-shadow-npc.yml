@@ -18,7 +18,7 @@ jobs:
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-java@v4
+      - uses: actions/setup-java@v5
         with:
           distribution: temurin
           java-version: '21'
@@ -37,12 +37,28 @@ jobs:
           with zipfile.ZipFile(p) as z:
               names=set(z.namelist())
               assert 'com/rnmd/shadownpc/ShadowNpcMod.class' in names
-              assert 'com/rnmd/shadownpc/item/NpcEditorItem.class' in names
+              assert 'com/rnmd/shadownpc/client/ShadowNpcClient.class' in names
+              assert 'com/rnmd/shadownpc/client/screen/NpcEditorScreen.class' in names
+              assert 'assets/shadow_npc/textures/item/npc_staff.png' in names
               assert json.loads(z.read('fabric.mod.json'))['id']=='shadow_npc'
           print(p)
           PY
+      - name: Launch client smoke test
+        run: |
+          mkdir -p shadow-npc/run
+          printf 'onboardAccessibility:false
+' > shadow-npc/run/options.txt
+          timeout 300s xvfb-run -a gradle -p shadow-npc runClient --no-daemon > shadow-npc/smoke.log 2>&1 || true
+          grep SHADOW_NPC_CLIENT_OK shadow-npc/smoke.log
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: ShadowNPC-build-logs
+          path: |
+            shadow-npc/smoke.log
+            shadow-npc/run/logs/latest.log
       - uses: actions/upload-artifact@v4
         with:
           name: ShadowNPC-Fabric-1.21.11
-          path: shadow-npc/build/libs/ShadowNPC-Fabric-1.21.11-0.1.0.jar
+          path: shadow-npc/build/libs/ShadowNPC-Fabric-1.21.11-0.2.0.jar
           if-no-files-found: error

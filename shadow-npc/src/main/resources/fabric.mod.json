@@ -3,12 +3,15 @@
   "id": "shadow_npc",
   "version": "${version}",
   "name": "Shadow NPC",
-  "description": "Simple NPC editor for Minecraft Fabric 1.21.11.",
+  "description": "NPC creator and editor with a custom staff for Minecraft Fabric 1.21.11.",
   "license": "MIT",
   "environment": "*",
   "entrypoints": {
     "main": [
       "com.rnmd.shadownpc.ShadowNpcMod"
+    ],
+    "client": [
+      "com.rnmd.shadownpc.client.ShadowNpcClient"
     ]
   },
   "depends": {

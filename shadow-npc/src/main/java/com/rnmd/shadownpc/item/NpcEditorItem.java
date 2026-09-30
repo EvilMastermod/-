@@ -1,8 +1,11 @@
 package com.rnmd.shadownpc.item;
 
 import com.rnmd.shadownpc.NpcData;
+import com.rnmd.shadownpc.ShadowNpcMod;
+import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.npc.villager.Villager;
@@ -32,17 +35,16 @@ public final class NpcEditorItem extends Item {
         npc.setCustomNameVisible(true);
         NpcData.markNpc(npc);
         NpcData.setDialog(npc, NpcData.DEFAULT_DIALOG);
+        NpcData.setLookAtPlayer(npc, true);
 
         if (!level.addFreshEntity(npc)) {
             return InteractionResult.FAIL;
         }
 
-        if (context.getPlayer() != null) {
-            context.getPlayer().displayClientMessage(
-                    Component.literal("§aNPC создан. §fИмя: биркой. Диалог: переименуй Редактор NPC в наковальне и нажми им по NPC."),
-                    false
-            );
+        if (context.getPlayer() instanceof ServerPlayer player) {
+            ServerPlayNetworking.send(player, ShadowNpcMod.editorPayload(npc));
         }
+
         return InteractionResult.SUCCESS;
     }
 }
