@@ -5,13 +5,14 @@ import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.event.player.UseEntityCallback;
 import net.fabricmc.fabric.api.itemgroup.v1.ItemGroupEvents;
 import net.minecraft.core.Registry;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.InteractionResult;
-import net.minecraft.world.entity.npc.Villager;
+import net.minecraft.world.entity.npc.villager.Villager;
 import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -60,17 +61,20 @@ public final class ShadowNpcMod implements ModInitializer {
                 if (player.isShiftKeyDown()) {
                     npc.discard();
                     player.displayClientMessage(Component.literal("§cNPC удалён."), false);
-                } else if (held.hasCustomHoverName()) {
-                    NpcData.setDialog(npc, held.getHoverName().getString());
-                    player.displayClientMessage(
-                            Component.literal("§aДиалог NPC сохранён: §f" + NpcData.getDialog(npc)),
-                            false
-                    );
                 } else {
-                    player.displayClientMessage(
-                            Component.literal("§eПереименуй Редактор NPC в наковальне в нужную реплику и нажми им по NPC. §7Shift+ПКМ — удалить."),
-                            false
-                    );
+                    Component customName = held.get(DataComponents.CUSTOM_NAME);
+                    if (customName != null) {
+                        NpcData.setDialog(npc, customName.getString());
+                        player.displayClientMessage(
+                                Component.literal("§aДиалог NPC сохранён: §f" + NpcData.getDialog(npc)),
+                                false
+                        );
+                    } else {
+                        player.displayClientMessage(
+                                Component.literal("§eПереименуй Редактор NPC в наковальне в нужную реплику и нажми им по NPC. §7Shift+ПКМ — удалить."),
+                                false
+                        );
+                    }
                 }
                 return InteractionResult.SUCCESS;
             }
