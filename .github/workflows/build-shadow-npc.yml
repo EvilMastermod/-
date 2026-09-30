@@ -47,8 +47,23 @@ jobs:
         run: |
           mkdir -p shadow-npc/run
           printf 'onboardAccessibility:false\n' > shadow-npc/run/options.txt
-          timeout 300s xvfb-run -a gradle -p shadow-npc runClient --no-daemon > shadow-npc/smoke.log 2>&1 || true
-          grep SHADOW_NPC_CLIENT_OK shadow-npc/smoke.log
+          xvfb-run -a gradle -p shadow-npc runClient --no-daemon > shadow-npc/smoke.log 2>&1 &
+          PID=$!
+          for i in $(seq 1 60); do
+            if grep -q SHADOW_NPC_CLIENT_OK shadow-npc/smoke.log 2>/dev/null; then
+              kill $PID 2>/dev/null || true
+              wait $PID 2>/dev/null || true
+              exit 0
+            fi
+            if ! kill -0 $PID 2>/dev/null; then
+              cat shadow-npc/smoke.log
+              exit 1
+            fi
+            sleep 1
+          done
+          cat shadow-npc/smoke.log
+          kill $PID 2>/dev/null || true
+          exit 1
       - uses: actions/upload-artifact@v4
         if: always()
         with:
