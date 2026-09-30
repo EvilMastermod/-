@@ -33,8 +33,11 @@ public final class NpcEditorItem extends Item {
         npc.setInvulnerable(true);
         npc.setCustomName(Component.literal("NPC"));
         npc.setCustomNameVisible(true);
+
         NpcData.markNpc(npc);
         NpcData.setDialog(npc, NpcData.DEFAULT_DIALOG);
+        NpcData.setAnswer(npc, NpcData.DEFAULT_ANSWER);
+        NpcData.setSkin(npc, NpcData.DEFAULT_SKIN);
         NpcData.setLookAtPlayer(npc, true);
 
         if (!level.addFreshEntity(npc)) {

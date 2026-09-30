@@ -39,6 +39,7 @@ jobs:
               assert 'com/rnmd/shadownpc/ShadowNpcMod.class' in names
               assert 'com/rnmd/shadownpc/client/ShadowNpcClient.class' in names
               assert 'com/rnmd/shadownpc/client/screen/NpcEditorScreen.class' in names
+              assert 'com/rnmd/shadownpc/client/screen/DialogueScreen.class' in names
               assert 'assets/shadow_npc/textures/item/npc_staff.png' in names
               assert json.loads(z.read('fabric.mod.json'))['id']=='shadow_npc'
           print(p)
@@ -74,5 +75,5 @@ jobs:
       - uses: actions/upload-artifact@v4
         with:
           name: ShadowNPC-Fabric-1.21.11
-          path: shadow-npc/build/libs/ShadowNPC-Fabric-1.21.11-0.2.0.jar
+          path: shadow-npc/build/libs/ShadowNPC-Fabric-1.21.11-0.3.0.jar
           if-no-files-found: error

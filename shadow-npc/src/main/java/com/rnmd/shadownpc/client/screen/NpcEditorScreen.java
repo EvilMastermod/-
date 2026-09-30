@@ -10,144 +10,149 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 
 public final class NpcEditorScreen extends Screen {
+    private static final String[] SKINS = {"plains", "desert", "jungle", "savanna", "snow", "swamp", "taiga"};
+    private static final String[] SKIN_NAMES = {"Обычный", "Пустыня", "Джунгли", "Саванна", "Снег", "Болото", "Тайга"};
+
+    private enum Tab { NAME_SKIN, DIALOGS }
+
     private final OpenNpcEditorPayload data;
+    private Tab tab = Tab.NAME_SKIN;
 
     private EditBox nameBox;
     private EditBox dialogBox;
+    private EditBox answerBox;
 
-    private boolean showName;
-    private boolean invulnerable;
-    private boolean glowing;
-    private boolean baby;
-    private boolean lookAtPlayer;
-
+    private Button nameTabButton;
+    private Button dialogTabButton;
+    private Button skinButton;
     private Button showNameButton;
     private Button invulnerableButton;
-    private Button glowingButton;
-    private Button babyButton;
-    private Button lookButton;
+
+    private int skinIndex;
+    private boolean showName;
+    private boolean invulnerable;
 
     public NpcEditorScreen(OpenNpcEditorPayload data) {
         super(Component.literal("Редактор NPC"));
         this.data = data;
+        this.skinIndex = findSkin(data.skin());
         this.showName = data.showName();
         this.invulnerable = data.invulnerable();
-        this.glowing = data.glowing();
-        this.baby = data.baby();
-        this.lookAtPlayer = data.lookAtPlayer();
     }
 
-    private int panelWidth() {
-        return Math.min(360, Math.max(300, this.width - 24));
-    }
-
-    private int panelHeight() {
-        return Math.min(290, Math.max(255, this.height - 24));
-    }
-
-    private int left() {
-        return (this.width - panelWidth()) / 2;
-    }
-
-    private int top() {
-        return Math.max(12, (this.height - panelHeight()) / 2);
-    }
+    private int panelWidth() { return 270; }
+    private int panelHeight() { return 186; }
+    private int left() { return (this.width - panelWidth()) / 2; }
+    private int top() { return Math.max(8, (this.height - panelHeight()) / 2); }
 
     @Override
     protected void init() {
-        int left = left();
-        int top = top();
-        int width = panelWidth();
-        int fieldWidth = width - 32;
+        int l = left();
+        int t = top();
+        int fieldWidth = panelWidth() - 24;
 
-        this.nameBox = new EditBox(this.font, left + 16, top + 46, fieldWidth, 20, Component.literal("Название"));
+        this.nameTabButton = this.addRenderableWidget(Button.builder(Component.literal("Название и скин"), b -> {
+            this.tab = Tab.NAME_SKIN;
+            refreshTab();
+        }).bounds(l + 12, t + 10, 120, 20).build());
+
+        this.dialogTabButton = this.addRenderableWidget(Button.builder(Component.literal("Диалоги"), b -> {
+            this.tab = Tab.DIALOGS;
+            refreshTab();
+        }).bounds(l + 138, t + 10, 120, 20).build());
+
+        this.nameBox = this.addRenderableWidget(new EditBox(this.font, l + 12, t + 57, fieldWidth, 20, Component.literal("Название")));
         this.nameBox.setMaxLength(48);
         this.nameBox.setValue(this.data.name());
-        this.nameBox.setHint(Component.literal("Название NPC"));
-        this.addRenderableWidget(this.nameBox);
 
-        this.dialogBox = new EditBox(this.font, left + 16, top + 92, fieldWidth, 20, Component.literal("Диалог"));
+        this.skinButton = this.addRenderableWidget(Button.builder(Component.empty(), b -> {
+            this.skinIndex = (this.skinIndex + 1) % SKINS.length;
+            refreshSkinButton();
+        }).bounds(l + 12, t + 88, fieldWidth, 20).build());
+
+        this.showNameButton = this.addRenderableWidget(Button.builder(Component.empty(), b -> {
+            this.showName = !this.showName;
+            refreshToggleButtons();
+        }).bounds(l + 12, t + 114, 120, 20).build());
+
+        this.invulnerableButton = this.addRenderableWidget(Button.builder(Component.empty(), b -> {
+            this.invulnerable = !this.invulnerable;
+            refreshToggleButtons();
+        }).bounds(l + 138, t + 114, 120, 20).build());
+
+        this.dialogBox = this.addRenderableWidget(new EditBox(this.font, l + 12, t + 57, fieldWidth, 20, Component.literal("Фраза NPC")));
         this.dialogBox.setMaxLength(180);
         this.dialogBox.setValue(this.data.dialog());
-        this.dialogBox.setHint(Component.literal("Что NPC говорит по ПКМ"));
-        this.addRenderableWidget(this.dialogBox);
 
-        int half = (fieldWidth - 6) / 2;
-        int y = top + 128;
+        this.answerBox = this.addRenderableWidget(new EditBox(this.font, l + 12, t + 101, fieldWidth, 20, Component.literal("Ответ игрока")));
+        this.answerBox.setMaxLength(180);
+        this.answerBox.setValue(this.data.answer());
 
-        this.showNameButton = addToggle(left + 16, y, half, "Имя видно", this.showName, () -> {
-            this.showName = !this.showName;
-            refreshToggles();
-        });
+        int footerY = t + panelHeight() - 28;
+        this.addRenderableWidget(Button.builder(Component.literal("Сохранить"), b -> save())
+                .bounds(l + 12, footerY, 78, 20).build());
+        this.addRenderableWidget(Button.builder(Component.literal("Удалить"), b -> deleteNpc())
+                .bounds(l + 96, footerY, 78, 20).build());
+        this.addRenderableWidget(Button.builder(Component.literal("Отмена"), b -> closeScreen())
+                .bounds(l + 180, footerY, 78, 20).build());
 
-        this.invulnerableButton = addToggle(left + 22 + half, y, half, "Неуязвим", this.invulnerable, () -> {
-            this.invulnerable = !this.invulnerable;
-            refreshToggles();
-        });
-
-        y += 24;
-        this.glowingButton = addToggle(left + 16, y, half, "Свечение", this.glowing, () -> {
-            this.glowing = !this.glowing;
-            refreshToggles();
-        });
-
-        this.babyButton = addToggle(left + 22 + half, y, half, "Ребёнок", this.baby, () -> {
-            this.baby = !this.baby;
-            refreshToggles();
-        });
-
-        y += 24;
-        this.lookButton = addToggle(left + 16, y, fieldWidth, "Смотреть на ближайшего игрока", this.lookAtPlayer, () -> {
-            this.lookAtPlayer = !this.lookAtPlayer;
-            refreshToggles();
-        });
-
-        int footerY = top + panelHeight() - 34;
-        int buttonWidth = (fieldWidth - 12) / 3;
-
-        this.addRenderableWidget(Button.builder(Component.literal("Сохранить"), button -> save())
-                .bounds(left + 16, footerY, buttonWidth, 20).build());
-
-        this.addRenderableWidget(Button.builder(Component.literal("Удалить"), button -> deleteNpc())
-                .bounds(left + 22 + buttonWidth, footerY, buttonWidth, 20).build());
-
-        this.addRenderableWidget(Button.builder(Component.literal("Отмена"), button -> closeScreen())
-                .bounds(left + 28 + buttonWidth * 2, footerY, buttonWidth, 20).build());
-
-        refreshToggles();
-        this.setInitialFocus(this.nameBox);
+        refreshSkinButton();
+        refreshToggleButtons();
+        refreshTab();
     }
 
-    private Button addToggle(int x, int y, int width, String label, boolean value, Runnable click) {
-        Button button = Button.builder(toggleText(label, value), b -> click.run())
-                .bounds(x, y, width, 20)
-                .build();
-        this.addRenderableWidget(button);
-        return button;
+    private int findSkin(String skin) {
+        for (int i = 0; i < SKINS.length; i++) {
+            if (SKINS[i].equalsIgnoreCase(skin)) return i;
+        }
+        return 0;
     }
 
-    private Component toggleText(String label, boolean enabled) {
-        return Component.literal((enabled ? "§a[ВКЛ] §f" : "§c[ВЫКЛ] §f") + label);
+    private void refreshSkinButton() {
+        if (this.skinButton != null) {
+            this.skinButton.setMessage(Component.literal("Скин: " + SKIN_NAMES[this.skinIndex]));
+        }
     }
 
-    private void refreshToggles() {
-        if (this.showNameButton != null) this.showNameButton.setMessage(toggleText("Имя видно", this.showName));
-        if (this.invulnerableButton != null) this.invulnerableButton.setMessage(toggleText("Неуязвим", this.invulnerable));
-        if (this.glowingButton != null) this.glowingButton.setMessage(toggleText("Свечение", this.glowing));
-        if (this.babyButton != null) this.babyButton.setMessage(toggleText("Ребёнок", this.baby));
-        if (this.lookButton != null) this.lookButton.setMessage(toggleText("Смотреть на ближайшего игрока", this.lookAtPlayer));
+    private void refreshToggleButtons() {
+        if (this.showNameButton != null) {
+            this.showNameButton.setMessage(Component.literal((this.showName ? "§a" : "§c") + "Имя: " + (this.showName ? "Вкл" : "Выкл")));
+        }
+        if (this.invulnerableButton != null) {
+            this.invulnerableButton.setMessage(Component.literal((this.invulnerable ? "§a" : "§c") + "Неуязвим"));
+        }
+    }
+
+    private void refreshTab() {
+        boolean nameTab = this.tab == Tab.NAME_SKIN;
+
+        this.nameTabButton.active = !nameTab;
+        this.dialogTabButton.active = nameTab;
+
+        this.nameBox.visible = nameTab;
+        this.nameBox.setEditable(nameTab);
+        this.skinButton.visible = nameTab;
+        this.skinButton.active = nameTab;
+        this.showNameButton.visible = nameTab;
+        this.showNameButton.active = nameTab;
+        this.invulnerableButton.visible = nameTab;
+        this.invulnerableButton.active = nameTab;
+
+        this.dialogBox.visible = !nameTab;
+        this.dialogBox.setEditable(!nameTab);
+        this.answerBox.visible = !nameTab;
+        this.answerBox.setEditable(!nameTab);
     }
 
     private void save() {
         ClientPlayNetworking.send(new SaveNpcPayload(
                 this.data.entityId(),
                 this.nameBox.getValue(),
+                SKINS[this.skinIndex],
                 this.dialogBox.getValue(),
+                this.answerBox.getValue(),
                 this.showName,
                 this.invulnerable,
-                this.glowing,
-                this.baby,
-                this.lookAtPlayer,
                 false
         ));
         closeScreen();
@@ -157,12 +162,11 @@ public final class NpcEditorScreen extends Screen {
         ClientPlayNetworking.send(new SaveNpcPayload(
                 this.data.entityId(),
                 this.nameBox.getValue(),
+                SKINS[this.skinIndex],
                 this.dialogBox.getValue(),
+                this.answerBox.getValue(),
                 this.showName,
                 this.invulnerable,
-                this.glowing,
-                this.baby,
-                this.lookAtPlayer,
                 true
         ));
         closeScreen();
@@ -179,14 +183,13 @@ public final class NpcEditorScreen extends Screen {
 
     @Override
     public void renderBackground(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
-        graphics.fill(0, 0, this.width, this.height, 0xB0000000);
+        graphics.fill(0, 0, this.width, this.height, 0xA0000000);
         int l = left();
         int t = top();
         int r = l + panelWidth();
         int b = t + panelHeight();
-        graphics.fill(l, t, r, b, 0xEE11151D);
-        graphics.fill(l, t, r, t + 2, 0xFF36A8FF);
-        graphics.fill(l, b - 2, r, b, 0xFF143D66);
+        graphics.fill(l, t, r, b, 0xF0141820);
+        graphics.fill(l, t, r, t + 2, 0xFF3BA7FF);
     }
 
     @Override
@@ -194,9 +197,15 @@ public final class NpcEditorScreen extends Screen {
         super.render(graphics, mouseX, mouseY, partialTick);
         int l = left();
         int t = top();
-        graphics.drawCenteredString(this.font, this.title, this.width / 2, t + 14, 0xFFFFFFFF);
-        graphics.drawString(this.font, "Название NPC", l + 16, t + 34, 0xFFB8C7DB, false);
-        graphics.drawString(this.font, "Диалог по ПКМ", l + 16, t + 80, 0xFFB8C7DB, false);
-        graphics.drawString(this.font, "NPC всегда стоит на месте", l + 16, t + 202, 0xFF78889B, false);
+
+        graphics.drawCenteredString(this.font, this.title, this.width / 2, t + 36, 0xFFFFFFFF);
+
+        if (this.tab == Tab.NAME_SKIN) {
+            graphics.drawString(this.font, "Название", l + 12, t + 47, 0xFFB9CBE0, false);
+            graphics.drawString(this.font, "Нажимай на кнопку скина для выбора", l + 12, t + 79, 0xFF78899B, false);
+        } else {
+            graphics.drawString(this.font, "Что говорит NPC", l + 12, t + 47, 0xFFB9CBE0, false);
+            graphics.drawString(this.font, "Кнопка-ответ игрока", l + 12, t + 91, 0xFFB9CBE0, false);
+        }
     }
 }

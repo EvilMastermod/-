@@ -1,6 +1,7 @@
 package com.rnmd.shadownpc;
 
 import com.rnmd.shadownpc.item.NpcEditorItem;
+import com.rnmd.shadownpc.network.OpenDialoguePayload;
 import com.rnmd.shadownpc.network.OpenNpcEditorPayload;
 import com.rnmd.shadownpc.network.SaveNpcPayload;
 import net.fabricmc.api.ModInitializer;
@@ -20,6 +21,7 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.npc.villager.Villager;
+import net.minecraft.world.entity.npc.villager.VillagerType;
 import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -47,18 +49,18 @@ public final class ShadowNpcMod implements ModInitializer {
         return new OpenNpcEditorPayload(
                 npc.getId(),
                 npc.getName().getString(),
+                NpcData.getSkin(npc),
                 NpcData.getDialog(npc),
+                NpcData.getAnswer(npc),
                 npc.isCustomNameVisible(),
-                npc.isInvulnerable(),
-                npc.isCurrentlyGlowing(),
-                npc.isBaby(),
-                NpcData.shouldLookAtPlayer(npc)
+                npc.isInvulnerable()
         );
     }
 
     @Override
     public void onInitialize() {
         PayloadTypeRegistry.playS2C().register(OpenNpcEditorPayload.TYPE, OpenNpcEditorPayload.CODEC);
+        PayloadTypeRegistry.playS2C().register(OpenDialoguePayload.TYPE, OpenDialoguePayload.CODEC);
         PayloadTypeRegistry.playC2S().register(SaveNpcPayload.TYPE, SaveNpcPayload.CODEC);
 
         ServerPlayNetworking.registerGlobalReceiver(SaveNpcPayload.TYPE, (payload, context) -> {
@@ -81,13 +83,15 @@ public final class ShadowNpcMod implements ModInitializer {
             npc.setCustomName(Component.literal(name));
             npc.setCustomNameVisible(payload.showName());
             npc.setInvulnerable(payload.invulnerable());
-            npc.setGlowingTag(payload.glowing());
-            npc.setBaby(payload.baby());
             npc.setNoAi(true);
             npc.setPersistenceRequired();
 
+            String skin = normalizeSkin(payload.skin());
+            NpcData.setSkin(npc, skin);
+            npc.setVillagerData(npc.getVillagerData().withType(npc.level().registryAccess(), skinKey(skin)));
+
             NpcData.setDialog(npc, payload.dialog());
-            NpcData.setLookAtPlayer(npc, payload.lookAtPlayer());
+            NpcData.setAnswer(npc, payload.answer());
 
             player.displayClientMessage(Component.literal("§aNPC сохранён."), false);
         });
@@ -115,10 +119,13 @@ public final class ShadowNpcMod implements ModInitializer {
                 facePlayer(npc, player);
             }
 
-            player.displayClientMessage(
-                    Component.literal("§e" + npc.getName().getString() + ": §f" + NpcData.getDialog(npc)),
-                    false
-            );
+            if (player instanceof ServerPlayer serverPlayer) {
+                ServerPlayNetworking.send(serverPlayer, new OpenDialoguePayload(
+                        npc.getName().getString(),
+                        NpcData.getDialog(npc),
+                        NpcData.getAnswer(npc)
+                ));
+            }
             return InteractionResult.SUCCESS;
         });
 
@@ -141,6 +148,25 @@ public final class ShadowNpcMod implements ModInitializer {
                 if (nearest != null) facePlayer(npc, nearest);
             }
         });
+    }
+
+    private static String normalizeSkin(String skin) {
+        return switch (skin == null ? "" : skin.strip().toLowerCase()) {
+            case "desert", "jungle", "savanna", "snow", "swamp", "taiga" -> skin.strip().toLowerCase();
+            default -> "plains";
+        };
+    }
+
+    private static ResourceKey<VillagerType> skinKey(String skin) {
+        return switch (skin) {
+            case "desert" -> VillagerType.DESERT;
+            case "jungle" -> VillagerType.JUNGLE;
+            case "savanna" -> VillagerType.SAVANNA;
+            case "snow" -> VillagerType.SNOW;
+            case "swamp" -> VillagerType.SWAMP;
+            case "taiga" -> VillagerType.TAIGA;
+            default -> VillagerType.PLAINS;
+        };
     }
 
     private static void facePlayer(Villager npc, Entity target) {

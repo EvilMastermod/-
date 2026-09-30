@@ -9,12 +9,11 @@ import net.minecraft.resources.Identifier;
 public record OpenNpcEditorPayload(
         int entityId,
         String name,
+        String skin,
         String dialog,
+        String answer,
         boolean showName,
-        boolean invulnerable,
-        boolean glowing,
-        boolean baby,
-        boolean lookAtPlayer
+        boolean invulnerable
 ) implements CustomPacketPayload {
     public static final Type<OpenNpcEditorPayload> TYPE =
             new Type<>(Identifier.fromNamespaceAndPath(ShadowNpcMod.MOD_ID, "open_editor"));
@@ -24,20 +23,18 @@ public record OpenNpcEditorPayload(
                     (payload, buf) -> {
                         buf.writeVarInt(payload.entityId());
                         buf.writeUtf(payload.name(), 48);
+                        buf.writeUtf(payload.skin(), 24);
                         buf.writeUtf(payload.dialog(), 180);
+                        buf.writeUtf(payload.answer(), 180);
                         buf.writeBoolean(payload.showName());
                         buf.writeBoolean(payload.invulnerable());
-                        buf.writeBoolean(payload.glowing());
-                        buf.writeBoolean(payload.baby());
-                        buf.writeBoolean(payload.lookAtPlayer());
                     },
                     buf -> new OpenNpcEditorPayload(
                             buf.readVarInt(),
                             buf.readUtf(48),
+                            buf.readUtf(24),
                             buf.readUtf(180),
-                            buf.readBoolean(),
-                            buf.readBoolean(),
-                            buf.readBoolean(),
+                            buf.readUtf(180),
                             buf.readBoolean(),
                             buf.readBoolean()
                     )
