@@ -58,12 +58,12 @@ public final class ShadowNpcMod implements ModInitializer {
 
     @Override
     public void onInitialize() {
-        PayloadTypeRegistry.clientboundPlay().register(OpenNpcEditorPayload.TYPE, OpenNpcEditorPayload.CODEC);
-        PayloadTypeRegistry.serverboundPlay().register(SaveNpcPayload.TYPE, SaveNpcPayload.CODEC);
+        PayloadTypeRegistry.playS2C().register(OpenNpcEditorPayload.TYPE, OpenNpcEditorPayload.CODEC);
+        PayloadTypeRegistry.playC2S().register(SaveNpcPayload.TYPE, SaveNpcPayload.CODEC);
 
         ServerPlayNetworking.registerGlobalReceiver(SaveNpcPayload.TYPE, (payload, context) -> {
             ServerPlayer player = context.player();
-            Entity entity = player.serverLevel().getEntity(payload.entityId());
+            Entity entity = player.level().getEntity(payload.entityId());
 
             if (!(entity instanceof Villager npc) || !NpcData.isNpc(npc)) return;
             if (npc.distanceToSqr(player) > 64.0 * 64.0) return;
@@ -122,7 +122,7 @@ public final class ShadowNpcMod implements ModInitializer {
             return InteractionResult.SUCCESS;
         });
 
-        ServerTickEvents.END_LEVEL_TICK.register(level -> {
+        ServerTickEvents.END_WORLD_TICK.register(level -> {
             for (Entity entity : level.getAllEntities()) {
                 if (!(entity instanceof Villager npc) || !NpcData.isNpc(npc) || !NpcData.shouldLookAtPlayer(npc)) {
                     continue;
