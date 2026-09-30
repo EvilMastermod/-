@@ -11,7 +11,7 @@ public record OpenNpcEditorPayload(
         String name,
         String skin,
         String dialog,
-        String answer,
+        String choices,
         boolean showName,
         boolean invulnerable
 ) implements CustomPacketPayload {
@@ -25,7 +25,7 @@ public record OpenNpcEditorPayload(
                         buf.writeUtf(payload.name(), 48);
                         buf.writeUtf(payload.skin(), 24);
                         buf.writeUtf(payload.dialog(), 180);
-                        buf.writeUtf(payload.answer(), 180);
+                        buf.writeUtf(payload.choices(), 4096);
                         buf.writeBoolean(payload.showName());
                         buf.writeBoolean(payload.invulnerable());
                     },
@@ -34,7 +34,7 @@ public record OpenNpcEditorPayload(
                             buf.readUtf(48),
                             buf.readUtf(24),
                             buf.readUtf(180),
-                            buf.readUtf(180),
+                            buf.readUtf(4096),
                             buf.readBoolean(),
                             buf.readBoolean()
                     )

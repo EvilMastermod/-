@@ -1,5 +1,6 @@
 package com.rnmd.shadownpc.client.screen;
 
+import com.rnmd.shadownpc.NpcData;
 import com.rnmd.shadownpc.network.OpenNpcEditorPayload;
 import com.rnmd.shadownpc.network.SaveNpcPayload;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
@@ -9,28 +10,51 @@ import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public final class NpcEditorScreen extends Screen {
     private static final String[] SKINS = {"plains", "desert", "jungle", "savanna", "snow", "swamp", "taiga"};
     private static final String[] SKIN_NAMES = {"Обычный", "Пустыня", "Джунгли", "Саванна", "Снег", "Болото", "Тайга"};
 
     private enum Tab { NAME_SKIN, DIALOGS }
 
+    private static final class ChoiceDraft {
+        String answer;
+        String reply;
+        String itemId;
+
+        ChoiceDraft(String answer, String reply, String itemId) {
+            this.answer = answer;
+            this.reply = reply;
+            this.itemId = itemId;
+        }
+    }
+
     private final OpenNpcEditorPayload data;
+    private final List<ChoiceDraft> choices = new ArrayList<>();
+
     private Tab tab = Tab.NAME_SKIN;
+    private int choiceIndex;
+    private int skinIndex;
+    private boolean showName;
+    private boolean invulnerable;
 
     private EditBox nameBox;
     private EditBox dialogBox;
     private EditBox answerBox;
+    private EditBox replyBox;
+    private EditBox itemBox;
 
     private Button nameTabButton;
     private Button dialogTabButton;
     private Button skinButton;
     private Button showNameButton;
     private Button invulnerableButton;
-
-    private int skinIndex;
-    private boolean showName;
-    private boolean invulnerable;
+    private Button prevButton;
+    private Button nextButton;
+    private Button addChoiceButton;
+    private Button removeChoiceButton;
 
     public NpcEditorScreen(OpenNpcEditorPayload data) {
         super(Component.literal("Редактор NPC"));
@@ -38,12 +62,19 @@ public final class NpcEditorScreen extends Screen {
         this.skinIndex = findSkin(data.skin());
         this.showName = data.showName();
         this.invulnerable = data.invulnerable();
+
+        for (NpcData.DialogueChoice choice : NpcData.decodeChoices(data.choices())) {
+            this.choices.add(new ChoiceDraft(choice.answer(), choice.reply(), choice.itemId()));
+        }
+        if (this.choices.isEmpty()) {
+            this.choices.add(new ChoiceDraft(NpcData.DEFAULT_ANSWER, "", ""));
+        }
     }
 
-    private int panelWidth() { return 270; }
-    private int panelHeight() { return 186; }
+    private int panelWidth() { return 310; }
+    private int panelHeight() { return 252; }
     private int left() { return (this.width - panelWidth()) / 2; }
-    private int top() { return Math.max(8, (this.height - panelHeight()) / 2); }
+    private int top() { return Math.max(6, (this.height - panelHeight()) / 2); }
 
     @Override
     protected void init() {
@@ -52,52 +83,74 @@ public final class NpcEditorScreen extends Screen {
         int fieldWidth = panelWidth() - 24;
 
         this.nameTabButton = this.addRenderableWidget(Button.builder(Component.literal("Название и скин"), b -> {
+            saveCurrentChoiceFields();
             this.tab = Tab.NAME_SKIN;
             refreshTab();
-        }).bounds(l + 12, t + 10, 120, 20).build());
+        }).bounds(l + 12, t + 10, 136, 20).build());
 
         this.dialogTabButton = this.addRenderableWidget(Button.builder(Component.literal("Диалоги"), b -> {
             this.tab = Tab.DIALOGS;
             refreshTab();
-        }).bounds(l + 138, t + 10, 120, 20).build());
+            loadCurrentChoiceFields();
+        }).bounds(l + 162, t + 10, 136, 20).build());
 
-        this.nameBox = this.addRenderableWidget(new EditBox(this.font, l + 12, t + 57, fieldWidth, 20, Component.literal("Название")));
+        this.nameBox = this.addRenderableWidget(new EditBox(this.font, l + 12, t + 58, fieldWidth, 20, Component.literal("Название")));
         this.nameBox.setMaxLength(48);
         this.nameBox.setValue(this.data.name());
 
         this.skinButton = this.addRenderableWidget(Button.builder(Component.empty(), b -> {
             this.skinIndex = (this.skinIndex + 1) % SKINS.length;
             refreshSkinButton();
-        }).bounds(l + 12, t + 88, fieldWidth, 20).build());
+        }).bounds(l + 12, t + 92, fieldWidth, 20).build());
 
         this.showNameButton = this.addRenderableWidget(Button.builder(Component.empty(), b -> {
             this.showName = !this.showName;
             refreshToggleButtons();
-        }).bounds(l + 12, t + 114, 120, 20).build());
+        }).bounds(l + 12, t + 120, 136, 20).build());
 
         this.invulnerableButton = this.addRenderableWidget(Button.builder(Component.empty(), b -> {
             this.invulnerable = !this.invulnerable;
             refreshToggleButtons();
-        }).bounds(l + 138, t + 114, 120, 20).build());
+        }).bounds(l + 162, t + 120, 136, 20).build());
 
-        this.dialogBox = this.addRenderableWidget(new EditBox(this.font, l + 12, t + 57, fieldWidth, 20, Component.literal("Фраза NPC")));
-        this.dialogBox.setMaxLength(180);
+        this.dialogBox = this.addRenderableWidget(new EditBox(this.font, l + 12, t + 58, fieldWidth, 20, Component.literal("Начальный текст NPC")));
+        this.dialogBox.setMaxLength(120);
         this.dialogBox.setValue(this.data.dialog());
 
-        this.answerBox = this.addRenderableWidget(new EditBox(this.font, l + 12, t + 101, fieldWidth, 20, Component.literal("Ответ игрока")));
-        this.answerBox.setMaxLength(180);
-        this.answerBox.setValue(this.data.answer());
+        this.answerBox = this.addRenderableWidget(new EditBox(this.font, l + 12, t + 92, fieldWidth, 20, Component.literal("Текст кнопки")));
+        this.answerBox.setMaxLength(120);
+
+        this.replyBox = this.addRenderableWidget(new EditBox(this.font, l + 12, t + 126, fieldWidth, 20, Component.literal("Ответ NPC")));
+        this.replyBox.setMaxLength(120);
+
+        this.itemBox = this.addRenderableWidget(new EditBox(this.font, l + 12, t + 160, fieldWidth, 20, Component.literal("Предмет")));
+        this.itemBox.setMaxLength(96);
+        this.itemBox.setHint(Component.literal("minecraft:diamond"));
+
+        int navY = t + 190;
+        this.prevButton = this.addRenderableWidget(Button.builder(Component.literal("<"), b -> switchChoice(-1))
+                .bounds(l + 12, navY, 34, 20).build());
+
+        this.addChoiceButton = this.addRenderableWidget(Button.builder(Component.literal("+ Ещё диалог"), b -> addChoice())
+                .bounds(l + 52, navY, 112, 20).build());
+
+        this.nextButton = this.addRenderableWidget(Button.builder(Component.literal(">"), b -> switchChoice(1))
+                .bounds(l + 170, navY, 34, 20).build());
+
+        this.removeChoiceButton = this.addRenderableWidget(Button.builder(Component.literal("Удалить"), b -> removeChoice())
+                .bounds(l + 210, navY, 88, 20).build());
 
         int footerY = t + panelHeight() - 28;
         this.addRenderableWidget(Button.builder(Component.literal("Сохранить"), b -> save())
-                .bounds(l + 12, footerY, 78, 20).build());
-        this.addRenderableWidget(Button.builder(Component.literal("Удалить"), b -> deleteNpc())
-                .bounds(l + 96, footerY, 78, 20).build());
+                .bounds(l + 12, footerY, 88, 20).build());
+        this.addRenderableWidget(Button.builder(Component.literal("Удалить NPC"), b -> deleteNpc())
+                .bounds(l + 106, footerY, 96, 20).build());
         this.addRenderableWidget(Button.builder(Component.literal("Отмена"), b -> closeScreen())
-                .bounds(l + 180, footerY, 78, 20).build());
+                .bounds(l + 208, footerY, 90, 20).build());
 
         refreshSkinButton();
         refreshToggleButtons();
+        loadCurrentChoiceFields();
         refreshTab();
     }
 
@@ -142,6 +195,66 @@ public final class NpcEditorScreen extends Screen {
         this.dialogBox.setEditable(!nameTab);
         this.answerBox.visible = !nameTab;
         this.answerBox.setEditable(!nameTab);
+        this.replyBox.visible = !nameTab;
+        this.replyBox.setEditable(!nameTab);
+        this.itemBox.visible = !nameTab;
+        this.itemBox.setEditable(!nameTab);
+
+        this.prevButton.visible = !nameTab;
+        this.prevButton.active = !nameTab && this.choiceIndex > 0;
+        this.nextButton.visible = !nameTab;
+        this.nextButton.active = !nameTab && this.choiceIndex < this.choices.size() - 1;
+        this.addChoiceButton.visible = !nameTab;
+        this.addChoiceButton.active = !nameTab && this.choices.size() < NpcData.MAX_CHOICES;
+        this.removeChoiceButton.visible = !nameTab;
+        this.removeChoiceButton.active = !nameTab && this.choices.size() > 1;
+    }
+
+    private void saveCurrentChoiceFields() {
+        if (this.answerBox == null || this.choices.isEmpty()) return;
+        ChoiceDraft current = this.choices.get(this.choiceIndex);
+        current.answer = this.answerBox.getValue();
+        current.reply = this.replyBox.getValue();
+        current.itemId = this.itemBox.getValue();
+    }
+
+    private void loadCurrentChoiceFields() {
+        if (this.answerBox == null || this.choices.isEmpty()) return;
+        ChoiceDraft current = this.choices.get(this.choiceIndex);
+        this.answerBox.setValue(current.answer);
+        this.replyBox.setValue(current.reply);
+        this.itemBox.setValue(current.itemId);
+        refreshTab();
+    }
+
+    private void switchChoice(int direction) {
+        saveCurrentChoiceFields();
+        this.choiceIndex = Math.max(0, Math.min(this.choices.size() - 1, this.choiceIndex + direction));
+        loadCurrentChoiceFields();
+    }
+
+    private void addChoice() {
+        if (this.choices.size() >= NpcData.MAX_CHOICES) return;
+        saveCurrentChoiceFields();
+        this.choices.add(new ChoiceDraft("Ответ " + (this.choices.size() + 1), "", ""));
+        this.choiceIndex = this.choices.size() - 1;
+        loadCurrentChoiceFields();
+    }
+
+    private void removeChoice() {
+        if (this.choices.size() <= 1) return;
+        this.choices.remove(this.choiceIndex);
+        if (this.choiceIndex >= this.choices.size()) this.choiceIndex = this.choices.size() - 1;
+        loadCurrentChoiceFields();
+    }
+
+    private String encodedChoices() {
+        saveCurrentChoiceFields();
+        List<NpcData.DialogueChoice> result = new ArrayList<>();
+        for (ChoiceDraft draft : this.choices) {
+            result.add(new NpcData.DialogueChoice(draft.answer, draft.reply, draft.itemId));
+        }
+        return NpcData.encodeChoices(result);
     }
 
     private void save() {
@@ -150,7 +263,7 @@ public final class NpcEditorScreen extends Screen {
                 this.nameBox.getValue(),
                 SKINS[this.skinIndex],
                 this.dialogBox.getValue(),
-                this.answerBox.getValue(),
+                encodedChoices(),
                 this.showName,
                 this.invulnerable,
                 false
@@ -164,7 +277,7 @@ public final class NpcEditorScreen extends Screen {
                 this.nameBox.getValue(),
                 SKINS[this.skinIndex],
                 this.dialogBox.getValue(),
-                this.answerBox.getValue(),
+                encodedChoices(),
                 this.showName,
                 this.invulnerable,
                 true
@@ -201,11 +314,16 @@ public final class NpcEditorScreen extends Screen {
         graphics.drawCenteredString(this.font, this.title, this.width / 2, t + 36, 0xFFFFFFFF);
 
         if (this.tab == Tab.NAME_SKIN) {
-            graphics.drawString(this.font, "Название", l + 12, t + 47, 0xFFB9CBE0, false);
-            graphics.drawString(this.font, "Нажимай на кнопку скина для выбора", l + 12, t + 79, 0xFF78899B, false);
+            graphics.drawString(this.font, "Название", l + 12, t + 48, 0xFFB9CBE0, false);
+            graphics.drawString(this.font, "Внешность NPC", l + 12, t + 82, 0xFFB9CBE0, false);
         } else {
-            graphics.drawString(this.font, "Что говорит NPC", l + 12, t + 47, 0xFFB9CBE0, false);
-            graphics.drawString(this.font, "Кнопка-ответ игрока", l + 12, t + 91, 0xFFB9CBE0, false);
+            graphics.drawString(this.font, "Начальная фраза NPC", l + 12, t + 48, 0xFFB9CBE0, false);
+            graphics.drawString(this.font, "Кнопка / твой ответ", l + 12, t + 82, 0xFFB9CBE0, false);
+            graphics.drawString(this.font, "Что NPC ответит после выбора", l + 12, t + 116, 0xFFB9CBE0, false);
+            graphics.drawString(this.font, "Предмет за этот ответ", l + 12, t + 150, 0xFFB9CBE0, false);
+            graphics.drawString(this.font,
+                    "Диалог " + (this.choiceIndex + 1) + "/" + this.choices.size(),
+                    l + 218, t + 196, 0xFF8EA2B8, false);
         }
     }
 }

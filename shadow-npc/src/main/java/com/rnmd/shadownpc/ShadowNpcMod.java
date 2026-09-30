@@ -4,6 +4,7 @@ import com.rnmd.shadownpc.item.NpcEditorItem;
 import com.rnmd.shadownpc.network.OpenDialoguePayload;
 import com.rnmd.shadownpc.network.OpenNpcEditorPayload;
 import com.rnmd.shadownpc.network.SaveNpcPayload;
+import com.rnmd.shadownpc.network.SelectDialoguePayload;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.event.player.UseEntityCallback;
@@ -25,7 +26,9 @@ import net.minecraft.world.entity.npc.villager.VillagerType;
 import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 
+import java.util.List;
 import java.util.function.Function;
 
 public final class ShadowNpcMod implements ModInitializer {
@@ -51,7 +54,7 @@ public final class ShadowNpcMod implements ModInitializer {
                 npc.getName().getString(),
                 NpcData.getSkin(npc),
                 NpcData.getDialog(npc),
-                NpcData.getAnswer(npc),
+                NpcData.encodeChoices(NpcData.getChoices(npc)),
                 npc.isCustomNameVisible(),
                 npc.isInvulnerable()
         );
@@ -62,6 +65,7 @@ public final class ShadowNpcMod implements ModInitializer {
         PayloadTypeRegistry.playS2C().register(OpenNpcEditorPayload.TYPE, OpenNpcEditorPayload.CODEC);
         PayloadTypeRegistry.playS2C().register(OpenDialoguePayload.TYPE, OpenDialoguePayload.CODEC);
         PayloadTypeRegistry.playC2S().register(SaveNpcPayload.TYPE, SaveNpcPayload.CODEC);
+        PayloadTypeRegistry.playC2S().register(SelectDialoguePayload.TYPE, SelectDialoguePayload.CODEC);
 
         ServerPlayNetworking.registerGlobalReceiver(SaveNpcPayload.TYPE, (payload, context) -> {
             ServerPlayer player = context.player();
@@ -91,9 +95,32 @@ public final class ShadowNpcMod implements ModInitializer {
             npc.setVillagerData(npc.getVillagerData().withType(npc.level().registryAccess(), skinKey(skin)));
 
             NpcData.setDialog(npc, payload.dialog());
-            NpcData.setAnswer(npc, payload.answer());
+            NpcData.setChoices(npc, NpcData.decodeChoices(payload.choices()));
 
             player.displayClientMessage(Component.literal("§aNPC сохранён."), false);
+        });
+
+        ServerPlayNetworking.registerGlobalReceiver(SelectDialoguePayload.TYPE, (payload, context) -> {
+            ServerPlayer player = context.player();
+            Entity entity = player.level().getEntity(payload.entityId());
+
+            if (!(entity instanceof Villager npc) || !NpcData.isNpc(npc)) return;
+            if (npc.distanceToSqr(player) > 16.0 * 16.0) return;
+
+            List<NpcData.DialogueChoice> choices = NpcData.getChoices(npc);
+            if (payload.choiceIndex() < 0 || payload.choiceIndex() >= choices.size()) return;
+
+            NpcData.DialogueChoice choice = choices.get(payload.choiceIndex());
+            player.displayClientMessage(Component.literal("§bТы: §f" + choice.answer()), false);
+
+            if (!choice.reply().isBlank()) {
+                player.displayClientMessage(
+                        Component.literal("§e" + npc.getName().getString() + ": §f" + choice.reply()),
+                        false
+                );
+            }
+
+            giveConfiguredItem(player, choice.itemId());
         });
 
         ItemGroupEvents.modifyEntriesEvent(CreativeModeTabs.TOOLS_AND_UTILITIES)
@@ -121,9 +148,10 @@ public final class ShadowNpcMod implements ModInitializer {
 
             if (player instanceof ServerPlayer serverPlayer) {
                 ServerPlayNetworking.send(serverPlayer, new OpenDialoguePayload(
+                        npc.getId(),
                         npc.getName().getString(),
                         NpcData.getDialog(npc),
-                        NpcData.getAnswer(npc)
+                        NpcData.encodeChoices(NpcData.getChoices(npc))
                 ));
             }
             return InteractionResult.SUCCESS;
@@ -148,6 +176,30 @@ public final class ShadowNpcMod implements ModInitializer {
                 if (nearest != null) facePlayer(npc, nearest);
             }
         });
+    }
+
+    private static void giveConfiguredItem(ServerPlayer player, String configuredId) {
+        String raw = configuredId == null ? "" : configuredId.strip().toLowerCase();
+        if (raw.isEmpty()) return;
+
+        String normalized = raw.contains(":") ? raw : "minecraft:" + raw;
+        Identifier id = Identifier.tryParse(normalized);
+        if (id == null || !BuiltInRegistries.ITEM.containsKey(id)) {
+            player.displayClientMessage(Component.literal("§cПредмет не найден: §f" + raw), false);
+            return;
+        }
+
+        Item item = BuiltInRegistries.ITEM.getValue(id);
+        if (item == null || item == Items.AIR) {
+            player.displayClientMessage(Component.literal("§cПредмет не найден: §f" + raw), false);
+            return;
+        }
+
+        ItemStack reward = new ItemStack(item, 1);
+        if (!player.addItem(reward)) {
+            player.drop(reward, false);
+        }
+        player.displayClientMessage(Component.literal("§aПолучено: §f" + normalized), false);
     }
 
     private static String normalizeSkin(String skin) {

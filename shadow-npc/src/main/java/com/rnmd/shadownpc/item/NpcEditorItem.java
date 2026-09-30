@@ -13,6 +13,8 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
 
+import java.util.List;
+
 public final class NpcEditorItem extends Item {
     public NpcEditorItem(Properties properties) {
         super(properties);
@@ -36,7 +38,11 @@ public final class NpcEditorItem extends Item {
 
         NpcData.markNpc(npc);
         NpcData.setDialog(npc, NpcData.DEFAULT_DIALOG);
-        NpcData.setAnswer(npc, NpcData.DEFAULT_ANSWER);
+        NpcData.setChoices(npc, List.of(new NpcData.DialogueChoice(
+                NpcData.DEFAULT_ANSWER,
+                "Рад тебя видеть.",
+                ""
+        )));
         NpcData.setSkin(npc, NpcData.DEFAULT_SKIN);
         NpcData.setLookAtPlayer(npc, true);
 
