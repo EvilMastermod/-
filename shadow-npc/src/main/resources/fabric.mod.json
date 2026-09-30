@@ -1,0 +1,20 @@
+{
+  "schemaVersion": 1,
+  "id": "shadow_npc",
+  "version": "${version}",
+  "name": "Shadow NPC",
+  "description": "Simple NPC editor for Minecraft Fabric 1.21.11.",
+  "license": "MIT",
+  "environment": "*",
+  "entrypoints": {
+    "main": [
+      "com.rnmd.shadownpc.ShadowNpcMod"
+    ]
+  },
+  "depends": {
+    "fabricloader": ">=0.18.2",
+    "minecraft": "~1.21.11",
+    "java": ">=21",
+    "fabric-api": "*"
+  }
+}
