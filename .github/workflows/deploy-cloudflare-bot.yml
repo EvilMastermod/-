@@ -1,0 +1,57 @@
+name: Deploy RNMD Chat Automator to Cloudflare
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Check Worker syntax
+        run: |
+          node --check cloudflare-bot/src/worker.js
+          node --check cloudflare-bot/src/group.js
+
+      - name: Apply D1 schema and deploy Worker
+        id: deploy
+        uses: cloudflare/wrangler-action@v4
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          workingDirectory: cloudflare-bot
+          wranglerVersion: "4"
+          preCommands: wrangler d1 execute rnmd-chat-automator --remote --file=schema.sql
+          command: deploy
+          secrets: |
+            BOT_TOKEN
+            WEBHOOK_SECRET
+        env:
+          BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
+          WEBHOOK_SECRET: ${{ secrets.WEBHOOK_SECRET }}
+
+      - name: Configure Telegram webhook
+        env:
+          BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
+          WEBHOOK_SECRET: ${{ secrets.WEBHOOK_SECRET }}
+          WORKER_URL: ${{ steps.deploy.outputs.deployment-url }}
+        run: |
+          test -n "$WORKER_URL"
+          BASE_URL="${WORKER_URL%/}"
+          curl --fail-with-body --silent --show-error \
+            -X POST "https://api.telegram.org/bot${BOT_TOKEN}/setWebhook" \
+            --data-urlencode "url=${BASE_URL}/webhook" \
+            --data-urlencode "secret_token=${WEBHOOK_SECRET}"
+          echo
+
+      - name: Health check
+        env:
+          WORKER_URL: ${{ steps.deploy.outputs.deployment-url }}
+        run: |
+          curl --fail-with-body --silent --show-error "${WORKER_URL%/}/"
+          echo
