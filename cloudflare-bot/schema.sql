@@ -161,3 +161,12 @@ CREATE TABLE IF NOT EXISTS nomute_runtime (
   last_success INTEGER,
   last_error TEXT
 );
+
+
+CREATE TABLE IF NOT EXISTS nomute_resends (
+  connection_id TEXT NOT NULL,
+  chat_id INTEGER NOT NULL,
+  original_message_id INTEGER NOT NULL,
+  resent_at INTEGER NOT NULL,
+  PRIMARY KEY(connection_id, chat_id, original_message_id)
+);
