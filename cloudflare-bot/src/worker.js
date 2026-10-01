@@ -8,6 +8,26 @@ const run = (db, sql, ...args) => db.prepare(sql).bind(...args).run();
 const keyboard = rows => ({ inline_keyboard: rows });
 const button = (label, data) => ({ text: label, callback_data: data });
 
+function commandsText() {
+  return [
+    '📋 Команды RNMD Chat Automator',
+    '',
+    '💬 В переписке Telegram Business:',
+    '.mute — включить мут собеседника и удалять новые входящие сообщения',
+    '.unmute — выключить мут',
+    '.nomute — то же самое, что .unmute',
+    '.spam 5 текст — отправить текст несколько раз, от 1 до 25',
+    '',
+    '🤖 В личном чате с ботом:',
+    '/start — открыть бота',
+    '/business — панель Telegram Business',
+    '/bizwelcome текст — изменить первое авто-сообщение',
+    '/bizfallback текст — изменить общий автоответ',
+    '/bizreplyadd слово | ответ — добавить автоответ по слову',
+    '/bizreplydel ID — удалить автоответ',
+  ].join('\n');
+}
+
 async function api(env, method, payload = {}) {
   const response = await fetch(`https://api.telegram.org/bot${env.BOT_TOKEN}/${method}`, {
     method: 'POST',
@@ -65,6 +85,7 @@ async function panel(env, owner) {
     [button(`${yes(s.automation_enabled)} Автоматизация`, 'biz:automation'), button(`${yes(s.fallback_enabled)} Общий автоответ`, 'biz:fallback')],
     [button(`${yes(s.welcome_enabled)} Первое сообщение`, 'biz:welcome'), button(`${yes(s.mark_read)} Читать сообщения`, 'biz:read')],
     [button('🗯 Ответы по словам', 'biz:replies'), button('📝 Тексты автоответов', 'biz:texts')],
+    [button('📋 Список команд', 'bot:commands')],
   ]);
 }
 
@@ -101,6 +122,16 @@ async function handleOwnerCommand(env, msg, connection) {
       await reply('Формат: .spam 5 Привет (от 1 до 25 раз)');
       return;
     }
+    // Hide the .spam command itself from the Business chat.
+    try {
+      await api(env, 'deleteBusinessMessages', {
+        business_connection_id: id,
+        message_ids: [msg.message_id],
+      });
+    } catch (error) {
+      console.warn('Cannot delete .spam command:', String(error));
+    }
+
     // A D1 lease prevents overlapping batches even across Worker isolates.
     const lease = await run(env.DB, `INSERT OR IGNORE INTO repeat_leases(connection_id,chat_id,expires_at)
       VALUES(?,?,?)`, id, chat, now() + 35);
@@ -234,6 +265,21 @@ async function callback(env, q) {
       reply_markup: keyboard([[button(action === 'mute' ? '🔊 Говори' : '🔇 Молчать',
         `bizchat:${action === 'mute' ? 'unmute' : 'mute'}:${owner}:${chat}`)]]) });
   }
+  if (data === 'bot:commands') {
+    if (chat !== owner) return answer('⛔ Кнопка недоступна.', true);
+    await answer();
+    return send(env, owner, commandsText(), {
+      reply_markup: keyboard([[button('💼 Открыть Business', 'bot:business')]]),
+    });
+  }
+  if (data === 'bot:business') {
+    if (chat !== owner) return answer('⛔ Кнопка недоступна.', true);
+    await answer();
+    const c = await ownerConnection(env, owner);
+    return send(env, owner,
+      `💼 Автоматизация личных чатов\n\nTelegram Business: ${c ? '✅ подключён' : '❌ ещё не подключён'}\n\n.mute — удалять новые входящие\n.unmute / .nomute — снять мут\n.spam 5 Привет — повторить до 25 раз`,
+      { reply_markup: await panel(env, owner) });
+  }
   if (!data.startsWith('biz:') || chat !== owner) return answer();
   const action = data.slice(4), s = await settings(env, owner);
   const fields = { automation: 'automation_enabled', fallback: 'fallback_enabled',
@@ -265,7 +311,12 @@ async function privateCommand(env, msg) {
   if (msg.chat.type !== 'private' || msg.from?.id !== msg.chat.id) return;
   const text = msg.text || '', [name] = text.split(/\s+/, 1), raw = text.slice(name.length).trim();
   const command = name.split('@')[0].toLowerCase(), owner = msg.from.id;
-  if (command === '/start') return send(env, owner, '🤖 Я RNMD Chat Automator.\n\nНастройки Business: /business');
+  if (command === '/start') return send(env, owner,
+    '🤖 Я RNMD Chat Automator.\n\nНастройки Business: /business',
+    { reply_markup: keyboard([
+      [button('📋 Список команд', 'bot:commands')],
+      [button('💼 Business', 'bot:business')],
+    ]) });
   if (command === '/business') {
     const c = await ownerConnection(env, owner);
     return send(env, owner, `💼 Автоматизация личных чатов\n\nTelegram Business: ${c ? '✅ подключён' : '❌ ещё не подключён'}\n\n.mute — удалять новые входящие\n.unmute / .nomute — снять мут\n.spam 5 Привет — повторить до 25 раз`,
