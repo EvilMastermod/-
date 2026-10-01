@@ -8,6 +8,17 @@ const fields = new Set(['welcome_enabled', 'welcome_text', 'anti_spam', 'anti_li
   'bad_words_enabled', 'warn_limit', 'clean_service', 'rules', 'flood_count',
   'flood_window', 'flood_mute']);
 
+async function ensureMutedBotsTable(env) {
+  await run(env.DB, `CREATE TABLE IF NOT EXISTS muted_bots (
+    chat_id INTEGER NOT NULL,
+    bot_user_id INTEGER NOT NULL,
+    muted_until INTEGER NOT NULL,
+    muted_by INTEGER,
+    created_at INTEGER NOT NULL,
+    PRIMARY KEY(chat_id, bot_user_id)
+  )`);
+}
+
 async function chatSettings(env, chat) {
   await run(env.DB, 'INSERT OR IGNORE INTO chats(chat_id) VALUES(?)', chat);
   return one(env.DB, 'SELECT * FROM chats WHERE chat_id=?', chat);
@@ -134,7 +145,23 @@ export async function handleGroup(env, api, send, msg, updateId) {
     const target = msg.reply_to_message?.from;
     if (['warn', 'unwarn', 'mute', 'unmute', 'ban'].includes(command)) {
       if (!target) return reply(send, env, msg, `Ответь /${command} на сообщение пользователя.`);
-      if (target.is_bot) return;
+      if (target.is_bot) {
+        await ensureMutedBotsTable(env);
+        if (command === 'mute') {
+          const seconds = duration(arg.split(/\s+/)[0]);
+          await run(env.DB, `INSERT INTO muted_bots(chat_id,bot_user_id,muted_until,muted_by,created_at)
+            VALUES(?,?,?,?,?) ON CONFLICT(chat_id,bot_user_id) DO UPDATE SET
+            muted_until=excluded.muted_until,muted_by=excluded.muted_by,created_at=excluded.created_at`,
+            chat, target.id, now() + seconds, user.id, now());
+          return reply(send, env, msg, `🔇 Бот замьючен на ${seconds} сек. Его новые сообщения будут удаляться.`);
+        }
+        if (command === 'unmute') {
+          await run(env.DB, 'DELETE FROM muted_bots WHERE chat_id=? AND bot_user_id=?', chat, target.id);
+          return reply(send, env, msg, '🔊 Мут с бота снят.');
+        }
+        if (command === 'warn' || command === 'unwarn')
+          return reply(send, env, msg, 'ℹ️ Для ботов используй /mute или /unmute ответом на сообщение.');
+      }
       if (['warn', 'mute', 'ban'].includes(command) && await isAdmin(env, api, chat, target.id))
         return reply(send, env, msg, '❌ Нельзя применять к админу.');
       if (command === 'warn') {
@@ -176,6 +203,17 @@ export async function handleGroup(env, api, send, msg, updateId) {
   const text = (msg.text || msg.caption || '').trim();
   if (!text && !senderIsBot) return;
   const s = await chatSettings(env, chat);
+  if (senderIsBot) {
+    await ensureMutedBotsTable(env);
+    const muted = await one(env.DB, 'SELECT muted_until FROM muted_bots WHERE chat_id=? AND bot_user_id=?', chat, user.id);
+    if (muted) {
+      if (muted.muted_until > now()) {
+        try { await api(env, 'deleteMessage', { chat_id: chat, message_id: msg.message_id }); } catch {}
+        return;
+      }
+      await run(env.DB, 'DELETE FROM muted_bots WHERE chat_id=? AND bot_user_id=?', chat, user.id);
+    }
+  }
   let reason = '';
   if (s.anti_spam) {
     await run(env.DB, 'INSERT OR IGNORE INTO flood_events(chat_id,user_id,update_id,at) VALUES(?,?,?,?)',
