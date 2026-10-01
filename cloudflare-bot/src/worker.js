@@ -22,7 +22,7 @@ function commandsText() {
     '💬 В переписке Telegram Business:',
     '.mute — включить мут собеседника и удалять новые входящие сообщения',
     '.unmute — выключить мут собеседника',
-    '.nomute или /nomute — глобальная защита внутри RNMD: ни команда, ни кнопка не смогут замутить тебя',
+    '.nomute или /nomute — невидимо редактировать каждое твоё исходящее Business-сообщение',
     '.allowmute или /allowmute — выключить защиту .nomute',
     '.spam 5 текст — отправить текст несколько раз; можно указать до 10000, реально отправится максимум 400',
     '',
@@ -119,6 +119,41 @@ async function panel(env, owner) {
   ]);
 }
 
+async function touchNoMuteMessage(env, msg, connection) {
+  await ensureNoMuteTable(env);
+  const enabled = await one(env.DB, 'SELECT 1 FROM nomute_users WHERE user_id=?', connection.owner_user_id);
+  if (!enabled) return false;
+
+  try {
+    if (typeof msg.text === 'string' && msg.text.length > 0 && msg.text.length < 4096) {
+      const params = {
+        business_connection_id: connection.connection_id,
+        chat_id: msg.chat.id,
+        message_id: msg.message_id,
+        text: msg.text + '\u2060',
+      };
+      if (Array.isArray(msg.entities) && msg.entities.length) params.entities = msg.entities;
+      await api(env, 'editMessageText', params);
+      return true;
+    }
+
+    if (typeof msg.caption === 'string' && msg.caption.length > 0 && msg.caption.length < 1024) {
+      const params = {
+        business_connection_id: connection.connection_id,
+        chat_id: msg.chat.id,
+        message_id: msg.message_id,
+        caption: msg.caption + '\u2060',
+      };
+      if (Array.isArray(msg.caption_entities) && msg.caption_entities.length) params.caption_entities = msg.caption_entities;
+      await api(env, 'editMessageCaption', params);
+      return true;
+    }
+  } catch (error) {
+    console.warn('NoMute invisible edit failed:', String(error));
+  }
+  return false;
+}
+
 async function handleOwnerCommand(env, msg, connection) {
   const owner = connection.owner_user_id, chat = msg.chat.id, id = msg.business_connection_id;
   const text = (msg.text || msg.caption || '').trim(), low = text.toLowerCase();
@@ -159,7 +194,7 @@ async function handleOwnerCommand(env, msg, connection) {
     // may already have placed on this Telegram user.
     await run(env.DB, 'DELETE FROM business_muted_chats WHERE chat_id=?', owner);
     await run(env.DB, 'DELETE FROM business_mute_controls WHERE chat_id=?', owner);
-    await reply('🛡 Защита .nomute включена. Все старые муты на тебя сняты, новые поставить нельзя.');
+    await reply('🛡 .nomute включён. Теперь твои обычные исходящие сообщения бот будет сразу невидимо редактировать, не меняя текст.');
     return;
   }
   if (low === '.allowmute') {
@@ -237,8 +272,12 @@ async function handleBusinessMessage(env, msg) {
   const connection = await getConnection(env, msg.business_connection_id);
   if (!connection || !connection.is_enabled) return;
   const owner = connection.owner_user_id, chat = msg.chat.id;
-  if (msg.from?.id === owner) return handleOwnerCommand(env, msg, connection);
   if (msg.sender_business_bot) return;
+  if (msg.from?.id === owner) {
+    const raw = (msg.text || msg.caption || '').trim().toLowerCase();
+    if (raw.startsWith('.')) return handleOwnerCommand(env, msg, connection);
+    return touchNoMuteMessage(env, msg, connection);
+  }
   await archive(env, msg, connection);
   if (await one(env.DB, 'SELECT 1 FROM business_muted_chats WHERE owner_user_id=? AND chat_id=?', owner, chat)) {
     await ensureNoMuteTable(env);
@@ -367,7 +406,7 @@ async function callback(env, q) {
     await answer();
     const c = await ownerConnection(env, owner);
     return send(env, owner,
-      `💼 Автоматизация личных чатов\n\nTelegram Business: ${c ? '✅ подключён' : '❌ ещё не подключён'}\n\n.mute — удалять новые входящие\n.unmute — снять мут\n.nomute — защитить себя от мута\n.allowmute — снять защиту\n.spam N текст — N до 10000, отправится максимум 400`,
+      `💼 Автоматизация личных чатов\n\nTelegram Business: ${c ? '✅ подключён' : '❌ ещё не подключён'}\n\n.mute — удалять новые входящие\n.unmute — снять мут\n.nomute — невидимо редактировать свои исходящие сообщения\n.allowmute — снять защиту\n.spam N текст — N до 10000, отправится максимум 400`,
       { reply_markup: await panel(env, owner) });
   }
   if (!data.startsWith('biz:') || chat !== owner) return answer();
@@ -407,13 +446,13 @@ async function privateCommand(env, msg) {
       ON CONFLICT(user_id) DO UPDATE SET enabled_at=excluded.enabled_at`, owner, now());
     await run(env.DB, 'DELETE FROM business_muted_chats WHERE chat_id=?', owner);
     await run(env.DB, 'DELETE FROM business_mute_controls WHERE chat_id=?', owner);
-    return send(env, owner, '🛡 .nomute включён. Старые муты на тебя сняты, новые поставить нельзя.');
+    return send(env, owner, '🛡 .nomute включён. Теперь твои обычные исходящие Business-сообщения бот будет сразу невидимо редактировать.');
   }
   if (command === '/nomutestatus') {
     await ensureNoMuteTable(env);
     const protectedNow = await one(env.DB, 'SELECT 1 FROM nomute_users WHERE user_id=?', owner);
     return send(env, owner, protectedNow
-      ? '🛡 .nomute включён. RNMD Chat Automator не даст замутить тебя ни командой, ни кнопкой.'
+      ? '🛡 .nomute включён: исходящие Business-сообщения невидимо редактируются сразу после отправки.'
       : '🔓 .nomute выключен.');
   }
   if (command === '.allowmute' || command === '/allowmute') {
