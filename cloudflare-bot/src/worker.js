@@ -15,6 +15,32 @@ async function ensureNoMuteTable(env) {
   )`);
 }
 
+async function ensureRuntimeTables(env) {
+  await run(env.DB, `CREATE TABLE IF NOT EXISTS spam_stop_flags (
+    connection_id TEXT NOT NULL,
+    chat_id INTEGER NOT NULL,
+    stop_at INTEGER NOT NULL,
+    PRIMARY KEY(connection_id, chat_id)
+  )`);
+  await run(env.DB, `CREATE TABLE IF NOT EXISTS nomute_runtime (
+    user_id INTEGER PRIMARY KEY,
+    last_attempt INTEGER,
+    last_success INTEGER,
+    last_error TEXT
+  )`);
+}
+
+async function setNoMuteRuntime(env, userId, ok, errorText = null) {
+  await ensureRuntimeTables(env);
+  await run(env.DB, `INSERT INTO nomute_runtime(user_id,last_attempt,last_success,last_error)
+    VALUES(?,?,?,?)
+    ON CONFLICT(user_id) DO UPDATE SET
+      last_attempt=excluded.last_attempt,
+      last_success=CASE WHEN excluded.last_success IS NOT NULL THEN excluded.last_success ELSE nomute_runtime.last_success END,
+      last_error=excluded.last_error`,
+    userId, now(), ok ? now() : null, errorText ? String(errorText).slice(0, 500) : null);
+}
+
 function commandsText() {
   return [
     '📋 Команды RNMD Chat Automator',
@@ -25,6 +51,7 @@ function commandsText() {
     '.nomute или /nomute — невидимо редактировать каждое твоё исходящее Business-сообщение',
     '.allowmute или /allowmute — выключить защиту .nomute',
     '.spam 5 текст — отправить текст несколько раз; можно указать до 10000, реально отправится максимум 400',
+    '.stopspam — остановить текущий спам',
     '',
     '🤖 В личном чате с ботом:',
     '/start — открыть бота',
@@ -124,33 +151,50 @@ async function touchNoMuteMessage(env, msg, connection) {
   const enabled = await one(env.DB, 'SELECT 1 FROM nomute_users WHERE user_id=?', connection.owner_user_id);
   if (!enabled) return false;
 
-  try {
-    if (typeof msg.text === 'string' && msg.text.length > 0 && msg.text.length < 4096) {
-      const params = {
-        business_connection_id: connection.connection_id,
-        chat_id: msg.chat.id,
-        message_id: msg.message_id,
-        text: msg.text + '\u2060',
-      };
-      if (Array.isArray(msg.entities) && msg.entities.length) params.entities = msg.entities;
-      await api(env, 'editMessageText', params);
-      return true;
-    }
-
-    if (typeof msg.caption === 'string' && msg.caption.length > 0 && msg.caption.length < 1024) {
-      const params = {
-        business_connection_id: connection.connection_id,
-        chat_id: msg.chat.id,
-        message_id: msg.message_id,
-        caption: msg.caption + '\u2060',
-      };
-      if (Array.isArray(msg.caption_entities) && msg.caption_entities.length) params.caption_entities = msg.caption_entities;
-      await api(env, 'editMessageCaption', params);
-      return true;
-    }
-  } catch (error) {
-    console.warn('NoMute invisible edit failed:', String(error));
+  const base = typeof msg.text === 'string' ? msg.text : null;
+  const caption = typeof msg.caption === 'string' ? msg.caption : null;
+  if (!base && !caption) {
+    await setNoMuteRuntime(env, connection.owner_user_id, false, 'У сообщения нет текста или подписи для редактирования.');
+    return false;
   }
+
+  const invisibleVariants = ['\u200B', '\u2063', '\u200C'];
+  let lastError = null;
+
+  for (const invisible of invisibleVariants) {
+    try {
+      if (base !== null && base.length < 4096) {
+        const params = {
+          business_connection_id: connection.connection_id,
+          chat_id: msg.chat.id,
+          message_id: msg.message_id,
+          text: base + invisible,
+        };
+        if (Array.isArray(msg.entities) && msg.entities.length) params.entities = msg.entities;
+        await api(env, 'editMessageText', params);
+        await setNoMuteRuntime(env, connection.owner_user_id, true);
+        return true;
+      }
+
+      if (caption !== null && caption.length < 1024) {
+        const params = {
+          business_connection_id: connection.connection_id,
+          chat_id: msg.chat.id,
+          message_id: msg.message_id,
+          caption: caption + invisible,
+        };
+        if (Array.isArray(msg.caption_entities) && msg.caption_entities.length) params.caption_entities = msg.caption_entities;
+        await api(env, 'editMessageCaption', params);
+        await setNoMuteRuntime(env, connection.owner_user_id, true);
+        return true;
+      }
+    } catch (error) {
+      lastError = error;
+    }
+  }
+
+  console.warn('NoMute invisible edit failed:', String(lastError));
+  await setNoMuteRuntime(env, connection.owner_user_id, false, lastError?.message || String(lastError));
   return false;
 }
 
@@ -203,6 +247,19 @@ async function handleOwnerCommand(env, msg, connection) {
     await reply('🔓 Защита .nomute выключена. Теперь тебя снова можно замутить через RNMD Chat Automator.');
     return;
   }
+  if (low === '.stopspam') {
+    await ensureRuntimeTables(env);
+    await run(env.DB, `INSERT INTO spam_stop_flags(connection_id,chat_id,stop_at) VALUES(?,?,?)
+      ON CONFLICT(connection_id,chat_id) DO UPDATE SET stop_at=excluded.stop_at`, id, chat, now());
+    try {
+      await api(env, 'deleteBusinessMessages', {
+        business_connection_id: id,
+        message_ids: [msg.message_id],
+      });
+    } catch {}
+    await reply('⛔ Спам остановлен.');
+    return;
+  }
   if (low.startsWith('.spam')) {
     const match = /^\.spam\s+(\d+)\s+([\s\S]+)$/i.exec(text);
     if (!match || Number(match[1]) < 1 || Number(match[1]) > 10000 || !match[2].trim()) {
@@ -210,6 +267,9 @@ async function handleOwnerCommand(env, msg, connection) {
       return;
     }
     const spamCount = Math.min(Number(match[1]), 400);
+    await ensureRuntimeTables(env);
+    const spamStartedAt = now();
+    await run(env.DB, 'DELETE FROM spam_stop_flags WHERE connection_id=? AND chat_id=?', id, chat);
 
     // Hide the .spam command itself from the Business chat.
     try {
@@ -250,6 +310,7 @@ async function handleOwnerCommand(env, msg, connection) {
       }
     } finally {
       await run(env.DB, 'DELETE FROM repeat_leases WHERE connection_id=? AND chat_id=?', id, chat);
+      await run(env.DB, 'DELETE FROM spam_stop_flags WHERE connection_id=? AND chat_id=?', id, chat);
     }
   }
 }
@@ -273,7 +334,10 @@ async function handleBusinessMessage(env, msg) {
   if (!connection || !connection.is_enabled) return;
   const owner = connection.owner_user_id, chat = msg.chat.id;
   if (msg.sender_business_bot) return;
-  if (msg.from?.id === owner) {
+  const outgoingFromOwner =
+    msg.from?.id === owner ||
+    (msg.chat?.type === 'private' && msg.from?.id != null && msg.from.id !== chat);
+  if (outgoingFromOwner) {
     const raw = (msg.text || msg.caption || '').trim().toLowerCase();
     if (raw.startsWith('.')) return handleOwnerCommand(env, msg, connection);
     return touchNoMuteMessage(env, msg, connection);
@@ -406,7 +470,7 @@ async function callback(env, q) {
     await answer();
     const c = await ownerConnection(env, owner);
     return send(env, owner,
-      `💼 Автоматизация личных чатов\n\nTelegram Business: ${c ? '✅ подключён' : '❌ ещё не подключён'}\n\n.mute — удалять новые входящие\n.unmute — снять мут\n.nomute — невидимо редактировать свои исходящие сообщения\n.allowmute — снять защиту\n.spam N текст — N до 10000, отправится максимум 400`,
+      `💼 Автоматизация личных чатов\n\nTelegram Business: ${c ? '✅ подключён' : '❌ ещё не подключён'}\n\n.mute — удалять новые входящие\n.unmute — снять мут\n.nomute — невидимо редактировать свои исходящие сообщения\n.allowmute — снять защиту\n.spam N текст — N до 10000, отправится максимум 400\n.stopspam — остановить текущий спам`,
       { reply_markup: await panel(env, owner) });
   }
   if (!data.startsWith('biz:') || chat !== owner) return answer();
@@ -450,10 +514,17 @@ async function privateCommand(env, msg) {
   }
   if (command === '/nomutestatus') {
     await ensureNoMuteTable(env);
+    await ensureRuntimeTables(env);
     const protectedNow = await one(env.DB, 'SELECT 1 FROM nomute_users WHERE user_id=?', owner);
-    return send(env, owner, protectedNow
-      ? '🛡 .nomute включён: исходящие Business-сообщения невидимо редактируются сразу после отправки.'
-      : '🔓 .nomute выключен.');
+    const rt = await one(env.DB, 'SELECT * FROM nomute_runtime WHERE user_id=?', owner);
+    const c = await ownerConnection(env, owner);
+    const lines = [
+      protectedNow ? '🛡 .nomute включён.' : '🔓 .nomute выключен.',
+      `💬 Право ответов/редактирования: ${c?.can_reply ? '✅' : '❌'}`,
+    ];
+    if (rt?.last_success) lines.push(`✅ Последнее успешное редактирование: ${now() - rt.last_success} сек. назад.`);
+    if (rt?.last_error) lines.push(`❌ Последняя ошибка: ${rt.last_error}`);
+    return send(env, owner, lines.join('\n'));
   }
   if (command === '.allowmute' || command === '/allowmute') {
     await ensureNoMuteTable(env);
