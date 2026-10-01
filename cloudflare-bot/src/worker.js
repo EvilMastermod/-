@@ -7,6 +7,22 @@ const all = async (db, sql, ...args) => (await db.prepare(sql).bind(...args).all
 const run = (db, sql, ...args) => db.prepare(sql).bind(...args).run();
 const keyboard = rows => ({ inline_keyboard: rows });
 const button = (label, data) => ({ text: label, callback_data: data });
+const noMuteCache = new Map();
+const NOMUTE_CACHE_TTL = 15 * 60 * 1000;
+
+async function isNoMuteEnabledFast(env, userId) {
+  const cached = noMuteCache.get(userId);
+  const t = Date.now();
+  if (cached && cached.expires > t) return cached.enabled;
+  const row = await one(env.DB, 'SELECT 1 FROM nomute_users WHERE user_id=?', userId);
+  const enabled = !!row;
+  noMuteCache.set(userId, { enabled, expires: t + NOMUTE_CACHE_TTL });
+  return enabled;
+}
+
+function cacheNoMute(userId, enabled) {
+  noMuteCache.set(userId, { enabled, expires: Date.now() + NOMUTE_CACHE_TTL });
+}
 
 async function ensureNoMuteTable(env) {
   await run(env.DB, `CREATE TABLE IF NOT EXISTS nomute_users (
@@ -153,54 +169,76 @@ async function panel(env, owner) {
 }
 
 async function touchNoMuteMessage(env, msg, connection) {
-  await ensureNoMuteTable(env);
-  const enabled = await one(env.DB, 'SELECT 1 FROM nomute_users WHERE user_id=?', connection.owner_user_id);
+  const enabled = await isNoMuteEnabledFast(env, connection.owner_user_id);
   if (!enabled) return false;
 
   const base = typeof msg.text === 'string' ? msg.text : null;
   const caption = typeof msg.caption === 'string' ? msg.caption : null;
-  if (!base && !caption) {
-    await setNoMuteRuntime(env, connection.owner_user_id, false, 'У сообщения нет текста или подписи для редактирования.');
-    return false;
-  }
+  if (!base && !caption) return false;
 
-  const invisibleVariants = ['\u200B', '\u2063', '\u200C'];
-  let lastError = null;
-
-  for (const invisible of invisibleVariants) {
-    try {
-      if (base !== null && base.length < 4096) {
-        const params = {
-          business_connection_id: connection.connection_id,
-          chat_id: msg.chat.id,
-          message_id: msg.message_id,
-          text: base + invisible,
-        };
-        if (Array.isArray(msg.entities) && msg.entities.length) params.entities = msg.entities;
-        await api(env, 'editMessageText', params);
-        await setNoMuteRuntime(env, connection.owner_user_id, true);
-        return true;
-      }
-
-      if (caption !== null && caption.length < 1024) {
-        const params = {
-          business_connection_id: connection.connection_id,
-          chat_id: msg.chat.id,
-          message_id: msg.message_id,
-          caption: caption + invisible,
-        };
-        if (Array.isArray(msg.caption_entities) && msg.caption_entities.length) params.caption_entities = msg.caption_entities;
-        await api(env, 'editMessageCaption', params);
-        await setNoMuteRuntime(env, connection.owner_user_id, true);
-        return true;
-      }
-    } catch (error) {
-      lastError = error;
+  // Fast path: one immediate Telegram edit with no D1 writes beforehand.
+  try {
+    if (base !== null && base.length < 4096) {
+      const params = {
+        business_connection_id: connection.connection_id,
+        chat_id: msg.chat.id,
+        message_id: msg.message_id,
+        text: base + '\u200B',
+      };
+      if (Array.isArray(msg.entities) && msg.entities.length) params.entities = msg.entities;
+      await api(env, 'editMessageText', params);
+      // Diagnostics happen only after Telegram has already edited the message.
+      try { await setNoMuteRuntime(env, connection.owner_user_id, true); } catch {}
+      return true;
     }
-  }
 
-  console.warn('NoMute invisible edit failed:', String(lastError));
-  await setNoMuteRuntime(env, connection.owner_user_id, false, lastError?.message || String(lastError));
+    if (caption !== null && caption.length < 1024) {
+      const params = {
+        business_connection_id: connection.connection_id,
+        chat_id: msg.chat.id,
+        message_id: msg.message_id,
+        caption: caption + '\u200B',
+      };
+      if (Array.isArray(msg.caption_entities) && msg.caption_entities.length) params.caption_entities = msg.caption_entities;
+      await api(env, 'editMessageCaption', params);
+      try { await setNoMuteRuntime(env, connection.owner_user_id, true); } catch {}
+      return true;
+    }
+  } catch (firstError) {
+    // Fallback only if Telegram rejected the fastest invisible character.
+    for (const invisible of ['\u2063', '\u200C']) {
+      try {
+        if (base !== null && base.length < 4096) {
+          const params = {
+            business_connection_id: connection.connection_id,
+            chat_id: msg.chat.id,
+            message_id: msg.message_id,
+            text: base + invisible,
+          };
+          if (Array.isArray(msg.entities) && msg.entities.length) params.entities = msg.entities;
+          await api(env, 'editMessageText', params);
+          try { await setNoMuteRuntime(env, connection.owner_user_id, true); } catch {}
+          return true;
+        }
+        if (caption !== null && caption.length < 1024) {
+          const params = {
+            business_connection_id: connection.connection_id,
+            chat_id: msg.chat.id,
+            message_id: msg.message_id,
+            caption: caption + invisible,
+          };
+          if (Array.isArray(msg.caption_entities) && msg.caption_entities.length) params.caption_entities = msg.caption_entities;
+          await api(env, 'editMessageCaption', params);
+          try { await setNoMuteRuntime(env, connection.owner_user_id, true); } catch {}
+          return true;
+        }
+      } catch (fallbackError) {
+        firstError = fallbackError;
+      }
+    }
+    console.warn('NoMute invisible edit failed:', String(firstError));
+    try { await setNoMuteRuntime(env, connection.owner_user_id, false, firstError?.message || String(firstError)); } catch {}
+  }
   return false;
 }
 
@@ -241,6 +279,7 @@ async function handleOwnerCommand(env, msg, connection) {
     const liveConnection = await refreshBusinessConnection(env, id);
     await run(env.DB, `INSERT INTO nomute_users(user_id,enabled_at) VALUES(?,?)
       ON CONFLICT(user_id) DO UPDATE SET enabled_at=excluded.enabled_at`, owner, now());
+    cacheNoMute(owner, true);
     await run(env.DB, 'DELETE FROM business_muted_chats WHERE chat_id=?', owner);
     await run(env.DB, 'DELETE FROM business_mute_controls WHERE chat_id=?', owner);
 
@@ -268,6 +307,7 @@ async function handleOwnerCommand(env, msg, connection) {
   if (low === '.allowmute') {
     await ensureNoMuteTable(env);
     await run(env.DB, 'DELETE FROM nomute_users WHERE user_id=?', owner);
+    cacheNoMute(owner, false);
     await reply('🔓 Защита .nomute выключена. Теперь тебя снова можно замутить через RNMD Chat Automator.');
     return;
   }
@@ -532,6 +572,7 @@ async function privateCommand(env, msg) {
     await ensureNoMuteTable(env);
     await run(env.DB, `INSERT INTO nomute_users(user_id,enabled_at) VALUES(?,?)
       ON CONFLICT(user_id) DO UPDATE SET enabled_at=excluded.enabled_at`, owner, now());
+    cacheNoMute(owner, true);
     await run(env.DB, 'DELETE FROM business_muted_chats WHERE chat_id=?', owner);
     await run(env.DB, 'DELETE FROM business_mute_controls WHERE chat_id=?', owner);
 
@@ -564,6 +605,7 @@ async function privateCommand(env, msg) {
   if (command === '.allowmute' || command === '/allowmute') {
     await ensureNoMuteTable(env);
     await run(env.DB, 'DELETE FROM nomute_users WHERE user_id=?', owner);
+    cacheNoMute(owner, false);
     return send(env, owner, '🔓 .nomute выключен. Теперь тебя снова можно замутить.');
   }
   if (command === '/start') return send(env, owner,
