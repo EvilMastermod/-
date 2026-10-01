@@ -73,13 +73,13 @@ export async function handleGroup(env, api, send, msg, updateId) {
       try { await api(env, 'deleteMessage', { chat_id: chat, message_id: msg.message_id }); } catch {}
     return;
   }
-  if (command === 'start') return reply(send, env, msg, '🤖 Готов. Админ-панель: /setup');
-  if (command === 'rules') {
+  if (command === 'start' && !user?.is_bot) return reply(send, env, msg, '🤖 Готов. Админ-панель: /setup');
+  if (command === 'rules' && !user?.is_bot) {
     const s = await chatSettings(env, chat);
     return reply(send, env, msg, '📋 Правила чата:\n\n' + s.rules);
   }
   const admin = await isAdmin(env, api, chat, user?.id);
-  if (command && admin) {
+  if (command && admin && !user?.is_bot) {
     const s = await chatSettings(env, chat);
     if (command === 'setup')
       return reply(send, env, msg, '🛠 Автоматизация чата\n\nВыберите настройку:',
@@ -165,15 +165,16 @@ export async function handleGroup(env, api, send, msg, updateId) {
     }
     return;
   }
-  if (command && !admin) {
+  if (command && !admin && !user?.is_bot) {
     if (new Set(['setup', 'setwelcome', 'setrules', 'badadd', 'baddel', 'badlist',
       'replyadd', 'replydel', 'schedule', 'scheduledel', 'warnlimit', 'warn', 'unwarn',
       'mute', 'unmute', 'ban']).has(command))
       return reply(send, env, msg, '⛔ Эта команда только для админов чата.');
   }
-  if (!user || user.is_bot || admin || command) return;
+  const senderIsBot = !!user?.is_bot;
+  if (!user || admin || (command && !senderIsBot)) return;
   const text = (msg.text || msg.caption || '').trim();
-  if (!text) return;
+  if (!text && !senderIsBot) return;
   const s = await chatSettings(env, chat);
   let reason = '';
   if (s.anti_spam) {
@@ -184,9 +185,15 @@ export async function handleGroup(env, api, send, msg, updateId) {
     const count = await one(env.DB, 'SELECT COUNT(*) AS n FROM flood_events WHERE chat_id=? AND user_id=?', chat, user.id);
     if (count.n >= s.flood_count) {
       reason = 'слишком много сообщений подряд';
-      await run(env.DB, 'DELETE FROM flood_events WHERE chat_id=? AND user_id=?', chat, user.id);
-      try { await api(env, 'restrictChatMember', { chat_id: chat, user_id: user.id,
-        permissions: locked, until_date: now() + s.flood_mute }); } catch {}
+      // For human users, reset the window and mute them. For bots, keep the
+      // flood window populated so every following spam message is deleted
+      // until the window naturally expires. Telegram does not support
+      // restricting another bot like a normal member.
+      if (!senderIsBot) {
+        await run(env.DB, 'DELETE FROM flood_events WHERE chat_id=? AND user_id=?', chat, user.id);
+        try { await api(env, 'restrictChatMember', { chat_id: chat, user_id: user.id,
+          permissions: locked, until_date: now() + s.flood_mute }); } catch {}
+      }
     }
   }
   if (!reason && s.anti_links && URL_RE.test(text)) reason = 'ссылки запрещены';
@@ -196,8 +203,12 @@ export async function handleGroup(env, api, send, msg, updateId) {
   }
   if (reason) {
     try { await api(env, 'deleteMessage', { chat_id: chat, message_id: msg.message_id }); } catch {}
+    // Never answer a spam bot: replying can create bot-to-bot loops.
+    if (senderIsBot) return;
     return send(env, chat, `🚫 ${user.first_name || 'Пользователь'}: ${reason}.`);
   }
+  // Bot messages are moderation-only. Do not run auto-replies for them.
+  if (senderIsBot) return;
   const replies = await all(env.DB, 'SELECT trigger,reply FROM auto_replies WHERE chat_id=?', chat);
   const chosen = replies.find(row => text.toLowerCase().includes(row.trigger));
   if (chosen) return reply(send, env, msg, chosen.reply);
