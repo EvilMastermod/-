@@ -8,17 +8,6 @@ const run = (db, sql, ...args) => db.prepare(sql).bind(...args).run();
 const keyboard = rows => ({ inline_keyboard: rows });
 const button = (label, data) => ({ text: label, callback_data: data });
 
-async function ensureDeleteReasonTable(env) {
-  await run(env.DB, `CREATE TABLE IF NOT EXISTS business_delete_reasons (
-    connection_id TEXT NOT NULL,
-    chat_id INTEGER NOT NULL,
-    message_id INTEGER NOT NULL,
-    reason TEXT NOT NULL,
-    created_at INTEGER NOT NULL,
-    PRIMARY KEY(connection_id, chat_id, message_id)
-  )`);
-}
-
 async function api(env, method, payload = {}) {
   const response = await fetch(`https://api.telegram.org/bot${env.BOT_TOKEN}/${method}`, {
     method: 'POST',
@@ -26,23 +15,12 @@ async function api(env, method, payload = {}) {
     body: JSON.stringify(payload),
   });
   const result = await response.json();
-  if (!result.ok) {
-    const error = new Error(`Telegram ${method}: ${result.description || response.status}`);
-    error.retryAfter = Number(result.parameters?.retry_after || 0);
-    error.errorCode = Number(result.error_code || response.status || 0);
-    throw error;
-  }
+  if (!result.ok) throw new Error(`Telegram ${method}: ${result.description || response.status}`);
   return result.result;
 }
 
 function send(env, chat_id, text, extras = {}) {
   return api(env, 'sendMessage', { chat_id, text, ...extras });
-}
-
-async function refreshConnection(env, id) {
-  const connection = await api(env, 'getBusinessConnection', { business_connection_id: id });
-  await saveConnection(env, connection);
-  return one(env.DB, 'SELECT * FROM business_connections WHERE connection_id=?', id);
 }
 
 async function getConnection(env, id) {
@@ -95,11 +73,6 @@ async function handleOwnerCommand(env, msg, connection) {
   const text = (msg.text || msg.caption || '').trim(), low = text.toLowerCase();
   const reply = body => send(env, chat, body, { business_connection_id: id });
   if (low === '.mute') {
-    const liveConnection = await refreshConnection(env, id);
-    if (!liveConnection?.can_delete_all) {
-      await reply('❌ Мут не включён. В Telegram Business дай боту право удалять все сообщения в чатах.');
-      return;
-    }
     await run(env.DB, `INSERT INTO business_muted_chats(owner_user_id,chat_id,muted_at) VALUES(?,?,?)
       ON CONFLICT(owner_user_id,chat_id) DO UPDATE SET muted_at=excluded.muted_at`, owner, chat, now());
     await run(env.DB, `INSERT INTO business_mute_controls(owner_user_id,chat_id,connection_id,message_id)
@@ -140,19 +113,7 @@ async function handleOwnerCommand(env, msg, connection) {
     }
     try {
       for (let index = 0; index < Number(match[1]); index++) {
-        let sent = false;
-        for (let attempt = 0; attempt < 2 && !sent; attempt++) {
-          try {
-            await reply(match[2].trim().slice(0, 4096));
-            sent = true;
-          } catch (error) {
-            if (error?.errorCode === 429 && error?.retryAfter > 0 && attempt === 0) {
-              await new Promise(r => setTimeout(r, Math.min(error.retryAfter, 15) * 1000));
-              continue;
-            }
-            throw error;
-          }
-        }
+        await reply(match[2].trim().slice(0, 4096));
         if (index + 1 < Number(match[1])) await new Promise(r => setTimeout(r, 450));
       }
     } finally {
@@ -183,27 +144,17 @@ async function handleBusinessMessage(env, msg) {
   if (msg.sender_business_bot) return;
   await archive(env, msg, connection);
   if (await one(env.DB, 'SELECT 1 FROM business_muted_chats WHERE owner_user_id=? AND chat_id=?', owner, chat)) {
-    await ensureDeleteReasonTable(env);
-    await run(env.DB, `INSERT OR REPLACE INTO business_delete_reasons
-      (connection_id,chat_id,message_id,reason,created_at) VALUES(?,?,?,?,?)`,
-      connection.connection_id, chat, msg.message_id, 'mute', now());
     try {
       await api(env, 'deleteBusinessMessages', {
         business_connection_id: connection.connection_id,
         message_ids: [msg.message_id],
       });
     } catch (error) {
-      await run(env.DB, 'DELETE FROM business_delete_reasons WHERE connection_id=? AND chat_id=? AND message_id=?',
-        connection.connection_id, chat, msg.message_id);
-      if (error?.errorCode === 403 || error?.errorCode === 400) {
-        await run(env.DB, 'DELETE FROM business_muted_chats WHERE owner_user_id=? AND chat_id=?', owner, chat);
-        try {
-          await send(env, connection.user_chat_id,
-            '❌ Мут отключён: Telegram не разрешил удалить сообщение. Открой Telegram Business → Автоматизация чатов и дай боту право удалять все сообщения.');
-        } catch {}
-        return;
-      }
-      throw error;
+      await run(env.DB, 'DELETE FROM business_muted_chats WHERE owner_user_id=? AND chat_id=?', owner, chat);
+      try {
+        await send(env, connection.user_chat_id,
+          '❌ Мут отключён: Telegram не дал удалить входящее сообщение. Проверь право «Удаление всех сообщений» в Telegram Business.');
+      } catch {}
     }
     return;
   }
@@ -235,11 +186,10 @@ async function handleDeleted(env, deleted) {
     const row = await one(env.DB, `SELECT * FROM business_message_archive
       WHERE connection_id=? AND chat_id=? AND message_id=?`, connection.connection_id, deleted.chat.id, id);
     if (!row || row.sender_user_id === connection.owner_user_id) continue;
-    await ensureDeleteReasonTable(env);
-    const deleteReason = await one(env.DB,
-      'SELECT reason FROM business_delete_reasons WHERE connection_id=? AND chat_id=? AND message_id=?',
-      connection.connection_id, deleted.chat.id, id);
-    const reasonLabel = deleteReason?.reason === 'mute' ? '🔇 Удалено мутом' : '🗑 Собеседник удалил';
+    const mutedNow = await one(env.DB,
+      'SELECT 1 FROM business_muted_chats WHERE owner_user_id=? AND chat_id=?',
+      connection.owner_user_id, deleted.chat.id);
+    const reasonLabel = mutedNow ? '🔇 Удалено мутом' : '🗑 Собеседник удалил';
     const header = `${reasonLabel}\n👤 ${row.sender_name || `ID ${row.sender_user_id || '?'}`}\n💬 Chat ID: ${row.chat_id}\n🆔 Message ID: ${id}\n`;
     const body = `${header}\n📝 ${row.text_content || '[без текста]'}`;
     const method = { photo: 'sendPhoto', video: 'sendVideo', document: 'sendDocument',
@@ -256,8 +206,6 @@ async function handleDeleted(env, deleted) {
         await api(env, 'sendSticker', { chat_id: connection.user_chat_id, sticker: row.file_id });
     }
     await run(env.DB, 'DELETE FROM business_message_archive WHERE connection_id=? AND chat_id=? AND message_id=?',
-      connection.connection_id, deleted.chat.id, id);
-    await run(env.DB, 'DELETE FROM business_delete_reasons WHERE connection_id=? AND chat_id=? AND message_id=?',
       connection.connection_id, deleted.chat.id, id);
   }
 }
@@ -320,7 +268,7 @@ async function privateCommand(env, msg) {
   if (command === '/start') return send(env, owner, '🤖 Я RNMD Chat Automator.\n\nНастройки Business: /business');
   if (command === '/business') {
     const c = await ownerConnection(env, owner);
-    return send(env, owner, `💼 Автоматизация личных чатов\n\nTelegram Business: ${c ? '✅ подключён' : '❌ ещё не подключён'}\n\n.mute — удалять новые входящие, включая сообщения от ботов\n.unmute / .nomute — снять мут\n.spam 5 Привет — повторить до 25 раз`,
+    return send(env, owner, `💼 Автоматизация личных чатов\n\nTelegram Business: ${c ? '✅ подключён' : '❌ ещё не подключён'}\n\n.mute — удалять новые входящие\n.unmute / .nomute — снять мут\n.spam 5 Привет — повторить до 25 раз`,
       { reply_markup: await panel(env, owner) });
   }
   if (command === '/bizwelcome' || command === '/bizfallback') {
@@ -385,7 +333,5 @@ export default {
   },
   async scheduled(_event, env) {
     await scheduled(env, send);
-    await ensureDeleteReasonTable(env);
-    await run(env.DB, 'DELETE FROM business_delete_reasons WHERE created_at<?', now() - 2 * 86400);
   },
 };
