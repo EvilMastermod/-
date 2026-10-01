@@ -26,7 +26,12 @@ async function api(env, method, payload = {}) {
     body: JSON.stringify(payload),
   });
   const result = await response.json();
-  if (!result.ok) throw new Error(`Telegram ${method}: ${result.description || response.status}`);
+  if (!result.ok) {
+    const error = new Error(`Telegram ${method}: ${result.description || response.status}`);
+    error.retryAfter = Number(result.parameters?.retry_after || 0);
+    error.errorCode = Number(result.error_code || response.status || 0);
+    throw error;
+  }
   return result.result;
 }
 
@@ -124,7 +129,19 @@ async function handleOwnerCommand(env, msg, connection) {
     }
     try {
       for (let index = 0; index < Number(match[1]); index++) {
-        await reply(match[2].trim().slice(0, 4096));
+        let sent = false;
+        for (let attempt = 0; attempt < 2 && !sent; attempt++) {
+          try {
+            await reply(match[2].trim().slice(0, 4096));
+            sent = true;
+          } catch (error) {
+            if (error?.errorCode === 429 && error?.retryAfter > 0 && attempt === 0) {
+              await new Promise(r => setTimeout(r, Math.min(error.retryAfter, 15) * 1000));
+              continue;
+            }
+            throw error;
+          }
+        }
         if (index + 1 < Number(match[1])) await new Promise(r => setTimeout(r, 450));
       }
     } finally {
