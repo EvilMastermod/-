@@ -108,6 +108,12 @@ async function getConnection(env, id) {
   return one(env.DB, 'SELECT * FROM business_connections WHERE connection_id=?', id);
 }
 
+async function refreshBusinessConnection(env, connectionId) {
+  const live = await api(env, 'getBusinessConnection', { business_connection_id: connectionId });
+  await saveConnection(env, live);
+  return one(env.DB, 'SELECT * FROM business_connections WHERE connection_id=?', connectionId);
+}
+
 async function saveConnection(env, connection) {
   const rights = connection.rights || {};
   await run(env.DB, `INSERT INTO business_connections
@@ -232,13 +238,31 @@ async function handleOwnerCommand(env, msg, connection) {
   }
   if (low === '.nomute') {
     await ensureNoMuteTable(env);
+    const liveConnection = await refreshBusinessConnection(env, id);
     await run(env.DB, `INSERT INTO nomute_users(user_id,enabled_at) VALUES(?,?)
       ON CONFLICT(user_id) DO UPDATE SET enabled_at=excluded.enabled_at`, owner, now());
-    // .nomute applies immediately: remove mutes that other connected users
-    // may already have placed on this Telegram user.
     await run(env.DB, 'DELETE FROM business_muted_chats WHERE chat_id=?', owner);
     await run(env.DB, 'DELETE FROM business_mute_controls WHERE chat_id=?', owner);
-    await reply('🛡 .nomute включён. Теперь твои обычные исходящие сообщения бот будет сразу невидимо редактировать, не меняя текст.');
+
+    if (!liveConnection?.can_reply) {
+      await setNoMuteRuntime(env, owner, false,
+        'Telegram Business не дал право can_reply (ответы/редактирование).');
+      try {
+        await send(env, liveConnection?.user_chat_id || connection.user_chat_id,
+          '❌ .nomute включён, но Telegram не разрешает редактирование. В Telegram Business включи для бота право ответов/редактирования.');
+      } catch {}
+      return;
+    }
+
+    const testOk = await touchNoMuteMessage(env, msg, liveConnection);
+    if (testOk) {
+      try { await reply('🛡 .nomute включён и проверен ✅ Невидимое редактирование работает.'); } catch {}
+    } else {
+      try {
+        await send(env, liveConnection.user_chat_id,
+          '⚠️ .nomute включён, но тестовое редактирование не прошло. Напиши /nomutestatus — там будет точная ошибка Telegram.');
+      } catch {}
+    }
     return;
   }
   if (low === '.allowmute') {
@@ -510,7 +534,18 @@ async function privateCommand(env, msg) {
       ON CONFLICT(user_id) DO UPDATE SET enabled_at=excluded.enabled_at`, owner, now());
     await run(env.DB, 'DELETE FROM business_muted_chats WHERE chat_id=?', owner);
     await run(env.DB, 'DELETE FROM business_mute_controls WHERE chat_id=?', owner);
-    return send(env, owner, '🛡 .nomute включён. Теперь твои обычные исходящие Business-сообщения бот будет сразу невидимо редактировать.');
+
+    const current = await ownerConnection(env, owner);
+    const live = current ? await refreshBusinessConnection(env, current.connection_id) : null;
+    if (!live) return send(env, owner, '⚠️ .nomute включён, но Telegram Business сейчас не подключён.');
+    if (!live.can_reply) {
+      await setNoMuteRuntime(env, owner, false,
+        'Telegram Business не дал право can_reply (ответы/редактирование).');
+      return send(env, owner,
+        '⚠️ .nomute включён, но редактирование не заработает, пока в Telegram Business у бота нет права ответов/редактирования.');
+    }
+    return send(env, owner,
+      '🛡 .nomute включён. Право редактирования есть ✅ Теперь отправь обычное сообщение в Business-ЛС и затем проверь /nomutestatus.');
   }
   if (command === '/nomutestatus') {
     await ensureNoMuteTable(env);
@@ -539,7 +574,7 @@ async function privateCommand(env, msg) {
     ]) });
   if (command === '/business') {
     const c = await ownerConnection(env, owner);
-    return send(env, owner, `💼 Автоматизация личных чатов\n\nTelegram Business: ${c ? '✅ подключён' : '❌ ещё не подключён'}\n\n.mute — удалять новые входящие, включая сообщения от ботов\n.unmute — снять мут\n.nomute — защитить себя от мута\n.allowmute — снять защиту\n.spam N текст — N до 10000, отправится максимум 400`,
+    return send(env, owner, `💼 Автоматизация личных чатов\n\nTelegram Business: ${c ? '✅ подключён' : '❌ ещё не подключён'}\n\n.mute — удалять новые входящие, включая сообщения от ботов\n.unmute — снять мут\n.nomute — невидимо редактировать исходящие сообщения\n.allowmute — выключить nomute\n.spam N текст — N до 10000, отправится максимум 400\n.stopspam — остановить текущий спам`,
       { reply_markup: await panel(env, owner) });
   }
   if (command === '/bizwelcome' || command === '/bizfallback') {
