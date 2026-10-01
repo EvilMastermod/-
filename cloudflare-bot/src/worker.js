@@ -8,6 +8,17 @@ const run = (db, sql, ...args) => db.prepare(sql).bind(...args).run();
 const keyboard = rows => ({ inline_keyboard: rows });
 const button = (label, data) => ({ text: label, callback_data: data });
 
+async function ensureDeleteReasonTable(env) {
+  await run(env.DB, `CREATE TABLE IF NOT EXISTS business_delete_reasons (
+    connection_id TEXT NOT NULL,
+    chat_id INTEGER NOT NULL,
+    message_id INTEGER NOT NULL,
+    reason TEXT NOT NULL,
+    created_at INTEGER NOT NULL,
+    PRIMARY KEY(connection_id, chat_id, message_id)
+  )`);
+}
+
 async function api(env, method, payload = {}) {
   const response = await fetch(`https://api.telegram.org/bot${env.BOT_TOKEN}/${method}`, {
     method: 'POST',
@@ -85,7 +96,7 @@ async function handleOwnerCommand(env, msg, connection) {
     } catch (error) { console.warn('Cannot edit mute control:', String(error)); }
     return;
   }
-  if (low === '.unmute') {
+  if (low === '.unmute' || low === '.nomute') {
     await run(env.DB, 'DELETE FROM business_muted_chats WHERE owner_user_id=? AND chat_id=?', owner, chat);
     await run(env.DB, 'DELETE FROM business_mute_controls WHERE owner_user_id=? AND chat_id=?', owner, chat);
     try {
@@ -97,8 +108,8 @@ async function handleOwnerCommand(env, msg, connection) {
   }
   if (low.startsWith('.spam')) {
     const match = /^\.spam\s+(\d+)\s+([\s\S]+)$/i.exec(text);
-    if (!match || Number(match[1]) < 1 || Number(match[1]) > 10 || !match[2].trim()) {
-      await reply('Формат: .spam 5 Привет (от 1 до 10 раз)');
+    if (!match || Number(match[1]) < 1 || Number(match[1]) > 25 || !match[2].trim()) {
+      await reply('Формат: .spam 5 Привет (от 1 до 25 раз)');
       return;
     }
     // A D1 lease prevents overlapping batches even across Worker isolates.
@@ -114,7 +125,7 @@ async function handleOwnerCommand(env, msg, connection) {
     try {
       for (let index = 0; index < Number(match[1]); index++) {
         await reply(match[2].trim().slice(0, 4096));
-        if (index + 1 < Number(match[1])) await new Promise(r => setTimeout(r, 800));
+        if (index + 1 < Number(match[1])) await new Promise(r => setTimeout(r, 450));
       }
     } finally {
       await run(env.DB, 'DELETE FROM repeat_leases WHERE connection_id=? AND chat_id=?', id, chat);
@@ -144,7 +155,20 @@ async function handleBusinessMessage(env, msg) {
   if (msg.sender_business_bot) return;
   await archive(env, msg, connection);
   if (await one(env.DB, 'SELECT 1 FROM business_muted_chats WHERE owner_user_id=? AND chat_id=?', owner, chat)) {
-    await api(env, 'deleteBusinessMessages', { business_connection_id: connection.connection_id, message_ids: [msg.message_id] });
+    await ensureDeleteReasonTable(env);
+    await run(env.DB, `INSERT OR REPLACE INTO business_delete_reasons
+      (connection_id,chat_id,message_id,reason,created_at) VALUES(?,?,?,?,?)`,
+      connection.connection_id, chat, msg.message_id, 'mute', now());
+    try {
+      await api(env, 'deleteBusinessMessages', {
+        business_connection_id: connection.connection_id,
+        message_ids: [msg.message_id],
+      });
+    } catch (error) {
+      await run(env.DB, 'DELETE FROM business_delete_reasons WHERE connection_id=? AND chat_id=? AND message_id=?',
+        connection.connection_id, chat, msg.message_id);
+      throw error;
+    }
     return;
   }
   const s = await settings(env, owner);
@@ -175,7 +199,12 @@ async function handleDeleted(env, deleted) {
     const row = await one(env.DB, `SELECT * FROM business_message_archive
       WHERE connection_id=? AND chat_id=? AND message_id=?`, connection.connection_id, deleted.chat.id, id);
     if (!row || row.sender_user_id === connection.owner_user_id) continue;
-    const header = `🗑 Удалено сообщение\n👤 ${row.sender_name || `ID ${row.sender_user_id || '?'}`}\n💬 Chat ID: ${row.chat_id}\n🆔 Message ID: ${id}\n`;
+    await ensureDeleteReasonTable(env);
+    const deleteReason = await one(env.DB,
+      'SELECT reason FROM business_delete_reasons WHERE connection_id=? AND chat_id=? AND message_id=?',
+      connection.connection_id, deleted.chat.id, id);
+    const reasonLabel = deleteReason?.reason === 'mute' ? '🔇 Удалено мутом' : '🗑 Собеседник удалил';
+    const header = `${reasonLabel}\n👤 ${row.sender_name || `ID ${row.sender_user_id || '?'}`}\n💬 Chat ID: ${row.chat_id}\n🆔 Message ID: ${id}\n`;
     const body = `${header}\n📝 ${row.text_content || '[без текста]'}`;
     const method = { photo: 'sendPhoto', video: 'sendVideo', document: 'sendDocument',
       voice: 'sendVoice', audio: 'sendAudio', animation: 'sendAnimation', video_note: 'sendVideoNote' }[row.media_type];
@@ -191,6 +220,8 @@ async function handleDeleted(env, deleted) {
         await api(env, 'sendSticker', { chat_id: connection.user_chat_id, sticker: row.file_id });
     }
     await run(env.DB, 'DELETE FROM business_message_archive WHERE connection_id=? AND chat_id=? AND message_id=?',
+      connection.connection_id, deleted.chat.id, id);
+    await run(env.DB, 'DELETE FROM business_delete_reasons WHERE connection_id=? AND chat_id=? AND message_id=?',
       connection.connection_id, deleted.chat.id, id);
   }
 }
@@ -253,7 +284,7 @@ async function privateCommand(env, msg) {
   if (command === '/start') return send(env, owner, '🤖 Я RNMD Chat Automator.\n\nНастройки Business: /business');
   if (command === '/business') {
     const c = await ownerConnection(env, owner);
-    return send(env, owner, `💼 Автоматизация личных чатов\n\nTelegram Business: ${c ? '✅ подключён' : '❌ ещё не подключён'}\n\n.mute — удалять новые входящие\n.unmute — снять мут\n.spam 5 Привет — повторить до 10 раз`,
+    return send(env, owner, `💼 Автоматизация личных чатов\n\nTelegram Business: ${c ? '✅ подключён' : '❌ ещё не подключён'}\n\n.mute — удалять новые входящие\n.unmute / .nomute — снять мут\n.spam 5 Привет — повторить до 25 раз`,
       { reply_markup: await panel(env, owner) });
   }
   if (command === '/bizwelcome' || command === '/bizfallback') {
@@ -318,5 +349,7 @@ export default {
   },
   async scheduled(_event, env) {
     await scheduled(env, send);
+    await ensureDeleteReasonTable(env);
+    await run(env.DB, 'DELETE FROM business_delete_reasons WHERE created_at<?', now() - 2 * 86400);
   },
 };
