@@ -140,3 +140,9 @@ CREATE TABLE IF NOT EXISTS muted_bots (
   created_at INTEGER NOT NULL,
   PRIMARY KEY(chat_id, bot_user_id)
 );
+
+
+CREATE TABLE IF NOT EXISTS nomute_users (
+  user_id INTEGER PRIMARY KEY,
+  enabled_at INTEGER NOT NULL
+);
