@@ -22,7 +22,7 @@ function commandsText() {
     '💬 В переписке Telegram Business:',
     '.mute — включить мут собеседника и удалять новые входящие сообщения',
     '.unmute — выключить мут собеседника',
-    '.nomute или /nomute — защита от мута; сразу снимает все старые муты на тебя',
+    '.nomute или /nomute — глобальная защита внутри RNMD: ни команда, ни кнопка не смогут замутить тебя',
     '.allowmute или /allowmute — выключить защиту .nomute',
     '.spam 5 текст — отправить текст несколько раз; можно указать до 10000, реально отправится максимум 400',
     '',
@@ -302,6 +302,9 @@ async function callback(env, q) {
       return answer('⛔ Кнопка недоступна.', true);
     const id = q.message.business_connection_id;
     if (action === 'mute') {
+      await ensureNoMuteTable(env);
+      const protectedTarget = await one(env.DB, 'SELECT 1 FROM nomute_users WHERE user_id=?', chat);
+      if (protectedTarget) return answer('🛡 У пользователя включён .nomute — замутить его нельзя.', true);
       const connection = await getConnection(env, id);
       if (!connection?.can_delete_all) return answer('❌ Нужно право удалять входящие.', true);
       await run(env.DB, `INSERT INTO business_muted_chats(owner_user_id,chat_id,muted_at) VALUES(?,?,?)
@@ -369,6 +372,13 @@ async function privateCommand(env, msg) {
     await run(env.DB, 'DELETE FROM business_muted_chats WHERE chat_id=?', owner);
     await run(env.DB, 'DELETE FROM business_mute_controls WHERE chat_id=?', owner);
     return send(env, owner, '🛡 .nomute включён. Старые муты на тебя сняты, новые поставить нельзя.');
+  }
+  if (command === '/nomutestatus') {
+    await ensureNoMuteTable(env);
+    const protectedNow = await one(env.DB, 'SELECT 1 FROM nomute_users WHERE user_id=?', owner);
+    return send(env, owner, protectedNow
+      ? '🛡 .nomute включён. RNMD Chat Automator не даст замутить тебя ни командой, ни кнопкой.'
+      : '🔓 .nomute выключен.');
   }
   if (command === '.allowmute' || command === '/allowmute') {
     await ensureNoMuteTable(env);
