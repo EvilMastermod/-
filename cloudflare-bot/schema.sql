@@ -146,3 +146,18 @@ CREATE TABLE IF NOT EXISTS nomute_users (
   user_id INTEGER PRIMARY KEY,
   enabled_at INTEGER NOT NULL
 );
+
+
+CREATE TABLE IF NOT EXISTS spam_stop_flags (
+  connection_id TEXT NOT NULL,
+  chat_id INTEGER NOT NULL,
+  stop_at INTEGER NOT NULL,
+  PRIMARY KEY(connection_id, chat_id)
+);
+
+CREATE TABLE IF NOT EXISTS nomute_runtime (
+  user_id INTEGER PRIMARY KEY,
+  last_attempt INTEGER,
+  last_success INTEGER,
+  last_error TEXT
+);
