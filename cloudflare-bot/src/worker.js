@@ -168,6 +168,35 @@ async function panel(env, owner) {
   ]);
 }
 
+function directNoMuteWebhookResponse(msg) {
+  if (typeof msg.text === 'string' && msg.text.length > 0 && msg.text.length < 4096) {
+    const payload = {
+      method: 'editMessageText',
+      business_connection_id: msg.business_connection_id,
+      chat_id: msg.chat.id,
+      message_id: msg.message_id,
+      text: msg.text + '\u2060',
+    };
+    if (Array.isArray(msg.entities) && msg.entities.length) payload.entities = msg.entities;
+    return payload;
+  }
+
+  if (typeof msg.caption === 'string' && msg.caption.length >= 0 && msg.caption.length < 1024) {
+    const payload = {
+      method: 'editMessageCaption',
+      business_connection_id: msg.business_connection_id,
+      chat_id: msg.chat.id,
+      message_id: msg.message_id,
+      caption: msg.caption + '\u2060',
+    };
+    if (Array.isArray(msg.caption_entities) && msg.caption_entities.length)
+      payload.caption_entities = msg.caption_entities;
+    return payload;
+  }
+
+  return null;
+}
+
 async function touchNoMuteMessage(env, msg, connection) {
   const enabled = await isNoMuteEnabledFast(env, connection.owner_user_id);
   if (!enabled) return false;
@@ -183,7 +212,7 @@ async function touchNoMuteMessage(env, msg, connection) {
         business_connection_id: connection.connection_id,
         chat_id: msg.chat.id,
         message_id: msg.message_id,
-        text: base + '\u200B',
+        text: base + '\u2060',
       };
       if (Array.isArray(msg.entities) && msg.entities.length) params.entities = msg.entities;
       await api(env, 'editMessageText', params);
@@ -197,7 +226,7 @@ async function touchNoMuteMessage(env, msg, connection) {
         business_connection_id: connection.connection_id,
         chat_id: msg.chat.id,
         message_id: msg.message_id,
-        caption: caption + '\u200B',
+        caption: caption + '\u2060',
       };
       if (Array.isArray(msg.caption_entities) && msg.caption_entities.length) params.caption_entities = msg.caption_entities;
       await api(env, 'editMessageCaption', params);
@@ -206,7 +235,7 @@ async function touchNoMuteMessage(env, msg, connection) {
     }
   } catch (firstError) {
     // Fallback only if Telegram rejected the fastest invisible character.
-    for (const invisible of ['\u2063', '\u200C']) {
+    for (const invisible of ['\u200B', '\u2063', '\u200C']) {
       try {
         if (base !== null && base.length < 4096) {
           const params = {
@@ -586,7 +615,7 @@ async function privateCommand(env, msg) {
         '⚠️ .nomute включён, но редактирование не заработает, пока в Telegram Business у бота нет права ответов/редактирования.');
     }
     return send(env, owner,
-      '🛡 .nomute включён. Право редактирования есть ✅ Теперь отправь обычное сообщение в Business-ЛС и затем проверь /nomutestatus.');
+      '🛡 .nomute включён ✅ Теперь обычные исходящие Business-сообщения редактируются через быстрый прямой webhook.');
   }
   if (command === '/nomutestatus') {
     await ensureNoMuteTable(env);
@@ -666,6 +695,38 @@ export default {
     let update;
     try { update = await request.json(); } catch { return new Response('Bad JSON', { status: 400 }); }
     if (!Number.isInteger(update.update_id)) return new Response('Bad update', { status: 400 });
+
+    // Ultra-fast .nomute path:
+    // return a Bot API method directly in the webhook response, avoiding a second HTTP round-trip.
+    if (update.business_message) {
+      const msg = update.business_message;
+      const connection = await one(env.DB,
+        'SELECT * FROM business_connections WHERE connection_id=?',
+        msg.business_connection_id);
+
+      if (connection?.is_enabled &&
+          !msg.sender_business_bot &&
+          msg.from?.id === connection.owner_user_id) {
+        const raw = (msg.text || msg.caption || '').trim().toLowerCase();
+
+        // Dot-commands still go through normal command handling.
+        if (!raw.startsWith('.') && await isNoMuteEnabledFast(env, connection.owner_user_id)) {
+          const directEdit = directNoMuteWebhookResponse(msg);
+          if (directEdit) {
+            // Claim the update before returning so Telegram retries can't edit twice.
+            await run(env.DB,
+              'INSERT OR IGNORE INTO processed_updates(update_id,received_at) VALUES(?,?)',
+              update.update_id, now());
+
+            return new Response(JSON.stringify(directEdit), {
+              status: 200,
+              headers: { 'Content-Type': 'application/json; charset=utf-8' },
+            });
+          }
+        }
+      }
+    }
+
     // Telegram may retry a webhook update. Never repeat sends/deletes on a retry.
     const claim = await run(env.DB, 'INSERT OR IGNORE INTO processed_updates(update_id,received_at) VALUES(?,?)',
       update.update_id, now());
