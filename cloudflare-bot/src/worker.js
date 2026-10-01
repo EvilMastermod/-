@@ -22,8 +22,8 @@ function commandsText() {
     '💬 В переписке Telegram Business:',
     '.mute — включить мут собеседника и удалять новые входящие сообщения',
     '.unmute — выключить мут собеседника',
-    '.nomute — включить защиту: другие пользователи этого бота не смогут замутить тебя',
-    '.allowmute — выключить защиту .nomute',
+    '.nomute или /nomute — защита от мута; сразу снимает все старые муты на тебя',
+    '.allowmute или /allowmute — выключить защиту .nomute',
     '.spam 5 текст — отправить текст несколько раз; можно указать до 10000, реально отправится максимум 400',
     '',
     '🤖 В личном чате с ботом:',
@@ -155,7 +155,11 @@ async function handleOwnerCommand(env, msg, connection) {
     await ensureNoMuteTable(env);
     await run(env.DB, `INSERT INTO nomute_users(user_id,enabled_at) VALUES(?,?)
       ON CONFLICT(user_id) DO UPDATE SET enabled_at=excluded.enabled_at`, owner, now());
-    await reply('🛡 Защита .nomute включена. Другие пользователи RNMD Chat Automator не смогут замутить тебя.');
+    // .nomute applies immediately: remove mutes that other connected users
+    // may already have placed on this Telegram user.
+    await run(env.DB, 'DELETE FROM business_muted_chats WHERE chat_id=?', owner);
+    await run(env.DB, 'DELETE FROM business_mute_controls WHERE chat_id=?', owner);
+    await reply('🛡 Защита .nomute включена. Все старые муты на тебя сняты, новые поставить нельзя.');
     return;
   }
   if (low === '.allowmute') {
@@ -237,29 +241,37 @@ async function handleBusinessMessage(env, msg) {
   if (msg.sender_business_bot) return;
   await archive(env, msg, connection);
   if (await one(env.DB, 'SELECT 1 FROM business_muted_chats WHERE owner_user_id=? AND chat_id=?', owner, chat)) {
-    await ensureDeleteReasonTable(env);
-    await run(env.DB, `INSERT OR REPLACE INTO business_delete_reasons
-      (connection_id,chat_id,message_id,reason,created_at) VALUES(?,?,?,?,?)`,
-      connection.connection_id, chat, msg.message_id, 'mute', now());
-    try {
-      await api(env, 'deleteBusinessMessages', {
-        business_connection_id: connection.connection_id,
-        message_ids: [msg.message_id],
-      });
-    } catch (error) {
-      await run(env.DB, 'DELETE FROM business_delete_reasons WHERE connection_id=? AND chat_id=? AND message_id=?',
-        connection.connection_id, chat, msg.message_id);
-      if (error?.errorCode === 403 || error?.errorCode === 400) {
-        await run(env.DB, 'DELETE FROM business_muted_chats WHERE owner_user_id=? AND chat_id=?', owner, chat);
+    await ensureNoMuteTable(env);
+
+    // If the sender enabled .nomute after this mute had already been set,
+    // cancel the stale mute immediately.
+    const senderId = msg.from?.id ?? chat;
+    const senderProtected = await one(env.DB, 'SELECT 1 FROM nomute_users WHERE user_id=?', senderId);
+    if (senderProtected) {
+      await run(env.DB, 'DELETE FROM business_muted_chats WHERE owner_user_id=? AND chat_id=?', owner, chat);
+      await run(env.DB, 'DELETE FROM business_mute_controls WHERE owner_user_id=? AND chat_id=?', owner, chat);
+    } else {
+      let deleted = false;
+      for (let attempt = 0; attempt < 2 && !deleted; attempt++) {
         try {
-          await send(env, connection.user_chat_id,
-            '❌ Мут отключён: Telegram не разрешил удалить сообщение. Открой Telegram Business → Автоматизация чатов и дай боту право удалять все сообщения.');
-        } catch {}
-        return;
+          await api(env, 'deleteBusinessMessages', {
+            business_connection_id: connection.connection_id,
+            message_ids: [msg.message_id],
+          });
+          deleted = true;
+        } catch (error) {
+          if (error?.errorCode === 429 && error?.retryAfter > 0 && attempt === 0) {
+            await new Promise(r => setTimeout(r, Math.min(error.retryAfter, 10) * 1000));
+            continue;
+          }
+          console.error('Muted message deletion failed:', String(error));
+          break;
+        }
       }
-      throw error;
+      // Keep the mute active even if one particular message couldn't be deleted.
+      // The next incoming message will be tried again.
+      return;
     }
-    return;
   }
   const s = await settings(env, owner);
   if (!s.automation_enabled) return;
@@ -386,6 +398,19 @@ async function privateCommand(env, msg) {
   if (msg.chat.type !== 'private' || msg.from?.id !== msg.chat.id) return;
   const text = msg.text || '', [name] = text.split(/\s+/, 1), raw = text.slice(name.length).trim();
   const command = name.split('@')[0].toLowerCase(), owner = msg.from.id;
+  if (command === '.nomute' || command === '/nomute') {
+    await ensureNoMuteTable(env);
+    await run(env.DB, `INSERT INTO nomute_users(user_id,enabled_at) VALUES(?,?)
+      ON CONFLICT(user_id) DO UPDATE SET enabled_at=excluded.enabled_at`, owner, now());
+    await run(env.DB, 'DELETE FROM business_muted_chats WHERE chat_id=?', owner);
+    await run(env.DB, 'DELETE FROM business_mute_controls WHERE chat_id=?', owner);
+    return send(env, owner, '🛡 .nomute включён. Старые муты на тебя сняты, новые поставить нельзя.');
+  }
+  if (command === '.allowmute' || command === '/allowmute') {
+    await ensureNoMuteTable(env);
+    await run(env.DB, 'DELETE FROM nomute_users WHERE user_id=?', owner);
+    return send(env, owner, '🔓 .nomute выключен. Теперь тебя снова можно замутить.');
+  }
   if (command === '/start') return send(env, owner,
     '🤖 Я RNMD Chat Automator.\n\nНастройки Business: /business',
     { reply_markup: keyboard([
