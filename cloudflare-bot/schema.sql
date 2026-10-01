@@ -121,22 +121,3 @@ CREATE TABLE IF NOT EXISTS flood_events (
   PRIMARY KEY(chat_id, user_id, update_id)
 );
 CREATE INDEX IF NOT EXISTS flood_window_idx ON flood_events(chat_id, user_id, at);
-
-
-CREATE TABLE IF NOT EXISTS business_delete_reasons (
-  connection_id TEXT NOT NULL,
-  chat_id INTEGER NOT NULL,
-  message_id INTEGER NOT NULL,
-  reason TEXT NOT NULL,
-  created_at INTEGER NOT NULL,
-  PRIMARY KEY(connection_id, chat_id, message_id)
-);
-
-CREATE TABLE IF NOT EXISTS muted_bots (
-  chat_id INTEGER NOT NULL,
-  bot_user_id INTEGER NOT NULL,
-  muted_until INTEGER NOT NULL,
-  muted_by INTEGER,
-  created_at INTEGER NOT NULL,
-  PRIMARY KEY(chat_id, bot_user_id)
-);
