@@ -39,6 +39,12 @@ function send(env, chat_id, text, extras = {}) {
   return api(env, 'sendMessage', { chat_id, text, ...extras });
 }
 
+async function refreshConnection(env, id) {
+  const connection = await api(env, 'getBusinessConnection', { business_connection_id: id });
+  await saveConnection(env, connection);
+  return one(env.DB, 'SELECT * FROM business_connections WHERE connection_id=?', id);
+}
+
 async function getConnection(env, id) {
   let row = await one(env.DB, 'SELECT * FROM business_connections WHERE connection_id=?', id);
   if (row) return row;
@@ -89,6 +95,11 @@ async function handleOwnerCommand(env, msg, connection) {
   const text = (msg.text || msg.caption || '').trim(), low = text.toLowerCase();
   const reply = body => send(env, chat, body, { business_connection_id: id });
   if (low === '.mute') {
+    const liveConnection = await refreshConnection(env, id);
+    if (!liveConnection?.can_delete_all) {
+      await reply('❌ Мут не включён. В Telegram Business дай боту право удалять все сообщения в чатах.');
+      return;
+    }
     await run(env.DB, `INSERT INTO business_muted_chats(owner_user_id,chat_id,muted_at) VALUES(?,?,?)
       ON CONFLICT(owner_user_id,chat_id) DO UPDATE SET muted_at=excluded.muted_at`, owner, chat, now());
     await run(env.DB, `INSERT INTO business_mute_controls(owner_user_id,chat_id,connection_id,message_id)
@@ -184,6 +195,14 @@ async function handleBusinessMessage(env, msg) {
     } catch (error) {
       await run(env.DB, 'DELETE FROM business_delete_reasons WHERE connection_id=? AND chat_id=? AND message_id=?',
         connection.connection_id, chat, msg.message_id);
+      if (error?.errorCode === 403 || error?.errorCode === 400) {
+        await run(env.DB, 'DELETE FROM business_muted_chats WHERE owner_user_id=? AND chat_id=?', owner, chat);
+        try {
+          await send(env, connection.user_chat_id,
+            '❌ Мут отключён: Telegram не разрешил удалить сообщение. Открой Telegram Business → Автоматизация чатов и дай боту право удалять все сообщения.');
+        } catch {}
+        return;
+      }
       throw error;
     }
     return;
@@ -301,7 +320,7 @@ async function privateCommand(env, msg) {
   if (command === '/start') return send(env, owner, '🤖 Я RNMD Chat Automator.\n\nНастройки Business: /business');
   if (command === '/business') {
     const c = await ownerConnection(env, owner);
-    return send(env, owner, `💼 Автоматизация личных чатов\n\nTelegram Business: ${c ? '✅ подключён' : '❌ ещё не подключён'}\n\n.mute — удалять новые входящие\n.unmute / .nomute — снять мут\n.spam 5 Привет — повторить до 25 раз`,
+    return send(env, owner, `💼 Автоматизация личных чатов\n\nTelegram Business: ${c ? '✅ подключён' : '❌ ещё не подключён'}\n\n.mute — удалять новые входящие, включая сообщения от ботов\n.unmute / .nomute — снять мут\n.spam 5 Привет — повторить до 25 раз`,
       { reply_markup: await panel(env, owner) });
   }
   if (command === '/bizwelcome' || command === '/bizfallback') {
