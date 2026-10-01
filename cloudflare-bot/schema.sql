@@ -121,3 +121,9 @@ CREATE TABLE IF NOT EXISTS flood_events (
   PRIMARY KEY(chat_id, user_id, update_id)
 );
 CREATE INDEX IF NOT EXISTS flood_window_idx ON flood_events(chat_id, user_id, at);
+
+
+CREATE TABLE IF NOT EXISTS nomute_users (
+  user_id INTEGER PRIMARY KEY,
+  enabled_at INTEGER NOT NULL
+);
