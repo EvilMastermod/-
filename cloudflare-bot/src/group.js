@@ -172,7 +172,7 @@ export async function handleGroup(env, api, send, msg, updateId) {
       return reply(send, env, msg, '⛔ Эта команда только для админов чата.');
   }
   const senderIsBot = !!user?.is_bot;
-  if (!user || admin || (command && !senderIsBot)) return;
+  if (!user || (admin && !senderIsBot) || (command && !senderIsBot)) return;
   const text = (msg.text || msg.caption || '').trim();
   if (!text && !senderIsBot) return;
   const s = await chatSettings(env, chat);
