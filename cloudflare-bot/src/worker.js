@@ -310,7 +310,40 @@ async function dispatch(env, update) {
 
 export default {
   async fetch(request, env) {
-    if (new URL(request.url).pathname !== '/webhook') return new Response('RNMD bot', { status: 200 });
+    const url = new URL(request.url);
+    if (url.pathname === '/health') {
+      const status = {
+        worker: 'ok',
+        bot_token_present: !!env.BOT_TOKEN,
+        webhook_secret_present: !!env.WEBHOOK_SECRET,
+        db: 'unknown',
+        telegram: 'unknown',
+      };
+      try {
+        await one(env.DB, 'SELECT 1 AS ok');
+        status.db = 'ok';
+      } catch (error) {
+        status.db = 'error';
+        status.db_error = String(error?.message || error).slice(0, 200);
+      }
+      if (env.BOT_TOKEN) {
+        try {
+          const me = await api(env, 'getMe');
+          status.telegram = 'ok';
+          status.bot_username = me?.username || null;
+        } catch (error) {
+          status.telegram = 'error';
+          status.telegram_error = String(error?.message || error).slice(0, 200);
+        }
+      } else {
+        status.telegram = 'missing_token';
+      }
+      return new Response(JSON.stringify(status, null, 2), {
+        status: 200,
+        headers: { 'Content-Type': 'application/json; charset=utf-8' },
+      });
+    }
+    if (url.pathname !== '/webhook') return new Response('RNMD bot', { status: 200 });
     if (request.method !== 'POST') return new Response('Method not allowed', { status: 405 });
     if (!env.BOT_TOKEN || !env.WEBHOOK_SECRET || !env.DB) return new Response('Not configured', { status: 503 });
     if (request.headers.get('X-Telegram-Bot-Api-Secret-Token') !== env.WEBHOOK_SECRET)
