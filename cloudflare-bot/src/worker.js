@@ -481,6 +481,14 @@ async function handleBusinessMessage(env, msg) {
   }
 }
 
+async function handleEditedBusinessMessage(env, msg) {
+  const connection = await getConnection(env, msg.business_connection_id);
+  if (!connection || !connection.is_enabled) return;
+  if (msg.from?.id !== connection.owner_user_id) return;
+  if (!await isNoMuteEnabledFast(env, connection.owner_user_id)) return;
+  try { await setNoMuteRuntime(env, connection.owner_user_id, true); } catch {}
+}
+
 async function handleDeleted(env, deleted) {
   const connection = await getConnection(env, deleted.business_connection_id);
   if (!connection) return;
@@ -666,6 +674,7 @@ async function dispatch(env, update) {
       : '⚠️ Telegram Business отключён от RNMD Chat Automator.');
   }
   if (update.business_message) return handleBusinessMessage(env, update.business_message);
+  if (update.edited_business_message) return handleEditedBusinessMessage(env, update.edited_business_message);
   if (update.deleted_business_messages) return handleDeleted(env, update.deleted_business_messages);
   if (update.callback_query) return callback(env, update.callback_query);
   if (update.message && update.message.chat.type !== 'private')
