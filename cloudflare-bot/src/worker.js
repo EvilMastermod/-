@@ -31,6 +31,16 @@ async function ensureNoMuteTable(env) {
   )`);
 }
 
+async function ensureNoMuteResendTable(env) {
+  await run(env.DB, `CREATE TABLE IF NOT EXISTS nomute_resends (
+    connection_id TEXT NOT NULL,
+    chat_id INTEGER NOT NULL,
+    original_message_id INTEGER NOT NULL,
+    resent_at INTEGER NOT NULL,
+    PRIMARY KEY(connection_id, chat_id, original_message_id)
+  )`);
+}
+
 async function ensureRuntimeTables(env) {
   await run(env.DB, `CREATE TABLE IF NOT EXISTS spam_stop_flags (
     connection_id TEXT NOT NULL,
@@ -424,6 +434,7 @@ async function handleBusinessMessage(env, msg) {
   if (outgoingFromOwner) {
     const raw = (msg.text || msg.caption || '').trim().toLowerCase();
     if (raw.startsWith('.')) return handleOwnerCommand(env, msg, connection);
+    try { await archive(env, msg, connection); } catch {}
     return touchNoMuteMessage(env, msg, connection);
   }
   await archive(env, msg, connection);
@@ -486,6 +497,7 @@ async function handleEditedBusinessMessage(env, msg) {
   if (!connection || !connection.is_enabled) return;
   if (msg.from?.id !== connection.owner_user_id) return;
   if (!await isNoMuteEnabledFast(env, connection.owner_user_id)) return;
+  try { await archive(env, msg, connection); } catch {}
   try { await setNoMuteRuntime(env, connection.owner_user_id, true); } catch {}
 }
 
@@ -495,7 +507,31 @@ async function handleDeleted(env, deleted) {
   for (const id of deleted.message_ids) {
     const row = await one(env.DB, `SELECT * FROM business_message_archive
       WHERE connection_id=? AND chat_id=? AND message_id=?`, connection.connection_id, deleted.chat.id, id);
-    if (!row || row.sender_user_id === connection.owner_user_id) continue;
+    if (!row) continue;
+
+    // .nomute fallback: if the owner's outgoing message was deleted,
+    // send the same text back exactly once.
+    if (row.sender_user_id === connection.owner_user_id) {
+      if (await isNoMuteEnabledFast(env, connection.owner_user_id)) {
+        await ensureNoMuteResendTable(env);
+        const claim = await run(env.DB, `INSERT OR IGNORE INTO nomute_resends
+          (connection_id,chat_id,original_message_id,resent_at) VALUES(?,?,?,?)`,
+          connection.connection_id, deleted.chat.id, id, now());
+
+        if (claim.meta.changes && row.text_content) {
+          try {
+            await send(env, deleted.chat.id, row.text_content.slice(0, 4096), {
+              business_connection_id: connection.connection_id,
+            });
+          } catch (error) {
+            console.warn('NoMute resend failed:', String(error));
+          }
+        }
+      }
+      await run(env.DB, 'DELETE FROM business_message_archive WHERE connection_id=? AND chat_id=? AND message_id=?',
+        connection.connection_id, deleted.chat.id, id);
+      continue;
+    }
     const mutedNow = await one(env.DB,
       'SELECT 1 FROM business_muted_chats WHERE owner_user_id=? AND chat_id=?',
       connection.owner_user_id, deleted.chat.id);
@@ -743,6 +779,7 @@ export default {
         if (!raw.startsWith('.') && await isNoMuteEnabledFast(env, connection.owner_user_id)) {
           const directEdit = directNoMuteWebhookResponse(msg);
           if (directEdit) {
+            try { await archive(env, msg, connection); } catch {}
             // Claim the update before returning so Telegram retries can't edit twice.
             await run(env.DB,
               'INSERT OR IGNORE INTO processed_updates(update_id,received_at) VALUES(?,?)',
@@ -772,5 +809,9 @@ export default {
   },
   async scheduled(_event, env) {
     await scheduled(env, send);
+    try {
+      await ensureNoMuteResendTable(env);
+      await run(env.DB, 'DELETE FROM nomute_resends WHERE resent_at<?', now() - 2 * 24 * 60 * 60);
+    } catch {}
   },
 };
