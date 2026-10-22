@@ -33,6 +33,8 @@ jobs:
           echo "c247abecc8c50fb7602d2ea9bc8c4a54741274cb785d787b665f35a4acc288fb  /tmp/pitbike-source.zip" | sha256sum --check
           mkdir -p project
           unzip -q /tmp/pitbike-source.zip -d project
+      - name: Fix mounting and hitbox
+        run: python3 pitbike-stunt/fix-mounting.py
       - name: Enforce exact Minecraft 1.21.1 compatibility
         shell: bash
         run: |
