@@ -205,56 +205,121 @@ def gather(country, old):
     return dedup
 
 def probe(proxy, country):
+    """Two HTTP probes through Xray to estimate response latency and short-term failures."""
     port = random.randint(21000, 62000)
     conf = {"log": {"loglevel": "error"}, "inbounds": [
         {"listen": "127.0.0.1", "port": port, "protocol": "socks",
          "settings": {"auth": "noauth"}}],
         "outbounds": [dict(proxy, tag="proxy")]}
+    observations = []
     with tempfile.TemporaryDirectory() as temp:
         c = pathlib.Path(temp) / "xray.json"
         c.write_text(json.dumps(conf), encoding="utf-8")
         proc = subprocess.Popen(["./xray", "run", "-config", str(c)],
                                 cwd=ROOT.parent, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
         try:
-            time.sleep(0.35)
-            for url in ("https://www.cloudflare.com/cdn-cgi/trace", "https://api.country.is/"):
+            time.sleep(0.4)
+            for endpoint in ("https://www.cloudflare.com/cdn-cgi/trace", "https://api.country.is/"):
                 try:
                     t0 = time.monotonic()
                     r = subprocess.run([
-                        "curl", "-fsS", "--max-time", "5", "--connect-timeout", "3",
-                        "--socks5-hostname", f"127.0.0.1:{port}", url],
-                        text=True, capture_output=True, timeout=7)
-                    elapsed = round((time.monotonic() - t0) * 1000)
-                    if r.returncode != 0: continue
+                        "curl", "-fsS", "--max-time", "4", "--connect-timeout", "3",
+                        "--socks5-hostname", f"127.0.0.1:{port}", endpoint],
+                        text=True, capture_output=True, timeout=6)
+                    ms = round((time.monotonic() - t0) * 1000)
+                    if r.returncode != 0:
+                        observations.append((None, ms))
+                        continue
                     loc = re.search(r"(?m)^loc=([A-Z]{2})\s*$", r.stdout)
                     if loc:
                         found = loc.group(1)
                     else:
-                        try: found = json.loads(r.stdout).get("country", "").upper()
-                        except ValueError: found = ""
-                    if len(found) == 2:
-                        return {"server": server(proxy), "exit": found,
-                                "http_ms": elapsed, "ok": found == country, "proxy": proxy}
+                        try:
+                            found = str(json.loads(r.stdout).get("country", "")).upper()
+                        except ValueError:
+                            found = ""
+                    observations.append((found if len(found) == 2 else None, ms))
                 except (subprocess.TimeoutExpired, OSError):
-                    pass
-            return {"server": server(proxy), "exit": None, "http_ms": None,
-                    "ok": False, "proxy": proxy}
+                    observations.append((None, 6000))
         finally:
             proc.terminate()
-            try: proc.wait(timeout=2)
-            except subprocess.TimeoutExpired: proc.kill()
+            try:
+                proc.wait(timeout=2)
+            except subprocess.TimeoutExpired:
+                proc.kill()
+    good = [ms for loc, ms in observations if loc == country]
+    wrong = [loc for loc, ms in observations if loc not in (None, country)]
+    # Reject inconsistent egress countries to prevent country switching unexpectedly.
+    valid = bool(good) and not wrong
+    latency = round(median(good)) if good else None
+    success_rate = len(good) / 2
+    jitter_ms = abs(good[1] - good[0]) if len(good) == 2 else None
+    return {"server": server(proxy), "exit": country if valid else (wrong[0] if wrong else None),
+            "http_ms": latency, "success_rate": success_rate,
+            "jitter_ms": jitter_ms, "ok": valid, "proxy": proxy}
 
 def choose_verified(results, country):
-    selected, exit_seen, net_seen = [], set(), {}
-    candidates = sorted((r for r in results if r["ok"]), key=lambda x: x["http_ms"])
+    """Prefer stable responses, then short latency, while avoiding shared server subnets."""
+    selected, net_seen = [], {}
+    candidates = sorted((r for r in results if r["ok"]),
+                        key=lambda r: (r["success_rate"] < 1.0,
+                                       (r["http_ms"] or 10000) + (r["jitter_ms"] or 700) * 0.25))
     for r in candidates:
         k = subnet(r["proxy"])
         if net_seen.get(k, 0) >= 2:
             continue
         net_seen[k] = net_seen.get(k, 0) + 1
         selected.append(r)
-        if len(selected) == MAX_POOL[country]: break
+        if len(selected) == MAX_POOL[country]:
+            break
     return selected
+
+def build_auto(template, country, emoji, name, verified, gaming=False):
+    cfg = copy.deepcopy(template)
+    suffix = "ИГРЫ — МИНИМАЛЬНЫЙ ПИНГ" if gaming else "АВТОВЫБОР — СТАБИЛЬНЫЙ"
+    cfg["remarks"] = f"{emoji} {name} — {suffix}"
+    ranked = sorted(verified, key=lambda r: r["http_ms"] or 10000) if gaming else verified
+    ranked = ranked[:5] if gaming else ranked
+    outbounds = []
+    prefix = country.lower() + ("-game-" if gaming else "-")
+    for i, item in enumerate(ranked, 1):
+        proxy = copy.deepcopy(item["proxy"])
+        proxy["tag"] = f"{prefix}{i}"
+        outbounds.append(proxy)
+    if not outbounds:
+        raise ValueError(f"{country}: empty profile")
+    cfg["outbounds"] = outbounds + [{"tag": "direct", "protocol": "freedom", "settings": {}}]
+    cfg["routing"] = {
+        "domainStrategy": "AsIs",
+        "balancers": [{"tag": "auto", "selector": [prefix],
+                       "fallbackTag": outbounds[0]["tag"], "strategy": {"type": "leastPing"}}],
+        "rules": [
+            {"type": "field", "ip": PRIVATE_IPS, "outboundTag": "direct"},
+            {"type": "field", "inboundTag": ["socks", "http"], "balancerTag": "auto"}]
+    }
+    cfg["observatory"] = {
+        "subjectSelector": [prefix],
+        "probeUrl": "https://www.gstatic.com/generate_204",
+        "probeInterval": "20s" if gaming else "35s",
+        "enableConcurrency": True
+    }
+    return cfg
+
+def build_manual(template, country, emoji, name, verified, i):
+    cfg = copy.deepcopy(template)
+    cfg["remarks"] = f"{emoji} {name} — СЕРВЕР {i + 1}"
+    p = copy.deepcopy(verified[i]["proxy"])
+    p["tag"] = "proxy"
+    cfg["outbounds"] = [p, {"tag": "direct", "protocol": "freedom", "settings": {}}]
+    cfg["routing"] = {
+        "domainStrategy": "AsIs",
+        "rules": [
+            {"type": "field", "ip": PRIVATE_IPS, "outboundTag": "direct"},
+            {"type": "field", "inboundTag": ["socks", "http"], "outboundTag": "proxy"}]
+    }
+    cfg.pop("observatory", None)
+    return cfg
+
 
 def main():
     existing = json.loads(TARGET.read_text(encoding="utf-8"))
