@@ -47,6 +47,17 @@ jobs:
         run: python3 pitbike-stunt/increase-speed-12111.py
       - name: Fix Minecraft 1.21.11 bike item registry keys
         run: python3 pitbike-stunt/fix-item-registry-12111.py
+      - name: Install exact donor model and steering fixes
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ ! -f pitbike-stunt/donor-kit.zip ]; then
+            echo "::error::Upload donor-kit.zip to pitbike-stunt/donor-kit.zip for exact model import"
+            exit 1
+          fi
+          mkdir -p donor-unpacked
+          unzip -q pitbike-stunt/donor-kit.zip -d donor-unpacked
+          python3 donor-unpacked/scripts/install_exact_donor.py
       - name: Build Minecraft mod
         id: compilation
         continue-on-error: true
