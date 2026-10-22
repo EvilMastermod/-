@@ -29,3 +29,22 @@ data["depends"]["minecraft"]="=1.21.11"
 data["depends"]["fabricloader"]=">=0.18.1"
 p.write_text(json.dumps(data, indent=2,ensure_ascii=False)+"\n")
 print("Upgraded to Minecraft 1.21.11, Loom 1.14, Yarn build.6 and Fabric API 0.141.6")
+
+
+# The project's physics checks are a standalone Java main(), not JUnit tests.
+# Gradle 9 fails :test when classes exist but no JUnit test engine is configured.
+# Run the real physics assertions as a dedicated check task instead of silently skipping them.
+p = root/"build.gradle"
+s = p.read_text()
+s += """
+tasks.named('test') { enabled = false }
+tasks.register('physicsSelfTest', JavaExec) {
+    group = 'verification'
+    description = 'Run 11 standalone pitbike physics checks'
+    classpath = sourceSets.test.runtimeClasspath
+    mainClass = 'dev.pitbike.stunt.physics.BikePhysicsSelfTest'
+}
+tasks.named('check') { dependsOn 'physicsSelfTest' }
+"""
+p.write_text(s)
+print("Enabled physicsSelfTest with Gradle 9 without phantom JUnit tests")
