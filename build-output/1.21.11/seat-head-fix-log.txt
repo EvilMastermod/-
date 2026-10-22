@@ -1,0 +1,2 @@
+Raised passenger feet onto donor seat and added bounded remote-motion smoothing
+Added fixed third-person torso, head-only look, aligned hands and clean skin overlays
