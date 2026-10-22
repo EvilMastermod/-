@@ -289,42 +289,6 @@
         }
       },
       {
-        "tag": "us-9",
-        "protocol": "vless",
-        "settings": {
-          "vnext": [
-            {
-              "address": "45.32.69.110",
-              "port": 443,
-              "users": [
-                {
-                  "id": "1572b9c5-d741-46eb-b4a2-a5d23958dfbe",
-                  "encryption": "none"
-                }
-              ]
-            }
-          ]
-        },
-        "streamSettings": {
-          "network": "ws",
-          "security": "reality",
-          "realitySettings": {
-            "show": false,
-            "serverName": "itunes.apple.com",
-            "fingerprint": "chrome",
-            "publicKey": "6l-Yq_zkVrnExw8AVv85VwoYnfNc8-dRSpoj_AA-fxY",
-            "shortId": "c5cde18f",
-            "spiderX": "/"
-          },
-          "wsSettings": {
-            "path": "/ws",
-            "headers": {
-              "Host": "itunes.apple.com"
-            }
-          }
-        }
-      },
-      {
         "tag": "us-10",
         "protocol": "vless",
         "settings": {
@@ -417,78 +381,6 @@
             "publicKey": "ZJRnFU-1s1JOnO8E9uZ7b00l1fPEh63fGRbdBANFRno",
             "shortId": "",
             "spiderX": "/"
-          }
-        }
-      },
-      {
-        "tag": "us-13",
-        "protocol": "vless",
-        "settings": {
-          "vnext": [
-            {
-              "address": "154.12.38.202",
-              "port": 443,
-              "users": [
-                {
-                  "id": "2a9ab69b-26e7-44d0-a325-e5056d849900",
-                  "encryption": "none"
-                }
-              ]
-            }
-          ]
-        },
-        "streamSettings": {
-          "network": "ws",
-          "security": "reality",
-          "realitySettings": {
-            "show": false,
-            "serverName": "itunes.apple.com",
-            "fingerprint": "chrome",
-            "publicKey": "iJDZHJQcTGl2VIwbsRmlOG9JGbbmxNY5wmv1hc6OwQM",
-            "shortId": "c31176b6",
-            "spiderX": "/"
-          },
-          "wsSettings": {
-            "path": "/ws",
-            "headers": {
-              "Host": "itunes.apple.com"
-            }
-          }
-        }
-      },
-      {
-        "tag": "us-14",
-        "protocol": "vless",
-        "settings": {
-          "vnext": [
-            {
-              "address": "154.12.38.159",
-              "port": 443,
-              "users": [
-                {
-                  "id": "12c465bd-11a3-4fd8-8aa9-19b20a883b9e",
-                  "encryption": "none"
-                }
-              ]
-            }
-          ]
-        },
-        "streamSettings": {
-          "network": "ws",
-          "security": "reality",
-          "realitySettings": {
-            "show": false,
-            "serverName": "itunes.apple.com",
-            "fingerprint": "chrome",
-            "publicKey": "iv4XmZKQUC4KEuMaWZxDmjJOlGEnS3rRw-Nk8h93zUU",
-            "shortId": "f61a3a8f",
-            "spiderX": "/"
-          },
-          "wsSettings": {
-            "path": "/ws",
-            "headers": {
-              "Host": "itunes.apple.com"
-            }
           }
         }
       },
