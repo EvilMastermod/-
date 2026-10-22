@@ -1,0 +1,50 @@
+name: Build Pitbike Stunt (Fabric 1.21.1)
+
+on:
+  push:
+    branches: [pitbike-stunt-build]
+    paths:
+      - 'pitbike-stunt/**'
+      - '.github/workflows/pitbike-stunt.yml'
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.10.2'
+      - name: Unpack Pitbike Stunt source
+        shell: bash
+        run: |
+          base64 -d pitbike-stunt/source-0.2.0-alpha.zip.b64 > /tmp/pitbike-source.zip
+          echo "c247abecc8c50fb7602d2ea9bc8c4a54741274cb785d787b665f35a4acc288fb  /tmp/pitbike-source.zip" | sha256sum --check
+          mkdir -p project
+          unzip -q /tmp/pitbike-source.zip -d project
+      - name: Build Minecraft mod
+        working-directory: project
+        shell: bash
+        run: |
+          set -o pipefail
+          gradle --no-daemon build --stacktrace 2>&1 | tee ../pitbike-build.log
+      - name: Upload tested mod JAR
+        uses: actions/upload-artifact@v4
+        with:
+          name: PitbikeStunt-1.21.1-jar
+          path: project/build/libs/pitbike-stunt-1.21.1-0.2.0-alpha.jar
+          if-no-files-found: error
+      - name: Upload logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: PitbikeStunt-build-log
+          path: pitbike-build.log
+          if-no-files-found: ignore
