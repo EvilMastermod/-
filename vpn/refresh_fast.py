@@ -322,8 +322,24 @@ def build_manual(template, country, emoji, name, verified, i):
     return cfg
 
 
+def preflight_profiles(existing):
+    """Detect missing generator variables before lengthy remote checks."""
+    template = next((p for p in existing if "АВТОВЫБОР" in p.get("remarks", "")), None)
+    if template is None:
+        raise RuntimeError("Missing subscription template")
+    candidate = next((x for x in template["outbounds"] if safe(x)), None)
+    if candidate is None:
+        raise RuntimeError("No valid prior proxy for preflight")
+    sample = {"proxy": candidate, "server": server(candidate), "http_ms": 100,
+              "success_rate": 1.0, "jitter_ms": 0, "exit": "US"}
+    build_auto(template, "US", "🇺🇸", "США", [sample])
+    build_auto(template, "US", "🇺🇸", "США", [sample], gaming=True)
+    build_manual(template, "US", "🇺🇸", "США", [sample], 0)
+
+
 def main():
     current = json.loads(TARGET.read_text(encoding="utf-8"))
+    preflight_profiles(current)
     # Prior auto profiles act as a fallback if a provider is temporarily unavailable.
     old_bases = {}
     for country, (_, label) in COUNTRIES.items():
