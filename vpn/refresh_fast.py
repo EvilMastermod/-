@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Refresh Happ USA/Russia auto groups and individual nodes, verifying country + HTTP RTT."""
+"""Happ VPN 2.0: checked country exits, tested latency/stability, and manual backups."""
 from __future__ import annotations
 import base64
 import concurrent.futures
@@ -23,8 +23,17 @@ AU_SOURCE = "https://raw.githubusercontent.com/Au1rxx/free-vpn-subscriptions/mai
 NEXUS_SOURCE = "https://raw.githubusercontent.com/ninjastrikers/Nexus-nodes/main/configs/countries/{}/all.txt"
 RADIKAL_SOURCE = "https://raw.githubusercontent.com/0xRadikal/Free-v2ray-Configs/main/top100.txt"
 RU_EXTRA_SOURCE = "https://raw.githubusercontent.com/aviamastersgh/vpn-free-russia/main/ru_configs.txt"
-MAX_TESTS = {"US": 115, "RU": 220}
-MAX_POOL = {"US": 16, "RU": 12}
+COUNTRIES = {
+    "US": ("🇺🇸", "США"),
+    "RU": ("🇷🇺", "РОССИЯ"),
+    "DE": ("🇩🇪", "ГЕРМАНИЯ"),
+    "NL": ("🇳🇱", "НИДЕРЛАНДЫ"),
+    "FI": ("🇫🇮", "ФИНЛЯНДИЯ"),
+}
+MAX_TESTS = {"US": 125, "RU": 190, "DE": 95, "NL": 95, "FI": 75}
+MAX_POOL = {"US": 16, "RU": 12, "DE": 12, "NL": 12, "FI": 9}
+MANUAL_LIMIT = {"US": 7, "RU": 7, "DE": 5, "NL": 5, "FI": 4}
+
 
 def download(url):
     request = urllib.request.Request(url, headers={"User-Agent": "Happ-VPN-Feed-Checker/2.0"})
@@ -146,7 +155,7 @@ def subnet(proxy):
     return addr.lower()
 
 def gather(country, old):
-    rng = random.Random(int(time.time() // 86400))
+    rng = random.Random(int(time.time() // 86400) + sum(map(ord, country)))
     inputs = {"old": [], "au": [], "nexus": [], "radikal": [], "ru_extra": []}
     inputs["old"] = [o for o in old if safe(o)]
     try:
@@ -175,7 +184,7 @@ def gather(country, old):
         rng.shuffle(inputs[key])
     dedup, seen, blocks = [], set(), {}
     # Existing working endpoints are sampled too; broaden to several operators / subnets.
-    order = ["old", "au", "ru_extra", "nexus", "au", "ru_extra", "nexus", "radikal"]
+    order = ["old", "au", "ru_extra", "nexus", "au", "nexus", "radikal"]
     while len(dedup) < MAX_TESTS[country] and any(inputs.values()):
         advanced = False
         for source in order:
