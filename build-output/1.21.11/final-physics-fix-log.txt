@@ -1,0 +1,6 @@
+Patched physics/BikePhysics.java
+Patched client/PitbikeRenderer.java
+Patched client/DonorMesh.java
+Patched entity/PitbikeEntity.java
+Patched mixin/PlayerModelPoseMixin.java
+Completed client smoothing, donor tire contact, shock and pose patches.
