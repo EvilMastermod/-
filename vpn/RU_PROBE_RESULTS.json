@@ -1,0 +1,268 @@
+{
+  "checked_utc": "2026-10-22T13:26:30Z",
+  "tested": 65,
+  "working_ru_exit": 6,
+  "working_other_exit": 3,
+  "candidate_servers": [
+    {
+      "server": "103.24.207.39:444",
+      "country": null
+    },
+    {
+      "server": "45.12.75.242:26424",
+      "country": "RU"
+    },
+    {
+      "server": "rus.puflino.com:444",
+      "country": null
+    },
+    {
+      "server": "9f6635t.msk1.h1clayd.click:443",
+      "country": "RU"
+    },
+    {
+      "server": "0f5857g.msk1.h1clayd.click:443",
+      "country": "RU"
+    },
+    {
+      "server": "45.91.52.28:443",
+      "country": "RU"
+    },
+    {
+      "server": "46.254.17.88:30065",
+      "country": "RU"
+    },
+    {
+      "server": "95.182.120.128:443",
+      "country": null
+    },
+    {
+      "server": "146.75.59.186:443",
+      "country": null
+    },
+    {
+      "server": "45.67.215.233:443",
+      "country": null
+    },
+    {
+      "server": "45.67.215.159:2087",
+      "country": null
+    },
+    {
+      "server": "178.248.236.209:10443",
+      "country": null
+    },
+    {
+      "server": "91.215.43.248:443",
+      "country": null
+    },
+    {
+      "server": "95.129.236.252:443",
+      "country": null
+    },
+    {
+      "server": "191.44.47.164:25565",
+      "country": null
+    },
+    {
+      "server": "193.233.90.77:3443",
+      "country": null
+    },
+    {
+      "server": "37.9.15.129:443",
+      "country": null
+    },
+    {
+      "server": "185.147.27.183:8443",
+      "country": null
+    },
+    {
+      "server": "31.131.251.17:443",
+      "country": null
+    },
+    {
+      "server": "37.9.4.97:443",
+      "country": null
+    },
+    {
+      "server": "188.225.25.142:443",
+      "country": null
+    },
+    {
+      "server": "188.225.42.6:443",
+      "country": null
+    },
+    {
+      "server": "85.193.85.231:443",
+      "country": null
+    },
+    {
+      "server": "188.225.45.152:443",
+      "country": null
+    },
+    {
+      "server": "45.81.33.217:443",
+      "country": null
+    },
+    {
+      "server": "193.233.90.77:10443",
+      "country": null
+    },
+    {
+      "server": "app-sh-185.spbstudentlife.com:443",
+      "country": "NL"
+    },
+    {
+      "server": "188.225.32.216:443",
+      "country": null
+    },
+    {
+      "server": "62.152.58.90:443",
+      "country": null
+    },
+    {
+      "server": "104.171.133.209:443",
+      "country": null
+    },
+    {
+      "server": "188.130.209.227:8443",
+      "country": null
+    },
+    {
+      "server": "147.45.148.6:443",
+      "country": null
+    },
+    {
+      "server": "217.16.31.218:443",
+      "country": null
+    },
+    {
+      "server": "72.56.241.230:443",
+      "country": null
+    },
+    {
+      "server": "158.160.160.21:443",
+      "country": null
+    },
+    {
+      "server": "111.88.128.167:8517",
+      "country": null
+    },
+    {
+      "server": "144.48.11.97:43000",
+      "country": "GB"
+    },
+    {
+      "server": "45.139.27.9:443",
+      "country": null
+    },
+    {
+      "server": "77.110.105.122:443",
+      "country": null
+    },
+    {
+      "server": "72.56.241.75:18443",
+      "country": null
+    },
+    {
+      "server": "45.144.30.86:443",
+      "country": null
+    },
+    {
+      "server": "45.9.12.3:443",
+      "country": null
+    },
+    {
+      "server": "194.55.239.233:443",
+      "country": null
+    },
+    {
+      "server": "200.165.231.209:443",
+      "country": null
+    },
+    {
+      "server": "94.103.2.23:8451",
+      "country": "NL"
+    },
+    {
+      "server": "xsru1.ddnsfree.com:443",
+      "country": "RU"
+    },
+    {
+      "server": "212.119.42.120:8445",
+      "country": null
+    },
+    {
+      "server": "du-rov.secureservice.top:8443",
+      "country": null
+    },
+    {
+      "server": "pl1.h1cloud.net:27591",
+      "country": null
+    },
+    {
+      "server": "renderer-bridge-2-114.mirra.now:443",
+      "country": null
+    },
+    {
+      "server": "176.108.244.38:9881",
+      "country": null
+    },
+    {
+      "server": "176.124.214.107:8443",
+      "country": null
+    },
+    {
+      "server": "188.225.83.133:443",
+      "country": null
+    },
+    {
+      "server": "176.108.246.58:9881",
+      "country": null
+    },
+    {
+      "server": "188.225.58.238:443",
+      "country": null
+    },
+    {
+      "server": "45.155.52.231:443",
+      "country": null
+    },
+    {
+      "server": "72.56.11.135:43000",
+      "country": null
+    },
+    {
+      "server": "168.222.194.138:9880",
+      "country": null
+    },
+    {
+      "server": "176.108.249.189:9881",
+      "country": null
+    },
+    {
+      "server": "api.mediaklenov.cc:443",
+      "country": null
+    },
+    {
+      "server": "185.125.103.62:8082",
+      "country": null
+    },
+    {
+      "server": "45.132.179.12:9881",
+      "country": null
+    },
+    {
+      "server": "212.41.11.152:443",
+      "country": null
+    },
+    {
+      "server": "201.51.11.117:443",
+      "country": null
+    },
+    {
+      "server": "176.108.244.178:9881",
+      "country": null
+    }
+  ]
+}

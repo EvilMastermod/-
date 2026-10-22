@@ -646,37 +646,6 @@
         "settings": {
           "vnext": [
             {
-              "address": "103.24.207.39",
-              "port": 444,
-              "users": [
-                {
-                  "id": "258d8fc5-206c-48fd-88df-169dbbe44d3f",
-                  "encryption": "none",
-                  "flow": "xtls-rprx-vision"
-                }
-              ]
-            }
-          ]
-        },
-        "streamSettings": {
-          "network": "tcp",
-          "security": "reality",
-          "realitySettings": {
-            "show": false,
-            "serverName": "vextor.win",
-            "fingerprint": "random",
-            "publicKey": "P7F65GjTQGZju-N8CVHtlKNaWebVe_76Xt7Lm00RuH0",
-            "shortId": "",
-            "spiderX": "/"
-          }
-        }
-      },
-      {
-        "tag": "ru-2",
-        "protocol": "vless",
-        "settings": {
-          "vnext": [
-            {
               "address": "45.12.75.242",
               "port": 26424,
               "users": [
@@ -702,38 +671,7 @@
         }
       },
       {
-        "tag": "ru-3",
-        "protocol": "vless",
-        "settings": {
-          "vnext": [
-            {
-              "address": "rus.puflino.com",
-              "port": 444,
-              "users": [
-                {
-                  "id": "258d8fc5-206c-48fd-88df-169dbbe44d3f",
-                  "encryption": "none",
-                  "flow": "xtls-rprx-vision"
-                }
-              ]
-            }
-          ]
-        },
-        "streamSettings": {
-          "network": "tcp",
-          "security": "reality",
-          "realitySettings": {
-            "show": false,
-            "serverName": "vextor.win",
-            "fingerprint": "random",
-            "publicKey": "P7F65GjTQGZju-N8CVHtlKNaWebVe_76Xt7Lm00RuH0",
-            "shortId": "",
-            "spiderX": "/"
-          }
-        }
-      },
-      {
-        "tag": "ru-4",
+        "tag": "ru-2",
         "protocol": "vless",
         "settings": {
           "vnext": [
@@ -763,7 +701,7 @@
         }
       },
       {
-        "tag": "ru-5",
+        "tag": "ru-3",
         "protocol": "vless",
         "settings": {
           "vnext": [
@@ -797,7 +735,7 @@
         }
       },
       {
-        "tag": "ru-6",
+        "tag": "ru-4",
         "protocol": "vless",
         "settings": {
           "vnext": [
@@ -831,7 +769,7 @@
         }
       },
       {
-        "tag": "ru-7",
+        "tag": "ru-5",
         "protocol": "vless",
         "settings": {
           "vnext": [
@@ -862,33 +800,32 @@
         }
       },
       {
-        "tag": "ru-8",
+        "tag": "ru-6",
         "protocol": "vless",
         "settings": {
           "vnext": [
             {
-              "address": "95.182.120.128",
+              "address": "xsru1.ddnsfree.com",
               "port": 443,
               "users": [
                 {
-                  "id": "9c794bb7-54fe-4acd-844a-a26209af36c3",
-                  "encryption": "none",
-                  "flow": "xtls-rprx-vision"
+                  "id": "c90395e6-2140-47ad-a54d-9b166729d3ef",
+                  "encryption": "none"
                 }
               ]
             }
           ]
         },
         "streamSettings": {
-          "network": "tcp",
-          "security": "reality",
-          "realitySettings": {
-            "show": false,
-            "serverName": "api.stride.surf",
-            "fingerprint": "firefox",
-            "publicKey": "7MRwvMvlDcjZqfdbBmePpZI5WDEYgya1y_pOp7B9CDc",
-            "shortId": "d0dc65ab94f5e69b",
-            "spiderX": "/"
+          "network": "grpc",
+          "security": "tls",
+          "tlsSettings": {
+            "serverName": "xsru1.ddnsfree.com",
+            "allowInsecure": false,
+            "fingerprint": "chrome"
+          },
+          "grpcSettings": {
+            "serviceName": "grpc-ru"
           }
         }
       },
