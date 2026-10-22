@@ -1,4 +1,4 @@
-name: Refresh Happ VPN fast USA and Russia
+name: Happ VPN 2.0 - health checks and fast nodes
 
 on:
   schedule:
@@ -28,10 +28,29 @@ jobs:
       - name: Download Xray
         run: |
           curl -fLsS --retry 2 -o /tmp/xray.zip https://github.com/XTLS/Xray-core/releases/latest/download/Xray-linux-64.zip
-          unzip -o -j /tmp/xray.zip xray -d .
+          unzip -o -j /tmp/xray.zip xray geoip.dat geosite.dat -d .
           chmod +x xray
       - name: Verify country and select fastest working nodes
         run: python vpn/refresh_fast.py
+      - name: Verify all generated Xray profiles start
+        run: |
+          python - <<'PY'
+          import json
+          import os
+          import pathlib
+          import subprocess
+          import tempfile
+          profiles = json.loads(pathlib.Path("vpn/Happ_US_RU_Auto.json").read_text(encoding="utf-8"))
+          with tempfile.TemporaryDirectory() as d:
+              for i, profile in enumerate(profiles):
+                  p = pathlib.Path(d) / f"profile_{i}.json"
+                  p.write_text(json.dumps(profile, ensure_ascii=False), encoding="utf-8")
+                  test = subprocess.run(["./xray", "run", "-test", "-config", str(p)],
+                                        capture_output=True, text=True, env=dict(os.environ, XRAY_LOCATION_ASSET="."))
+                  if test.returncode:
+                      raise RuntimeError(f"{profile.get('remarks')} : {test.stderr[-800:]}")
+          print(f"Validated {len(profiles)} profiles in Xray")
+          PY
       - name: Publish Happ subscription
         run: |
           git config user.name "github-actions[bot]"
