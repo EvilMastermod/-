@@ -40,6 +40,8 @@ jobs:
         run: |
           set -o pipefail
           python3 pitbike-stunt/port-gameplay-12111.py 2>&1 | tee port-12111.log
+      - name: Replace bulky left HUD with compact speed overlay
+        run: python3 pitbike-stunt/replace-hud-12111.py
       - name: Build Minecraft mod
         id: compilation
         continue-on-error: true
