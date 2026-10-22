@@ -33,6 +33,7 @@ COUNTRIES = {
 MAX_TESTS = {"US": 125, "RU": 190, "DE": 95, "NL": 95, "FI": 75}
 MAX_POOL = {"US": 16, "RU": 12, "DE": 12, "NL": 12, "FI": 9}
 MANUAL_LIMIT = {"US": 7, "RU": 7, "DE": 5, "NL": 5, "FI": 4}
+PRIVATE_IPS = ["geoip:private"]
 
 
 def download(url):
