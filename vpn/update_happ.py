@@ -99,8 +99,10 @@ def profile(country, proxies):
     }
 
 def main():
+    old_profiles = json.loads(TARGET.read_text(encoding="utf-8"))
+    ru_old = next((p for p in old_profiles if "РОССИЯ" in p.get("remarks", "")), None)
     profiles = []
-    for country in ("US", "RU"):
+    for country in ("US",):
         url = SOURCE.format(country)
         request = urllib.request.Request(url, headers={"User-Agent": "HappFreeNodesUpdater/1.0"})
         with urllib.request.urlopen(request, timeout=45) as response:
@@ -108,6 +110,8 @@ def main():
         proxies = choose(source["outbounds"], country)
         profiles.append(profile(country, proxies))
         print(country, len(proxies), "unique candidate nodes")
+    if ru_old is not None:
+        profiles.append(ru_old)
     output = json.dumps(profiles, ensure_ascii=False, indent=2) + "\n"
     TARGET.write_text(output, encoding="utf-8")
 
