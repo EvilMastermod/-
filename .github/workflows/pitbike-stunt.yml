@@ -33,6 +33,18 @@ jobs:
           echo "c247abecc8c50fb7602d2ea9bc8c4a54741274cb785d787b665f35a4acc288fb  /tmp/pitbike-source.zip" | sha256sum --check
           mkdir -p project
           unzip -q /tmp/pitbike-source.zip -d project
+      - name: Enforce exact Minecraft 1.21.1 compatibility
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          p = Path('project/src/main/resources/fabric.mod.json')
+          data = json.loads(p.read_text(encoding='utf-8'))
+          data['depends']['minecraft'] = '=1.21.1'
+          p.write_text(json.dumps(data, indent=2, ensure_ascii=False) + '\n', encoding='utf-8')
+          print('Minecraft version restriction:', data['depends']['minecraft'])
+          PY
       - name: Build Minecraft mod
         id: compilation
         continue-on-error: true
