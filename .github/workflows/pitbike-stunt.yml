@@ -45,6 +45,8 @@ jobs:
       - name: Increase motorcycle top speeds and verify forward throttle
         shell: bash
         run: python3 pitbike-stunt/increase-speed-12111.py
+      - name: Fix Minecraft 1.21.11 bike item registry keys
+        run: python3 pitbike-stunt/fix-item-registry-12111.py
       - name: Build Minecraft mod
         id: compilation
         continue-on-error: true
