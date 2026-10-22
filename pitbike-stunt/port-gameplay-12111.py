@@ -166,4 +166,7 @@ config=resources/'pitbikestunt.mixins.json'
 data=json.loads(config.read_text())
 data['client']=[]
 config.write_text(json.dumps(data,indent=2)+'\n')
+# Remove obsolete 1.21.1-specific player pose mixin during port; it no longer compiles.
+old_mixin=java/'mixin/PlayerModelPoseMixin.java'
+if old_mixin.exists(): old_mixin.unlink()
 print("Ported basic ride, terrain simulation, 3D bike renderer and animation to 1.21.11")
