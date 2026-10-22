@@ -73,6 +73,11 @@ jobs:
         run: |
           set -euo pipefail
           python3 pitbike-stunt/fix-rider-wheels-smooth-12111.py 2>&1 | tee final-physics-fix.log
+      - name: Fix seating, head-only movement, floating skin and smooth driving
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 pitbike-stunt/fix-seat-head-skin-smoothing-12111.py 2>&1 | tee seat-head-fix.log
       - name: Build Minecraft mod
         id: compilation
         continue-on-error: true
@@ -88,6 +93,7 @@ jobs:
           mkdir -p build-output/1.21.11
           if [ -f pitbike-build.log ]; then cp pitbike-build.log build-output/1.21.11/build-log.txt; fi
           if [ -f port-12111.log ]; then cp port-12111.log build-output/1.21.11/port-log.txt; fi
+          if [ -f seat-head-fix.log ]; then cp seat-head-fix.log build-output/1.21.11/seat-head-fix-log.txt; fi
           if [ -f final-physics-fix.log ]; then cp final-physics-fix.log build-output/1.21.11/final-physics-fix-log.txt; fi
           if [ -f donor-install.log ]; then cp donor-install.log build-output/1.21.11/donor-install-log.txt; fi
           if [ -f riding-hotfix.log ]; then cp riding-hotfix.log build-output/1.21.11/riding-hotfix-log.txt; fi
