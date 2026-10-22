@@ -35,6 +35,8 @@ jobs:
           unzip -q /tmp/pitbike-source.zip -d project
       - name: Migrate source to Minecraft 1.21.11
         run: python3 pitbike-stunt/migrate-to-1.21.11.py
+      - name: Port riding and rendering to Minecraft 1.21.11
+        run: python3 pitbike-stunt/port-gameplay-12111.py
       - name: Build Minecraft mod
         id: compilation
         continue-on-error: true
