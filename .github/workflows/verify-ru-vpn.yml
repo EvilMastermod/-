@@ -1,0 +1,39 @@
+name: Verify RU exit nodes for Happ
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - "vpn/check_ru.py"
+  schedule:
+    - cron: "23 */6 * * *"
+
+permissions:
+  contents: write
+
+jobs:
+  verify-ru:
+    runs-on: ubuntu-latest
+    timeout-minutes: 9
+    steps:
+      - uses: actions/checkout@v4
+      - name: Get Xray core
+        run: |
+          curl --fail --location --retry 2 -o /tmp/xray.zip https://github.com/XTLS/Xray-core/releases/latest/download/Xray-linux-64.zip
+          unzip -o -j /tmp/xray.zip xray -d .
+          chmod +x xray
+      - name: Probe real egress location through Russian candidates
+        run: python3 vpn/check_ru.py
+      - name: Publish verified results
+        if: always()
+        run: |
+          if [ -e vpn/RU_PROBE_RESULTS.json ]; then
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add vpn/RU_PROBE_RESULTS.json vpn/Happ_US_RU_Auto.json
+            if ! git diff --cached --quiet; then
+              git commit -m "Refresh verified Russian exit nodes for Happ"
+              git pull --rebase origin main
+              git push origin HEAD:main
+            fi
+          fi
