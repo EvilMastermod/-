@@ -170,3 +170,15 @@ config.write_text(json.dumps(data,indent=2)+'\n')
 old_mixin=java/'mixin/PlayerModelPoseMixin.java'
 if old_mixin.exists(): old_mixin.unlink()
 print("Ported basic ride, terrain simulation, 3D bike renderer and animation to 1.21.11")
+
+
+# Minecraft 1.21.11 interface changes discovered in compile log
+entity = java/'entity/PitbikeEntity.java'
+s=entity.read_text()
+s=s.replace('import net.minecraft.entity.Entity;', 'import net.minecraft.entity.Entity;\nimport net.minecraft.entity.damage.DamageSource;')
+s=s.replace('ActionResult.success(getEntityWorld().isClient())', 'ActionResult.SUCCESS')
+s=s.replace('player.startRiding(this, true)', 'player.startRiding(this)')
+s=s.replace('    @Override public boolean canHit() { return true; }', '    @Override public boolean damage(net.minecraft.server.world.ServerWorld world, DamageSource source, float amount) { return false; }\n    @Override public boolean canHit() { return true; }')
+entity.write_text(s)
+p = java/'item/BikeItem.java'
+p.write_text(p.read_text().replace('startRiding(bike, true)', 'startRiding(bike)'))
