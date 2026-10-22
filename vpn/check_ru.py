@@ -30,6 +30,9 @@ def parse_link(link):
         if security not in ("tls", "reality") or net not in ("tcp", "ws", "grpc"):
             return None
         stream = {"network": net, "security": security}
+        # REALITY + WS cannot start in Xray.
+        if security == "reality" and net not in ("tcp", "grpc"):
+            return None
         if security == "reality":
             if not get("pbk"):
                 return None
