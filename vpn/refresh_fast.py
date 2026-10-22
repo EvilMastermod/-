@@ -22,7 +22,8 @@ REPORT = ROOT / "FAST_NODES_RESULTS.json"
 AU_SOURCE = "https://raw.githubusercontent.com/Au1rxx/free-vpn-subscriptions/main/output/country/{}/singbox-0001.json"
 NEXUS_SOURCE = "https://raw.githubusercontent.com/ninjastrikers/Nexus-nodes/main/configs/countries/{}/all.txt"
 RADIKAL_SOURCE = "https://raw.githubusercontent.com/0xRadikal/Free-v2ray-Configs/main/top100.txt"
-MAX_TESTS = {"US": 115, "RU": 100}
+RU_EXTRA_SOURCE = "https://raw.githubusercontent.com/aviamastersgh/vpn-free-russia/main/ru_configs.txt"
+MAX_TESTS = {"US": 115, "RU": 220}
 MAX_POOL = {"US": 16, "RU": 12}
 
 def download(url):
@@ -146,7 +147,7 @@ def subnet(proxy):
 
 def gather(country, old):
     rng = random.Random(int(time.time() // 86400))
-    inputs = {"old": [], "au": [], "nexus": [], "radikal": []}
+    inputs = {"old": [], "au": [], "nexus": [], "radikal": [], "ru_extra": []}
     inputs["old"] = [o for o in old if safe(o)]
     try:
         raw = json.loads(download(AU_SOURCE.format(country)))
@@ -164,11 +165,17 @@ def gather(country, old):
         inputs["radikal"] = [x for x in (convert_link(line) for line in decoded.splitlines()) if x]
     except Exception as e:
         print(f"{country} Radikal: {str(e)[:160]}", flush=True)
-    for key in ("au", "nexus", "radikal"):
+    if country == "RU":
+        try:
+            data = download(RU_EXTRA_SOURCE)
+            inputs["ru_extra"] = [x for x in (convert_link(line) for line in data.splitlines()) if x]
+        except Exception as e:
+            print(f"{country} extra source: {str(e)[:160]}", flush=True)
+    for key in ("au", "nexus", "radikal", "ru_extra"):
         rng.shuffle(inputs[key])
     dedup, seen, blocks = [], set(), {}
     # Existing working endpoints are sampled too; broaden to several operators / subnets.
-    order = ["old", "au", "nexus", "au", "nexus", "radikal"]
+    order = ["old", "au", "ru_extra", "nexus", "au", "ru_extra", "nexus", "radikal"]
     while len(dedup) < MAX_TESTS[country] and any(inputs.values()):
         advanced = False
         for source in order:
