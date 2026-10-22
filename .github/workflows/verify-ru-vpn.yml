@@ -5,6 +5,7 @@ on:
   push:
     paths:
       - "vpn/check_ru.py"
+      - ".github/workflows/verify-ru-vpn.yml"
   schedule:
     - cron: "23 */6 * * *"
 
