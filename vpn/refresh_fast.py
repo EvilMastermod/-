@@ -322,69 +322,114 @@ def build_manual(template, country, emoji, name, verified, i):
 
 
 def main():
-    existing = json.loads(TARGET.read_text(encoding="utf-8"))
-    out, report = {}, {"verified_from": "GitHub-hosted runner (not the user's network)",
-                       "checked_utc": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
-                       "countries": {}}
-    for country, label in (("US", "США"), ("RU", "РОССИЯ")):
-        old = next(x for x in existing if label in x["remarks"] and "АВТОВЫБОР" in x["remarks"])
-        candidates = gather(country, old["outbounds"])
-        results = []
-        with concurrent.futures.ThreadPoolExecutor(max_workers=16) as pool:
-            for r in pool.map(lambda o: probe(o, country), candidates):
-                results.append(r)
-                if r["ok"]: print(country, r["server"], r["http_ms"], "ms", flush=True)
-        verified = choose_verified(results, country)
-        # Never silently replace a functioning subscription with an empty one.
-        if not verified:
-            print(country, "no verified nodes; preserving old group", flush=True)
-            old_nodes = [x for x in old["outbounds"] if safe(x)]
-            verified = [{"proxy": p, "server": server(p), "exit": "not_rechecked",
-                         "http_ms": None} for p in old_nodes]
-        out[country] = (old, verified)
+    current = json.loads(TARGET.read_text(encoding="utf-8"))
+    # Prior auto profiles act as a fallback if a provider is temporarily unavailable.
+    old_bases = {}
+    for country, (_, label) in COUNTRIES.items():
+        old_bases[country] = next((p for p in current
+                                   if label in p.get("remarks", "")
+                                   and "АВТОВЫБОР" in p.get("remarks", "")), None)
+    template = old_bases["US"] or old_bases["RU"]
+    if template is None:
+        raise RuntimeError("No usable template found in existing Happ subscription")
+    report = {
+        "version": "2.0",
+        "verified_from": "GitHub Actions runner, not user's device/network",
+        "checked_utc": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+        "limitations": "HTTP response time is not ICMP ping and cannot predict game ping",
+        "countries": {}
+    }
+    selected = {}
+    for country, (emoji, label) in COUNTRIES.items():
+        old = old_bases[country]
+        old_outbounds = (old or {}).get("outbounds", [])
+        candidates = gather(country, old_outbounds)
+        checks = []
+        with concurrent.futures.ThreadPoolExecutor(max_workers=16) as executor:
+            for result in executor.map(lambda p: probe(p, country), candidates):
+                checks.append(result)
+                if result["ok"]:
+                    print(country, result["server"], result["http_ms"],
+                          "ms", "success", result["success_rate"], flush=True)
+        verified = choose_verified(checks, country)
+        retained_old = False
+        if not verified and old is not None:
+            # Preserve known old country-specific nodes in temporary source outages.
+            verified = [
+                {"proxy": p, "server": server(p), "exit": "previously checked",
+                 "http_ms": None, "success_rate": 0, "jitter_ms": None}
+                for p in old_outbounds if safe(p)
+            ][:MAX_POOL[country]]
+            retained_old = bool(verified)
+        if verified:
+            selected[country] = verified
         report["countries"][country] = {
-            "tested": len(results),
-            "country_verified": sum(1 for x in results if x["ok"]),
-            "other_country": sum(x["exit"] not in (None, country) for x in results),
-            "selected": [{"server": x["server"], "http_ms": x["http_ms"],
-                          "exit": x["exit"]} for x in verified]}
-    rebuilt = []
+            "tested": len(checks),
+            "country_verified": sum(1 for x in checks if x["ok"]),
+            "wrong_country": sum(x["exit"] not in (None, country) for x in checks),
+            "retained_old_nodes": retained_old,
+            "selected": [
+                {"server": x["server"], "http_ms": x["http_ms"],
+                 "jitter_ms": x["jitter_ms"], "success_rate": x["success_rate"],
+                 "exit": x["exit"]}
+                for x in verified]
+        }
+    profiles = []
+    for country, (emoji, name) in COUNTRIES.items():
+        verified = selected.get(country)
+        if not verified:
+            print(country, "no verified exit; no new profile added", flush=True)
+            continue
+        template_country = old_bases[country] or template
+        profiles.append(build_auto(template_country, country, emoji, name, verified))
+    # Keep gaming modes distinct; gaming selector prioritizes the lowest measured HTTP RTT.
     for country in ("US", "RU"):
-        original, ranked = out[country]
-        base = copy.deepcopy(original)
-        base["outbounds"] = []
-        for i, item in enumerate(ranked):
-            proxy = copy.deepcopy(item["proxy"])
-            proxy["tag"] = f'{country.lower()}-{i+1}'
-            base["outbounds"].append(proxy)
-        base["outbounds"].append({"tag": "direct", "protocol": "freedom", "settings": {}})
-        if not ranked:
-            raise RuntimeError("Empty country: " + country)
-        base["routing"]["balancers"][0]["fallbackTag"] = f'{country.lower()}-1'
-        base["routing"]["balancers"][0]["selector"] = [f'{country.lower()}-']
-        base["observatory"]["subjectSelector"] = [f'{country.lower()}-']
-        rebuilt.append(base)
-    # User may manually select individual endpoints without relying on auto balancer.
-    for country, emoji, name in (("US", "🇺🇸", "США"), ("RU", "🇷🇺", "Россия")):
-        original, verified = out[country]
-        for i, item in enumerate(verified[:8], 1):
-            one = copy.deepcopy(original)
-            one["remarks"] = f"{emoji} {name} — сервер {i}"
-            p = copy.deepcopy(item["proxy"])
-            p["tag"] = "proxy"
-            one["outbounds"] = [p, {"tag": "direct", "protocol": "freedom", "settings": {}}]
-            one["routing"] = {"domainStrategy": "AsIs",
-                              "rules": [
-                                  {"type": "field", "ip": ["geoip:private"], "outboundTag": "direct"},
-                                  {"type": "field", "inboundTag": ["socks", "http"], "outboundTag": "proxy"}]}
-            one.pop("observatory", None)
-            rebuilt.append(one)
-    # Avoid invalid Xray combinations recurring during automated updates.
-    for profile in rebuilt:
-        assert all(safe(x) for x in profile["outbounds"] if x["protocol"] == "vless")
-    TARGET.write_text(json.dumps(rebuilt, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
-    REPORT.write_text(json.dumps(report, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
-    print("Wrote", len(rebuilt), "Happ profiles; updated with active country exit checks", flush=True)
+        if selected.get(country):
+            emoji, name = COUNTRIES[country]
+            profiles.append(build_auto(old_bases[country] or template,
+                                       country, emoji, name, selected[country], gaming=True))
+    europe = []
+    for code in ("DE", "NL", "FI"):
+        europe.extend(selected.get(code, []))
+    if europe:
+        europe = sorted(europe, key=lambda x: x["http_ms"] or 99999)[:8]
+        profiles.append(build_auto(template, "EU", "🎮", "ЕВРОПА",
+                                   europe, gaming=True))
+    # Standalone profiles let Happ users measure from their own network.
+    for country, (emoji, name) in COUNTRIES.items():
+        verified = selected.get(country)
+        if not verified:
+            continue
+        for i in range(min(len(verified), MANUAL_LIMIT[country])):
+            profiles.append(build_manual(old_bases[country] or template, country,
+                                         emoji, name, verified, i))
+    # Validate selected tags / Xray balancer references to prevent startup failures.
+    unique_names = set()
+    for item in profiles:
+        name = item["remarks"]
+        if name in unique_names:
+            raise ValueError("Duplicate profile: " + name)
+        unique_names.add(name)
+        out = item["outbounds"]
+        tags = [x["tag"] for x in out]
+        if len(tags) != len(set(tags)):
+            raise ValueError("Duplicate outbound tags")
+        for o in out:
+            if o["protocol"] == "vless" and not safe(o):
+                raise ValueError("Unsupported transport: " + name)
+        for bal in item["routing"].get("balancers", []):
+            if bal["fallbackTag"] not in tags:
+                raise ValueError("Invalid failover tag")
+            if not any(t.startswith(bal["selector"][0]) for t in tags):
+                raise ValueError("Invalid observatory selector")
+    if not profiles:
+        raise RuntimeError("No verified profiles or fallback pools")
+    TARGET.write_text(json.dumps(profiles, ensure_ascii=False, indent=2) + "\n",
+                      encoding="utf-8")
+    REPORT.write_text(json.dumps(report, ensure_ascii=False, indent=2) + "\n",
+                      encoding="utf-8")
+    print("HAPP V2 profiles:", len(profiles), "countries:",
+          list(selected.keys()), flush=True)
 
 if __name__ == "__main__":
     main()
