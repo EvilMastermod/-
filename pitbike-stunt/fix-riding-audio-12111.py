@@ -120,6 +120,13 @@ data=json.loads(p.read_text(encoding="utf-8"))
 data["client"]=["PlayerModelPoseMixin"]
 p.write_text(json.dumps(data,indent=2)+"\n",encoding="utf-8")
 
+# Retain the user's original ride and wheel animation keyframes as mod resources.
+original=Path("donor-unpacked/donor/assets/donor_animations.json")
+assert original.exists(), "Original donor animation JSON missing"
+animations=res/"assets/pitbikestunt/animations"
+animations.mkdir(parents=True,exist_ok=True)
+shutil.copy2(original, animations/"pitbike.json")
+
 # Generate new engine sample: harmonic four-stroke burble; pitch reacts to RPM.
 sounddir=res/"assets/pitbikestunt/sounds"
 sounddir.mkdir(parents=True,exist_ok=True)
