@@ -10,155 +10,666 @@ For more details see https://docs.gradle.org/9.2.1/release-notes.html
 
 To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/9.2.1/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
 Daemon will be stopped at the end of the build 
-gradle/actions: Writing build results to /home/runner/work/_temp/.gradle-actions/build-results/compilation-1792664523314.json
+
+> Configure project :
+Fabric Loom: 1.14.10
+
+Cannot remap modifiers because it does not exists in any of the targets [] or their parents.
+
+> Task :compileJava
+/home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/client/PitbikeRenderer.java:16: error: wrong number of type arguments; required 2
+public final class PitbikeRenderer extends EntityRenderer<PitbikeEntity> {
+                                                         ^
+/home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/PitbikeStunt.java:26: error: incompatible types: String cannot be converted to RegistryKey<EntityType<?>>
+                    .dimensions(0.98f, 1.25f).maxTrackingRange(10).trackingTickInterval(1).build("pitbikestunt:pitbike"));
+                                                                                                 ^
+/home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/entity/PitbikeEntity.java:38: error: PitbikeEntity is not abstract and does not override abstract method writeCustomData(WriteView) in Entity
+public final class PitbikeEntity extends Entity {
+             ^
+/home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/entity/PitbikeEntity.java:99: error: cannot find symbol
+        if (getWorld().isClient) return;
+            ^
+  symbol:   method getWorld()
+  location: class PitbikeEntity
+/home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/entity/PitbikeEntity.java:111: error: cannot find symbol
+        if (getWorld().isClient) return;
+            ^
+  symbol:   method getWorld()
+  location: class PitbikeEntity
+/home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/entity/PitbikeEntity.java:165: error: cannot find symbol
+        Vec3d beforeMove = getPos();
+                           ^
+  symbol:   method getPos()
+  location: class PitbikeEntity
+/home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/entity/PitbikeEntity.java:168: error: cannot find symbol
+        Vec3d actualMove = getPos().subtract(beforeMove);
+                           ^
+  symbol:   method getPos()
+  location: class PitbikeEntity
+/home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/entity/PitbikeEntity.java:195: error: cannot find symbol
+        if (getWorld() instanceof ServerWorld server && isOnGround() && age % 5 == 0 &&
+            ^
+  symbol:   method getWorld()
+  location: class PitbikeEntity
+/home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/entity/PitbikeEntity.java:223: error: cannot find symbol
+        if (!getWorld().isClient) getWorld().playSound(null, getX(), getY(), getZ(),
+             ^
+  symbol:   method getWorld()
+  location: class PitbikeEntity
+/home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/entity/PitbikeEntity.java:223: error: cannot find symbol
+        if (!getWorld().isClient) getWorld().playSound(null, getX(), getY(), getZ(),
+                                  ^
+  symbol:   method getWorld()
+  location: class PitbikeEntity
+/home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/entity/PitbikeEntity.java:233: error: cannot find symbol
+            VoxelShape collision = getWorld().getBlockState(pos).getCollisionShape(getWorld(), pos);
+                                   ^
+  symbol:   method getWorld()
+  location: class PitbikeEntity
+/home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/entity/PitbikeEntity.java:233: error: cannot find symbol
+            VoxelShape collision = getWorld().getBlockState(pos).getCollisionShape(getWorld(), pos);
+                                                                                   ^
+  symbol:   method getWorld()
+  location: class PitbikeEntity
+/home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/entity/PitbikeEntity.java:260: error: cannot find symbol
+            if (!getWorld().isClient && fuel() < 100f) {
+                 ^
+  symbol:   method getWorld()
+  location: class PitbikeEntity
+/home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/entity/PitbikeEntity.java:265: error: cannot find symbol
+            return ActionResult.success(getWorld().isClient);
+                                        ^
+  symbol:   method getWorld()
+  location: class PitbikeEntity
+/home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/entity/PitbikeEntity.java:268: error: cannot find symbol
+            if (!getWorld().isClient && condition() < 100) {
+                 ^
+  symbol:   method getWorld()
+  location: class PitbikeEntity
+/home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/entity/PitbikeEntity.java:273: error: cannot find symbol
+            return ActionResult.success(getWorld().isClient);
+                                        ^
+  symbol:   method getWorld()
+  location: class PitbikeEntity
+/home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/entity/PitbikeEntity.java:276: error: cannot find symbol
+            if (!getWorld().isClient && getFirstPassenger() == null && Math.abs(speed()) < 0.04) {
+                 ^
+  symbol:   method getWorld()
+  location: class PitbikeEntity
+/home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/entity/PitbikeEntity.java:280: error: cannot find symbol
+            return ActionResult.success(getWorld().isClient);
+                                        ^
+  symbol:   method getWorld()
+  location: class PitbikeEntity
+/home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/entity/PitbikeEntity.java:283: error: cannot find symbol
+            if (!getWorld().isClient) {
+                 ^
+  symbol:   method getWorld()
+  location: class PitbikeEntity
+/home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/entity/PitbikeEntity.java:298: error: cannot find symbol
+            return ActionResult.success(getWorld().isClient);
+                                        ^
+  symbol:   method getWorld()
+  location: class PitbikeEntity
+/home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/entity/PitbikeEntity.java:300: error: cannot find symbol
+        if (!getWorld().isClient && !player.hasVehicle()) {
+             ^
+  symbol:   method getWorld()
+  location: class PitbikeEntity
+/home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/entity/PitbikeEntity.java:304: error: cannot find symbol
+        return ActionResult.success(getWorld().isClient);
+                                    ^
+  symbol:   method getWorld()
+  location: class PitbikeEntity
+/home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/entity/PitbikeEntity.java:306: error: method does not override or implement a method from a supertype
+    @Override public boolean isCollidable() { return true; }
+    ^
+/home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/entity/PitbikeEntity.java:307: error: method isCollidable in class Entity cannot be applied to given types;
+    @Override public boolean collidesWith(Entity entity) { return !hasPassenger(entity) && entity.isCollidable(); }
+                                                                                                 ^
+  required: Entity
+  found:    no arguments
+  reason: actual and formal argument lists differ in length
+/home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/entity/PitbikeEntity.java:308: error: method does not override or implement a method from a supertype
+    @Override protected void readCustomDataFromNbt(NbtCompound nbt) {
+    ^
+/home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/entity/PitbikeEntity.java:309: error: incompatible types: Optional<Integer> cannot be converted to int
+        setVariant(nbt.getInt("BikeVariant"));
+                             ^
+/home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/entity/PitbikeEntity.java:310: error: no suitable method found for floorMod(Optional<Integer>,int)
+        dataTracker.set(COLOR, Math.floorMod(nbt.getInt("Paint"), 6));
+                                   ^
+    method Math.floorMod(int,int) is not applicable
+      (argument mismatch; Optional<Integer> cannot be converted to int)
+    method Math.floorMod(long,int) is not applicable
+      (argument mismatch; Optional<Integer> cannot be converted to long)
+    method Math.floorMod(long,long) is not applicable
+      (argument mismatch; Optional<Integer> cannot be converted to long)
+/home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/entity/PitbikeEntity.java:311: error: no suitable method found for clamp(Optional<Float>,int,int)
+        dataTracker.set(FUEL, MathHelper.clamp(nbt.getFloat("Fuel"), 0, 100));
+                                        ^
+    method MathHelper.clamp(int,int,int) is not applicable
+      (argument mismatch; Optional<Float> cannot be converted to int)
+    method MathHelper.clamp(long,long,long) is not applicable
+      (argument mismatch; Optional<Float> cannot be converted to long)
+    method MathHelper.clamp(float,float,float) is not applicable
+      (argument mismatch; Optional<Float> cannot be converted to float)
+    method MathHelper.clamp(double,double,double) is not applicable
+      (argument mismatch; Optional<Float> cannot be converted to double)
+/home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/entity/PitbikeEntity.java:312: error: no suitable method found for clamp(Optional<Integer>,int,int)
+        dataTracker.set(GEAR, MathHelper.clamp(nbt.getInt("Gear"), 1, 4));
+                                        ^
+    method MathHelper.clamp(int,int,int) is not applicable
+      (argument mismatch; Optional<Integer> cannot be converted to int)
+    method MathHelper.clamp(long,long,long) is not applicable
+      (argument mismatch; Optional<Integer> cannot be converted to long)
+    method MathHelper.clamp(float,float,float) is not applicable
+      (argument mismatch; Optional<Integer> cannot be converted to float)
+    method MathHelper.clamp(double,double,double) is not applicable
+      (argument mismatch; Optional<Integer> cannot be converted to double)
+/home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/entity/PitbikeEntity.java:313: error: no suitable method found for set(TrackedData<Boolean>,Optional<Boolean>)
+        dataTracker.set(ENGINE, nbt.getBoolean("EngineOn"));
+                   ^
+    method DataTracker.<T#1>set(TrackedData<T#1>,T#1) is not applicable
+      (inference variable T#1 has incompatible bounds
+        equality constraints: Boolean
+        lower bounds: Optional<Boolean>)
+    method DataTracker.<T#2>set(TrackedData<T#2>,T#2,boolean) is not applicable
+      (cannot infer type-variable(s) T#2
+        (actual and formal argument lists differ in length))
+  where T#1,T#2 are type-variables:
+    T#1 extends Object declared in method <T#1>set(TrackedData<T#1>,T#1)
+    T#2 extends Object declared in method <T#2>set(TrackedData<T#2>,T#2,boolean)
+/home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/entity/PitbikeEntity.java:314: error: no suitable method found for max(int,Optional<Integer>)
+        dataTracker.set(SCORE, Math.max(0, nbt.getInt("Score")));
+                                   ^
+    method Math.max(int,int) is not applicable
+      (argument mismatch; Optional<Integer> cannot be converted to int)
+    method Math.max(long,long) is not applicable
+      (argument mismatch; Optional<Integer> cannot be converted to long)
+    method Math.max(float,float) is not applicable
+      (argument mismatch; Optional<Integer> cannot be converted to float)
+    method Math.max(double,double) is not applicable
+      (argument mismatch; Optional<Integer> cannot be converted to double)
+/home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/entity/PitbikeEntity.java:315: error: no suitable method found for clamp(Optional<Integer>,int,int)
+        dataTracker.set(CONDITION, nbt.contains("Condition") ? MathHelper.clamp(nbt.getInt("Condition"), 0, 100) : 100);
+                                                                         ^
+    method MathHelper.clamp(int,int,int) is not applicable
+      (argument mismatch; Optional<Integer> cannot be converted to int)
+    method MathHelper.clamp(long,long,long) is not applicable
+      (argument mismatch; Optional<Integer> cannot be converted to long)
+    method MathHelper.clamp(float,float,float) is not applicable
+      (argument mismatch; Optional<Integer> cannot be converted to float)
+    method MathHelper.clamp(double,double,double) is not applicable
+      (argument mismatch; Optional<Integer> cannot be converted to double)
+/home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/entity/PitbikeEntity.java:316: error: no suitable method found for set(TrackedData<Boolean>,Optional<Boolean>)
+        dataTracker.set(KICKSTAND, nbt.getBoolean("Kickstand"));
+                   ^
+    method DataTracker.<T#1>set(TrackedData<T#1>,T#1) is not applicable
+      (inference variable T#1 has incompatible bounds
+        equality constraints: Boolean
+        lower bounds: Optional<Boolean>)
+    method DataTracker.<T#2>set(TrackedData<T#2>,T#2,boolean) is not applicable
+      (cannot infer type-variable(s) T#2
+        (actual and formal argument lists differ in length))
+  where T#1,T#2 are type-variables:
+    T#1 extends Object declared in method <T#1>set(TrackedData<T#1>,T#1)
+    T#2 extends Object declared in method <T#2>set(TrackedData<T#2>,T#2,boolean)
+/home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/entity/PitbikeEntity.java:318: error: method does not override or implement a method from a supertype
+    @Override protected void writeCustomDataToNbt(NbtCompound nbt) {
+    ^
+/home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/mixin/PlayerModelPoseMixin.java:27: error: type PlayerEntityModel does not take parameters
+        PlayerEntityModel<?> model = (PlayerEntityModel<?>) (Object) this;
+                         ^
+/home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/mixin/PlayerModelPoseMixin.java:27: error: type PlayerEntityModel does not take parameters
+        PlayerEntityModel<?> model = (PlayerEntityModel<?>) (Object) this;
+                                                       ^
+/home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/mixin/PlayerModelPoseMixin.java:61: error: cannot find symbol
+        rightSleeve.copyTransform(right);
+                   ^
+  symbol:   method copyTransform(ModelPart)
+  location: variable rightSleeve of type ModelPart
+/home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/mixin/PlayerModelPoseMixin.java:62: error: cannot find symbol
+        leftSleeve.copyTransform(left);
+                  ^
+  symbol:   method copyTransform(ModelPart)
+  location: variable leftSleeve of type ModelPart
+/home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/mixin/PlayerModelPoseMixin.java:63: error: cannot find symbol
+        rightPants.copyTransform(legR);
+                  ^
+  symbol:   method copyTransform(ModelPart)
+  location: variable rightPants of type ModelPart
+/home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/mixin/PlayerModelPoseMixin.java:64: error: cannot find symbol
+        leftPants.copyTransform(legL);
+                 ^
+  symbol:   method copyTransform(ModelPart)
+  location: variable leftPants of type ModelPart
+/home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/client/PitbikeRenderer.java:24: error: cannot find symbol
+        this.shadowRadius = 0.54f;
+            ^
+  symbol: variable shadowRadius
+/home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/client/PitbikeRenderer.java:26: error: method does not override or implement a method from a supertype
+    @Override public Identifier getTexture(PitbikeEntity entity) {
+    ^
+/home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/client/PitbikeRenderer.java:29: error: method does not override or implement a method from a supertype
+    @Override public void render(PitbikeEntity entity, float yaw, float tickDelta,
+    ^
+/home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/client/PitbikeRenderer.java:32: error: cannot find symbol
+        matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(180.0f - MathHelper.lerp(tickDelta, entity.prevYaw, entity.getYaw())));
+                                                                                                            ^
+  symbol:   variable prevYaw
+  location: variable entity of type PitbikeEntity
+/home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/client/PitbikeRenderer.java:40: error: cannot find symbol
+        VertexConsumer consumer = vertices.getBuffer(RenderLayer.getEntityCutoutNoCull(getTexture(entity)));
+                                                                ^
+  symbol:   method getEntityCutoutNoCull(Identifier)
+  location: class RenderLayer
+/home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/client/PitbikeRenderer.java:43: error: cannot find symbol
+        super.render(entity, yaw, tickDelta, matrices, vertices, light);
+        ^
+  symbol:   variable super
+  location: class PitbikeRenderer
+/home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/client/PitbikeModel.java:18: error: type argument PitbikeEntity is not within bounds of type-variable T
+public final class PitbikeModel extends EntityModel<PitbikeEntity> {
+                                                    ^
+  where T is a type-variable:
+    T extends EntityRenderState declared in class EntityModel
+/home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/client/PitbikeModel.java:28: error: no suitable constructor found for EntityModel(no arguments)
+    public PitbikeModel(ModelPart root) {
+                                        ^
+    constructor EntityModel.EntityModel(ModelPart) is not applicable
+      (actual and formal argument lists differ in length)
+    constructor EntityModel.EntityModel(ModelPart,Function<Identifier,RenderLayer>) is not applicable
+      (actual and formal argument lists differ in length)
+/home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/client/PitbikeModel.java:41: error: cannot find symbol
+        return parent.addChild(name, ModelPartBuilder.create(), ModelTransform.pivot(x, y, z));
+                                                                              ^
+  symbol:   method pivot(float,float,float)
+  location: class ModelTransform
+/home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/client/PitbikeModel.java:170: error: cannot find symbol
+        steering.pivotY = -bike.frontSpring() * 2.5f;
+                ^
+  symbol:   variable pivotY
+  location: variable steering of type ModelPart
+/home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/client/PitbikeModel.java:171: error: cannot find symbol
+        chain.pivotZ = (float) Math.sin(speed*1.2f) * 0.12f;
+             ^
+  symbol:   variable pivotZ
+  location: variable chain of type ModelPart
+/home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/client/PitbikeModel.java:173: error: cannot find symbol
+        enginePart.pivotX = (float)Math.sin((bike.age + tickDelta)*2.1f)*0.04f;
+                  ^
+  symbol:   variable pivotX
+  location: variable enginePart of type ModelPart
+/home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/client/PitbikeModel.java:176: error: method does not override or implement a method from a supertype
+    @Override public void setAngles(PitbikeEntity entity, float limbAngle, float limbDistance,
+    ^
+/home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/client/PitbikeModel.java:178: error: render(MatrixStack,VertexConsumer,int,int,int) in PitbikeModel cannot override render(MatrixStack,VertexConsumer,int,int,int) in Model
+    @Override public void render(MatrixStack matrices, VertexConsumer vertices, int light, int overlay, int color) {
+                          ^
+  overridden method is final
+/home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/client/PitbikeStuntClient.java:29: error: incompatible types: String cannot be converted to Category
+                InputUtil.Type.KEYSYM, key, CATEGORY));
+                                            ^
+/home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/client/PitbikeStuntClient.java:34: error: method register in class EntityRendererRegistry cannot be applied to given types;
+        EntityRendererRegistry.register(PitbikeStunt.BIKE_ENTITY, PitbikeRenderer::new);
+                              ^
+  required: EntityType<? extends E>,EntityRendererFactory<E>
+  found:    EntityType<PitbikeEntity>,PitbikeRen[...]::new
+  reason: cannot infer type-variable(s) E
+    (argument mismatch; bad return type in method reference
+      PitbikeRenderer cannot be converted to EntityRenderer<E,?>)
+  where E is a type-variable:
+    E extends Entity declared in method <E>register(EntityType<? extends E>,EntityRendererFactory<E>)
+/home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/item/BikeItem.java:16: error: isClient has private access in World
+        if (context.getWorld().isClient) return ActionResult.SUCCESS;
+                              ^
+Note: /home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/client/PitbikeStuntClient.java uses or overrides a deprecated API.
+Note: Recompile with -Xlint:deprecation for details.
+Note: Some messages have been simplified; recompile with -Xdiags:verbose to get full output
+57 errors
+
+> Task :compileJava FAILED
+gradle/actions: Writing build results to /home/runner/work/_temp/.gradle-actions/build-results/compilation-1792664646736.json
+
+[Incubating] Problems report is available at: file:///home/runner/work/-/-/project/build/reports/problems/problems-report.html
 
 FAILURE: Build failed with an exception.
 
-* Where:
-Build file '/home/runner/work/-/-/project/build.gradle' line: 2
-
 * What went wrong:
-Plugin [id: 'fabric-loom', version: '1.14'] was not found in any of the following sources:
-
-- Gradle Core Plugins (not a core plugin. For more available plugins, please refer to https://docs.gradle.org/9.2.1/userguide/plugin_reference.html in the Gradle documentation.)
-- Included Builds (No included builds contain this plugin)
-- Plugin Repositories (could not resolve plugin artifact 'fabric-loom:fabric-loom.gradle.plugin:1.14')
-  Searched in the following repositories:
-    maven(https://maven.fabricmc.net/)
-    Gradle Central Plugin Repository
-    MavenRepo
+Execution failed for task ':compileJava'.
+> Compilation failed; see the compiler output below.
+  /home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/mixin/PlayerModelPoseMixin.java:27: error: type PlayerEntityModel does not take parameters
+          PlayerEntityModel<?> model = (PlayerEntityModel<?>) (Object) this;
+                           ^
+  /home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/mixin/PlayerModelPoseMixin.java:27: error: type PlayerEntityModel does not take parameters
+          PlayerEntityModel<?> model = (PlayerEntityModel<?>) (Object) this;
+                                                         ^
+  /home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/entity/PitbikeEntity.java:307: error: method isCollidable in class Entity cannot be applied to given types;
+      @Override public boolean collidesWith(Entity entity) { return !hasPassenger(entity) && entity.isCollidable(); }
+                                                                                                   ^
+    required: Entity
+    found:    no arguments
+    reason: actual and formal argument lists differ in length
+  /home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/client/PitbikeStuntClient.java:34: error: method register in class EntityRendererRegistry cannot be applied to given types;
+          EntityRendererRegistry.register(PitbikeStunt.BIKE_ENTITY, PitbikeRenderer::new);
+                                ^
+    required: EntityType<? extends E>,EntityRendererFactory<E>
+    found:    EntityType<PitbikeEntity>,PitbikeRen[...]::new
+    reason: cannot infer type-variable(s) E
+      (argument mismatch; bad return type in method reference
+        PitbikeRenderer cannot be converted to EntityRenderer<E,?>)
+    where E is a type-variable:
+      E extends Entity declared in method <E>register(EntityType<? extends E>,EntityRendererFactory<E>)
+  /home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/entity/PitbikeEntity.java:310: error: no suitable method found for floorMod(Optional<Integer>,int)
+          dataTracker.set(COLOR, Math.floorMod(nbt.getInt("Paint"), 6));
+                                     ^
+      method Math.floorMod(int,int) is not applicable
+        (argument mismatch; Optional<Integer> cannot be converted to int)
+      method Math.floorMod(long,int) is not applicable
+        (argument mismatch; Optional<Integer> cannot be converted to long)
+      method Math.floorMod(long,long) is not applicable
+        (argument mismatch; Optional<Integer> cannot be converted to long)
+  /home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/entity/PitbikeEntity.java:311: error: no suitable method found for clamp(Optional<Float>,int,int)
+          dataTracker.set(FUEL, MathHelper.clamp(nbt.getFloat("Fuel"), 0, 100));
+                                          ^
+      method MathHelper.clamp(int,int,int) is not applicable
+        (argument mismatch; Optional<Float> cannot be converted to int)
+      method MathHelper.clamp(long,long,long) is not applicable
+        (argument mismatch; Optional<Float> cannot be converted to long)
+      method MathHelper.clamp(float,float,float) is not applicable
+        (argument mismatch; Optional<Float> cannot be converted to float)
+      method MathHelper.clamp(double,double,double) is not applicable
+        (argument mismatch; Optional<Float> cannot be converted to double)
+  /home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/entity/PitbikeEntity.java:312: error: no suitable method found for clamp(Optional<Integer>,int,int)
+          dataTracker.set(GEAR, MathHelper.clamp(nbt.getInt("Gear"), 1, 4));
+                                          ^
+      method MathHelper.clamp(int,int,int) is not applicable
+        (argument mismatch; Optional<Integer> cannot be converted to int)
+      method MathHelper.clamp(long,long,long) is not applicable
+        (argument mismatch; Optional<Integer> cannot be converted to long)
+      method MathHelper.clamp(float,float,float) is not applicable
+        (argument mismatch; Optional<Integer> cannot be converted to float)
+      method MathHelper.clamp(double,double,double) is not applicable
+        (argument mismatch; Optional<Integer> cannot be converted to double)
+  /home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/entity/PitbikeEntity.java:313: error: no suitable method found for set(TrackedData<Boolean>,Optional<Boolean>)
+          dataTracker.set(ENGINE, nbt.getBoolean("EngineOn"));
+                     ^
+      method DataTracker.<T#1>set(TrackedData<T#1>,T#1) is not applicable
+        (inference variable T#1 has incompatible bounds
+          equality constraints: Boolean
+          lower bounds: Optional<Boolean>)
+      method DataTracker.<T#2>set(TrackedData<T#2>,T#2,boolean) is not applicable
+        (cannot infer type-variable(s) T#2
+          (actual and formal argument lists differ in length))
+    where T#1,T#2 are type-variables:
+      T#1 extends Object declared in method <T#1>set(TrackedData<T#1>,T#1)
+      T#2 extends Object declared in method <T#2>set(TrackedData<T#2>,T#2,boolean)
+  /home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/entity/PitbikeEntity.java:314: error: no suitable method found for max(int,Optional<Integer>)
+          dataTracker.set(SCORE, Math.max(0, nbt.getInt("Score")));
+                                     ^
+      method Math.max(int,int) is not applicable
+        (argument mismatch; Optional<Integer> cannot be converted to int)
+      method Math.max(long,long) is not applicable
+        (argument mismatch; Optional<Integer> cannot be converted to long)
+      method Math.max(float,float) is not applicable
+        (argument mismatch; Optional<Integer> cannot be converted to float)
+      method Math.max(double,double) is not applicable
+        (argument mismatch; Optional<Integer> cannot be converted to double)
+  /home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/entity/PitbikeEntity.java:315: error: no suitable method found for clamp(Optional<Integer>,int,int)
+          dataTracker.set(CONDITION, nbt.contains("Condition") ? MathHelper.clamp(nbt.getInt("Condition"), 0, 100) : 100);
+                                                                           ^
+      method MathHelper.clamp(int,int,int) is not applicable
+        (argument mismatch; Optional<Integer> cannot be converted to int)
+      method MathHelper.clamp(long,long,long) is not applicable
+        (argument mismatch; Optional<Integer> cannot be converted to long)
+      method MathHelper.clamp(float,float,float) is not applicable
+        (argument mismatch; Optional<Integer> cannot be converted to float)
+      method MathHelper.clamp(double,double,double) is not applicable
+        (argument mismatch; Optional<Integer> cannot be converted to double)
+  /home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/entity/PitbikeEntity.java:316: error: no suitable method found for set(TrackedData<Boolean>,Optional<Boolean>)
+          dataTracker.set(KICKSTAND, nbt.getBoolean("Kickstand"));
+                     ^
+      method DataTracker.<T#1>set(TrackedData<T#1>,T#1) is not applicable
+        (inference variable T#1 has incompatible bounds
+          equality constraints: Boolean
+          lower bounds: Optional<Boolean>)
+      method DataTracker.<T#2>set(TrackedData<T#2>,T#2,boolean) is not applicable
+        (cannot infer type-variable(s) T#2
+          (actual and formal argument lists differ in length))
+    where T#1,T#2 are type-variables:
+      T#1 extends Object declared in method <T#1>set(TrackedData<T#1>,T#1)
+      T#2 extends Object declared in method <T#2>set(TrackedData<T#2>,T#2,boolean)
+  /home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/client/PitbikeModel.java:28: error: no suitable constructor found for EntityModel(no arguments)
+      public PitbikeModel(ModelPart root) {
+                                          ^
+      constructor EntityModel.EntityModel(ModelPart) is not applicable
+        (actual and formal argument lists differ in length)
+      constructor EntityModel.EntityModel(ModelPart,Function<Identifier,RenderLayer>) is not applicable
+        (actual and formal argument lists differ in length)
+  Note: Recompile with -Xlint:deprecation for details.
+  /home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/client/PitbikeRenderer.java:16: error: wrong number of type arguments; required 2
+  public final class PitbikeRenderer extends EntityRenderer<PitbikeEntity> {
+                                                           ^
+  /home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/client/PitbikeRenderer.java:32: error: cannot find symbol
+          matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(180.0f - MathHelper.lerp(tickDelta, entity.prevYaw, entity.getYaw())));
+                                                                                                              ^
+    symbol:   variable prevYaw
+    location: variable entity of type PitbikeEntity
+  /home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/client/PitbikeRenderer.java:43: error: cannot find symbol
+          super.render(entity, yaw, tickDelta, matrices, vertices, light);
+          ^
+    symbol:   variable super
+    location: class PitbikeRenderer
+  /home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/client/PitbikeModel.java:170: error: cannot find symbol
+          steering.pivotY = -bike.frontSpring() * 2.5f;
+                  ^
+    symbol:   variable pivotY
+    location: variable steering of type ModelPart
+  /home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/client/PitbikeModel.java:171: error: cannot find symbol
+          chain.pivotZ = (float) Math.sin(speed*1.2f) * 0.12f;
+               ^
+    symbol:   variable pivotZ
+    location: variable chain of type ModelPart
+  /home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/client/PitbikeModel.java:173: error: cannot find symbol
+          enginePart.pivotX = (float)Math.sin((bike.age + tickDelta)*2.1f)*0.04f;
+                    ^
+    symbol:   variable pivotX
+    location: variable enginePart of type ModelPart
+  /home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/item/BikeItem.java:16: error: isClient has private access in World
+          if (context.getWorld().isClient) return ActionResult.SUCCESS;
+                                ^
+  /home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/entity/PitbikeEntity.java:306: error: method does not override or implement a method from a supertype
+      @Override public boolean isCollidable() { return true; }
+      ^
+  /home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/entity/PitbikeEntity.java:308: error: method does not override or implement a method from a supertype
+      @Override protected void readCustomDataFromNbt(NbtCompound nbt) {
+      ^
+  /home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/entity/PitbikeEntity.java:318: error: method does not override or implement a method from a supertype
+      @Override protected void writeCustomDataToNbt(NbtCompound nbt) {
+      ^
+  /home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/client/PitbikeRenderer.java:26: error: method does not override or implement a method from a supertype
+      @Override public Identifier getTexture(PitbikeEntity entity) {
+      ^
+  /home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/client/PitbikeRenderer.java:29: error: method does not override or implement a method from a supertype
+      @Override public void render(PitbikeEntity entity, float yaw, float tickDelta,
+      ^
+  /home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/client/PitbikeModel.java:176: error: method does not override or implement a method from a supertype
+      @Override public void setAngles(PitbikeEntity entity, float limbAngle, float limbDistance,
+      ^
+  /home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/client/PitbikeModel.java:18: error: type argument PitbikeEntity is not within bounds of type-variable T
+  public final class PitbikeModel extends EntityModel<PitbikeEntity> {
+                                                      ^
+    where T is a type-variable:
+      T extends EntityRenderState declared in class EntityModel
+  /home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/entity/PitbikeEntity.java:99: error: cannot find symbol
+          if (getWorld().isClient) return;
+              ^
+    symbol:   method getWorld()
+    location: class PitbikeEntity
+  /home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/entity/PitbikeEntity.java:111: error: cannot find symbol
+          if (getWorld().isClient) return;
+              ^
+    symbol:   method getWorld()
+    location: class PitbikeEntity
+  /home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/entity/PitbikeEntity.java:165: error: cannot find symbol
+          Vec3d beforeMove = getPos();
+                             ^
+    symbol:   method getPos()
+    location: class PitbikeEntity
+  /home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/entity/PitbikeEntity.java:168: error: cannot find symbol
+          Vec3d actualMove = getPos().subtract(beforeMove);
+                             ^
+    symbol:   method getPos()
+    location: class PitbikeEntity
+  /home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/entity/PitbikeEntity.java:195: error: cannot find symbol
+          if (getWorld() instanceof ServerWorld server && isOnGround() && age % 5 == 0 &&
+              ^
+    symbol:   method getWorld()
+    location: class PitbikeEntity
+  /home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/entity/PitbikeEntity.java:223: error: cannot find symbol
+          if (!getWorld().isClient) getWorld().playSound(null, getX(), getY(), getZ(),
+               ^
+    symbol:   method getWorld()
+    location: class PitbikeEntity
+  /home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/entity/PitbikeEntity.java:223: error: cannot find symbol
+          if (!getWorld().isClient) getWorld().playSound(null, getX(), getY(), getZ(),
+                                    ^
+    symbol:   method getWorld()
+    location: class PitbikeEntity
+  /home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/entity/PitbikeEntity.java:233: error: cannot find symbol
+              VoxelShape collision = getWorld().getBlockState(pos).getCollisionShape(getWorld(), pos);
+                                     ^
+    symbol:   method getWorld()
+    location: class PitbikeEntity
+  /home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/entity/PitbikeEntity.java:233: error: cannot find symbol
+              VoxelShape collision = getWorld().getBlockState(pos).getCollisionShape(getWorld(), pos);
+                                                                                     ^
+    symbol:   method getWorld()
+    location: class PitbikeEntity
+  /home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/entity/PitbikeEntity.java:260: error: cannot find symbol
+              if (!getWorld().isClient && fuel() < 100f) {
+                   ^
+    symbol:   method getWorld()
+    location: class PitbikeEntity
+  /home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/entity/PitbikeEntity.java:265: error: cannot find symbol
+              return ActionResult.success(getWorld().isClient);
+                                          ^
+    symbol:   method getWorld()
+    location: class PitbikeEntity
+  /home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/entity/PitbikeEntity.java:268: error: cannot find symbol
+              if (!getWorld().isClient && condition() < 100) {
+                   ^
+    symbol:   method getWorld()
+    location: class PitbikeEntity
+  /home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/entity/PitbikeEntity.java:273: error: cannot find symbol
+              return ActionResult.success(getWorld().isClient);
+                                          ^
+    symbol:   method getWorld()
+    location: class PitbikeEntity
+  /home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/entity/PitbikeEntity.java:276: error: cannot find symbol
+              if (!getWorld().isClient && getFirstPassenger() == null && Math.abs(speed()) < 0.04) {
+                   ^
+    symbol:   method getWorld()
+    location: class PitbikeEntity
+  /home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/entity/PitbikeEntity.java:280: error: cannot find symbol
+              return ActionResult.success(getWorld().isClient);
+                                          ^
+    symbol:   method getWorld()
+    location: class PitbikeEntity
+  /home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/entity/PitbikeEntity.java:283: error: cannot find symbol
+              if (!getWorld().isClient) {
+                   ^
+    symbol:   method getWorld()
+    location: class PitbikeEntity
+  /home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/entity/PitbikeEntity.java:298: error: cannot find symbol
+              return ActionResult.success(getWorld().isClient);
+                                          ^
+    symbol:   method getWorld()
+    location: class PitbikeEntity
+  /home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/entity/PitbikeEntity.java:300: error: cannot find symbol
+          if (!getWorld().isClient && !player.hasVehicle()) {
+               ^
+    symbol:   method getWorld()
+    location: class PitbikeEntity
+  /home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/entity/PitbikeEntity.java:304: error: cannot find symbol
+          return ActionResult.success(getWorld().isClient);
+                                      ^
+    symbol:   method getWorld()
+    location: class PitbikeEntity
+  /home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/mixin/PlayerModelPoseMixin.java:61: error: cannot find symbol
+          rightSleeve.copyTransform(right);
+                     ^
+    symbol:   method copyTransform(ModelPart)
+    location: variable rightSleeve of type ModelPart
+  /home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/mixin/PlayerModelPoseMixin.java:62: error: cannot find symbol
+          leftSleeve.copyTransform(left);
+                    ^
+    symbol:   method copyTransform(ModelPart)
+    location: variable leftSleeve of type ModelPart
+  /home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/mixin/PlayerModelPoseMixin.java:63: error: cannot find symbol
+          rightPants.copyTransform(legR);
+                    ^
+    symbol:   method copyTransform(ModelPart)
+    location: variable rightPants of type ModelPart
+  /home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/mixin/PlayerModelPoseMixin.java:64: error: cannot find symbol
+          leftPants.copyTransform(legL);
+                   ^
+    symbol:   method copyTransform(ModelPart)
+    location: variable leftPants of type ModelPart
+  /home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/client/PitbikeRenderer.java:40: error: cannot find symbol
+          VertexConsumer consumer = vertices.getBuffer(RenderLayer.getEntityCutoutNoCull(getTexture(entity)));
+                                                                  ^
+    symbol:   method getEntityCutoutNoCull(Identifier)
+    location: class RenderLayer
+  /home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/client/PitbikeModel.java:41: error: cannot find symbol
+          return parent.addChild(name, ModelPartBuilder.create(), ModelTransform.pivot(x, y, z));
+                                                                                ^
+    symbol:   method pivot(float,float,float)
+    location: class ModelTransform
+  Note: /home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/client/PitbikeStuntClient.java uses or overrides a deprecated API.
+  /home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/client/PitbikeModel.java:178: error: render(MatrixStack,VertexConsumer,int,int,int) in PitbikeModel cannot override render(MatrixStack,VertexConsumer,int,int,int) in Model
+      @Override public void render(MatrixStack matrices, VertexConsumer vertices, int light, int overlay, int color) {
+                            ^
+    overridden method is final
+  /home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/entity/PitbikeEntity.java:38: error: PitbikeEntity is not abstract and does not override abstract method writeCustomData(WriteView) in Entity
+  public final class PitbikeEntity extends Entity {
+               ^
+  /home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/PitbikeStunt.java:26: error: incompatible types: String cannot be converted to RegistryKey<EntityType<?>>
+                      .dimensions(0.98f, 1.25f).maxTrackingRange(10).trackingTickInterval(1).build("pitbikestunt:pitbike"));
+                                                                                                   ^
+  /home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/entity/PitbikeEntity.java:309: error: incompatible types: Optional<Integer> cannot be converted to int
+          setVariant(nbt.getInt("BikeVariant"));
+                               ^
+  /home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/client/PitbikeStuntClient.java:29: error: incompatible types: String cannot be converted to Category
+                  InputUtil.Type.KEYSYM, key, CATEGORY));
+                                              ^
+  Note: Some messages have been simplified; recompile with -Xdiags:verbose to get full output
+  /home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/client/PitbikeRenderer.java:24: error: cannot find symbol
+          this.shadowRadius = 0.54f;
+              ^
+    symbol: variable shadowRadius
+  57 errors
 
 * Try:
-> Run with --info or --debug option to get more log output.
+> Check your code and dependencies to fix the compilation error(s)
 > Run with --scan to generate a Build Scan (powered by Develocity).
-> Get more help at https://help.gradle.org.
 
 * Exception is:
-org.gradle.api.plugins.UnknownPluginException: Plugin [id: 'fabric-loom', version: '1.14'] was not found in any of the following sources:
-
-- Gradle Core Plugins (not a core plugin. For more available plugins, please refer to https://docs.gradle.org/9.2.1/userguide/plugin_reference.html in the Gradle documentation.)
-- Included Builds (No included builds contain this plugin)
-- Plugin Repositories (could not resolve plugin artifact 'fabric-loom:fabric-loom.gradle.plugin:1.14')
-  Searched in the following repositories:
-    maven(https://maven.fabricmc.net/)
-    Gradle Central Plugin Repository
-    MavenRepo
-	at org.gradle.plugin.use.resolve.internal.PluginResolutionResult.getFound(PluginResolutionResult.java:112)
-	at org.gradle.plugin.use.internal.DefaultPluginRequestApplicator.resolvePluginRequest(DefaultPluginRequestApplicator.java:197)
-	at org.gradle.plugin.use.internal.DefaultPluginRequestApplicator.applyPlugins(DefaultPluginRequestApplicator.java:101)
-	at org.gradle.configuration.DefaultScriptPluginFactory$ScriptPluginImpl.apply(DefaultScriptPluginFactory.java:123)
-	at org.gradle.configuration.BuildOperationScriptPlugin$1.run(BuildOperationScriptPlugin.java:68)
-	at org.gradle.internal.operations.DefaultBuildOperationRunner$1.execute(DefaultBuildOperationRunner.java:29)
-	at org.gradle.internal.operations.DefaultBuildOperationRunner$1.execute(DefaultBuildOperationRunner.java:26)
-	at org.gradle.internal.operations.DefaultBuildOperationRunner$2.execute(DefaultBuildOperationRunner.java:66)
-	at org.gradle.internal.operations.DefaultBuildOperationRunner$2.execute(DefaultBuildOperationRunner.java:59)
-	at org.gradle.internal.operations.DefaultBuildOperationRunner.execute(DefaultBuildOperationRunner.java:166)
-	at org.gradle.internal.operations.DefaultBuildOperationRunner.execute(DefaultBuildOperationRunner.java:59)
-	at org.gradle.internal.operations.DefaultBuildOperationRunner.run(DefaultBuildOperationRunner.java:47)
-	at org.gradle.configuration.BuildOperationScriptPlugin.lambda$apply$0(BuildOperationScriptPlugin.java:65)
-	at org.gradle.internal.code.DefaultUserCodeApplicationContext.apply(DefaultUserCodeApplicationContext.java:44)
-	at org.gradle.configuration.BuildOperationScriptPlugin.apply(BuildOperationScriptPlugin.java:65)
-	at org.gradle.api.internal.project.DefaultProjectStateRegistry$ProjectStateImpl.lambda$applyToMutableState$1(DefaultProjectStateRegistry.java:446)
-	at org.gradle.api.internal.project.DefaultProjectStateRegistry$ProjectStateImpl.fromMutableState(DefaultProjectStateRegistry.java:464)
-	at org.gradle.api.internal.project.DefaultProjectStateRegistry$ProjectStateImpl.applyToMutableState(DefaultProjectStateRegistry.java:445)
-	at org.gradle.configuration.project.BuildScriptProcessor.execute(BuildScriptProcessor.java:46)
-	at org.gradle.configuration.project.BuildScriptProcessor.execute(BuildScriptProcessor.java:27)
-	at org.gradle.configuration.project.ConfigureActionsProjectEvaluator.evaluate(ConfigureActionsProjectEvaluator.java:35)
-	at org.gradle.configuration.project.LifecycleProjectEvaluator$EvaluateProject.lambda$run$0(LifecycleProjectEvaluator.java:109)
-	at org.gradle.api.internal.project.DefaultProjectStateRegistry$ProjectStateImpl.lambda$applyToMutableState$1(DefaultProjectStateRegistry.java:446)
-	at org.gradle.api.internal.project.DefaultProjectStateRegistry$ProjectStateImpl.lambda$fromMutableState$2(DefaultProjectStateRegistry.java:469)
-	at org.gradle.internal.work.DefaultWorkerLeaseService.lambda$withLocksAcquired$0(DefaultWorkerLeaseService.java:269)
-	at org.gradle.internal.work.ResourceLockStatistics$1.measure(ResourceLockStatistics.java:42)
-	at org.gradle.internal.work.DefaultWorkerLeaseService.withLocksAcquired(DefaultWorkerLeaseService.java:267)
-	at org.gradle.internal.work.DefaultWorkerLeaseService.lambda$withReplacedLocks$3(DefaultWorkerLeaseService.java:365)
-	at org.gradle.internal.work.DefaultWorkerLeaseService.withoutLocks(DefaultWorkerLeaseService.java:337)
-	at org.gradle.internal.work.DefaultWorkerLeaseService.withReplacedLocks(DefaultWorkerLeaseService.java:364)
-	at org.gradle.api.internal.project.DefaultProjectStateRegistry$ProjectStateImpl.fromMutableState(DefaultProjectStateRegistry.java:469)
-	at org.gradle.api.internal.project.DefaultProjectStateRegistry$ProjectStateImpl.applyToMutableState(DefaultProjectStateRegistry.java:445)
-	at org.gradle.configuration.project.LifecycleProjectEvaluator$EvaluateProject.run(LifecycleProjectEvaluator.java:100)
-	at org.gradle.internal.operations.DefaultBuildOperationRunner$1.execute(DefaultBuildOperationRunner.java:29)
-	at org.gradle.internal.operations.DefaultBuildOperationRunner$1.execute(DefaultBuildOperationRunner.java:26)
-	at org.gradle.internal.operations.DefaultBuildOperationRunner$2.execute(DefaultBuildOperationRunner.java:66)
-	at org.gradle.internal.operations.DefaultBuildOperationRunner$2.execute(DefaultBuildOperationRunner.java:59)
-	at org.gradle.internal.operations.DefaultBuildOperationRunner.execute(DefaultBuildOperationRunner.java:166)
-	at org.gradle.internal.operations.DefaultBuildOperationRunner.execute(DefaultBuildOperationRunner.java:59)
-	at org.gradle.internal.operations.DefaultBuildOperationRunner.run(DefaultBuildOperationRunner.java:47)
-	at org.gradle.configuration.project.LifecycleProjectEvaluator.evaluate(LifecycleProjectEvaluator.java:72)
-	at org.gradle.api.internal.project.DefaultProject.evaluateUnchecked(DefaultProject.java:840)
-	at org.gradle.api.internal.project.ProjectLifecycleController.lambda$ensureSelfConfigured$2(ProjectLifecycleController.java:88)
-	at org.gradle.internal.model.StateTransitionController.lambda$doTransition$14(StateTransitionController.java:255)
-	at org.gradle.internal.model.StateTransitionController.doTransition(StateTransitionController.java:266)
-	at org.gradle.internal.model.StateTransitionController.doTransition(StateTransitionController.java:254)
-	at org.gradle.internal.model.StateTransitionController.lambda$maybeTransitionIfNotCurrentlyTransitioning$10(StateTransitionController.java:199)
-	at org.gradle.internal.work.DefaultSynchronizer.withLock(DefaultSynchronizer.java:35)
-	at org.gradle.internal.model.StateTransitionController.maybeTransitionIfNotCurrentlyTransitioning(StateTransitionController.java:195)
-	at org.gradle.api.internal.project.ProjectLifecycleController.ensureSelfConfigured(ProjectLifecycleController.java:88)
-	at org.gradle.api.internal.project.DefaultProjectStateRegistry$ProjectStateImpl.ensureConfigured(DefaultProjectStateRegistry.java:411)
-	at org.gradle.execution.TaskPathProjectEvaluator.configure(TaskPathProjectEvaluator.java:70)
-	at org.gradle.execution.TaskPathProjectEvaluator.configureHierarchy(TaskPathProjectEvaluator.java:84)
-	at org.gradle.configuration.DefaultProjectsPreparer.prepareProjects(DefaultProjectsPreparer.java:50)
-	at org.gradle.configuration.BuildTreePreparingProjectsPreparer.prepareProjects(BuildTreePreparingProjectsPreparer.java:65)
-	at org.gradle.configuration.BuildOperationFiringProjectsPreparer$ConfigureBuild.run(BuildOperationFiringProjectsPreparer.java:52)
-	at org.gradle.internal.operations.DefaultBuildOperationRunner$1.execute(DefaultBuildOperationRunner.java:29)
-	at org.gradle.internal.operations.DefaultBuildOperationRunner$1.execute(DefaultBuildOperationRunner.java:26)
-	at org.gradle.internal.operations.DefaultBuildOperationRunner$2.execute(DefaultBuildOperationRunner.java:66)
-	at org.gradle.internal.operations.DefaultBuildOperationRunner$2.execute(DefaultBuildOperationRunner.java:59)
-	at org.gradle.internal.operations.DefaultBuildOperationRunner.execute(DefaultBuildOperationRunner.java:166)
-	at org.gradle.internal.operations.DefaultBuildOperationRunner.execute(DefaultBuildOperationRunner.java:59)
-	at org.gradle.internal.operations.DefaultBuildOperationRunner.run(DefaultBuildOperationRunner.java:47)
-	at org.gradle.configuration.BuildOperationFiringProjectsPreparer.prepareProjects(BuildOperationFiringProjectsPreparer.java:40)
-	at org.gradle.initialization.VintageBuildModelController.lambda$prepareProjects$2(VintageBuildModelController.java:83)
-	at org.gradle.internal.model.StateTransitionController.lambda$doTransition$14(StateTransitionController.java:255)
-	at org.gradle.internal.model.StateTransitionController.doTransition(StateTransitionController.java:266)
-	at org.gradle.internal.model.StateTransitionController.doTransition(StateTransitionController.java:254)
-	at org.gradle.internal.model.StateTransitionController.lambda$transitionIfNotPreviously$11(StateTransitionController.java:213)
-	at org.gradle.internal.work.DefaultSynchronizer.withLock(DefaultSynchronizer.java:35)
-	at org.gradle.internal.model.StateTransitionController.transitionIfNotPreviously(StateTransitionController.java:209)
-	at org.gradle.initialization.VintageBuildModelController.prepareProjects(VintageBuildModelController.java:83)
-	at org.gradle.initialization.VintageBuildModelController.prepareToScheduleTasks(VintageBuildModelController.java:70)
-	at org.gradle.internal.build.DefaultBuildLifecycleController.lambda$prepareToScheduleTasks$6(DefaultBuildLifecycleController.java:175)
-	at org.gradle.internal.model.StateTransitionController.lambda$doTransition$14(StateTransitionController.java:255)
-	at org.gradle.internal.model.StateTransitionController.doTransition(StateTransitionController.java:266)
-	at org.gradle.internal.model.StateTransitionController.doTransition(StateTransitionController.java:254)
-	at org.gradle.internal.model.StateTransitionController.lambda$maybeTransition$9(StateTransitionController.java:190)
-	at org.gradle.internal.work.DefaultSynchronizer.withLock(DefaultSynchronizer.java:35)
-	at org.gradle.internal.model.StateTransitionController.maybeTransition(StateTransitionController.java:186)
-	at org.gradle.internal.build.DefaultBuildLifecycleController.prepareToScheduleTasks(DefaultBuildLifecycleController.java:173)
-	at org.gradle.internal.buildtree.DefaultBuildTreeWorkPreparer.scheduleRequestedTasks(DefaultBuildTreeWorkPreparer.java:35)
-	at org.gradle.internal.cc.impl.barrier.BarrierAwareBuildTreeWorkPreparer.scheduleRequestedTasks$lambda$0(BarrierAwareBuildTreeWorkPreparer.kt:34)
-	at org.gradle.internal.cc.impl.barrier.VintageConfigurationTimeActionRunner.runConfigurationTimeAction(VintageConfigurationTimeActionRunner.kt:48)
-	at org.gradle.internal.cc.impl.barrier.BarrierAwareBuildTreeWorkPreparer.scheduleRequestedTasks(BarrierAwareBuildTreeWorkPreparer.kt:33)
-	at org.gradle.internal.cc.impl.VintageBuildTreeWorkController$scheduleAndRunRequestedTasks$1.apply(VintageBuildTreeWorkController.kt:36)
-	at org.gradle.internal.cc.impl.VintageBuildTreeWorkController$scheduleAndRunRequestedTasks$1.apply(VintageBuildTreeWorkController.kt:35)
-	at org.gradle.composite.internal.DefaultIncludedBuildTaskGraph.withNewWorkGraph(DefaultIncludedBuildTaskGraph.java:114)
-	at org.gradle.internal.cc.impl.VintageBuildTreeWorkController.scheduleAndRunRequestedTasks(VintageBuildTreeWorkController.kt:35)
-	at org.gradle.internal.buildtree.DefaultBuildTreeLifecycleController.lambda$scheduleAndRunTasks$1(DefaultBuildTreeLifecycleController.java:77)
-	at org.gradle.internal.buildtree.DefaultBuildTreeLifecycleController.lambda$runBuild$4(DefaultBuildTreeLifecycleController.java:120)
-	at org.gradle.internal.model.StateTransitionController.lambda$transition$6(StateTransitionController.java:169)
-	at org.gradle.internal.model.StateTransitionController.doTransition(StateTransitionController.java:266)
-	at org.gradle.internal.model.StateTransitionController.lambda$transition$7(StateTransitionController.java:169)
-	at org.gradle.internal.work.DefaultSynchronizer.withLock(DefaultSynchronizer.java:45)
-	at org.gradle.internal.model.StateTransitionController.transition(StateTransitionController.java:169)
-	at org.gradle.internal.buildtree.DefaultBuildTreeLifecycleController.runBuild(DefaultBuildTreeLifecycleController.java:117)
-	at org.gradle.internal.buildtree.DefaultBuildTreeLifecycleController.scheduleAndRunTasks(DefaultBuildTreeLifecycleController.java:77)
-	at org.gradle.internal.buildtree.DefaultBuildTreeLifecycleController.scheduleAndRunTasks(DefaultBuildTreeLifecycleController.java:72)
-	at org.gradle.tooling.internal.provider.ExecuteBuildActionRunner.run(ExecuteBuildActionRunner.java:31)
-	at org.gradle.launcher.exec.ChainingBuildActionRunner.run(ChainingBuildActionRunner.java:35)
-	at org.gradle.internal.buildtree.ProblemReportingBuildActionRunner.run(ProblemReportingBuildActionRunner.java:54)
-	at org.gradle.launcher.exec.BuildOutcomeReportingBuildActionRunner.run(BuildOutcomeReportingBuildActionRunner.java:83)
-	at org.gradle.tooling.internal.provider.FileSystemWatchingBuildActionRunner.run(FileSystemWatchingBuildActionRunner.java:135)
-	at org.gradle.launcher.exec.BuildCompletionNotifyingBuildActionRunner.run(BuildCompletionNotifyingBuildActionRunner.java:54)
-	at org.gradle.launcher.exec.RootBuildLifecycleBuildActionExecutor.lambda$execute$0(RootBuildLifecycleBuildActionExecutor.java:56)
-	at org.gradle.composite.internal.DefaultRootBuildState.run(DefaultRootBuildState.java:126)
-	at org.gradle.launcher.exec.RootBuildLifecycleBuildActionExecutor.execute(RootBuildLifecycleBuildActionExecutor.java:56)
-	at org.gradle.internal.buildtree.InitDeprecationLoggingActionExecutor.execute(InitDeprecationLoggingActionExecutor.java:62)
-	at org.gradle.internal.buildtree.InitProblems.execute(InitProblems.java:36)
-	at org.gradle.internal.buildtree.DefaultBuildTreeContext.execute(DefaultBuildTreeContext.java:40)
-	at org.gradle.launcher.exec.BuildTreeLifecycleBuildActionExecutor.lambda$execute$0(BuildTreeLifecycleBuildActionExecutor.java:71)
-	at org.gradle.internal.buildtree.BuildTreeState.run(BuildTreeState.java:60)
-	at org.gradle.launcher.exec.BuildTreeLifecycleBuildActionExecutor.execute(BuildTreeLifecycleBuildActionExecutor.java:71)
-	at org.gradle.launcher.exec.RunAsBuildOperationBuildActionExecutor$2.call(RunAsBuildOperationBuildActionExecutor.java:65)
-	at org.gradle.launcher.exec.RunAsBuildOperationBuildActionExecutor$2.call(RunAsBuildOperationBuildActionExecutor.java:61)
+org.gradle.api.tasks.TaskExecutionException: Execution failed for task ':compileJava'.
+	at org.gradle.api.internal.tasks.execution.ExecuteActionsTaskExecuter.lambda$executeIfValid$1(ExecuteActionsTaskExecuter.java:135)
+	at org.gradle.internal.Try$Failure.ifSuccessfulOrElse(Try.java:288)
+	at org.gradle.api.internal.tasks.execution.ExecuteActionsTaskExecuter.executeIfValid(ExecuteActionsTaskExecuter.java:133)
+	at org.gradle.api.internal.tasks.execution.ExecuteActionsTaskExecuter.execute(ExecuteActionsTaskExecuter.java:121)
+	at org.gradle.api.internal.tasks.execution.ProblemsTaskPathTrackingTaskExecuter.execute(ProblemsTaskPathTrackingTaskExecuter.java:41)
+	at org.gradle.api.internal.tasks.execution.FinalizePropertiesTaskExecuter.execute(FinalizePropertiesTaskExecuter.java:46)
+	at org.gradle.api.internal.tasks.execution.ResolveTaskExecutionModeExecuter.execute(ResolveTaskExecutionModeExecuter.java:51)
+	at org.gradle.api.internal.tasks.execution.SkipTaskWithNoActionsExecuter.execute(SkipTaskWithNoActionsExecuter.java:57)
+	at org.gradle.api.internal.tasks.execution.SkipOnlyIfTaskExecuter.execute(SkipOnlyIfTaskExecuter.java:74)
+	at org.gradle.api.internal.tasks.execution.CatchExceptionTaskExecuter.execute(CatchExceptionTaskExecuter.java:36)
+	at org.gradle.api.internal.tasks.execution.EventFiringTaskExecuter$1.executeTask(EventFiringTaskExecuter.java:77)
+	at org.gradle.api.internal.tasks.execution.EventFiringTaskExecuter$1.call(EventFiringTaskExecuter.java:55)
+	at org.gradle.api.internal.tasks.execution.EventFiringTaskExecuter$1.call(EventFiringTaskExecuter.java:52)
 	at org.gradle.internal.operations.DefaultBuildOperationRunner$CallableBuildOperationWorker.execute(DefaultBuildOperationRunner.java:209)
 	at org.gradle.internal.operations.DefaultBuildOperationRunner$CallableBuildOperationWorker.execute(DefaultBuildOperationRunner.java:204)
 	at org.gradle.internal.operations.DefaultBuildOperationRunner$2.execute(DefaultBuildOperationRunner.java:66)
@@ -166,53 +677,490 @@ org.gradle.api.plugins.UnknownPluginException: Plugin [id: 'fabric-loom', versio
 	at org.gradle.internal.operations.DefaultBuildOperationRunner.execute(DefaultBuildOperationRunner.java:166)
 	at org.gradle.internal.operations.DefaultBuildOperationRunner.execute(DefaultBuildOperationRunner.java:59)
 	at org.gradle.internal.operations.DefaultBuildOperationRunner.call(DefaultBuildOperationRunner.java:53)
-	at org.gradle.launcher.exec.RunAsBuildOperationBuildActionExecutor.execute(RunAsBuildOperationBuildActionExecutor.java:61)
-	at org.gradle.launcher.exec.RunAsWorkerThreadBuildActionExecutor.lambda$execute$0(RunAsWorkerThreadBuildActionExecutor.java:36)
+	at org.gradle.api.internal.tasks.execution.EventFiringTaskExecuter.execute(EventFiringTaskExecuter.java:52)
+	at org.gradle.execution.plan.DefaultNodeExecutor.executeLocalTaskNode(DefaultNodeExecutor.java:55)
+	at org.gradle.execution.plan.DefaultNodeExecutor.execute(DefaultNodeExecutor.java:34)
+	at org.gradle.execution.taskgraph.DefaultTaskExecutionGraph$InvokeNodeExecutorsAction.execute(DefaultTaskExecutionGraph.java:355)
+	at org.gradle.execution.taskgraph.DefaultTaskExecutionGraph$InvokeNodeExecutorsAction.execute(DefaultTaskExecutionGraph.java:343)
+	at org.gradle.execution.taskgraph.DefaultTaskExecutionGraph$BuildOperationAwareExecutionAction.lambda$execute$0(DefaultTaskExecutionGraph.java:339)
+	at org.gradle.internal.operations.CurrentBuildOperationRef.with(CurrentBuildOperationRef.java:84)
+	at org.gradle.execution.taskgraph.DefaultTaskExecutionGraph$BuildOperationAwareExecutionAction.execute(DefaultTaskExecutionGraph.java:339)
+	at org.gradle.execution.taskgraph.DefaultTaskExecutionGraph$BuildOperationAwareExecutionAction.execute(DefaultTaskExecutionGraph.java:328)
+	at org.gradle.execution.plan.DefaultPlanExecutor$ExecutorWorker.execute(DefaultPlanExecutor.java:459)
+	at org.gradle.execution.plan.DefaultPlanExecutor$ExecutorWorker.run(DefaultPlanExecutor.java:376)
+	at org.gradle.execution.plan.DefaultPlanExecutor.process(DefaultPlanExecutor.java:111)
+	at org.gradle.execution.taskgraph.DefaultTaskExecutionGraph.executeWithServices(DefaultTaskExecutionGraph.java:146)
+	at org.gradle.execution.taskgraph.DefaultTaskExecutionGraph.execute(DefaultTaskExecutionGraph.java:131)
+	at org.gradle.execution.SelectedTaskExecutionAction.execute(SelectedTaskExecutionAction.java:35)
+	at org.gradle.execution.BuildOperationFiringBuildWorkerExecutor$ExecuteTasks.call(BuildOperationFiringBuildWorkerExecutor.java:54)
+	at org.gradle.execution.BuildOperationFiringBuildWorkerExecutor$ExecuteTasks.call(BuildOperationFiringBuildWorkerExecutor.java:43)
+	at org.gradle.internal.operations.DefaultBuildOperationRunner$CallableBuildOperationWorker.execute(DefaultBuildOperationRunner.java:209)
+	at org.gradle.internal.operations.DefaultBuildOperationRunner$CallableBuildOperationWorker.execute(DefaultBuildOperationRunner.java:204)
+	at org.gradle.internal.operations.DefaultBuildOperationRunner$2.execute(DefaultBuildOperationRunner.java:66)
+	at org.gradle.internal.operations.DefaultBuildOperationRunner$2.execute(DefaultBuildOperationRunner.java:59)
+	at org.gradle.internal.operations.DefaultBuildOperationRunner.execute(DefaultBuildOperationRunner.java:166)
+	at org.gradle.internal.operations.DefaultBuildOperationRunner.execute(DefaultBuildOperationRunner.java:59)
+	at org.gradle.internal.operations.DefaultBuildOperationRunner.call(DefaultBuildOperationRunner.java:53)
+	at org.gradle.execution.BuildOperationFiringBuildWorkerExecutor.execute(BuildOperationFiringBuildWorkerExecutor.java:40)
+	at org.gradle.internal.build.DefaultBuildLifecycleController.lambda$executeTasks$10(DefaultBuildLifecycleController.java:313)
+	at org.gradle.internal.model.StateTransitionController.doTransition(StateTransitionController.java:266)
+	at org.gradle.internal.model.StateTransitionController.lambda$tryTransition$8(StateTransitionController.java:177)
+	at org.gradle.internal.work.DefaultSynchronizer.withLock(DefaultSynchronizer.java:45)
+	at org.gradle.internal.model.StateTransitionController.tryTransition(StateTransitionController.java:177)
+	at org.gradle.internal.build.DefaultBuildLifecycleController.executeTasks(DefaultBuildLifecycleController.java:304)
+	at org.gradle.internal.build.DefaultBuildWorkGraphController$DefaultBuildWorkGraph.runWork(DefaultBuildWorkGraphController.java:220)
 	at org.gradle.internal.work.DefaultWorkerLeaseService.lambda$withLocksAcquired$0(DefaultWorkerLeaseService.java:269)
 	at org.gradle.internal.work.ResourceLockStatistics$1.measure(ResourceLockStatistics.java:42)
 	at org.gradle.internal.work.DefaultWorkerLeaseService.withLocksAcquired(DefaultWorkerLeaseService.java:267)
 	at org.gradle.internal.work.DefaultWorkerLeaseService.withLocks(DefaultWorkerLeaseService.java:259)
 	at org.gradle.internal.work.DefaultWorkerLeaseService.runAsWorkerThread(DefaultWorkerLeaseService.java:127)
-	at org.gradle.launcher.exec.RunAsWorkerThreadBuildActionExecutor.execute(RunAsWorkerThreadBuildActionExecutor.java:36)
-	at org.gradle.tooling.internal.provider.continuous.ContinuousBuildActionExecutor.execute(ContinuousBuildActionExecutor.java:110)
-	at org.gradle.tooling.internal.provider.SubscribableBuildActionExecutor.execute(SubscribableBuildActionExecutor.java:64)
-	at org.gradle.internal.session.DefaultBuildSessionContext.execute(DefaultBuildSessionContext.java:46)
-	at org.gradle.internal.buildprocess.execution.BuildSessionLifecycleBuildActionExecutor$ActionImpl.apply(BuildSessionLifecycleBuildActionExecutor.java:92)
-	at org.gradle.internal.buildprocess.execution.BuildSessionLifecycleBuildActionExecutor$ActionImpl.apply(BuildSessionLifecycleBuildActionExecutor.java:80)
-	at org.gradle.internal.session.BuildSessionState.run(BuildSessionState.java:73)
-	at org.gradle.internal.buildprocess.execution.BuildSessionLifecycleBuildActionExecutor.execute(BuildSessionLifecycleBuildActionExecutor.java:62)
-	at org.gradle.internal.buildprocess.execution.BuildSessionLifecycleBuildActionExecutor.execute(BuildSessionLifecycleBuildActionExecutor.java:41)
-	at org.gradle.internal.buildprocess.execution.StartParamsValidatingActionExecutor.execute(StartParamsValidatingActionExecutor.java:57)
-	at org.gradle.internal.buildprocess.execution.StartParamsValidatingActionExecutor.execute(StartParamsValidatingActionExecutor.java:32)
-	at org.gradle.internal.buildprocess.execution.SessionFailureReportingActionExecutor.execute(SessionFailureReportingActionExecutor.java:51)
-	at org.gradle.internal.buildprocess.execution.SessionFailureReportingActionExecutor.execute(SessionFailureReportingActionExecutor.java:39)
-	at org.gradle.internal.buildprocess.execution.SetupLoggingActionExecutor.execute(SetupLoggingActionExecutor.java:47)
-	at org.gradle.internal.buildprocess.execution.SetupLoggingActionExecutor.execute(SetupLoggingActionExecutor.java:31)
-	at org.gradle.launcher.daemon.server.exec.ExecuteBuild.doBuild(ExecuteBuild.java:70)
-	at org.gradle.launcher.daemon.server.exec.BuildCommandOnly.execute(BuildCommandOnly.java:37)
-	at org.gradle.launcher.daemon.server.api.DaemonCommandExecution.proceed(DaemonCommandExecution.java:104)
-	at org.gradle.launcher.daemon.server.exec.WatchForDisconnection.execute(WatchForDisconnection.java:39)
-	at org.gradle.launcher.daemon.server.api.DaemonCommandExecution.proceed(DaemonCommandExecution.java:104)
-	at org.gradle.launcher.daemon.server.exec.ResetDeprecationLogger.execute(ResetDeprecationLogger.java:29)
-	at org.gradle.launcher.daemon.server.api.DaemonCommandExecution.proceed(DaemonCommandExecution.java:104)
-	at org.gradle.launcher.daemon.server.exec.RequestStopIfSingleUsedDaemon.execute(RequestStopIfSingleUsedDaemon.java:35)
-	at org.gradle.launcher.daemon.server.api.DaemonCommandExecution.proceed(DaemonCommandExecution.java:104)
-	at org.gradle.launcher.daemon.server.exec.ForwardClientInput.lambda$execute$0(ForwardClientInput.java:40)
-	at org.gradle.internal.daemon.clientinput.ClientInputForwarder.forwardInput(ClientInputForwarder.java:80)
-	at org.gradle.launcher.daemon.server.exec.ForwardClientInput.execute(ForwardClientInput.java:37)
-	at org.gradle.launcher.daemon.server.api.DaemonCommandExecution.proceed(DaemonCommandExecution.java:104)
-	at org.gradle.launcher.daemon.server.exec.LogAndCheckHealth.execute(LogAndCheckHealth.java:53)
-	at org.gradle.launcher.daemon.server.api.DaemonCommandExecution.proceed(DaemonCommandExecution.java:104)
-	at org.gradle.launcher.daemon.server.exec.LogToClient.doBuild(LogToClient.java:63)
-	at org.gradle.launcher.daemon.server.exec.BuildCommandOnly.execute(BuildCommandOnly.java:37)
-	at org.gradle.launcher.daemon.server.api.DaemonCommandExecution.proceed(DaemonCommandExecution.java:104)
-	at org.gradle.launcher.daemon.server.exec.EstablishBuildEnvironment.doBuild(EstablishBuildEnvironment.java:84)
-	at org.gradle.launcher.daemon.server.exec.BuildCommandOnly.execute(BuildCommandOnly.java:37)
-	at org.gradle.launcher.daemon.server.api.DaemonCommandExecution.proceed(DaemonCommandExecution.java:104)
-	at org.gradle.launcher.daemon.server.exec.StartBuildOrRespondWithBusy$1.run(StartBuildOrRespondWithBusy.java:52)
-	at org.gradle.launcher.daemon.server.DaemonStateCoordinator.lambda$runCommand$0(DaemonStateCoordinator.java:321)
+	at org.gradle.composite.internal.DefaultBuildController.doRun(DefaultBuildController.java:181)
+	at org.gradle.composite.internal.DefaultBuildController.access$000(DefaultBuildController.java:50)
+	at org.gradle.composite.internal.DefaultBuildController$BuildOpRunnable.lambda$run$0(DefaultBuildController.java:198)
+	at org.gradle.internal.operations.CurrentBuildOperationRef.with(CurrentBuildOperationRef.java:84)
+	at org.gradle.composite.internal.DefaultBuildController$BuildOpRunnable.run(DefaultBuildController.java:198)
 	at org.gradle.internal.concurrent.ExecutorPolicy$CatchAndRecordFailures.onExecute(ExecutorPolicy.java:64)
 	at org.gradle.internal.concurrent.AbstractManagedExecutor$1.run(AbstractManagedExecutor.java:47)
+Caused by: org.gradle.api.internal.tasks.compile.CompilationFailedException: Compilation failed; see the compiler output below.
+/home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/mixin/PlayerModelPoseMixin.java:27: error: type PlayerEntityModel does not take parameters
+        PlayerEntityModel<?> model = (PlayerEntityModel<?>) (Object) this;
+                         ^
+/home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/mixin/PlayerModelPoseMixin.java:27: error: type PlayerEntityModel does not take parameters
+        PlayerEntityModel<?> model = (PlayerEntityModel<?>) (Object) this;
+                                                       ^
+/home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/entity/PitbikeEntity.java:307: error: method isCollidable in class Entity cannot be applied to given types;
+    @Override public boolean collidesWith(Entity entity) { return !hasPassenger(entity) && entity.isCollidable(); }
+                                                                                                 ^
+  required: Entity
+  found:    no arguments
+  reason: actual and formal argument lists differ in length
+/home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/client/PitbikeStuntClient.java:34: error: method register in class EntityRendererRegistry cannot be applied to given types;
+        EntityRendererRegistry.register(PitbikeStunt.BIKE_ENTITY, PitbikeRenderer::new);
+                              ^
+  required: EntityType<? extends E>,EntityRendererFactory<E>
+  found:    EntityType<PitbikeEntity>,PitbikeRen[...]::new
+  reason: cannot infer type-variable(s) E
+    (argument mismatch; bad return type in method reference
+      PitbikeRenderer cannot be converted to EntityRenderer<E,?>)
+  where E is a type-variable:
+    E extends Entity declared in method <E>register(EntityType<? extends E>,EntityRendererFactory<E>)
+/home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/entity/PitbikeEntity.java:310: error: no suitable method found for floorMod(Optional<Integer>,int)
+        dataTracker.set(COLOR, Math.floorMod(nbt.getInt("Paint"), 6));
+                                   ^
+    method Math.floorMod(int,int) is not applicable
+      (argument mismatch; Optional<Integer> cannot be converted to int)
+    method Math.floorMod(long,int) is not applicable
+      (argument mismatch; Optional<Integer> cannot be converted to long)
+    method Math.floorMod(long,long) is not applicable
+      (argument mismatch; Optional<Integer> cannot be converted to long)
+/home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/entity/PitbikeEntity.java:311: error: no suitable method found for clamp(Optional<Float>,int,int)
+        dataTracker.set(FUEL, MathHelper.clamp(nbt.getFloat("Fuel"), 0, 100));
+                                        ^
+    method MathHelper.clamp(int,int,int) is not applicable
+      (argument mismatch; Optional<Float> cannot be converted to int)
+    method MathHelper.clamp(long,long,long) is not applicable
+      (argument mismatch; Optional<Float> cannot be converted to long)
+    method MathHelper.clamp(float,float,float) is not applicable
+      (argument mismatch; Optional<Float> cannot be converted to float)
+    method MathHelper.clamp(double,double,double) is not applicable
+      (argument mismatch; Optional<Float> cannot be converted to double)
+/home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/entity/PitbikeEntity.java:312: error: no suitable method found for clamp(Optional<Integer>,int,int)
+        dataTracker.set(GEAR, MathHelper.clamp(nbt.getInt("Gear"), 1, 4));
+                                        ^
+    method MathHelper.clamp(int,int,int) is not applicable
+      (argument mismatch; Optional<Integer> cannot be converted to int)
+    method MathHelper.clamp(long,long,long) is not applicable
+      (argument mismatch; Optional<Integer> cannot be converted to long)
+    method MathHelper.clamp(float,float,float) is not applicable
+      (argument mismatch; Optional<Integer> cannot be converted to float)
+    method MathHelper.clamp(double,double,double) is not applicable
+      (argument mismatch; Optional<Integer> cannot be converted to double)
+/home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/entity/PitbikeEntity.java:313: error: no suitable method found for set(TrackedData<Boolean>,Optional<Boolean>)
+        dataTracker.set(ENGINE, nbt.getBoolean("EngineOn"));
+                   ^
+    method DataTracker.<T#1>set(TrackedData<T#1>,T#1) is not applicable
+      (inference variable T#1 has incompatible bounds
+        equality constraints: Boolean
+        lower bounds: Optional<Boolean>)
+    method DataTracker.<T#2>set(TrackedData<T#2>,T#2,boolean) is not applicable
+      (cannot infer type-variable(s) T#2
+        (actual and formal argument lists differ in length))
+  where T#1,T#2 are type-variables:
+    T#1 extends Object declared in method <T#1>set(TrackedData<T#1>,T#1)
+    T#2 extends Object declared in method <T#2>set(TrackedData<T#2>,T#2,boolean)
+/home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/entity/PitbikeEntity.java:314: error: no suitable method found for max(int,Optional<Integer>)
+        dataTracker.set(SCORE, Math.max(0, nbt.getInt("Score")));
+                                   ^
+    method Math.max(int,int) is not applicable
+      (argument mismatch; Optional<Integer> cannot be converted to int)
+    method Math.max(long,long) is not applicable
+      (argument mismatch; Optional<Integer> cannot be converted to long)
+    method Math.max(float,float) is not applicable
+      (argument mismatch; Optional<Integer> cannot be converted to float)
+    method Math.max(double,double) is not applicable
+      (argument mismatch; Optional<Integer> cannot be converted to double)
+/home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/entity/PitbikeEntity.java:315: error: no suitable method found for clamp(Optional<Integer>,int,int)
+        dataTracker.set(CONDITION, nbt.contains("Condition") ? MathHelper.clamp(nbt.getInt("Condition"), 0, 100) : 100);
+                                                                         ^
+    method MathHelper.clamp(int,int,int) is not applicable
+      (argument mismatch; Optional<Integer> cannot be converted to int)
+    method MathHelper.clamp(long,long,long) is not applicable
+      (argument mismatch; Optional<Integer> cannot be converted to long)
+    method MathHelper.clamp(float,float,float) is not applicable
+      (argument mismatch; Optional<Integer> cannot be converted to float)
+    method MathHelper.clamp(double,double,double) is not applicable
+      (argument mismatch; Optional<Integer> cannot be converted to double)
+/home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/entity/PitbikeEntity.java:316: error: no suitable method found for set(TrackedData<Boolean>,Optional<Boolean>)
+        dataTracker.set(KICKSTAND, nbt.getBoolean("Kickstand"));
+                   ^
+    method DataTracker.<T#1>set(TrackedData<T#1>,T#1) is not applicable
+      (inference variable T#1 has incompatible bounds
+        equality constraints: Boolean
+        lower bounds: Optional<Boolean>)
+    method DataTracker.<T#2>set(TrackedData<T#2>,T#2,boolean) is not applicable
+      (cannot infer type-variable(s) T#2
+        (actual and formal argument lists differ in length))
+  where T#1,T#2 are type-variables:
+    T#1 extends Object declared in method <T#1>set(TrackedData<T#1>,T#1)
+    T#2 extends Object declared in method <T#2>set(TrackedData<T#2>,T#2,boolean)
+/home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/client/PitbikeModel.java:28: error: no suitable constructor found for EntityModel(no arguments)
+    public PitbikeModel(ModelPart root) {
+                                        ^
+    constructor EntityModel.EntityModel(ModelPart) is not applicable
+      (actual and formal argument lists differ in length)
+    constructor EntityModel.EntityModel(ModelPart,Function<Identifier,RenderLayer>) is not applicable
+      (actual and formal argument lists differ in length)
+Note: Recompile with -Xlint:deprecation for details.
+/home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/client/PitbikeRenderer.java:16: error: wrong number of type arguments; required 2
+public final class PitbikeRenderer extends EntityRenderer<PitbikeEntity> {
+                                                         ^
+/home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/client/PitbikeRenderer.java:32: error: cannot find symbol
+        matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(180.0f - MathHelper.lerp(tickDelta, entity.prevYaw, entity.getYaw())));
+                                                                                                            ^
+  symbol:   variable prevYaw
+  location: variable entity of type PitbikeEntity
+/home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/client/PitbikeRenderer.java:43: error: cannot find symbol
+        super.render(entity, yaw, tickDelta, matrices, vertices, light);
+        ^
+  symbol:   variable super
+  location: class PitbikeRenderer
+/home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/client/PitbikeModel.java:170: error: cannot find symbol
+        steering.pivotY = -bike.frontSpring() * 2.5f;
+                ^
+  symbol:   variable pivotY
+  location: variable steering of type ModelPart
+/home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/client/PitbikeModel.java:171: error: cannot find symbol
+        chain.pivotZ = (float) Math.sin(speed*1.2f) * 0.12f;
+             ^
+  symbol:   variable pivotZ
+  location: variable chain of type ModelPart
+/home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/client/PitbikeModel.java:173: error: cannot find symbol
+        enginePart.pivotX = (float)Math.sin((bike.age + tickDelta)*2.1f)*0.04f;
+                  ^
+  symbol:   variable pivotX
+  location: variable enginePart of type ModelPart
+/home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/item/BikeItem.java:16: error: isClient has private access in World
+        if (context.getWorld().isClient) return ActionResult.SUCCESS;
+                              ^
+/home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/entity/PitbikeEntity.java:306: error: method does not override or implement a method from a supertype
+    @Override public boolean isCollidable() { return true; }
+    ^
+/home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/entity/PitbikeEntity.java:308: error: method does not override or implement a method from a supertype
+    @Override protected void readCustomDataFromNbt(NbtCompound nbt) {
+    ^
+/home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/entity/PitbikeEntity.java:318: error: method does not override or implement a method from a supertype
+    @Override protected void writeCustomDataToNbt(NbtCompound nbt) {
+    ^
+/home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/client/PitbikeRenderer.java:26: error: method does not override or implement a method from a supertype
+    @Override public Identifier getTexture(PitbikeEntity entity) {
+    ^
+/home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/client/PitbikeRenderer.java:29: error: method does not override or implement a method from a supertype
+    @Override public void render(PitbikeEntity entity, float yaw, float tickDelta,
+    ^
+/home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/client/PitbikeModel.java:176: error: method does not override or implement a method from a supertype
+    @Override public void setAngles(PitbikeEntity entity, float limbAngle, float limbDistance,
+    ^
+/home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/client/PitbikeModel.java:18: error: type argument PitbikeEntity is not within bounds of type-variable T
+public final class PitbikeModel extends EntityModel<PitbikeEntity> {
+                                                    ^
+  where T is a type-variable:
+    T extends EntityRenderState declared in class EntityModel
+/home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/entity/PitbikeEntity.java:99: error: cannot find symbol
+        if (getWorld().isClient) return;
+            ^
+  symbol:   method getWorld()
+  location: class PitbikeEntity
+/home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/entity/PitbikeEntity.java:111: error: cannot find symbol
+        if (getWorld().isClient) return;
+            ^
+  symbol:   method getWorld()
+  location: class PitbikeEntity
+/home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/entity/PitbikeEntity.java:165: error: cannot find symbol
+        Vec3d beforeMove = getPos();
+                           ^
+  symbol:   method getPos()
+  location: class PitbikeEntity
+/home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/entity/PitbikeEntity.java:168: error: cannot find symbol
+        Vec3d actualMove = getPos().subtract(beforeMove);
+                           ^
+  symbol:   method getPos()
+  location: class PitbikeEntity
+/home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/entity/PitbikeEntity.java:195: error: cannot find symbol
+        if (getWorld() instanceof ServerWorld server && isOnGround() && age % 5 == 0 &&
+            ^
+  symbol:   method getWorld()
+  location: class PitbikeEntity
+/home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/entity/PitbikeEntity.java:223: error: cannot find symbol
+        if (!getWorld().isClient) getWorld().playSound(null, getX(), getY(), getZ(),
+             ^
+  symbol:   method getWorld()
+  location: class PitbikeEntity
+/home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/entity/PitbikeEntity.java:223: error: cannot find symbol
+        if (!getWorld().isClient) getWorld().playSound(null, getX(), getY(), getZ(),
+                                  ^
+  symbol:   method getWorld()
+  location: class PitbikeEntity
+/home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/entity/PitbikeEntity.java:233: error: cannot find symbol
+            VoxelShape collision = getWorld().getBlockState(pos).getCollisionShape(getWorld(), pos);
+                                   ^
+  symbol:   method getWorld()
+  location: class PitbikeEntity
+/home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/entity/PitbikeEntity.java:233: error: cannot find symbol
+            VoxelShape collision = getWorld().getBlockState(pos).getCollisionShape(getWorld(), pos);
+                                                                                   ^
+  symbol:   method getWorld()
+  location: class PitbikeEntity
+/home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/entity/PitbikeEntity.java:260: error: cannot find symbol
+            if (!getWorld().isClient && fuel() < 100f) {
+                 ^
+  symbol:   method getWorld()
+  location: class PitbikeEntity
+/home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/entity/PitbikeEntity.java:265: error: cannot find symbol
+            return ActionResult.success(getWorld().isClient);
+                                        ^
+  symbol:   method getWorld()
+  location: class PitbikeEntity
+/home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/entity/PitbikeEntity.java:268: error: cannot find symbol
+            if (!getWorld().isClient && condition() < 100) {
+                 ^
+  symbol:   method getWorld()
+  location: class PitbikeEntity
+/home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/entity/PitbikeEntity.java:273: error: cannot find symbol
+            return ActionResult.success(getWorld().isClient);
+                                        ^
+  symbol:   method getWorld()
+  location: class PitbikeEntity
+/home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/entity/PitbikeEntity.java:276: error: cannot find symbol
+            if (!getWorld().isClient && getFirstPassenger() == null && Math.abs(speed()) < 0.04) {
+                 ^
+  symbol:   method getWorld()
+  location: class PitbikeEntity
+/home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/entity/PitbikeEntity.java:280: error: cannot find symbol
+            return ActionResult.success(getWorld().isClient);
+                                        ^
+  symbol:   method getWorld()
+  location: class PitbikeEntity
+/home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/entity/PitbikeEntity.java:283: error: cannot find symbol
+            if (!getWorld().isClient) {
+                 ^
+  symbol:   method getWorld()
+  location: class PitbikeEntity
+/home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/entity/PitbikeEntity.java:298: error: cannot find symbol
+            return ActionResult.success(getWorld().isClient);
+                                        ^
+  symbol:   method getWorld()
+  location: class PitbikeEntity
+/home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/entity/PitbikeEntity.java:300: error: cannot find symbol
+        if (!getWorld().isClient && !player.hasVehicle()) {
+             ^
+  symbol:   method getWorld()
+  location: class PitbikeEntity
+/home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/entity/PitbikeEntity.java:304: error: cannot find symbol
+        return ActionResult.success(getWorld().isClient);
+                                    ^
+  symbol:   method getWorld()
+  location: class PitbikeEntity
+/home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/mixin/PlayerModelPoseMixin.java:61: error: cannot find symbol
+        rightSleeve.copyTransform(right);
+                   ^
+  symbol:   method copyTransform(ModelPart)
+  location: variable rightSleeve of type ModelPart
+/home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/mixin/PlayerModelPoseMixin.java:62: error: cannot find symbol
+        leftSleeve.copyTransform(left);
+                  ^
+  symbol:   method copyTransform(ModelPart)
+  location: variable leftSleeve of type ModelPart
+/home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/mixin/PlayerModelPoseMixin.java:63: error: cannot find symbol
+        rightPants.copyTransform(legR);
+                  ^
+  symbol:   method copyTransform(ModelPart)
+  location: variable rightPants of type ModelPart
+/home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/mixin/PlayerModelPoseMixin.java:64: error: cannot find symbol
+        leftPants.copyTransform(legL);
+                 ^
+  symbol:   method copyTransform(ModelPart)
+  location: variable leftPants of type ModelPart
+/home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/client/PitbikeRenderer.java:40: error: cannot find symbol
+        VertexConsumer consumer = vertices.getBuffer(RenderLayer.getEntityCutoutNoCull(getTexture(entity)));
+                                                                ^
+  symbol:   method getEntityCutoutNoCull(Identifier)
+  location: class RenderLayer
+/home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/client/PitbikeModel.java:41: error: cannot find symbol
+        return parent.addChild(name, ModelPartBuilder.create(), ModelTransform.pivot(x, y, z));
+                                                                              ^
+  symbol:   method pivot(float,float,float)
+  location: class ModelTransform
+Note: /home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/client/PitbikeStuntClient.java uses or overrides a deprecated API.
+/home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/client/PitbikeModel.java:178: error: render(MatrixStack,VertexConsumer,int,int,int) in PitbikeModel cannot override render(MatrixStack,VertexConsumer,int,int,int) in Model
+    @Override public void render(MatrixStack matrices, VertexConsumer vertices, int light, int overlay, int color) {
+                          ^
+  overridden method is final
+/home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/entity/PitbikeEntity.java:38: error: PitbikeEntity is not abstract and does not override abstract method writeCustomData(WriteView) in Entity
+public final class PitbikeEntity extends Entity {
+             ^
+/home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/PitbikeStunt.java:26: error: incompatible types: String cannot be converted to RegistryKey<EntityType<?>>
+                    .dimensions(0.98f, 1.25f).maxTrackingRange(10).trackingTickInterval(1).build("pitbikestunt:pitbike"));
+                                                                                                 ^
+/home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/entity/PitbikeEntity.java:309: error: incompatible types: Optional<Integer> cannot be converted to int
+        setVariant(nbt.getInt("BikeVariant"));
+                             ^
+/home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/client/PitbikeStuntClient.java:29: error: incompatible types: String cannot be converted to Category
+                InputUtil.Type.KEYSYM, key, CATEGORY));
+                                            ^
+Note: Some messages have been simplified; recompile with -Xdiags:verbose to get full output
+/home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/client/PitbikeRenderer.java:24: error: cannot find symbol
+        this.shadowRadius = 0.54f;
+            ^
+  symbol: variable shadowRadius
+57 errors
+	at org.gradle.api.internal.tasks.compile.JdkJavaCompiler.execute(JdkJavaCompiler.java:89)
+	at org.gradle.api.internal.tasks.compile.JdkJavaCompiler.execute(JdkJavaCompiler.java:50)
+	at org.gradle.api.internal.tasks.compile.NormalizingJavaCompiler.delegateAndHandleErrors(NormalizingJavaCompiler.java:98)
+	at org.gradle.api.internal.tasks.compile.NormalizingJavaCompiler.execute(NormalizingJavaCompiler.java:52)
+	at org.gradle.api.internal.tasks.compile.NormalizingJavaCompiler.execute(NormalizingJavaCompiler.java:38)
+	at org.gradle.api.internal.tasks.compile.AnnotationProcessorDiscoveringCompiler.execute(AnnotationProcessorDiscoveringCompiler.java:52)
+	at org.gradle.api.internal.tasks.compile.AnnotationProcessorDiscoveringCompiler.execute(AnnotationProcessorDiscoveringCompiler.java:38)
+	at org.gradle.api.internal.tasks.compile.ModuleApplicationNameWritingCompiler.execute(ModuleApplicationNameWritingCompiler.java:46)
+	at org.gradle.api.internal.tasks.compile.ModuleApplicationNameWritingCompiler.execute(ModuleApplicationNameWritingCompiler.java:36)
+	at org.gradle.jvm.toolchain.internal.DefaultToolchainJavaCompiler.execute(DefaultToolchainJavaCompiler.java:57)
+	at org.gradle.api.tasks.compile.JavaCompile.lambda$createToolchainCompiler$3(JavaCompile.java:206)
+	at org.gradle.api.internal.tasks.compile.CleaningJavaCompiler.execute(CleaningJavaCompiler.java:53)
+	at org.gradle.api.internal.tasks.compile.incremental.IncrementalCompilerFactory.lambda$createRebuildAllCompiler$0(IncrementalCompilerFactory.java:55)
+	at org.gradle.api.internal.tasks.compile.incremental.SelectiveCompiler.execute(SelectiveCompiler.java:70)
+	at org.gradle.api.internal.tasks.compile.incremental.SelectiveCompiler.execute(SelectiveCompiler.java:44)
+	at org.gradle.api.internal.tasks.compile.incremental.IncrementalResultStoringCompiler.execute(IncrementalResultStoringCompiler.java:66)
+	at org.gradle.api.internal.tasks.compile.incremental.IncrementalResultStoringCompiler.execute(IncrementalResultStoringCompiler.java:52)
+	at org.gradle.api.internal.tasks.compile.CompileJavaBuildOperationReportingCompiler$1.call(CompileJavaBuildOperationReportingCompiler.java:64)
+	at org.gradle.api.internal.tasks.compile.CompileJavaBuildOperationReportingCompiler$1.call(CompileJavaBuildOperationReportingCompiler.java:48)
+	at org.gradle.internal.operations.DefaultBuildOperationRunner$CallableBuildOperationWorker.execute(DefaultBuildOperationRunner.java:209)
+	at org.gradle.internal.operations.DefaultBuildOperationRunner$CallableBuildOperationWorker.execute(DefaultBuildOperationRunner.java:204)
+	at org.gradle.internal.operations.DefaultBuildOperationRunner$2.execute(DefaultBuildOperationRunner.java:66)
+	at org.gradle.internal.operations.DefaultBuildOperationRunner$2.execute(DefaultBuildOperationRunner.java:59)
+	at org.gradle.internal.operations.DefaultBuildOperationRunner.execute(DefaultBuildOperationRunner.java:166)
+	at org.gradle.internal.operations.DefaultBuildOperationRunner.execute(DefaultBuildOperationRunner.java:59)
+	at org.gradle.internal.operations.DefaultBuildOperationRunner.call(DefaultBuildOperationRunner.java:53)
+	at org.gradle.api.internal.tasks.compile.CompileJavaBuildOperationReportingCompiler.execute(CompileJavaBuildOperationReportingCompiler.java:48)
+	at org.gradle.api.tasks.compile.JavaCompile.performCompilation(JavaCompile.java:224)
+	at org.gradle.api.tasks.compile.JavaCompile.performIncrementalCompilation(JavaCompile.java:165)
+	at org.gradle.api.tasks.compile.JavaCompile.compile(JavaCompile.java:150)
+	at org.gradle.internal.reflect.JavaMethod.invoke(JavaMethod.java:125)
+	at org.gradle.api.internal.project.taskfactory.IncrementalTaskAction.doExecute(IncrementalTaskAction.java:45)
+	at org.gradle.api.internal.project.taskfactory.StandardTaskAction.execute(StandardTaskAction.java:51)
+	at org.gradle.api.internal.project.taskfactory.IncrementalTaskAction.execute(IncrementalTaskAction.java:26)
+	at org.gradle.api.internal.project.taskfactory.StandardTaskAction.execute(StandardTaskAction.java:29)
+	at org.gradle.api.internal.tasks.execution.TaskExecution$3.run(TaskExecution.java:252)
+	at org.gradle.internal.operations.DefaultBuildOperationRunner$1.execute(DefaultBuildOperationRunner.java:29)
+	at org.gradle.internal.operations.DefaultBuildOperationRunner$1.execute(DefaultBuildOperationRunner.java:26)
+	at org.gradle.internal.operations.DefaultBuildOperationRunner$2.execute(DefaultBuildOperationRunner.java:66)
+	at org.gradle.internal.operations.DefaultBuildOperationRunner$2.execute(DefaultBuildOperationRunner.java:59)
+	at org.gradle.internal.operations.DefaultBuildOperationRunner.execute(DefaultBuildOperationRunner.java:166)
+	at org.gradle.internal.operations.DefaultBuildOperationRunner.execute(DefaultBuildOperationRunner.java:59)
+	at org.gradle.internal.operations.DefaultBuildOperationRunner.run(DefaultBuildOperationRunner.java:47)
+	at org.gradle.api.internal.tasks.execution.TaskExecution.executeAction(TaskExecution.java:237)
+	at org.gradle.api.internal.tasks.execution.TaskExecution.executeActions(TaskExecution.java:220)
+	at org.gradle.api.internal.tasks.execution.TaskExecution.executeWithPreviousOutputFiles(TaskExecution.java:203)
+	at org.gradle.api.internal.tasks.execution.TaskExecution.execute(TaskExecution.java:170)
+	at org.gradle.internal.execution.steps.ExecuteStep.executeInternal(ExecuteStep.java:105)
+	at org.gradle.internal.execution.steps.ExecuteStep.access$000(ExecuteStep.java:44)
+	at org.gradle.internal.execution.steps.ExecuteStep$1.call(ExecuteStep.java:59)
+	at org.gradle.internal.execution.steps.ExecuteStep$1.call(ExecuteStep.java:56)
+	at org.gradle.internal.operations.DefaultBuildOperationRunner$CallableBuildOperationWorker.execute(DefaultBuildOperationRunner.java:209)
+	at org.gradle.internal.operations.DefaultBuildOperationRunner$CallableBuildOperationWorker.execute(DefaultBuildOperationRunner.java:204)
+	at org.gradle.internal.operations.DefaultBuildOperationRunner$2.execute(DefaultBuildOperationRunner.java:66)
+	at org.gradle.internal.operations.DefaultBuildOperationRunner$2.execute(DefaultBuildOperationRunner.java:59)
+	at org.gradle.internal.operations.DefaultBuildOperationRunner.execute(DefaultBuildOperationRunner.java:166)
+	at org.gradle.internal.operations.DefaultBuildOperationRunner.execute(DefaultBuildOperationRunner.java:59)
+	at org.gradle.internal.operations.DefaultBuildOperationRunner.call(DefaultBuildOperationRunner.java:53)
+	at org.gradle.internal.execution.steps.ExecuteStep.execute(ExecuteStep.java:56)
+	at org.gradle.internal.execution.steps.ExecuteStep.execute(ExecuteStep.java:44)
+	at org.gradle.internal.execution.steps.CancelExecutionStep.execute(CancelExecutionStep.java:42)
+	at org.gradle.internal.execution.steps.TimeoutStep.executeWithoutTimeout(TimeoutStep.java:75)
+	at org.gradle.internal.execution.steps.TimeoutStep.execute(TimeoutStep.java:55)
+	at org.gradle.internal.execution.steps.PreCreateOutputParentsStep.execute(PreCreateOutputParentsStep.java:50)
+	at org.gradle.internal.execution.steps.PreCreateOutputParentsStep.execute(PreCreateOutputParentsStep.java:28)
+	at org.gradle.internal.execution.steps.RemovePreviousOutputsStep.execute(RemovePreviousOutputsStep.java:68)
+	at org.gradle.internal.execution.steps.RemovePreviousOutputsStep.execute(RemovePreviousOutputsStep.java:38)
+	at org.gradle.internal.execution.steps.BroadcastChangingOutputsStep.execute(BroadcastChangingOutputsStep.java:61)
+	at org.gradle.internal.execution.steps.BroadcastChangingOutputsStep.execute(BroadcastChangingOutputsStep.java:26)
+	at org.gradle.internal.execution.steps.CaptureOutputsAfterExecutionStep.execute(CaptureOutputsAfterExecutionStep.java:69)
+	at org.gradle.internal.execution.steps.CaptureOutputsAfterExecutionStep.execute(CaptureOutputsAfterExecutionStep.java:46)
+	at org.gradle.internal.execution.steps.ResolveInputChangesStep.execute(ResolveInputChangesStep.java:39)
+	at org.gradle.internal.execution.steps.ResolveInputChangesStep.execute(ResolveInputChangesStep.java:28)
+	at org.gradle.internal.execution.steps.BuildCacheStep.executeWithoutCache(BuildCacheStep.java:189)
+	at org.gradle.internal.execution.steps.BuildCacheStep.lambda$execute$1(BuildCacheStep.java:75)
+	at org.gradle.internal.Either$Right.fold(Either.java:176)
+	at org.gradle.internal.execution.caching.CachingState.fold(CachingState.java:62)
+	at org.gradle.internal.execution.steps.BuildCacheStep.execute(BuildCacheStep.java:73)
+	at org.gradle.internal.execution.steps.BuildCacheStep.execute(BuildCacheStep.java:48)
+	at org.gradle.internal.execution.steps.StoreExecutionStateStep.execute(StoreExecutionStateStep.java:46)
+	at org.gradle.internal.execution.steps.StoreExecutionStateStep.execute(StoreExecutionStateStep.java:35)
+	at org.gradle.internal.execution.steps.SkipUpToDateStep.executeBecause(SkipUpToDateStep.java:75)
+	at org.gradle.internal.execution.steps.SkipUpToDateStep.lambda$execute$2(SkipUpToDateStep.java:53)
+	at org.gradle.internal.execution.steps.SkipUpToDateStep.execute(SkipUpToDateStep.java:53)
+	at org.gradle.internal.execution.steps.SkipUpToDateStep.execute(SkipUpToDateStep.java:35)
+	at org.gradle.internal.execution.steps.legacy.MarkSnapshottingInputsFinishedStep.execute(MarkSnapshottingInputsFinishedStep.java:37)
+	at org.gradle.internal.execution.steps.legacy.MarkSnapshottingInputsFinishedStep.execute(MarkSnapshottingInputsFinishedStep.java:27)
+	at org.gradle.internal.execution.steps.ResolveIncrementalCachingStateStep.executeDelegate(ResolveIncrementalCachingStateStep.java:49)
+	at org.gradle.internal.execution.steps.ResolveIncrementalCachingStateStep.executeDelegate(ResolveIncrementalCachingStateStep.java:27)
+	at org.gradle.internal.execution.steps.AbstractResolveCachingStateStep.execute(AbstractResolveCachingStateStep.java:71)
+	at org.gradle.internal.execution.steps.AbstractResolveCachingStateStep.execute(AbstractResolveCachingStateStep.java:39)
+	at org.gradle.internal.execution.steps.ResolveChangesStep.execute(ResolveChangesStep.java:64)
+	at org.gradle.internal.execution.steps.ResolveChangesStep.execute(ResolveChangesStep.java:35)
+	at org.gradle.internal.execution.steps.ValidateStep.execute(ValidateStep.java:62)
+	at org.gradle.internal.execution.steps.ValidateStep.execute(ValidateStep.java:40)
+	at org.gradle.internal.execution.steps.AbstractCaptureStateBeforeExecutionStep.execute(AbstractCaptureStateBeforeExecutionStep.java:76)
+	at org.gradle.internal.execution.steps.AbstractCaptureStateBeforeExecutionStep.execute(AbstractCaptureStateBeforeExecutionStep.java:45)
+	at org.gradle.internal.execution.steps.AbstractSkipEmptyWorkStep.executeWithNonEmptySources(AbstractSkipEmptyWorkStep.java:136)
+	at org.gradle.internal.execution.steps.AbstractSkipEmptyWorkStep.execute(AbstractSkipEmptyWorkStep.java:66)
+	at org.gradle.internal.execution.steps.AbstractSkipEmptyWorkStep.execute(AbstractSkipEmptyWorkStep.java:38)
+	at org.gradle.internal.execution.steps.legacy.MarkSnapshottingInputsStartedStep.execute(MarkSnapshottingInputsStartedStep.java:38)
+	at org.gradle.internal.execution.steps.LoadPreviousExecutionStateStep.execute(LoadPreviousExecutionStateStep.java:36)
+	at org.gradle.internal.execution.steps.LoadPreviousExecutionStateStep.execute(LoadPreviousExecutionStateStep.java:23)
+	at org.gradle.internal.execution.steps.HandleStaleOutputsStep.execute(HandleStaleOutputsStep.java:75)
+	at org.gradle.internal.execution.steps.HandleStaleOutputsStep.execute(HandleStaleOutputsStep.java:41)
+	at org.gradle.internal.execution.steps.AssignMutableWorkspaceStep.lambda$execute$0(AssignMutableWorkspaceStep.java:35)
+	at org.gradle.api.internal.tasks.execution.TaskExecution$4.withWorkspace(TaskExecution.java:297)
+	at org.gradle.internal.execution.steps.AssignMutableWorkspaceStep.execute(AssignMutableWorkspaceStep.java:31)
+	at org.gradle.internal.execution.steps.AssignMutableWorkspaceStep.execute(AssignMutableWorkspaceStep.java:22)
+	at org.gradle.internal.execution.steps.ChoosePipelineStep.execute(ChoosePipelineStep.java:40)
+	at org.gradle.internal.execution.steps.ChoosePipelineStep.execute(ChoosePipelineStep.java:23)
+	at org.gradle.internal.execution.steps.ExecuteWorkBuildOperationFiringStep.lambda$execute$2(ExecuteWorkBuildOperationFiringStep.java:67)
+	at org.gradle.internal.execution.steps.ExecuteWorkBuildOperationFiringStep.execute(ExecuteWorkBuildOperationFiringStep.java:67)
+	at org.gradle.internal.execution.steps.ExecuteWorkBuildOperationFiringStep.execute(ExecuteWorkBuildOperationFiringStep.java:39)
+	at org.gradle.internal.execution.steps.IdentityCacheStep.execute(IdentityCacheStep.java:46)
+	at org.gradle.internal.execution.steps.IdentityCacheStep.execute(IdentityCacheStep.java:34)
+	at org.gradle.internal.execution.steps.IdentifyStep.execute(IdentifyStep.java:44)
+	at org.gradle.internal.execution.steps.IdentifyStep.execute(IdentifyStep.java:31)
+	at org.gradle.internal.execution.impl.DefaultExecutionEngine$1.execute(DefaultExecutionEngine.java:64)
+	at org.gradle.api.internal.tasks.execution.ExecuteActionsTaskExecuter.executeIfValid(ExecuteActionsTaskExecuter.java:132)
+	... 61 more
 
 
-BUILD FAILED in 8s
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 10.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/9.2.1/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD FAILED in 56s
+1 actionable task: 1 executed
