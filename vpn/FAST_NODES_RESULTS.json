@@ -1,132 +1,122 @@
 {
   "verified_from": "GitHub-hosted runner (not the user's network)",
-  "checked_utc": "2026-10-22T14:25:49Z",
+  "checked_utc": "2026-10-22T18:52:39Z",
   "countries": {
     "US": {
-      "tested": 115,
-      "country_verified": 59,
-      "other_country": 6,
+      "tested": 125,
+      "country_verified": 66,
+      "other_country": 5,
       "selected": [
         {
-          "server": "104.36.69.180:443",
-          "http_ms": 71,
+          "server": "147.182.212.232:56565",
+          "http_ms": 57,
           "exit": "US"
         },
         {
-          "server": "195.123.240.65:443",
-          "http_ms": 85,
-          "exit": "US"
-        },
-        {
-          "server": "154.40.55.185:443",
-          "http_ms": 115,
+          "server": "195.123.235.183:443",
+          "http_ms": 88,
           "exit": "US"
         },
         {
           "server": "104.18.37.127:443",
-          "http_ms": 117,
+          "http_ms": 89,
           "exit": "US"
         },
         {
-          "server": "104.21.91.244:443",
-          "http_ms": 118,
+          "server": "195.123.235.177:443",
+          "http_ms": 90,
           "exit": "US"
         },
         {
-          "server": "162.159.250.29:443",
-          "http_ms": 135,
+          "server": "159.89.87.21:28190",
+          "http_ms": 91,
+          "exit": "US"
+        },
+        {
+          "server": "188.114.96.6:443",
+          "http_ms": 92,
+          "exit": "US"
+        },
+        {
+          "server": "104.18.20.69:443",
+          "http_ms": 104,
           "exit": "US"
         },
         {
           "server": "www.speedtest.net:443",
-          "http_ms": 145,
+          "http_ms": 135,
           "exit": "US"
         },
         {
-          "server": "15.204.97.216:23576",
-          "http_ms": 153,
+          "server": "195.211.98.43:443",
+          "http_ms": 152,
           "exit": "US"
         },
         {
-          "server": "15.204.97.197:23576",
-          "http_ms": 153,
+          "server": "169.40.42.35:443",
+          "http_ms": 176,
           "exit": "US"
         },
         {
-          "server": "51.81.203.63:443",
-          "http_ms": 160,
+          "server": "147.45.60.160:8444",
+          "http_ms": 181,
           "exit": "US"
         },
         {
-          "server": "188.114.97.6:443",
-          "http_ms": 195,
+          "server": "208.84.100.209:2112",
+          "http_ms": 181,
           "exit": "US"
         },
         {
-          "server": "44.248.233.99:443",
-          "http_ms": 207,
+          "server": "69.42.222.165:443",
+          "http_ms": 185,
           "exit": "US"
         },
         {
-          "server": "tk1.high-speed-test-56424.me:443",
-          "http_ms": 216,
-          "exit": "US"
-        },
-        {
-          "server": "176.122.189.94:8443",
-          "http_ms": 228,
-          "exit": "US"
-        },
-        {
-          "server": "us7-2.998998.best:443",
-          "http_ms": 238,
+          "server": "167.17.69.171:443",
+          "http_ms": 199,
           "exit": "US"
         },
         {
           "server": "5.34.178.120:443",
-          "http_ms": 240,
+          "http_ms": 205,
+          "exit": "US"
+        },
+        {
+          "server": "169.40.42.89:443",
+          "http_ms": 205,
           "exit": "US"
         }
       ]
     },
     "RU": {
-      "tested": 176,
-      "country_verified": 7,
-      "other_country": 24,
+      "tested": 182,
+      "country_verified": 5,
+      "other_country": 27,
       "selected": [
         {
           "server": "45.128.78.178:443",
-          "http_ms": 597,
-          "exit": "RU"
-        },
-        {
-          "server": "xsru1.ddnsfree.com:443",
-          "http_ms": 788,
-          "exit": "RU"
-        },
-        {
-          "server": "139.100.226.187:8443",
-          "http_ms": 1026,
+          "http_ms": 396,
           "exit": "RU"
         },
         {
           "server": "46.254.17.88:30065",
-          "http_ms": 1463,
+          "http_ms": 1015,
           "exit": "RU"
         },
         {
-          "server": "45.12.75.242:26424",
-          "http_ms": 2240,
+          "server": "0f5857g.msk1.h1clayd.click:443",
+          "http_ms": 1124,
           "exit": "RU"
         },
         {
           "server": "95.182.120.128:443",
-          "http_ms": 2512,
+          "http_ms": 1405,
           "exit": "RU"
         },
         {
           "server": "9f6635t.msk1.h1clayd.click:443",
-          "http_ms": 3858,
+          "http_ms": 3432,
           "exit": "RU"
         }
       ]
