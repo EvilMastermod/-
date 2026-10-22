@@ -51,12 +51,11 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          if [ ! -f pitbike-stunt/donor-kit.zip ]; then
-            echo "::error::Upload donor-kit.zip to pitbike-stunt/donor-kit.zip for exact model import"
-            exit 1
-          fi
+          # Reconstruct the exact user-owned binary model from six GitHub text assets.
+          cat pitbike-stunt/donor-parts/part-*.b64 | base64 --decode > /tmp/pitbike-donor-kit.zip
+          echo '487d87e201736c99018439fd16c6d8c7c7527e36529b6fa7c44bdc7c2a7059be  /tmp/pitbike-donor-kit.zip' | sha256sum --check
           mkdir -p donor-unpacked
-          unzip -q pitbike-stunt/donor-kit.zip -d donor-unpacked
+          unzip -q /tmp/pitbike-donor-kit.zip -d donor-unpacked
           python3 donor-unpacked/scripts/install_exact_donor.py
       - name: Build Minecraft mod
         id: compilation
