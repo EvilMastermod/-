@@ -61,6 +61,9 @@ jobs:
       - name: Correct turning and motor sound, animate original bike
         shell: bash
         run: python3 pitbike-stunt/fix-audio-and-steering-12111.py
+      - name: Repair engine audio, steering, suspension and rider pose
+        shell: bash
+        run: python3 pitbike-stunt/fix-riding-audio-12111.py
       - name: Build Minecraft mod
         id: compilation
         continue-on-error: true
