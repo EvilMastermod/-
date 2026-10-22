@@ -36,7 +36,10 @@ jobs:
       - name: Migrate source to Minecraft 1.21.11
         run: python3 pitbike-stunt/migrate-to-1.21.11.py
       - name: Port riding and rendering to Minecraft 1.21.11
-        run: python3 pitbike-stunt/port-gameplay-12111.py
+        shell: bash
+        run: |
+          set -o pipefail
+          python3 pitbike-stunt/port-gameplay-12111.py 2>&1 | tee port-12111.log
       - name: Build Minecraft mod
         id: compilation
         continue-on-error: true
@@ -51,6 +54,7 @@ jobs:
         run: |
           mkdir -p build-output/1.21.11
           if [ -f pitbike-build.log ]; then cp pitbike-build.log build-output/1.21.11/build-log.txt; fi
+          if [ -f port-12111.log ]; then cp port-12111.log build-output/1.21.11/port-log.txt; fi
           if [ -f project/build/libs/pitbike-stunt-1.21.11-0.3.0-alpha.jar ]; then
             cp project/build/libs/pitbike-stunt-1.21.11-0.3.0-alpha.jar build-output/1.21.11/PitbikeStunt-1.21.11.jar
             echo 'SUCCESS' > build-output/1.21.11/status.txt
