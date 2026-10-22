@@ -1,0 +1,4 @@
+/tmp/pitbike-donor-kit.zip: OK
+Installed original donor pitbike: 3322 exact quads, donor UVs, and six color textures.
+Preserved independent suspension groups, steering and wheel rotation.
+Speed display shown to driver and when targeting bike; steering sign validated.
