@@ -1,27 +1,32 @@
-# Happ VPN 2.0 — one free subscription
+# Happ VPN 2.0 — бесплатная подписка
 
-Subscription URL:
+Одна ссылка для Happ:
 
 `https://raw.githubusercontent.com/EvilMastermod/-/main/vpn/Happ_US_RU_Auto.json`
 
-Happ → Add subscription → paste this link → Update.
+Как импортировать: Happ → + → Добавить подписку → вставить URL → Обновить.
 
-## Which profile to use?
+## Что выбирать
 
-- **🇺🇸 США — АВТОВЫБОР — СТАБИЛЬНЫЙ**: USA exit for everyday browsing.
-- **🇷🇺 РОССИЯ — АВТОВЫБОР — СТАБИЛЬНЫЙ**: Russian exit for everyday browsing.
-- **🇩🇪 Germany, 🇳🇱 Netherlands, 🇫🇮 Finland**: region-specific automatic groups when live verification yields available nodes.
-- **🎮 Gaming profiles**: smaller pools of low-HTTP-RTT nodes for comparison; test game ping locally.
-- **СЕРВЕР N**: select a specific endpoint in Happ; useful if automatic selection is slow from your own network.
+- **🇺🇸 США — АВТОВЫБОР — СТАБИЛЬНЫЙ** — американский IP, обычное использование.
+- **🇷🇺 РОССИЯ — АВТОВЫБОР — СТАБИЛЬНЫЙ** — российский IP.
+- **🇩🇪 Германия, 🇳🇱 Нидерланды, 🇫🇮 Финляндия** — отдельные страны (если проверка нашла рабочие узлы).
+- **🎮 ИГРЫ — МИНИМАЛЬНЫЙ ПИНГ** — небольшой пул серверов, прошедших проверку по HTTP-задержке; это не гарантия пинга в конкретной игре.
+- **СЕРВЕР 1/2/3...** — ручной выбор, если автовыбор на твоём интернете медленный.
 
-## How auto-selection works
+Если меню Happ предлагает *ядро*, выбирай **Xray**.
 
-Xray `leastPing` uses periodically measured HTTP latency and excludes nodes reported unavailable. Its `fallbackTag` is a backup target, but cannot guarantee an active connection survives a switch.
+## Как устроено
 
-The GitHub Actions updater periodically samples multiple public providers and uses Xray+HTTP to verify *exit country*, availability, and two-sample HTTP response delay. It rejects incompatible REALITY/WebSocket configurations before publishing. The workflow validates every generated Xray config, and posts aggregate per-country counts to `vpn/FAST_NODES_RESULTS.json`.
+- Раз в 6 часов GitHub Actions ищет публичные VLESS-серверы.
+- Каждый кандидат проверяется через Xray и два HTTP-запроса: действительная страна выходного IP, приблизительная задержка и доля успешных запросов.
+- Конфиги с неподдерживаемым REALITY + WebSocket отклоняются.
+- В обычном режиме сначала отбираются более стабильные узлы, затем Xray регулярно проверяет их и выбирает узел по задержке. При отказе имеется резервный адрес.
+- Игровой режим выбирает среди небольшой группы с наименьшим измеренным временем ответа.
+- Перед публикацией обновлений все созданные JSON-профили должны успешно пройти проверку синтаксиса ядром Xray.
 
-**Important:** Github server latency is *not your ping*, and is not the ping to an individual game server. Happ tests should be used from your device.
+**Ограничения:** HTTP-задержка с компьютера GitHub не совпадает с твоим пингом. Внезапное переключение может разорвать текущую игру или загрузку; работа VPN не гарантируется, если все публичные серверы отключатся.
 
-**Free public nodes can fail, disappear, change country or be malicious.** Do not use them for banking, private credentials, or sensitive accounts. There are no owned private VPS endpoints in this project.
+**Безопасность:** публичные бесплатные узлы принадлежат другим людям; не используй их для банков и чувствительных аккаунтов. Это не приватные собственные серверы и не обход подписки платного сервиса.
 
-This project does not bypass paid providers or make expired VLESS accounts valid. It gathers public third-party nodes.
+Отчёт: [FAST_NODES_RESULTS.json](./FAST_NODES_RESULTS.json).
