@@ -15,7 +15,7 @@ def replace_one(src, needle, replacement):
 
 entity_file=root/"entity/PitbikeEntity.java"
 s=entity_file.read_text(encoding="utf-8")
-s=replace_one(s,"new Vec3d(0, 0.52, -0.35)", "new Vec3d(0, 1.09, -0.35)")
+s=replace_one(s,"new Vec3d(0, 0.52, -0.35)", "new Vec3d(0, 1.09, -0.22)")
 # Network updates arrive on the client less regularly than renders. Move to a
 # short extrapolated target; suppress micro-snaps while still catching up after lag.
 begin=s.index("    private int smoothTicks;")
@@ -152,17 +152,17 @@ public abstract class PlayerModelPoseMixin {
         if (player==null || !(player.getVehicle() instanceof PitbikeEntity bike)) return;
 
         // Repeated player walking/swimming/emote animations cannot move the torso.
-        model.body.pitch=.12f;
+        model.body.pitch=.09f;
         model.body.yaw=0f;
         model.body.roll=0f;
         model.body.originX=0f;
         model.body.originZ=0f;
         model.rightArm.pitch=-1.19f;
         model.leftArm.pitch=-1.19f;
-        model.rightArm.yaw=-.27f;
-        model.leftArm.yaw=.27f;
-        model.rightArm.roll=-.10f;
-        model.leftArm.roll=.10f;
+        model.rightArm.yaw=-.34f;
+        model.leftArm.yaw=.34f;
+        model.rightArm.roll=-.12f;
+        model.leftArm.roll=.12f;
         model.rightLeg.pitch=-.90f;
         model.leftLeg.pitch=-.90f;
         model.rightLeg.yaw=0f;
@@ -210,4 +210,4 @@ data=json.loads(config.read_text(encoding="utf-8"))
 assert "PlayerModelPoseMixin" in data["client"]
 data["client"]=["PlayerModelPoseMixin","PlayerRidingStateMixin"]
 config.write_text(json.dumps(data,indent=2)+"\n",encoding="utf-8")
-print("Added fixed third-person torso, head-only look, aligned hands and clean skin overlays")
+print("Adjusted seat 0.13 blocks forward, straight torso, arms 0.07 radians wider")
