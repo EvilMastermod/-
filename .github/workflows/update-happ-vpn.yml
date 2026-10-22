@@ -1,29 +1,44 @@
-name: Refresh Happ VPN nodes
+name: Refresh Happ VPN fast USA and Russia
 
 on:
   schedule:
-    - cron: "17 */3 * * *"
+    - cron: "17 */6 * * *"
   workflow_dispatch:
+  push:
+    paths:
+      - "vpn/refresh_fast.py"
+      - ".github/workflows/update-happ-vpn.yml"
 
 permissions:
   contents: write
 
+concurrency:
+  group: happ-vpn-refresh
+  cancel-in-progress: false
+
 jobs:
   update:
     runs-on: ubuntu-latest
+    timeout-minutes: 12
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - name: Refresh country server pools
-        run: python vpn/update_happ.py
-      - name: Commit updated subscription
+      - name: Download Xray
         run: |
-          if ! git diff --quiet -- vpn/Happ_US_RU_Auto.json; then
-            git config user.name "github-actions[bot]"
-            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-            git add vpn/Happ_US_RU_Auto.json
-            git commit -m "Refresh Happ US and RU public proxies"
-            git push
+          curl -fLsS --retry 2 -o /tmp/xray.zip https://github.com/XTLS/Xray-core/releases/latest/download/Xray-linux-64.zip
+          unzip -o -j /tmp/xray.zip xray -d .
+          chmod +x xray
+      - name: Verify country and select fastest working nodes
+        run: python vpn/refresh_fast.py
+      - name: Publish Happ subscription
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add vpn/Happ_US_RU_Auto.json vpn/FAST_NODES_RESULTS.json
+          if ! git diff --cached --quiet; then
+            git commit -m "Refresh low-latency Happ US and RU verified servers"
+            git pull --rebase origin main
+            git push origin HEAD:main
           fi
