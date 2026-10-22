@@ -2,12 +2,6 @@ name: Verify RU exit nodes for Happ
 
 on:
   workflow_dispatch:
-  push:
-    paths:
-      - "vpn/check_ru.py"
-      - ".github/workflows/verify-ru-vpn.yml"
-  schedule:
-    - cron: "23 */6 * * *"
 
 permissions:
   contents: write
