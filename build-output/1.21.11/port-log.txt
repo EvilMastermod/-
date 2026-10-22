@@ -1,0 +1,5 @@
+Patched PitbikeStunt.java
+Patched entity/PitbikeEntity.java
+Patched item/BikeItem.java
+Patched client/PitbikeStuntClient.java
+Ported basic ride, terrain simulation, 3D bike renderer and animation to 1.21.11

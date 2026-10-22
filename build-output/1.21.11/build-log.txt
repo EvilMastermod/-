@@ -17,320 +17,54 @@ Fabric Loom: 1.14.10
 Cannot remap modifiers because it does not exists in any of the targets [] or their parents.
 
 > Task :compileJava
-/home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/client/PitbikeRenderer.java:16: error: wrong number of type arguments; required 2
-public final class PitbikeRenderer extends EntityRenderer<PitbikeEntity> {
-                                                         ^
-/home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/PitbikeStunt.java:26: error: incompatible types: String cannot be converted to RegistryKey<EntityType<?>>
-                    .dimensions(0.98f, 1.25f).maxTrackingRange(10).trackingTickInterval(1).build("pitbikestunt:pitbike"));
-                                                                                                 ^
-/home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/entity/PitbikeEntity.java:38: error: PitbikeEntity is not abstract and does not override abstract method writeCustomData(WriteView) in Entity
+/home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/entity/PitbikeEntity.java:39: error: PitbikeEntity is not abstract and does not override abstract method damage(ServerWorld,DamageSource,float) in Entity
 public final class PitbikeEntity extends Entity {
              ^
-/home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/entity/PitbikeEntity.java:99: error: cannot find symbol
-        if (getWorld().isClient) return;
-            ^
-  symbol:   method getWorld()
-  location: class PitbikeEntity
-/home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/entity/PitbikeEntity.java:111: error: cannot find symbol
-        if (getWorld().isClient) return;
-            ^
-  symbol:   method getWorld()
-  location: class PitbikeEntity
-/home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/entity/PitbikeEntity.java:165: error: cannot find symbol
-        Vec3d beforeMove = getPos();
-                           ^
-  symbol:   method getPos()
-  location: class PitbikeEntity
-/home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/entity/PitbikeEntity.java:168: error: cannot find symbol
-        Vec3d actualMove = getPos().subtract(beforeMove);
-                           ^
-  symbol:   method getPos()
-  location: class PitbikeEntity
-/home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/entity/PitbikeEntity.java:195: error: cannot find symbol
-        if (getWorld() instanceof ServerWorld server && isOnGround() && age % 5 == 0 &&
-            ^
-  symbol:   method getWorld()
-  location: class PitbikeEntity
-/home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/entity/PitbikeEntity.java:223: error: cannot find symbol
-        if (!getWorld().isClient) getWorld().playSound(null, getX(), getY(), getZ(),
-             ^
-  symbol:   method getWorld()
-  location: class PitbikeEntity
-/home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/entity/PitbikeEntity.java:223: error: cannot find symbol
-        if (!getWorld().isClient) getWorld().playSound(null, getX(), getY(), getZ(),
-                                  ^
-  symbol:   method getWorld()
-  location: class PitbikeEntity
-/home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/entity/PitbikeEntity.java:233: error: cannot find symbol
-            VoxelShape collision = getWorld().getBlockState(pos).getCollisionShape(getWorld(), pos);
-                                   ^
-  symbol:   method getWorld()
-  location: class PitbikeEntity
-/home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/entity/PitbikeEntity.java:233: error: cannot find symbol
-            VoxelShape collision = getWorld().getBlockState(pos).getCollisionShape(getWorld(), pos);
-                                                                                   ^
-  symbol:   method getWorld()
-  location: class PitbikeEntity
-/home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/entity/PitbikeEntity.java:260: error: cannot find symbol
-            if (!getWorld().isClient && fuel() < 100f) {
-                 ^
-  symbol:   method getWorld()
-  location: class PitbikeEntity
-/home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/entity/PitbikeEntity.java:265: error: cannot find symbol
-            return ActionResult.success(getWorld().isClient);
-                                        ^
-  symbol:   method getWorld()
-  location: class PitbikeEntity
-/home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/entity/PitbikeEntity.java:268: error: cannot find symbol
-            if (!getWorld().isClient && condition() < 100) {
-                 ^
-  symbol:   method getWorld()
-  location: class PitbikeEntity
-/home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/entity/PitbikeEntity.java:273: error: cannot find symbol
-            return ActionResult.success(getWorld().isClient);
-                                        ^
-  symbol:   method getWorld()
-  location: class PitbikeEntity
-/home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/entity/PitbikeEntity.java:276: error: cannot find symbol
-            if (!getWorld().isClient && getFirstPassenger() == null && Math.abs(speed()) < 0.04) {
-                 ^
-  symbol:   method getWorld()
-  location: class PitbikeEntity
-/home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/entity/PitbikeEntity.java:280: error: cannot find symbol
-            return ActionResult.success(getWorld().isClient);
-                                        ^
-  symbol:   method getWorld()
-  location: class PitbikeEntity
-/home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/entity/PitbikeEntity.java:283: error: cannot find symbol
-            if (!getWorld().isClient) {
-                 ^
-  symbol:   method getWorld()
-  location: class PitbikeEntity
-/home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/entity/PitbikeEntity.java:298: error: cannot find symbol
-            return ActionResult.success(getWorld().isClient);
-                                        ^
-  symbol:   method getWorld()
-  location: class PitbikeEntity
-/home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/entity/PitbikeEntity.java:300: error: cannot find symbol
-        if (!getWorld().isClient && !player.hasVehicle()) {
-             ^
-  symbol:   method getWorld()
-  location: class PitbikeEntity
-/home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/entity/PitbikeEntity.java:304: error: cannot find symbol
-        return ActionResult.success(getWorld().isClient);
-                                    ^
-  symbol:   method getWorld()
-  location: class PitbikeEntity
-/home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/entity/PitbikeEntity.java:306: error: method does not override or implement a method from a supertype
-    @Override public boolean isCollidable() { return true; }
-    ^
-/home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/entity/PitbikeEntity.java:307: error: method isCollidable in class Entity cannot be applied to given types;
-    @Override public boolean collidesWith(Entity entity) { return !hasPassenger(entity) && entity.isCollidable(); }
-                                                                                                 ^
-  required: Entity
-  found:    no arguments
-  reason: actual and formal argument lists differ in length
-/home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/entity/PitbikeEntity.java:308: error: method does not override or implement a method from a supertype
-    @Override protected void readCustomDataFromNbt(NbtCompound nbt) {
-    ^
-/home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/entity/PitbikeEntity.java:309: error: incompatible types: Optional<Integer> cannot be converted to int
-        setVariant(nbt.getInt("BikeVariant"));
-                             ^
-/home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/entity/PitbikeEntity.java:310: error: no suitable method found for floorMod(Optional<Integer>,int)
-        dataTracker.set(COLOR, Math.floorMod(nbt.getInt("Paint"), 6));
-                                   ^
-    method Math.floorMod(int,int) is not applicable
-      (argument mismatch; Optional<Integer> cannot be converted to int)
-    method Math.floorMod(long,int) is not applicable
-      (argument mismatch; Optional<Integer> cannot be converted to long)
-    method Math.floorMod(long,long) is not applicable
-      (argument mismatch; Optional<Integer> cannot be converted to long)
-/home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/entity/PitbikeEntity.java:311: error: no suitable method found for clamp(Optional<Float>,int,int)
-        dataTracker.set(FUEL, MathHelper.clamp(nbt.getFloat("Fuel"), 0, 100));
-                                        ^
-    method MathHelper.clamp(int,int,int) is not applicable
-      (argument mismatch; Optional<Float> cannot be converted to int)
-    method MathHelper.clamp(long,long,long) is not applicable
-      (argument mismatch; Optional<Float> cannot be converted to long)
-    method MathHelper.clamp(float,float,float) is not applicable
-      (argument mismatch; Optional<Float> cannot be converted to float)
-    method MathHelper.clamp(double,double,double) is not applicable
-      (argument mismatch; Optional<Float> cannot be converted to double)
-/home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/entity/PitbikeEntity.java:312: error: no suitable method found for clamp(Optional<Integer>,int,int)
-        dataTracker.set(GEAR, MathHelper.clamp(nbt.getInt("Gear"), 1, 4));
-                                        ^
-    method MathHelper.clamp(int,int,int) is not applicable
-      (argument mismatch; Optional<Integer> cannot be converted to int)
-    method MathHelper.clamp(long,long,long) is not applicable
-      (argument mismatch; Optional<Integer> cannot be converted to long)
-    method MathHelper.clamp(float,float,float) is not applicable
-      (argument mismatch; Optional<Integer> cannot be converted to float)
-    method MathHelper.clamp(double,double,double) is not applicable
-      (argument mismatch; Optional<Integer> cannot be converted to double)
-/home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/entity/PitbikeEntity.java:313: error: no suitable method found for set(TrackedData<Boolean>,Optional<Boolean>)
-        dataTracker.set(ENGINE, nbt.getBoolean("EngineOn"));
-                   ^
-    method DataTracker.<T#1>set(TrackedData<T#1>,T#1) is not applicable
-      (inference variable T#1 has incompatible bounds
-        equality constraints: Boolean
-        lower bounds: Optional<Boolean>)
-    method DataTracker.<T#2>set(TrackedData<T#2>,T#2,boolean) is not applicable
-      (cannot infer type-variable(s) T#2
-        (actual and formal argument lists differ in length))
-  where T#1,T#2 are type-variables:
-    T#1 extends Object declared in method <T#1>set(TrackedData<T#1>,T#1)
-    T#2 extends Object declared in method <T#2>set(TrackedData<T#2>,T#2,boolean)
-/home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/entity/PitbikeEntity.java:314: error: no suitable method found for max(int,Optional<Integer>)
-        dataTracker.set(SCORE, Math.max(0, nbt.getInt("Score")));
-                                   ^
-    method Math.max(int,int) is not applicable
-      (argument mismatch; Optional<Integer> cannot be converted to int)
-    method Math.max(long,long) is not applicable
-      (argument mismatch; Optional<Integer> cannot be converted to long)
-    method Math.max(float,float) is not applicable
-      (argument mismatch; Optional<Integer> cannot be converted to float)
-    method Math.max(double,double) is not applicable
-      (argument mismatch; Optional<Integer> cannot be converted to double)
-/home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/entity/PitbikeEntity.java:315: error: no suitable method found for clamp(Optional<Integer>,int,int)
-        dataTracker.set(CONDITION, nbt.contains("Condition") ? MathHelper.clamp(nbt.getInt("Condition"), 0, 100) : 100);
-                                                                         ^
-    method MathHelper.clamp(int,int,int) is not applicable
-      (argument mismatch; Optional<Integer> cannot be converted to int)
-    method MathHelper.clamp(long,long,long) is not applicable
-      (argument mismatch; Optional<Integer> cannot be converted to long)
-    method MathHelper.clamp(float,float,float) is not applicable
-      (argument mismatch; Optional<Integer> cannot be converted to float)
-    method MathHelper.clamp(double,double,double) is not applicable
-      (argument mismatch; Optional<Integer> cannot be converted to double)
-/home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/entity/PitbikeEntity.java:316: error: no suitable method found for set(TrackedData<Boolean>,Optional<Boolean>)
-        dataTracker.set(KICKSTAND, nbt.getBoolean("Kickstand"));
-                   ^
-    method DataTracker.<T#1>set(TrackedData<T#1>,T#1) is not applicable
-      (inference variable T#1 has incompatible bounds
-        equality constraints: Boolean
-        lower bounds: Optional<Boolean>)
-    method DataTracker.<T#2>set(TrackedData<T#2>,T#2,boolean) is not applicable
-      (cannot infer type-variable(s) T#2
-        (actual and formal argument lists differ in length))
-  where T#1,T#2 are type-variables:
-    T#1 extends Object declared in method <T#1>set(TrackedData<T#1>,T#1)
-    T#2 extends Object declared in method <T#2>set(TrackedData<T#2>,T#2,boolean)
-/home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/entity/PitbikeEntity.java:318: error: method does not override or implement a method from a supertype
-    @Override protected void writeCustomDataToNbt(NbtCompound nbt) {
-    ^
-/home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/mixin/PlayerModelPoseMixin.java:27: error: type PlayerEntityModel does not take parameters
-        PlayerEntityModel<?> model = (PlayerEntityModel<?>) (Object) this;
-                         ^
-/home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/mixin/PlayerModelPoseMixin.java:27: error: type PlayerEntityModel does not take parameters
-        PlayerEntityModel<?> model = (PlayerEntityModel<?>) (Object) this;
-                                                       ^
-/home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/mixin/PlayerModelPoseMixin.java:61: error: cannot find symbol
-        rightSleeve.copyTransform(right);
-                   ^
-  symbol:   method copyTransform(ModelPart)
-  location: variable rightSleeve of type ModelPart
-/home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/mixin/PlayerModelPoseMixin.java:62: error: cannot find symbol
-        leftSleeve.copyTransform(left);
-                  ^
-  symbol:   method copyTransform(ModelPart)
-  location: variable leftSleeve of type ModelPart
-/home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/mixin/PlayerModelPoseMixin.java:63: error: cannot find symbol
-        rightPants.copyTransform(legR);
-                  ^
-  symbol:   method copyTransform(ModelPart)
-  location: variable rightPants of type ModelPart
-/home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/mixin/PlayerModelPoseMixin.java:64: error: cannot find symbol
-        leftPants.copyTransform(legL);
-                 ^
-  symbol:   method copyTransform(ModelPart)
-  location: variable leftPants of type ModelPart
-/home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/client/PitbikeRenderer.java:24: error: cannot find symbol
-        this.shadowRadius = 0.54f;
-            ^
-  symbol: variable shadowRadius
-/home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/client/PitbikeRenderer.java:26: error: method does not override or implement a method from a supertype
-    @Override public Identifier getTexture(PitbikeEntity entity) {
-    ^
-/home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/client/PitbikeRenderer.java:29: error: method does not override or implement a method from a supertype
-    @Override public void render(PitbikeEntity entity, float yaw, float tickDelta,
-    ^
-/home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/client/PitbikeRenderer.java:32: error: cannot find symbol
-        matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(180.0f - MathHelper.lerp(tickDelta, entity.prevYaw, entity.getYaw())));
-                                                                                                            ^
-  symbol:   variable prevYaw
-  location: variable entity of type PitbikeEntity
-/home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/client/PitbikeRenderer.java:40: error: cannot find symbol
-        VertexConsumer consumer = vertices.getBuffer(RenderLayer.getEntityCutoutNoCull(getTexture(entity)));
-                                                                ^
-  symbol:   method getEntityCutoutNoCull(Identifier)
-  location: class RenderLayer
-/home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/client/PitbikeRenderer.java:43: error: cannot find symbol
-        super.render(entity, yaw, tickDelta, matrices, vertices, light);
-        ^
-  symbol:   variable super
-  location: class PitbikeRenderer
-/home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/client/PitbikeModel.java:18: error: type argument PitbikeEntity is not within bounds of type-variable T
-public final class PitbikeModel extends EntityModel<PitbikeEntity> {
-                                                    ^
-  where T is a type-variable:
-    T extends EntityRenderState declared in class EntityModel
-/home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/client/PitbikeModel.java:28: error: no suitable constructor found for EntityModel(no arguments)
-    public PitbikeModel(ModelPart root) {
-                                        ^
-    constructor EntityModel.EntityModel(ModelPart) is not applicable
+/home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/entity/PitbikeEntity.java:266: error: cannot find symbol
+            return ActionResult.success(getEntityWorld().isClient());
+                               ^
+  symbol:   method success(boolean)
+  location: interface ActionResult
+/home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/entity/PitbikeEntity.java:274: error: cannot find symbol
+            return ActionResult.success(getEntityWorld().isClient());
+                               ^
+  symbol:   method success(boolean)
+  location: interface ActionResult
+/home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/entity/PitbikeEntity.java:281: error: cannot find symbol
+            return ActionResult.success(getEntityWorld().isClient());
+                               ^
+  symbol:   method success(boolean)
+  location: interface ActionResult
+/home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/entity/PitbikeEntity.java:299: error: cannot find symbol
+            return ActionResult.success(getEntityWorld().isClient());
+                               ^
+  symbol:   method success(boolean)
+  location: interface ActionResult
+/home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/entity/PitbikeEntity.java:303: error: no suitable method found for startRiding(PitbikeEntity,boolean)
+            if (player.startRiding(this, true))
+                      ^
+    method Entity.startRiding(Entity) is not applicable
       (actual and formal argument lists differ in length)
-    constructor EntityModel.EntityModel(ModelPart,Function<Identifier,RenderLayer>) is not applicable
+    method Entity.startRiding(Entity,boolean,boolean) is not applicable
       (actual and formal argument lists differ in length)
-/home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/client/PitbikeModel.java:41: error: cannot find symbol
-        return parent.addChild(name, ModelPartBuilder.create(), ModelTransform.pivot(x, y, z));
-                                                                              ^
-  symbol:   method pivot(float,float,float)
-  location: class ModelTransform
-/home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/client/PitbikeModel.java:170: error: cannot find symbol
-        steering.pivotY = -bike.frontSpring() * 2.5f;
-                ^
-  symbol:   variable pivotY
-  location: variable steering of type ModelPart
-/home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/client/PitbikeModel.java:171: error: cannot find symbol
-        chain.pivotZ = (float) Math.sin(speed*1.2f) * 0.12f;
-             ^
-  symbol:   variable pivotZ
-  location: variable chain of type ModelPart
-/home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/client/PitbikeModel.java:173: error: cannot find symbol
-        enginePart.pivotX = (float)Math.sin((bike.age + tickDelta)*2.1f)*0.04f;
-                  ^
-  symbol:   variable pivotX
-  location: variable enginePart of type ModelPart
-/home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/client/PitbikeModel.java:176: error: method does not override or implement a method from a supertype
-    @Override public void setAngles(PitbikeEntity entity, float limbAngle, float limbDistance,
-    ^
-/home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/client/PitbikeModel.java:178: error: render(MatrixStack,VertexConsumer,int,int,int) in PitbikeModel cannot override render(MatrixStack,VertexConsumer,int,int,int) in Model
-    @Override public void render(MatrixStack matrices, VertexConsumer vertices, int light, int overlay, int color) {
-                          ^
-  overridden method is final
-/home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/client/PitbikeStuntClient.java:29: error: incompatible types: String cannot be converted to Category
-                InputUtil.Type.KEYSYM, key, CATEGORY));
-                                            ^
-/home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/client/PitbikeStuntClient.java:34: error: method register in class EntityRendererRegistry cannot be applied to given types;
-        EntityRendererRegistry.register(PitbikeStunt.BIKE_ENTITY, PitbikeRenderer::new);
-                              ^
-  required: EntityType<? extends E>,EntityRendererFactory<E>
-  found:    EntityType<PitbikeEntity>,PitbikeRen[...]::new
-  reason: cannot infer type-variable(s) E
-    (argument mismatch; bad return type in method reference
-      PitbikeRenderer cannot be converted to EntityRenderer<E,?>)
-  where E is a type-variable:
-    E extends Entity declared in method <E>register(EntityType<? extends E>,EntityRendererFactory<E>)
-/home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/item/BikeItem.java:16: error: isClient has private access in World
-        if (context.getWorld().isClient) return ActionResult.SUCCESS;
-                              ^
+/home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/entity/PitbikeEntity.java:306: error: cannot find symbol
+        return ActionResult.success(getEntityWorld().isClient());
+                           ^
+  symbol:   method success(boolean)
+  location: interface ActionResult
+/home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/item/BikeItem.java:25: error: no suitable method found for startRiding(PitbikeEntity,boolean)
+                context.getPlayer().startRiding(bike, true);
+                                   ^
+    method Entity.startRiding(Entity) is not applicable
+      (actual and formal argument lists differ in length)
+    method Entity.startRiding(Entity,boolean,boolean) is not applicable
+      (actual and formal argument lists differ in length)
 Note: /home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/client/PitbikeStuntClient.java uses or overrides a deprecated API.
 Note: Recompile with -Xlint:deprecation for details.
-Note: Some messages have been simplified; recompile with -Xdiags:verbose to get full output
-57 errors
+8 errors
 
 > Task :compileJava FAILED
-gradle/actions: Writing build results to /home/runner/work/_temp/.gradle-actions/build-results/compilation-1792664646736.json
+gradle/actions: Writing build results to /home/runner/work/_temp/.gradle-actions/build-results/compilation-1792665495272.json
 
 [Incubating] Problems report is available at: file:///home/runner/work/-/-/project/build/reports/problems/problems-report.html
 
@@ -339,317 +73,51 @@ FAILURE: Build failed with an exception.
 * What went wrong:
 Execution failed for task ':compileJava'.
 > Compilation failed; see the compiler output below.
-  /home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/mixin/PlayerModelPoseMixin.java:27: error: type PlayerEntityModel does not take parameters
-          PlayerEntityModel<?> model = (PlayerEntityModel<?>) (Object) this;
-                           ^
-  /home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/mixin/PlayerModelPoseMixin.java:27: error: type PlayerEntityModel does not take parameters
-          PlayerEntityModel<?> model = (PlayerEntityModel<?>) (Object) this;
-                                                         ^
-  /home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/entity/PitbikeEntity.java:307: error: method isCollidable in class Entity cannot be applied to given types;
-      @Override public boolean collidesWith(Entity entity) { return !hasPassenger(entity) && entity.isCollidable(); }
-                                                                                                   ^
-    required: Entity
-    found:    no arguments
-    reason: actual and formal argument lists differ in length
-  /home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/client/PitbikeStuntClient.java:34: error: method register in class EntityRendererRegistry cannot be applied to given types;
-          EntityRendererRegistry.register(PitbikeStunt.BIKE_ENTITY, PitbikeRenderer::new);
-                                ^
-    required: EntityType<? extends E>,EntityRendererFactory<E>
-    found:    EntityType<PitbikeEntity>,PitbikeRen[...]::new
-    reason: cannot infer type-variable(s) E
-      (argument mismatch; bad return type in method reference
-        PitbikeRenderer cannot be converted to EntityRenderer<E,?>)
-    where E is a type-variable:
-      E extends Entity declared in method <E>register(EntityType<? extends E>,EntityRendererFactory<E>)
-  /home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/entity/PitbikeEntity.java:310: error: no suitable method found for floorMod(Optional<Integer>,int)
-          dataTracker.set(COLOR, Math.floorMod(nbt.getInt("Paint"), 6));
-                                     ^
-      method Math.floorMod(int,int) is not applicable
-        (argument mismatch; Optional<Integer> cannot be converted to int)
-      method Math.floorMod(long,int) is not applicable
-        (argument mismatch; Optional<Integer> cannot be converted to long)
-      method Math.floorMod(long,long) is not applicable
-        (argument mismatch; Optional<Integer> cannot be converted to long)
-  /home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/entity/PitbikeEntity.java:311: error: no suitable method found for clamp(Optional<Float>,int,int)
-          dataTracker.set(FUEL, MathHelper.clamp(nbt.getFloat("Fuel"), 0, 100));
-                                          ^
-      method MathHelper.clamp(int,int,int) is not applicable
-        (argument mismatch; Optional<Float> cannot be converted to int)
-      method MathHelper.clamp(long,long,long) is not applicable
-        (argument mismatch; Optional<Float> cannot be converted to long)
-      method MathHelper.clamp(float,float,float) is not applicable
-        (argument mismatch; Optional<Float> cannot be converted to float)
-      method MathHelper.clamp(double,double,double) is not applicable
-        (argument mismatch; Optional<Float> cannot be converted to double)
-  /home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/entity/PitbikeEntity.java:312: error: no suitable method found for clamp(Optional<Integer>,int,int)
-          dataTracker.set(GEAR, MathHelper.clamp(nbt.getInt("Gear"), 1, 4));
-                                          ^
-      method MathHelper.clamp(int,int,int) is not applicable
-        (argument mismatch; Optional<Integer> cannot be converted to int)
-      method MathHelper.clamp(long,long,long) is not applicable
-        (argument mismatch; Optional<Integer> cannot be converted to long)
-      method MathHelper.clamp(float,float,float) is not applicable
-        (argument mismatch; Optional<Integer> cannot be converted to float)
-      method MathHelper.clamp(double,double,double) is not applicable
-        (argument mismatch; Optional<Integer> cannot be converted to double)
-  /home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/entity/PitbikeEntity.java:313: error: no suitable method found for set(TrackedData<Boolean>,Optional<Boolean>)
-          dataTracker.set(ENGINE, nbt.getBoolean("EngineOn"));
-                     ^
-      method DataTracker.<T#1>set(TrackedData<T#1>,T#1) is not applicable
-        (inference variable T#1 has incompatible bounds
-          equality constraints: Boolean
-          lower bounds: Optional<Boolean>)
-      method DataTracker.<T#2>set(TrackedData<T#2>,T#2,boolean) is not applicable
-        (cannot infer type-variable(s) T#2
-          (actual and formal argument lists differ in length))
-    where T#1,T#2 are type-variables:
-      T#1 extends Object declared in method <T#1>set(TrackedData<T#1>,T#1)
-      T#2 extends Object declared in method <T#2>set(TrackedData<T#2>,T#2,boolean)
-  /home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/entity/PitbikeEntity.java:314: error: no suitable method found for max(int,Optional<Integer>)
-          dataTracker.set(SCORE, Math.max(0, nbt.getInt("Score")));
-                                     ^
-      method Math.max(int,int) is not applicable
-        (argument mismatch; Optional<Integer> cannot be converted to int)
-      method Math.max(long,long) is not applicable
-        (argument mismatch; Optional<Integer> cannot be converted to long)
-      method Math.max(float,float) is not applicable
-        (argument mismatch; Optional<Integer> cannot be converted to float)
-      method Math.max(double,double) is not applicable
-        (argument mismatch; Optional<Integer> cannot be converted to double)
-  /home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/entity/PitbikeEntity.java:315: error: no suitable method found for clamp(Optional<Integer>,int,int)
-          dataTracker.set(CONDITION, nbt.contains("Condition") ? MathHelper.clamp(nbt.getInt("Condition"), 0, 100) : 100);
-                                                                           ^
-      method MathHelper.clamp(int,int,int) is not applicable
-        (argument mismatch; Optional<Integer> cannot be converted to int)
-      method MathHelper.clamp(long,long,long) is not applicable
-        (argument mismatch; Optional<Integer> cannot be converted to long)
-      method MathHelper.clamp(float,float,float) is not applicable
-        (argument mismatch; Optional<Integer> cannot be converted to float)
-      method MathHelper.clamp(double,double,double) is not applicable
-        (argument mismatch; Optional<Integer> cannot be converted to double)
-  /home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/entity/PitbikeEntity.java:316: error: no suitable method found for set(TrackedData<Boolean>,Optional<Boolean>)
-          dataTracker.set(KICKSTAND, nbt.getBoolean("Kickstand"));
-                     ^
-      method DataTracker.<T#1>set(TrackedData<T#1>,T#1) is not applicable
-        (inference variable T#1 has incompatible bounds
-          equality constraints: Boolean
-          lower bounds: Optional<Boolean>)
-      method DataTracker.<T#2>set(TrackedData<T#2>,T#2,boolean) is not applicable
-        (cannot infer type-variable(s) T#2
-          (actual and formal argument lists differ in length))
-    where T#1,T#2 are type-variables:
-      T#1 extends Object declared in method <T#1>set(TrackedData<T#1>,T#1)
-      T#2 extends Object declared in method <T#2>set(TrackedData<T#2>,T#2,boolean)
-  /home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/client/PitbikeModel.java:28: error: no suitable constructor found for EntityModel(no arguments)
-      public PitbikeModel(ModelPart root) {
-                                          ^
-      constructor EntityModel.EntityModel(ModelPart) is not applicable
+  Note: /home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/client/PitbikeStuntClient.java uses or overrides a deprecated API.
+  /home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/entity/PitbikeEntity.java:303: error: no suitable method found for startRiding(PitbikeEntity,boolean)
+              if (player.startRiding(this, true))
+                        ^
+      method Entity.startRiding(Entity) is not applicable
         (actual and formal argument lists differ in length)
-      constructor EntityModel.EntityModel(ModelPart,Function<Identifier,RenderLayer>) is not applicable
+      method Entity.startRiding(Entity,boolean,boolean) is not applicable
+        (actual and formal argument lists differ in length)
+  /home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/item/BikeItem.java:25: error: no suitable method found for startRiding(PitbikeEntity,boolean)
+                  context.getPlayer().startRiding(bike, true);
+                                     ^
+      method Entity.startRiding(Entity) is not applicable
+        (actual and formal argument lists differ in length)
+      method Entity.startRiding(Entity,boolean,boolean) is not applicable
         (actual and formal argument lists differ in length)
   Note: Recompile with -Xlint:deprecation for details.
-  /home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/client/PitbikeRenderer.java:16: error: wrong number of type arguments; required 2
-  public final class PitbikeRenderer extends EntityRenderer<PitbikeEntity> {
-                                                           ^
-  /home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/client/PitbikeRenderer.java:32: error: cannot find symbol
-          matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(180.0f - MathHelper.lerp(tickDelta, entity.prevYaw, entity.getYaw())));
-                                                                                                              ^
-    symbol:   variable prevYaw
-    location: variable entity of type PitbikeEntity
-  /home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/client/PitbikeRenderer.java:43: error: cannot find symbol
-          super.render(entity, yaw, tickDelta, matrices, vertices, light);
-          ^
-    symbol:   variable super
-    location: class PitbikeRenderer
-  /home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/client/PitbikeModel.java:170: error: cannot find symbol
-          steering.pivotY = -bike.frontSpring() * 2.5f;
-                  ^
-    symbol:   variable pivotY
-    location: variable steering of type ModelPart
-  /home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/client/PitbikeModel.java:171: error: cannot find symbol
-          chain.pivotZ = (float) Math.sin(speed*1.2f) * 0.12f;
-               ^
-    symbol:   variable pivotZ
-    location: variable chain of type ModelPart
-  /home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/client/PitbikeModel.java:173: error: cannot find symbol
-          enginePart.pivotX = (float)Math.sin((bike.age + tickDelta)*2.1f)*0.04f;
-                    ^
-    symbol:   variable pivotX
-    location: variable enginePart of type ModelPart
-  /home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/item/BikeItem.java:16: error: isClient has private access in World
-          if (context.getWorld().isClient) return ActionResult.SUCCESS;
-                                ^
-  /home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/entity/PitbikeEntity.java:306: error: method does not override or implement a method from a supertype
-      @Override public boolean isCollidable() { return true; }
-      ^
-  /home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/entity/PitbikeEntity.java:308: error: method does not override or implement a method from a supertype
-      @Override protected void readCustomDataFromNbt(NbtCompound nbt) {
-      ^
-  /home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/entity/PitbikeEntity.java:318: error: method does not override or implement a method from a supertype
-      @Override protected void writeCustomDataToNbt(NbtCompound nbt) {
-      ^
-  /home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/client/PitbikeRenderer.java:26: error: method does not override or implement a method from a supertype
-      @Override public Identifier getTexture(PitbikeEntity entity) {
-      ^
-  /home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/client/PitbikeRenderer.java:29: error: method does not override or implement a method from a supertype
-      @Override public void render(PitbikeEntity entity, float yaw, float tickDelta,
-      ^
-  /home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/client/PitbikeModel.java:176: error: method does not override or implement a method from a supertype
-      @Override public void setAngles(PitbikeEntity entity, float limbAngle, float limbDistance,
-      ^
-  /home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/client/PitbikeModel.java:18: error: type argument PitbikeEntity is not within bounds of type-variable T
-  public final class PitbikeModel extends EntityModel<PitbikeEntity> {
-                                                      ^
-    where T is a type-variable:
-      T extends EntityRenderState declared in class EntityModel
-  /home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/entity/PitbikeEntity.java:99: error: cannot find symbol
-          if (getWorld().isClient) return;
-              ^
-    symbol:   method getWorld()
-    location: class PitbikeEntity
-  /home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/entity/PitbikeEntity.java:111: error: cannot find symbol
-          if (getWorld().isClient) return;
-              ^
-    symbol:   method getWorld()
-    location: class PitbikeEntity
-  /home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/entity/PitbikeEntity.java:165: error: cannot find symbol
-          Vec3d beforeMove = getPos();
-                             ^
-    symbol:   method getPos()
-    location: class PitbikeEntity
-  /home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/entity/PitbikeEntity.java:168: error: cannot find symbol
-          Vec3d actualMove = getPos().subtract(beforeMove);
-                             ^
-    symbol:   method getPos()
-    location: class PitbikeEntity
-  /home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/entity/PitbikeEntity.java:195: error: cannot find symbol
-          if (getWorld() instanceof ServerWorld server && isOnGround() && age % 5 == 0 &&
-              ^
-    symbol:   method getWorld()
-    location: class PitbikeEntity
-  /home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/entity/PitbikeEntity.java:223: error: cannot find symbol
-          if (!getWorld().isClient) getWorld().playSound(null, getX(), getY(), getZ(),
-               ^
-    symbol:   method getWorld()
-    location: class PitbikeEntity
-  /home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/entity/PitbikeEntity.java:223: error: cannot find symbol
-          if (!getWorld().isClient) getWorld().playSound(null, getX(), getY(), getZ(),
-                                    ^
-    symbol:   method getWorld()
-    location: class PitbikeEntity
-  /home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/entity/PitbikeEntity.java:233: error: cannot find symbol
-              VoxelShape collision = getWorld().getBlockState(pos).getCollisionShape(getWorld(), pos);
-                                     ^
-    symbol:   method getWorld()
-    location: class PitbikeEntity
-  /home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/entity/PitbikeEntity.java:233: error: cannot find symbol
-              VoxelShape collision = getWorld().getBlockState(pos).getCollisionShape(getWorld(), pos);
-                                                                                     ^
-    symbol:   method getWorld()
-    location: class PitbikeEntity
-  /home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/entity/PitbikeEntity.java:260: error: cannot find symbol
-              if (!getWorld().isClient && fuel() < 100f) {
-                   ^
-    symbol:   method getWorld()
-    location: class PitbikeEntity
-  /home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/entity/PitbikeEntity.java:265: error: cannot find symbol
-              return ActionResult.success(getWorld().isClient);
-                                          ^
-    symbol:   method getWorld()
-    location: class PitbikeEntity
-  /home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/entity/PitbikeEntity.java:268: error: cannot find symbol
-              if (!getWorld().isClient && condition() < 100) {
-                   ^
-    symbol:   method getWorld()
-    location: class PitbikeEntity
-  /home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/entity/PitbikeEntity.java:273: error: cannot find symbol
-              return ActionResult.success(getWorld().isClient);
-                                          ^
-    symbol:   method getWorld()
-    location: class PitbikeEntity
-  /home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/entity/PitbikeEntity.java:276: error: cannot find symbol
-              if (!getWorld().isClient && getFirstPassenger() == null && Math.abs(speed()) < 0.04) {
-                   ^
-    symbol:   method getWorld()
-    location: class PitbikeEntity
-  /home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/entity/PitbikeEntity.java:280: error: cannot find symbol
-              return ActionResult.success(getWorld().isClient);
-                                          ^
-    symbol:   method getWorld()
-    location: class PitbikeEntity
-  /home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/entity/PitbikeEntity.java:283: error: cannot find symbol
-              if (!getWorld().isClient) {
-                   ^
-    symbol:   method getWorld()
-    location: class PitbikeEntity
-  /home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/entity/PitbikeEntity.java:298: error: cannot find symbol
-              return ActionResult.success(getWorld().isClient);
-                                          ^
-    symbol:   method getWorld()
-    location: class PitbikeEntity
-  /home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/entity/PitbikeEntity.java:300: error: cannot find symbol
-          if (!getWorld().isClient && !player.hasVehicle()) {
-               ^
-    symbol:   method getWorld()
-    location: class PitbikeEntity
-  /home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/entity/PitbikeEntity.java:304: error: cannot find symbol
-          return ActionResult.success(getWorld().isClient);
-                                      ^
-    symbol:   method getWorld()
-    location: class PitbikeEntity
-  /home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/mixin/PlayerModelPoseMixin.java:61: error: cannot find symbol
-          rightSleeve.copyTransform(right);
-                     ^
-    symbol:   method copyTransform(ModelPart)
-    location: variable rightSleeve of type ModelPart
-  /home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/mixin/PlayerModelPoseMixin.java:62: error: cannot find symbol
-          leftSleeve.copyTransform(left);
-                    ^
-    symbol:   method copyTransform(ModelPart)
-    location: variable leftSleeve of type ModelPart
-  /home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/mixin/PlayerModelPoseMixin.java:63: error: cannot find symbol
-          rightPants.copyTransform(legR);
-                    ^
-    symbol:   method copyTransform(ModelPart)
-    location: variable rightPants of type ModelPart
-  /home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/mixin/PlayerModelPoseMixin.java:64: error: cannot find symbol
-          leftPants.copyTransform(legL);
-                   ^
-    symbol:   method copyTransform(ModelPart)
-    location: variable leftPants of type ModelPart
-  /home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/client/PitbikeRenderer.java:40: error: cannot find symbol
-          VertexConsumer consumer = vertices.getBuffer(RenderLayer.getEntityCutoutNoCull(getTexture(entity)));
-                                                                  ^
-    symbol:   method getEntityCutoutNoCull(Identifier)
-    location: class RenderLayer
-  /home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/client/PitbikeModel.java:41: error: cannot find symbol
-          return parent.addChild(name, ModelPartBuilder.create(), ModelTransform.pivot(x, y, z));
-                                                                                ^
-    symbol:   method pivot(float,float,float)
-    location: class ModelTransform
-  Note: /home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/client/PitbikeStuntClient.java uses or overrides a deprecated API.
-  /home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/client/PitbikeModel.java:178: error: render(MatrixStack,VertexConsumer,int,int,int) in PitbikeModel cannot override render(MatrixStack,VertexConsumer,int,int,int) in Model
-      @Override public void render(MatrixStack matrices, VertexConsumer vertices, int light, int overlay, int color) {
-                            ^
-    overridden method is final
-  /home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/entity/PitbikeEntity.java:38: error: PitbikeEntity is not abstract and does not override abstract method writeCustomData(WriteView) in Entity
+  /home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/entity/PitbikeEntity.java:39: error: PitbikeEntity is not abstract and does not override abstract method damage(ServerWorld,DamageSource,float) in Entity
   public final class PitbikeEntity extends Entity {
                ^
-  /home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/PitbikeStunt.java:26: error: incompatible types: String cannot be converted to RegistryKey<EntityType<?>>
-                      .dimensions(0.98f, 1.25f).maxTrackingRange(10).trackingTickInterval(1).build("pitbikestunt:pitbike"));
-                                                                                                   ^
-  /home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/entity/PitbikeEntity.java:309: error: incompatible types: Optional<Integer> cannot be converted to int
-          setVariant(nbt.getInt("BikeVariant"));
-                               ^
-  /home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/client/PitbikeStuntClient.java:29: error: incompatible types: String cannot be converted to Category
-                  InputUtil.Type.KEYSYM, key, CATEGORY));
-                                              ^
-  Note: Some messages have been simplified; recompile with -Xdiags:verbose to get full output
-  /home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/client/PitbikeRenderer.java:24: error: cannot find symbol
-          this.shadowRadius = 0.54f;
-              ^
-    symbol: variable shadowRadius
-  57 errors
+  /home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/entity/PitbikeEntity.java:266: error: cannot find symbol
+              return ActionResult.success(getEntityWorld().isClient());
+                                 ^
+    symbol:   method success(boolean)
+    location: interface ActionResult
+  /home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/entity/PitbikeEntity.java:274: error: cannot find symbol
+              return ActionResult.success(getEntityWorld().isClient());
+                                 ^
+    symbol:   method success(boolean)
+    location: interface ActionResult
+  /home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/entity/PitbikeEntity.java:281: error: cannot find symbol
+              return ActionResult.success(getEntityWorld().isClient());
+                                 ^
+    symbol:   method success(boolean)
+    location: interface ActionResult
+  /home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/entity/PitbikeEntity.java:299: error: cannot find symbol
+              return ActionResult.success(getEntityWorld().isClient());
+                                 ^
+    symbol:   method success(boolean)
+    location: interface ActionResult
+  /home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/entity/PitbikeEntity.java:306: error: cannot find symbol
+          return ActionResult.success(getEntityWorld().isClient());
+                             ^
+    symbol:   method success(boolean)
+    location: interface ActionResult
+  8 errors
 
 * Try:
 > Check your code and dependencies to fix the compilation error(s)
@@ -688,351 +156,54 @@ org.gradle.api.tasks.TaskExecutionException: Execution failed for task ':compile
 	at org.gradle.execution.taskgraph.DefaultTaskExecutionGraph$BuildOperationAwareExecutionAction.execute(DefaultTaskExecutionGraph.java:328)
 	at org.gradle.execution.plan.DefaultPlanExecutor$ExecutorWorker.execute(DefaultPlanExecutor.java:459)
 	at org.gradle.execution.plan.DefaultPlanExecutor$ExecutorWorker.run(DefaultPlanExecutor.java:376)
-	at org.gradle.execution.plan.DefaultPlanExecutor.process(DefaultPlanExecutor.java:111)
-	at org.gradle.execution.taskgraph.DefaultTaskExecutionGraph.executeWithServices(DefaultTaskExecutionGraph.java:146)
-	at org.gradle.execution.taskgraph.DefaultTaskExecutionGraph.execute(DefaultTaskExecutionGraph.java:131)
-	at org.gradle.execution.SelectedTaskExecutionAction.execute(SelectedTaskExecutionAction.java:35)
-	at org.gradle.execution.BuildOperationFiringBuildWorkerExecutor$ExecuteTasks.call(BuildOperationFiringBuildWorkerExecutor.java:54)
-	at org.gradle.execution.BuildOperationFiringBuildWorkerExecutor$ExecuteTasks.call(BuildOperationFiringBuildWorkerExecutor.java:43)
-	at org.gradle.internal.operations.DefaultBuildOperationRunner$CallableBuildOperationWorker.execute(DefaultBuildOperationRunner.java:209)
-	at org.gradle.internal.operations.DefaultBuildOperationRunner$CallableBuildOperationWorker.execute(DefaultBuildOperationRunner.java:204)
-	at org.gradle.internal.operations.DefaultBuildOperationRunner$2.execute(DefaultBuildOperationRunner.java:66)
-	at org.gradle.internal.operations.DefaultBuildOperationRunner$2.execute(DefaultBuildOperationRunner.java:59)
-	at org.gradle.internal.operations.DefaultBuildOperationRunner.execute(DefaultBuildOperationRunner.java:166)
-	at org.gradle.internal.operations.DefaultBuildOperationRunner.execute(DefaultBuildOperationRunner.java:59)
-	at org.gradle.internal.operations.DefaultBuildOperationRunner.call(DefaultBuildOperationRunner.java:53)
-	at org.gradle.execution.BuildOperationFiringBuildWorkerExecutor.execute(BuildOperationFiringBuildWorkerExecutor.java:40)
-	at org.gradle.internal.build.DefaultBuildLifecycleController.lambda$executeTasks$10(DefaultBuildLifecycleController.java:313)
-	at org.gradle.internal.model.StateTransitionController.doTransition(StateTransitionController.java:266)
-	at org.gradle.internal.model.StateTransitionController.lambda$tryTransition$8(StateTransitionController.java:177)
-	at org.gradle.internal.work.DefaultSynchronizer.withLock(DefaultSynchronizer.java:45)
-	at org.gradle.internal.model.StateTransitionController.tryTransition(StateTransitionController.java:177)
-	at org.gradle.internal.build.DefaultBuildLifecycleController.executeTasks(DefaultBuildLifecycleController.java:304)
-	at org.gradle.internal.build.DefaultBuildWorkGraphController$DefaultBuildWorkGraph.runWork(DefaultBuildWorkGraphController.java:220)
-	at org.gradle.internal.work.DefaultWorkerLeaseService.lambda$withLocksAcquired$0(DefaultWorkerLeaseService.java:269)
-	at org.gradle.internal.work.ResourceLockStatistics$1.measure(ResourceLockStatistics.java:42)
-	at org.gradle.internal.work.DefaultWorkerLeaseService.withLocksAcquired(DefaultWorkerLeaseService.java:267)
-	at org.gradle.internal.work.DefaultWorkerLeaseService.withLocks(DefaultWorkerLeaseService.java:259)
-	at org.gradle.internal.work.DefaultWorkerLeaseService.runAsWorkerThread(DefaultWorkerLeaseService.java:127)
-	at org.gradle.composite.internal.DefaultBuildController.doRun(DefaultBuildController.java:181)
-	at org.gradle.composite.internal.DefaultBuildController.access$000(DefaultBuildController.java:50)
-	at org.gradle.composite.internal.DefaultBuildController$BuildOpRunnable.lambda$run$0(DefaultBuildController.java:198)
-	at org.gradle.internal.operations.CurrentBuildOperationRef.with(CurrentBuildOperationRef.java:84)
-	at org.gradle.composite.internal.DefaultBuildController$BuildOpRunnable.run(DefaultBuildController.java:198)
 	at org.gradle.internal.concurrent.ExecutorPolicy$CatchAndRecordFailures.onExecute(ExecutorPolicy.java:64)
 	at org.gradle.internal.concurrent.AbstractManagedExecutor$1.run(AbstractManagedExecutor.java:47)
 Caused by: org.gradle.api.internal.tasks.compile.CompilationFailedException: Compilation failed; see the compiler output below.
-/home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/mixin/PlayerModelPoseMixin.java:27: error: type PlayerEntityModel does not take parameters
-        PlayerEntityModel<?> model = (PlayerEntityModel<?>) (Object) this;
-                         ^
-/home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/mixin/PlayerModelPoseMixin.java:27: error: type PlayerEntityModel does not take parameters
-        PlayerEntityModel<?> model = (PlayerEntityModel<?>) (Object) this;
-                                                       ^
-/home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/entity/PitbikeEntity.java:307: error: method isCollidable in class Entity cannot be applied to given types;
-    @Override public boolean collidesWith(Entity entity) { return !hasPassenger(entity) && entity.isCollidable(); }
-                                                                                                 ^
-  required: Entity
-  found:    no arguments
-  reason: actual and formal argument lists differ in length
-/home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/client/PitbikeStuntClient.java:34: error: method register in class EntityRendererRegistry cannot be applied to given types;
-        EntityRendererRegistry.register(PitbikeStunt.BIKE_ENTITY, PitbikeRenderer::new);
-                              ^
-  required: EntityType<? extends E>,EntityRendererFactory<E>
-  found:    EntityType<PitbikeEntity>,PitbikeRen[...]::new
-  reason: cannot infer type-variable(s) E
-    (argument mismatch; bad return type in method reference
-      PitbikeRenderer cannot be converted to EntityRenderer<E,?>)
-  where E is a type-variable:
-    E extends Entity declared in method <E>register(EntityType<? extends E>,EntityRendererFactory<E>)
-/home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/entity/PitbikeEntity.java:310: error: no suitable method found for floorMod(Optional<Integer>,int)
-        dataTracker.set(COLOR, Math.floorMod(nbt.getInt("Paint"), 6));
-                                   ^
-    method Math.floorMod(int,int) is not applicable
-      (argument mismatch; Optional<Integer> cannot be converted to int)
-    method Math.floorMod(long,int) is not applicable
-      (argument mismatch; Optional<Integer> cannot be converted to long)
-    method Math.floorMod(long,long) is not applicable
-      (argument mismatch; Optional<Integer> cannot be converted to long)
-/home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/entity/PitbikeEntity.java:311: error: no suitable method found for clamp(Optional<Float>,int,int)
-        dataTracker.set(FUEL, MathHelper.clamp(nbt.getFloat("Fuel"), 0, 100));
-                                        ^
-    method MathHelper.clamp(int,int,int) is not applicable
-      (argument mismatch; Optional<Float> cannot be converted to int)
-    method MathHelper.clamp(long,long,long) is not applicable
-      (argument mismatch; Optional<Float> cannot be converted to long)
-    method MathHelper.clamp(float,float,float) is not applicable
-      (argument mismatch; Optional<Float> cannot be converted to float)
-    method MathHelper.clamp(double,double,double) is not applicable
-      (argument mismatch; Optional<Float> cannot be converted to double)
-/home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/entity/PitbikeEntity.java:312: error: no suitable method found for clamp(Optional<Integer>,int,int)
-        dataTracker.set(GEAR, MathHelper.clamp(nbt.getInt("Gear"), 1, 4));
-                                        ^
-    method MathHelper.clamp(int,int,int) is not applicable
-      (argument mismatch; Optional<Integer> cannot be converted to int)
-    method MathHelper.clamp(long,long,long) is not applicable
-      (argument mismatch; Optional<Integer> cannot be converted to long)
-    method MathHelper.clamp(float,float,float) is not applicable
-      (argument mismatch; Optional<Integer> cannot be converted to float)
-    method MathHelper.clamp(double,double,double) is not applicable
-      (argument mismatch; Optional<Integer> cannot be converted to double)
-/home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/entity/PitbikeEntity.java:313: error: no suitable method found for set(TrackedData<Boolean>,Optional<Boolean>)
-        dataTracker.set(ENGINE, nbt.getBoolean("EngineOn"));
-                   ^
-    method DataTracker.<T#1>set(TrackedData<T#1>,T#1) is not applicable
-      (inference variable T#1 has incompatible bounds
-        equality constraints: Boolean
-        lower bounds: Optional<Boolean>)
-    method DataTracker.<T#2>set(TrackedData<T#2>,T#2,boolean) is not applicable
-      (cannot infer type-variable(s) T#2
-        (actual and formal argument lists differ in length))
-  where T#1,T#2 are type-variables:
-    T#1 extends Object declared in method <T#1>set(TrackedData<T#1>,T#1)
-    T#2 extends Object declared in method <T#2>set(TrackedData<T#2>,T#2,boolean)
-/home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/entity/PitbikeEntity.java:314: error: no suitable method found for max(int,Optional<Integer>)
-        dataTracker.set(SCORE, Math.max(0, nbt.getInt("Score")));
-                                   ^
-    method Math.max(int,int) is not applicable
-      (argument mismatch; Optional<Integer> cannot be converted to int)
-    method Math.max(long,long) is not applicable
-      (argument mismatch; Optional<Integer> cannot be converted to long)
-    method Math.max(float,float) is not applicable
-      (argument mismatch; Optional<Integer> cannot be converted to float)
-    method Math.max(double,double) is not applicable
-      (argument mismatch; Optional<Integer> cannot be converted to double)
-/home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/entity/PitbikeEntity.java:315: error: no suitable method found for clamp(Optional<Integer>,int,int)
-        dataTracker.set(CONDITION, nbt.contains("Condition") ? MathHelper.clamp(nbt.getInt("Condition"), 0, 100) : 100);
-                                                                         ^
-    method MathHelper.clamp(int,int,int) is not applicable
-      (argument mismatch; Optional<Integer> cannot be converted to int)
-    method MathHelper.clamp(long,long,long) is not applicable
-      (argument mismatch; Optional<Integer> cannot be converted to long)
-    method MathHelper.clamp(float,float,float) is not applicable
-      (argument mismatch; Optional<Integer> cannot be converted to float)
-    method MathHelper.clamp(double,double,double) is not applicable
-      (argument mismatch; Optional<Integer> cannot be converted to double)
-/home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/entity/PitbikeEntity.java:316: error: no suitable method found for set(TrackedData<Boolean>,Optional<Boolean>)
-        dataTracker.set(KICKSTAND, nbt.getBoolean("Kickstand"));
-                   ^
-    method DataTracker.<T#1>set(TrackedData<T#1>,T#1) is not applicable
-      (inference variable T#1 has incompatible bounds
-        equality constraints: Boolean
-        lower bounds: Optional<Boolean>)
-    method DataTracker.<T#2>set(TrackedData<T#2>,T#2,boolean) is not applicable
-      (cannot infer type-variable(s) T#2
-        (actual and formal argument lists differ in length))
-  where T#1,T#2 are type-variables:
-    T#1 extends Object declared in method <T#1>set(TrackedData<T#1>,T#1)
-    T#2 extends Object declared in method <T#2>set(TrackedData<T#2>,T#2,boolean)
-/home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/client/PitbikeModel.java:28: error: no suitable constructor found for EntityModel(no arguments)
-    public PitbikeModel(ModelPart root) {
-                                        ^
-    constructor EntityModel.EntityModel(ModelPart) is not applicable
+Note: /home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/client/PitbikeStuntClient.java uses or overrides a deprecated API.
+/home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/entity/PitbikeEntity.java:303: error: no suitable method found for startRiding(PitbikeEntity,boolean)
+            if (player.startRiding(this, true))
+                      ^
+    method Entity.startRiding(Entity) is not applicable
       (actual and formal argument lists differ in length)
-    constructor EntityModel.EntityModel(ModelPart,Function<Identifier,RenderLayer>) is not applicable
+    method Entity.startRiding(Entity,boolean,boolean) is not applicable
+      (actual and formal argument lists differ in length)
+/home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/item/BikeItem.java:25: error: no suitable method found for startRiding(PitbikeEntity,boolean)
+                context.getPlayer().startRiding(bike, true);
+                                   ^
+    method Entity.startRiding(Entity) is not applicable
+      (actual and formal argument lists differ in length)
+    method Entity.startRiding(Entity,boolean,boolean) is not applicable
       (actual and formal argument lists differ in length)
 Note: Recompile with -Xlint:deprecation for details.
-/home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/client/PitbikeRenderer.java:16: error: wrong number of type arguments; required 2
-public final class PitbikeRenderer extends EntityRenderer<PitbikeEntity> {
-                                                         ^
-/home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/client/PitbikeRenderer.java:32: error: cannot find symbol
-        matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(180.0f - MathHelper.lerp(tickDelta, entity.prevYaw, entity.getYaw())));
-                                                                                                            ^
-  symbol:   variable prevYaw
-  location: variable entity of type PitbikeEntity
-/home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/client/PitbikeRenderer.java:43: error: cannot find symbol
-        super.render(entity, yaw, tickDelta, matrices, vertices, light);
-        ^
-  symbol:   variable super
-  location: class PitbikeRenderer
-/home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/client/PitbikeModel.java:170: error: cannot find symbol
-        steering.pivotY = -bike.frontSpring() * 2.5f;
-                ^
-  symbol:   variable pivotY
-  location: variable steering of type ModelPart
-/home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/client/PitbikeModel.java:171: error: cannot find symbol
-        chain.pivotZ = (float) Math.sin(speed*1.2f) * 0.12f;
-             ^
-  symbol:   variable pivotZ
-  location: variable chain of type ModelPart
-/home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/client/PitbikeModel.java:173: error: cannot find symbol
-        enginePart.pivotX = (float)Math.sin((bike.age + tickDelta)*2.1f)*0.04f;
-                  ^
-  symbol:   variable pivotX
-  location: variable enginePart of type ModelPart
-/home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/item/BikeItem.java:16: error: isClient has private access in World
-        if (context.getWorld().isClient) return ActionResult.SUCCESS;
-                              ^
-/home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/entity/PitbikeEntity.java:306: error: method does not override or implement a method from a supertype
-    @Override public boolean isCollidable() { return true; }
-    ^
-/home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/entity/PitbikeEntity.java:308: error: method does not override or implement a method from a supertype
-    @Override protected void readCustomDataFromNbt(NbtCompound nbt) {
-    ^
-/home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/entity/PitbikeEntity.java:318: error: method does not override or implement a method from a supertype
-    @Override protected void writeCustomDataToNbt(NbtCompound nbt) {
-    ^
-/home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/client/PitbikeRenderer.java:26: error: method does not override or implement a method from a supertype
-    @Override public Identifier getTexture(PitbikeEntity entity) {
-    ^
-/home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/client/PitbikeRenderer.java:29: error: method does not override or implement a method from a supertype
-    @Override public void render(PitbikeEntity entity, float yaw, float tickDelta,
-    ^
-/home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/client/PitbikeModel.java:176: error: method does not override or implement a method from a supertype
-    @Override public void setAngles(PitbikeEntity entity, float limbAngle, float limbDistance,
-    ^
-/home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/client/PitbikeModel.java:18: error: type argument PitbikeEntity is not within bounds of type-variable T
-public final class PitbikeModel extends EntityModel<PitbikeEntity> {
-                                                    ^
-  where T is a type-variable:
-    T extends EntityRenderState declared in class EntityModel
-/home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/entity/PitbikeEntity.java:99: error: cannot find symbol
-        if (getWorld().isClient) return;
-            ^
-  symbol:   method getWorld()
-  location: class PitbikeEntity
-/home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/entity/PitbikeEntity.java:111: error: cannot find symbol
-        if (getWorld().isClient) return;
-            ^
-  symbol:   method getWorld()
-  location: class PitbikeEntity
-/home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/entity/PitbikeEntity.java:165: error: cannot find symbol
-        Vec3d beforeMove = getPos();
-                           ^
-  symbol:   method getPos()
-  location: class PitbikeEntity
-/home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/entity/PitbikeEntity.java:168: error: cannot find symbol
-        Vec3d actualMove = getPos().subtract(beforeMove);
-                           ^
-  symbol:   method getPos()
-  location: class PitbikeEntity
-/home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/entity/PitbikeEntity.java:195: error: cannot find symbol
-        if (getWorld() instanceof ServerWorld server && isOnGround() && age % 5 == 0 &&
-            ^
-  symbol:   method getWorld()
-  location: class PitbikeEntity
-/home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/entity/PitbikeEntity.java:223: error: cannot find symbol
-        if (!getWorld().isClient) getWorld().playSound(null, getX(), getY(), getZ(),
-             ^
-  symbol:   method getWorld()
-  location: class PitbikeEntity
-/home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/entity/PitbikeEntity.java:223: error: cannot find symbol
-        if (!getWorld().isClient) getWorld().playSound(null, getX(), getY(), getZ(),
-                                  ^
-  symbol:   method getWorld()
-  location: class PitbikeEntity
-/home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/entity/PitbikeEntity.java:233: error: cannot find symbol
-            VoxelShape collision = getWorld().getBlockState(pos).getCollisionShape(getWorld(), pos);
-                                   ^
-  symbol:   method getWorld()
-  location: class PitbikeEntity
-/home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/entity/PitbikeEntity.java:233: error: cannot find symbol
-            VoxelShape collision = getWorld().getBlockState(pos).getCollisionShape(getWorld(), pos);
-                                                                                   ^
-  symbol:   method getWorld()
-  location: class PitbikeEntity
-/home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/entity/PitbikeEntity.java:260: error: cannot find symbol
-            if (!getWorld().isClient && fuel() < 100f) {
-                 ^
-  symbol:   method getWorld()
-  location: class PitbikeEntity
-/home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/entity/PitbikeEntity.java:265: error: cannot find symbol
-            return ActionResult.success(getWorld().isClient);
-                                        ^
-  symbol:   method getWorld()
-  location: class PitbikeEntity
-/home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/entity/PitbikeEntity.java:268: error: cannot find symbol
-            if (!getWorld().isClient && condition() < 100) {
-                 ^
-  symbol:   method getWorld()
-  location: class PitbikeEntity
-/home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/entity/PitbikeEntity.java:273: error: cannot find symbol
-            return ActionResult.success(getWorld().isClient);
-                                        ^
-  symbol:   method getWorld()
-  location: class PitbikeEntity
-/home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/entity/PitbikeEntity.java:276: error: cannot find symbol
-            if (!getWorld().isClient && getFirstPassenger() == null && Math.abs(speed()) < 0.04) {
-                 ^
-  symbol:   method getWorld()
-  location: class PitbikeEntity
-/home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/entity/PitbikeEntity.java:280: error: cannot find symbol
-            return ActionResult.success(getWorld().isClient);
-                                        ^
-  symbol:   method getWorld()
-  location: class PitbikeEntity
-/home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/entity/PitbikeEntity.java:283: error: cannot find symbol
-            if (!getWorld().isClient) {
-                 ^
-  symbol:   method getWorld()
-  location: class PitbikeEntity
-/home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/entity/PitbikeEntity.java:298: error: cannot find symbol
-            return ActionResult.success(getWorld().isClient);
-                                        ^
-  symbol:   method getWorld()
-  location: class PitbikeEntity
-/home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/entity/PitbikeEntity.java:300: error: cannot find symbol
-        if (!getWorld().isClient && !player.hasVehicle()) {
-             ^
-  symbol:   method getWorld()
-  location: class PitbikeEntity
-/home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/entity/PitbikeEntity.java:304: error: cannot find symbol
-        return ActionResult.success(getWorld().isClient);
-                                    ^
-  symbol:   method getWorld()
-  location: class PitbikeEntity
-/home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/mixin/PlayerModelPoseMixin.java:61: error: cannot find symbol
-        rightSleeve.copyTransform(right);
-                   ^
-  symbol:   method copyTransform(ModelPart)
-  location: variable rightSleeve of type ModelPart
-/home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/mixin/PlayerModelPoseMixin.java:62: error: cannot find symbol
-        leftSleeve.copyTransform(left);
-                  ^
-  symbol:   method copyTransform(ModelPart)
-  location: variable leftSleeve of type ModelPart
-/home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/mixin/PlayerModelPoseMixin.java:63: error: cannot find symbol
-        rightPants.copyTransform(legR);
-                  ^
-  symbol:   method copyTransform(ModelPart)
-  location: variable rightPants of type ModelPart
-/home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/mixin/PlayerModelPoseMixin.java:64: error: cannot find symbol
-        leftPants.copyTransform(legL);
-                 ^
-  symbol:   method copyTransform(ModelPart)
-  location: variable leftPants of type ModelPart
-/home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/client/PitbikeRenderer.java:40: error: cannot find symbol
-        VertexConsumer consumer = vertices.getBuffer(RenderLayer.getEntityCutoutNoCull(getTexture(entity)));
-                                                                ^
-  symbol:   method getEntityCutoutNoCull(Identifier)
-  location: class RenderLayer
-/home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/client/PitbikeModel.java:41: error: cannot find symbol
-        return parent.addChild(name, ModelPartBuilder.create(), ModelTransform.pivot(x, y, z));
-                                                                              ^
-  symbol:   method pivot(float,float,float)
-  location: class ModelTransform
-Note: /home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/client/PitbikeStuntClient.java uses or overrides a deprecated API.
-/home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/client/PitbikeModel.java:178: error: render(MatrixStack,VertexConsumer,int,int,int) in PitbikeModel cannot override render(MatrixStack,VertexConsumer,int,int,int) in Model
-    @Override public void render(MatrixStack matrices, VertexConsumer vertices, int light, int overlay, int color) {
-                          ^
-  overridden method is final
-/home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/entity/PitbikeEntity.java:38: error: PitbikeEntity is not abstract and does not override abstract method writeCustomData(WriteView) in Entity
+/home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/entity/PitbikeEntity.java:39: error: PitbikeEntity is not abstract and does not override abstract method damage(ServerWorld,DamageSource,float) in Entity
 public final class PitbikeEntity extends Entity {
              ^
-/home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/PitbikeStunt.java:26: error: incompatible types: String cannot be converted to RegistryKey<EntityType<?>>
-                    .dimensions(0.98f, 1.25f).maxTrackingRange(10).trackingTickInterval(1).build("pitbikestunt:pitbike"));
-                                                                                                 ^
-/home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/entity/PitbikeEntity.java:309: error: incompatible types: Optional<Integer> cannot be converted to int
-        setVariant(nbt.getInt("BikeVariant"));
-                             ^
-/home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/client/PitbikeStuntClient.java:29: error: incompatible types: String cannot be converted to Category
-                InputUtil.Type.KEYSYM, key, CATEGORY));
-                                            ^
-Note: Some messages have been simplified; recompile with -Xdiags:verbose to get full output
-/home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/client/PitbikeRenderer.java:24: error: cannot find symbol
-        this.shadowRadius = 0.54f;
-            ^
-  symbol: variable shadowRadius
-57 errors
+/home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/entity/PitbikeEntity.java:266: error: cannot find symbol
+            return ActionResult.success(getEntityWorld().isClient());
+                               ^
+  symbol:   method success(boolean)
+  location: interface ActionResult
+/home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/entity/PitbikeEntity.java:274: error: cannot find symbol
+            return ActionResult.success(getEntityWorld().isClient());
+                               ^
+  symbol:   method success(boolean)
+  location: interface ActionResult
+/home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/entity/PitbikeEntity.java:281: error: cannot find symbol
+            return ActionResult.success(getEntityWorld().isClient());
+                               ^
+  symbol:   method success(boolean)
+  location: interface ActionResult
+/home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/entity/PitbikeEntity.java:299: error: cannot find symbol
+            return ActionResult.success(getEntityWorld().isClient());
+                               ^
+  symbol:   method success(boolean)
+  location: interface ActionResult
+/home/runner/work/-/-/project/src/main/java/dev/pitbike/stunt/entity/PitbikeEntity.java:306: error: cannot find symbol
+        return ActionResult.success(getEntityWorld().isClient());
+                           ^
+  symbol:   method success(boolean)
+  location: interface ActionResult
+8 errors
 	at org.gradle.api.internal.tasks.compile.JdkJavaCompiler.execute(JdkJavaCompiler.java:89)
 	at org.gradle.api.internal.tasks.compile.JdkJavaCompiler.execute(JdkJavaCompiler.java:50)
 	at org.gradle.api.internal.tasks.compile.NormalizingJavaCompiler.delegateAndHandleErrors(NormalizingJavaCompiler.java:98)
@@ -1153,7 +324,7 @@ Note: Some messages have been simplified; recompile with -Xdiags:verbose to get 
 	at org.gradle.internal.execution.steps.IdentifyStep.execute(IdentifyStep.java:31)
 	at org.gradle.internal.execution.impl.DefaultExecutionEngine$1.execute(DefaultExecutionEngine.java:64)
 	at org.gradle.api.internal.tasks.execution.ExecuteActionsTaskExecuter.executeIfValid(ExecuteActionsTaskExecuter.java:132)
-	... 61 more
+	... 30 more
 
 
 Deprecated Gradle features were used in this build, making it incompatible with Gradle 10.
@@ -1162,5 +333,5 @@ You can use '--warning-mode all' to show the individual deprecation warnings and
 
 For more on this, please refer to https://docs.gradle.org/9.2.1/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
 
-BUILD FAILED in 56s
+BUILD FAILED in 1m 2s
 1 actionable task: 1 executed
