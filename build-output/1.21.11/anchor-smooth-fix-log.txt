@@ -1,0 +1,2 @@
+PASS: seat follows interpolated chassis every tick, smoother remote prediction
+PASS: rider torso fixed and arms held on wide handlebar grip
