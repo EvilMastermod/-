@@ -1,0 +1,125 @@
+{
+  "verified_from": "GitHub-hosted runner (not the user's network)",
+  "checked_utc": "2026-10-22T14:22:39Z",
+  "countries": {
+    "US": {
+      "tested": 115,
+      "country_verified": 60,
+      "other_country": 3,
+      "selected": [
+        {
+          "server": "47.253.226.114:443",
+          "http_ms": 47,
+          "exit": "US"
+        },
+        {
+          "server": "147.182.212.232:56565",
+          "http_ms": 59,
+          "exit": "US"
+        },
+        {
+          "server": "195.123.235.183:443",
+          "http_ms": 70,
+          "exit": "US"
+        },
+        {
+          "server": "195.123.235.177:443",
+          "http_ms": 75,
+          "exit": "US"
+        },
+        {
+          "server": "104.18.37.127:443",
+          "http_ms": 79,
+          "exit": "US"
+        },
+        {
+          "server": "185.95.231.156:443",
+          "http_ms": 82,
+          "exit": "US"
+        },
+        {
+          "server": "167.17.69.171:443",
+          "http_ms": 92,
+          "exit": "US"
+        },
+        {
+          "server": "147.45.60.160:8444",
+          "http_ms": 126,
+          "exit": "US"
+        },
+        {
+          "server": "169.40.42.224:443",
+          "http_ms": 150,
+          "exit": "US"
+        },
+        {
+          "server": "5.34.178.120:443",
+          "http_ms": 157,
+          "exit": "US"
+        },
+        {
+          "server": "69.42.222.165:443",
+          "http_ms": 165,
+          "exit": "US"
+        },
+        {
+          "server": "www.speedtest.net:443",
+          "http_ms": 170,
+          "exit": "US"
+        },
+        {
+          "server": "159.89.87.21:28190",
+          "http_ms": 193,
+          "exit": "US"
+        },
+        {
+          "server": "169.40.42.235:443",
+          "http_ms": 196,
+          "exit": "US"
+        },
+        {
+          "server": "23.191.200.207:443",
+          "http_ms": 196,
+          "exit": "US"
+        },
+        {
+          "server": "xray1-direct-mci1-fs-ce.freesocks.work:443",
+          "http_ms": 214,
+          "exit": "US"
+        }
+      ]
+    },
+    "RU": {
+      "tested": 100,
+      "country_verified": 5,
+      "other_country": 24,
+      "selected": [
+        {
+          "server": "45.128.78.178:443",
+          "http_ms": 454,
+          "exit": "RU"
+        },
+        {
+          "server": "46.254.17.88:30065",
+          "http_ms": 1400,
+          "exit": "RU"
+        },
+        {
+          "server": "45.91.52.28:443",
+          "http_ms": 2207,
+          "exit": "RU"
+        },
+        {
+          "server": "0f5857g.msk1.h1clayd.click:443",
+          "http_ms": 2514,
+          "exit": "RU"
+        },
+        {
+          "server": "9f6635t.msk1.h1clayd.click:443",
+          "http_ms": 3076,
+          "exit": "RU"
+        }
+      ]
+    }
+  }
+}
