@@ -58,9 +58,11 @@ jobs:
           mkdir -p donor-unpacked
           unzip -q /tmp/pitbike-donor-kit.zip -d donor-unpacked
           python3 donor-unpacked/scripts/install_exact_donor.py
-      - name: Correct turning and motor sound, animate original bike
+      - name: Install motor sound encoder
         shell: bash
-        run: python3 pitbike-stunt/fix-audio-and-steering-12111.py
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq ffmpeg
       - name: Repair engine audio, steering, suspension and rider pose
         shell: bash
         run: |
