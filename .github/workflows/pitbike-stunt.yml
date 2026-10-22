@@ -51,6 +51,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+          exec > >(tee donor-install.log) 2>&1
           # Reconstruct the exact user-owned binary model from six GitHub text assets.
           cat pitbike-stunt/donor-parts/part-*.b64 | base64 --decode > /tmp/pitbike-donor-kit.zip
           echo '487d87e201736c99018439fd16c6d8c7c7527e36529b6fa7c44bdc7c2a7059be  /tmp/pitbike-donor-kit.zip' | sha256sum --check
@@ -72,6 +73,7 @@ jobs:
           mkdir -p build-output/1.21.11
           if [ -f pitbike-build.log ]; then cp pitbike-build.log build-output/1.21.11/build-log.txt; fi
           if [ -f port-12111.log ]; then cp port-12111.log build-output/1.21.11/port-log.txt; fi
+          if [ -f donor-install.log ]; then cp donor-install.log build-output/1.21.11/donor-install-log.txt; fi
           if [ -f project/build/libs/pitbike-stunt-1.21.11-0.3.0-alpha.jar ]; then
             cp project/build/libs/pitbike-stunt-1.21.11-0.3.0-alpha.jar build-output/1.21.11/PitbikeStunt-1.21.11.jar
             echo 'SUCCESS' > build-output/1.21.11/status.txt
