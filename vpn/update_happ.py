@@ -21,6 +21,9 @@ def xray(o, tag):
         return None
     reality = tls.get("reality") or {}
     stream = {"network": network, "security": "reality" if reality.get("enabled") else "tls"}
+    # Xray REALITY rejects WebSocket: retain only RAW/TCP, XHTTP, gRPC.
+    if stream["security"] == "reality" and network not in ("tcp", "grpc"):
+        return None
     if stream["security"] == "reality":
         if not reality.get("public_key"):
             return None
