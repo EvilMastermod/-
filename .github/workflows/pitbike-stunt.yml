@@ -8,11 +8,15 @@ on:
       - '.github/workflows/pitbike-stunt.yml'
   workflow_dispatch:
 
+concurrency:
+  group: pitbike-stunt-build
+  cancel-in-progress: true
+
 jobs:
   build:
     runs-on: ubuntu-latest
     permissions:
-      contents: read
+      contents: write
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-java@v4
@@ -30,21 +34,37 @@ jobs:
           mkdir -p project
           unzip -q /tmp/pitbike-source.zip -d project
       - name: Build Minecraft mod
+        id: compilation
+        continue-on-error: true
         working-directory: project
         shell: bash
         run: |
           set -o pipefail
           gradle --no-daemon build --stacktrace 2>&1 | tee ../pitbike-build.log
-      - name: Upload tested mod JAR
+      - name: Save compiled mod or error log to separate branch
+        if: always()
+        shell: bash
+        run: |
+          mkdir -p build-output
+          if [ -f pitbike-build.log ]; then cp pitbike-build.log build-output/build-log.txt; fi
+          if [ -f project/build/libs/pitbike-stunt-1.21.1-0.2.0-alpha.jar ]; then
+            cp project/build/libs/pitbike-stunt-1.21.1-0.2.0-alpha.jar build-output/PitbikeStunt-1.21.1.jar
+            echo 'SUCCESS' > build-output/status.txt
+          else
+            echo 'FAILED' > build-output/status.txt
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -f build-output
+          git commit -m 'Publish Pitbike Stunt build result [skip ci]' || exit 0
+          git push origin HEAD:pitbike-stunt-build
+      - name: Upload compiled mod
+        if: steps.compilation.outcome == 'success'
         uses: actions/upload-artifact@v4
         with:
           name: PitbikeStunt-1.21.1-jar
           path: project/build/libs/pitbike-stunt-1.21.1-0.2.0-alpha.jar
           if-no-files-found: error
-      - name: Upload logs
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: PitbikeStunt-build-log
-          path: pitbike-build.log
-          if-no-files-found: ignore
+      - name: Mark compilation errors as failed
+        if: steps.compilation.outcome != 'success'
+        run: exit 1
