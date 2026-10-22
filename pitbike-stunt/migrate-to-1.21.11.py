@@ -21,7 +21,7 @@ for a,b in replacements.items():
     s=s.replace(a,b)
 props.write_text(s)
 p=root/"build.gradle"
-s=p.read_text().replace("id 'fabric-loom' version '1.9.2'", "id 'fabric-loom' version '1.14'")
+s=p.read_text().replace("id 'fabric-loom' version '1.9.2'", "id 'fabric-loom' version '1.14.10'")
 p.write_text(s)
 p=root/"src/main/resources/fabric.mod.json"
 data=json.loads(p.read_text())
