@@ -143,7 +143,7 @@ public final class PitbikeRenderer extends EntityRenderer<PitbikeEntity, Pitbike
     @Override public void render(BikeRenderState state, MatrixStack matrices,
                                  OrderedRenderCommandQueue queue, CameraRenderState camera) {
         matrices.push();
-        matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(180f - state.yaw));
+        matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(-state.yaw));
         if (state.trick==8 && !state.onGround)
             matrices.multiply(RotationAxis.POSITIVE_Y.rotation((float)Math.sin(state.age*.35f)*.42f));
         matrices.multiply(RotationAxis.POSITIVE_Z.rotation(state.rollAngle));
@@ -182,3 +182,10 @@ s=s.replace('    @Override public boolean canHit() { return true; }', '    @Over
 entity.write_text(s)
 p = java/'item/BikeItem.java'
 p.write_text(p.read_text().replace('startRiding(bike, true)', 'startRiding(bike)'))
+
+# Local model front wheel is at z=-10; the renderer already flips Z.
+# Adding 180 degrees rotated the visible bike backward relative to Minecraft's
+# +Z movement when yaw=0. Rendering at -yaw aligns visual nose and velocity.
+# Validate the throttle mapping as part of the self-contained test.
+test=java/'physics/BikePhysics.java'
+assert 'speed += c.acceleration' in test.read_text(), 'W throttle must accelerate toward positive velocity'
