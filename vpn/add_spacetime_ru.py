@@ -21,6 +21,7 @@ TARGET=BASE/"Happ_US_RU_Auto.json"
 SINGLE=BASE/"XetsiwVPN_Spacetime_RU.json"
 REPORT=BASE/"XetsiwVPN_Spacetime_RU_check.json"
 SOURCES=[
+  "https://raw.githubusercontent.com/3inker/v2ray-subscription/main/subs/all_ru.txt",
   "https://raw.githubusercontent.com/whoahaow/rjsxrd/main/githubmirror/bypass/bypass-7.txt",
   "https://raw.githubusercontent.com/whoahaow/rjsxrd/main/githubmirror/bypass/bypass-6.txt",
   "https://raw.githubusercontent.com/rtwo2/FastNodes/main/sub/countries/RU.txt",
@@ -88,7 +89,8 @@ def run():
                 endpoint=core.server(p)
                 if endpoint in prev or endpoint in seen:continue
                 seen.add(endpoint)
-                priority=(0 if "9f6635t.msk1.h1clayd.click" in line else
+                priority=(-2 if "3inker/v2ray-subscription" in url else
+                          0 if "9f6635t.msk1.h1clayd.click" in line else
                           1 if "🇷🇺" in line or "%F0%9F%87%B7" in line else 2)
                 candidates.append((priority,p))
             print(url,"new unique candidates so far",len(candidates),flush=True)
