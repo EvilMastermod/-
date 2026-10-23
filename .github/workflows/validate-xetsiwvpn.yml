@@ -1,0 +1,41 @@
+name: Validate XetsiwVPN profiles
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - ".github/workflows/validate-xetsiwvpn.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download Xray core and geo database
+        run: |
+          curl -fLsS --retry 2 -o /tmp/xray.zip https://github.com/XTLS/Xray-core/releases/latest/download/Xray-linux-64.zip
+          unzip -o -j /tmp/xray.zip xray geoip.dat geosite.dat -d .
+          chmod +x xray
+      - name: Check brand, global pool size, and all Xray configs
+        run: |
+          python3 - <<'PY'
+          import json, pathlib, os, subprocess, tempfile
+          profiles=json.loads(pathlib.Path("vpn/Happ_US_RU_Auto.json").read_text(encoding="utf-8"))
+          assert len(profiles)>0
+          assert all(p["remarks"].startswith("XetsiwVPN · ") for p in profiles)
+          ultra=next(p for p in profiles if "⚡ ВЕСЬ МИР — УЛЬТРА-ПИНГ" in p["remarks"])
+          count=sum(p["protocol"]=="vless" for p in ultra["outbounds"])
+          assert count>=80, f"only {count} ultra nodes"
+          with tempfile.TemporaryDirectory() as temp:
+            for n,p in enumerate(profiles):
+              path=pathlib.Path(temp)/f"p_{n}.json"
+              path.write_text(json.dumps(p,ensure_ascii=False),encoding="utf-8")
+              run=subprocess.run(["./xray","run","-test","-config",str(path)],
+                                 capture_output=True,text=True,env=dict(os.environ,XRAY_LOCATION_ASSET="."))
+              if run.returncode: raise RuntimeError(f'{p["remarks"]} : {run.stderr[-900:]}')
+          print(f"PASS XetsiwVPN: {len(profiles)} profiles, {count} ultra nodes validated")
+          PY
