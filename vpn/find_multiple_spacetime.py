@@ -22,7 +22,7 @@ OLD_SPECIAL = HERE / "XetsiwVPN_Spacetime_NEW_IP.json"
 COUNTRIES = [("US", "🇺🇸", "США", 10, 175),
              ("UA", "🇺🇦", "УКРАИНА", 5, 60),
              ("RU", "🇷🇺", "РОССИЯ", 5, 180)]
-TOTAL_CAP = 20
+TOTAL_CAP = 20  # Add only verified unique exits; no placeholder profiles.
 
 def ip_or_none(value):
     try:
