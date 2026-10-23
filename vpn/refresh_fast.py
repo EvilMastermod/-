@@ -29,10 +29,20 @@ COUNTRIES = {
     "DE": ("🇩🇪", "ГЕРМАНИЯ"),
     "NL": ("🇳🇱", "НИДЕРЛАНДЫ"),
     "FI": ("🇫🇮", "ФИНЛЯНДИЯ"),
+    "FR": ("🇫🇷", "ФРАНЦИЯ"),
+    "PL": ("🇵🇱", "ПОЛЬША"),
+    "GB": ("🇬🇧", "ВЕЛИКОБРИТАНИЯ"),
+    "CA": ("🇨🇦", "КАНАДА"),
+    "JP": ("🇯🇵", "ЯПОНИЯ"),
+    "SG": ("🇸🇬", "СИНГАПУР"),
+    "SE": ("🇸🇪", "ШВЕЦИЯ"),
 }
-MAX_TESTS = {"US": 125, "RU": 190, "DE": 95, "NL": 95, "FI": 75}
-MAX_POOL = {"US": 16, "RU": 12, "DE": 12, "NL": 12, "FI": 9}
-MANUAL_LIMIT = {"US": 7, "RU": 7, "DE": 5, "NL": 5, "FI": 4}
+MAX_TESTS = {"US": 130, "RU": 170, "DE": 85, "NL": 85, "FI": 70,
+             "FR": 70, "PL": 70, "GB": 60, "CA": 65, "JP": 75, "SG": 65, "SE": 65}
+MAX_POOL = {"US": 24, "RU": 16, "DE": 20, "NL": 20, "FI": 12,
+            "FR": 16, "PL": 16, "GB": 14, "CA": 16, "JP": 18, "SG": 16, "SE": 14}
+MANUAL_LIMIT = {"US": 12, "RU": 12, "DE": 10, "NL": 10, "FI": 9,
+                "FR": 10, "PL": 10, "GB": 10, "CA": 10, "JP": 10, "SG": 10, "SE": 10}
 PRIVATE_IPS = ["geoip:private"]
 
 
@@ -306,6 +316,56 @@ def build_auto(template, country, emoji, name, verified, gaming=False):
     }
     return cfg
 
+def build_world(template, selected):
+    """Global least HTTP latency, measured locally by Xray, over every distinct verified country node."""
+    all_proxies = []
+    seen = set()
+    for country, nodes in selected.items():
+        for r in nodes:
+            p = r["proxy"]
+            k = server(p)
+            if k in seen:
+                continue
+            seen.add(k)
+            all_proxies.append(r)
+    if not all_proxies:
+        raise RuntimeError("No working nodes to build world-wide selection")
+    cfg = copy.deepcopy(template)
+    cfg["remarks"] = "🌍 ВЕСЬ МИР — АВТОВЫБОР — МИНИМАЛЬНЫЙ ПИНГ"
+    # Fallback and initial ordering prefer fastest known probe.
+    all_proxies.sort(key=lambda x: (x.get("http_ms") is None,
+                                    x.get("http_ms") or 99999))
+    outbounds = []
+    for i, record in enumerate(all_proxies, 1):
+        p = copy.deepcopy(record["proxy"])
+        p["tag"] = f"world-{i}"
+        outbounds.append(p)
+    cfg["outbounds"] = outbounds + [
+        {"tag": "direct", "protocol": "freedom", "settings": {}}
+    ]
+    cfg["routing"] = {
+        "domainStrategy": "AsIs",
+        "balancers": [{
+            "tag": "auto",
+            "selector": ["world-"],
+            "fallbackTag": "world-1",
+            "strategy": {"type": "leastPing"}
+        }],
+        "rules": [
+            {"type": "field", "ip": PRIVATE_IPS, "outboundTag": "direct"},
+            {"type": "field", "inboundTag": ["socks", "http"], "balancerTag": "auto"}
+        ]
+    }
+    # Probing all at once frequently is excessive; 90 seconds balances freshness and load.
+    cfg["observatory"] = {
+        "subjectSelector": ["world-"],
+        "probeUrl": "https://www.gstatic.com/generate_204",
+        "probeInterval": "90s",
+        "enableConcurrency": True
+    }
+    return cfg
+
+
 def build_manual(template, country, emoji, name, verified, i):
     cfg = copy.deepcopy(template)
     cfg["remarks"] = f"{emoji} {name} — СЕРВЕР {i + 1}"
@@ -335,6 +395,7 @@ def preflight_profiles(existing):
     build_auto(template, "US", "🇺🇸", "США", [sample])
     build_auto(template, "US", "🇺🇸", "США", [sample], gaming=True)
     build_manual(template, "US", "🇺🇸", "США", [sample], 0)
+    build_world(template, {"US": [sample]})
 
 
 def main():
@@ -391,7 +452,7 @@ def main():
                  "exit": x["exit"]}
                 for x in verified]
         }
-    profiles = []
+    profiles = [build_world(template, selected)] if selected else []
     for country, (emoji, name) in COUNTRIES.items():
         verified = selected.get(country)
         if not verified:
@@ -406,7 +467,7 @@ def main():
             profiles.append(build_auto(old_bases[country] or template,
                                        country, emoji, name, selected[country], gaming=True))
     europe = []
-    for code in ("DE", "NL", "FI"):
+    for code in ("DE", "NL", "FI", "FR", "PL", "GB", "SE"):
         europe.extend(selected.get(code, []))
     if europe:
         europe = sorted(europe, key=lambda x: x["http_ms"] or 99999)[:8]
