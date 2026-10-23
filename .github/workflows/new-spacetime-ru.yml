@@ -1,0 +1,42 @@
+name: XetsiwVPN - new Russian exit for Spacetime
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - "vpn/add_spacetime_ru.py"
+      - ".github/workflows/new-spacetime-ru.yml"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: happ-vpn-refresh
+  cancel-in-progress: false
+
+jobs:
+  find:
+    runs-on: ubuntu-latest
+    timeout-minutes: 14
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download Xray
+        run: |
+          curl -fLsS --retry 2 -o /tmp/xray.zip https://github.com/XTLS/Xray-core/releases/latest/download/Xray-linux-64.zip
+          unzip -o -j /tmp/xray.zip xray geoip.dat geosite.dat -d .
+          chmod +x xray
+      - name: Check fresh endpoints and confirm genuinely new RU egress IP
+        run: python3 vpn/add_spacetime_ru.py
+      - name: Publish XetsiwVPN and separate RU profile
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          for attempt in 1 2 3 4 5; do
+            git fetch origin main
+            git reset --mixed origin/main
+            git add vpn/Happ_US_RU_Auto.json vpn/XetsiwVPN_Spacetime_RU.json vpn/XetsiwVPN_Spacetime_RU_check.json
+            if git diff --cached --quiet; then exit 0; fi
+            git commit -m "Publish verified different RU exit for XetsiwVPN Spacetime"
+            if git push origin HEAD:main; then exit 0; fi
+          done
+          exit 1
