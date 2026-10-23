@@ -382,6 +382,43 @@ def build_manual(template, country, emoji, name, verified, i):
     return cfg
 
 
+def build_discord_voice(template, country, emoji, name, verified, backup=False):
+    """Pin Discord voice to one checked endpoint to avoid mid-call auto-switching.
+    
+    Happ must still use UDP-capable TUN; a JSON profile cannot force OS-wide interception.
+    """
+    eligible = [r for r in verified if r.get("success_rate") == 1.0 and
+                r.get("proxy") and safe(r["proxy"])]
+    if not eligible:
+        eligible = [r for r in verified if r.get("proxy") and safe(r["proxy"])]
+    if not eligible:
+        raise ValueError("No stable node for Discord " + country)
+    eligible.sort(key=lambda r: (r.get("http_ms") is None,
+                                 (r.get("http_ms") or 99999) +
+                                 0.2 * (r.get("jitter_ms") or 1000)))
+    index = 1 if backup and len(eligible) > 1 else 0
+    picked = eligible[index]
+    cfg = copy.deepcopy(template)
+    cfg["remarks"] = f"🎧 DISCORD — {name} — " + ("РЕЗЕРВ" if backup else "ГОЛОС RTC")
+    proxy = copy.deepcopy(picked["proxy"])
+    proxy["tag"] = "proxy"
+    cfg["outbounds"] = [proxy, {"tag": "direct", "protocol": "freedom", "settings": {}}]
+    cfg["routing"] = {
+        "domainStrategy": "AsIs",
+        "rules": [
+            {"type": "field", "ip": PRIVATE_IPS, "outboundTag": "direct"},
+            {"type": "field", "network": "udp", "outboundTag": "proxy"},
+            {"type": "field", "inboundTag": ["socks", "http"], "outboundTag": "proxy"}
+        ]
+    }
+    cfg.pop("observatory", None)
+    # The local UDP relay remains enabled when used with Happ TUN.
+    for inbound in cfg.get("inbounds", []):
+        if inbound.get("protocol") == "socks":
+            inbound.setdefault("settings", {})["udp"] = True
+    return cfg
+
+
 def preflight_profiles(existing):
     """Detect missing generator variables before lengthy remote checks."""
     template = next((p for p in existing if "АВТОВЫБОР" in p.get("remarks", "")), None)
@@ -396,6 +433,7 @@ def preflight_profiles(existing):
     build_auto(template, "US", "🇺🇸", "США", [sample], gaming=True)
     build_manual(template, "US", "🇺🇸", "США", [sample], 0)
     build_world(template, {"US": [sample]})
+    build_discord_voice(template, "US", "🇺🇸", "США", [sample])
 
 
 def main():
@@ -473,6 +511,16 @@ def main():
         europe = sorted(europe, key=lambda x: x["http_ms"] or 99999)[:8]
         profiles.append(build_auto(template, "EU", "🎮", "ЕВРОПА",
                                    europe, gaming=True))
+    # Discord UDP voice: fixed server so observatory does not switch during active calls.
+    for country in ("NL", "DE", "RU", "US"):
+        if selected.get(country):
+            emoji, name = COUNTRIES[country]
+            template_country = old_bases[country] or template
+            profiles.append(build_discord_voice(template_country, country, emoji, name,
+                                                selected[country]))
+            if len(selected[country]) > 1:
+                profiles.append(build_discord_voice(template_country, country, emoji, name,
+                                                    selected[country], backup=True))
     # Standalone profiles let Happ users measure from their own network.
     for country, (emoji, name) in COUNTRIES.items():
         verified = selected.get(country)
