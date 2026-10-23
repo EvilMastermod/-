@@ -55,9 +55,12 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          # Keep the freshly generated, Xray-validated files when main has moved
+          # during the check. Mixed reset updates index/HEAD, not the generated files.
+          git fetch origin main
+          git reset --mixed origin/main
           git add vpn/Happ_US_RU_Auto.json vpn/FAST_NODES_RESULTS.json
           if ! git diff --cached --quiet; then
-            git commit -m "Refresh low-latency Happ US and RU verified servers"
-            git pull --rebase origin main
+            git commit -m "Refresh verified Happ global and country proxy pools"
             git push origin HEAD:main
           fi
