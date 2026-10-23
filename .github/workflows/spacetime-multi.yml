@@ -1,0 +1,42 @@
+name: XetsiwVPN Spacetime multiple verified exits
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'vpn/find_multiple_spacetime.py'
+      - '.github/workflows/spacetime-multi.yml'
+permissions:
+  contents: write
+jobs:
+  find-verified-exits:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Xray
+        run: |
+          curl -fLsS --retry 3 -o /tmp/xray.zip https://github.com/XTLS/Xray-core/releases/latest/download/Xray-linux-64.zip
+          unzip -o -j /tmp/xray.zip xray geoip.dat geosite.dat -d .
+          chmod +x ./xray
+      - name: Find and confirm distinct Spacetime alternatives
+        run: python3 vpn/find_multiple_spacetime.py
+      - name: Upload discovery results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: spacetime-multi-verified
+          path: |
+            vpn/XetsiwVPN_Spacetime_Multi.json
+            vpn/XetsiwVPN_Spacetime_Multi_report.json
+          if-no-files-found: warn
+      - name: Publish verified subscription and report
+        if: success()
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add vpn/XetsiwVPN_Spacetime_Multi.json vpn/XetsiwVPN_Spacetime_Multi_report.json
+          if ! git diff --cached --quiet; then
+            git commit -m "Publish multiple Xray-verified Spacetime exits"
+            git pull --rebase origin main
+            git push origin HEAD:main
+          fi
