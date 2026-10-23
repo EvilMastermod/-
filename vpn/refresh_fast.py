@@ -424,19 +424,33 @@ def build_world(template, selected):
     return cfg
 
 
-def build_ultra_world(world_cfg):
-    """All-country ultra selector (112 unique already-verified proxy endpoints).
+def build_ultra_world(world_cfg, verified_by_country=None):
+    """Fast global selector: 112 distinct working endpoints from verified countries.
 
-    Final leastPing check is made by Xray on the user's machine. This does not
-    guarantee the lowest game RTT and does not change the country automatically
-    based on the game the user is running.
+    Source measurements only seed initial order. Xray measures connection latency
+    again on the Happ user's own device; not a guarantee of gaming latency.
     """
     cfg = copy.deepcopy(world_cfg)
     candidates = [p for p in world_cfg["outbounds"] if p.get("protocol") == "vless"]
-    # The world pool has been ordered by the source runner's verified HTTP RTT.
-    if len(candidates) < 80:
+    allowed = {server(p) for p in candidates}
+    if verified_by_country:
+        ranked_records = [r for group in verified_by_country.values() for r in group
+                          if server(r["proxy"]) in allowed]
+        ranked_records.sort(key=lambda r: (
+            r.get("success_rate", 0) < 1,
+            (r.get("http_ms") or 99999) + .2 * (r.get("jitter_ms") or 500)))
+        ranked, seen = [], set()
+        for record in ranked_records:
+            p = record["proxy"]
+            k = server(p)
+            if k in seen: continue
+            seen.add(k)
+            ranked.append(p)
+    else:
+        ranked = candidates
+    if len(ranked) < 80:
         raise ValueError("Need >=80 actually verified candidates for ultra mode")
-    ranked = candidates[:min(112, len(candidates))]
+    ranked = ranked[:112]
     proxies = []
     for index, p in enumerate(ranked, 1):
         node = copy.deepcopy(p)
@@ -623,7 +637,7 @@ def main():
         }
     profiles = [build_world(template, selected)] if selected else []
     if profiles and sum(1 for x in profiles[0]["outbounds"] if x["protocol"] == "vless") >= 80:
-        profiles.insert(0, build_ultra_world(profiles[0]))
+        profiles.insert(0, build_ultra_world(profiles[0], selected))
     for country, (emoji, name) in COUNTRIES.items():
         verified = selected.get(country)
         if not verified:
