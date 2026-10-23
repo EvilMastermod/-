@@ -351,35 +351,35 @@
     "RU": {
       "tested": 420,
       "country_verified": 4,
-      "wrong_country": 47,
+      "wrong_country": 46,
       "retained_old_nodes": false,
       "selected": [
         {
           "server": "193.160.141.2:8443",
-          "http_ms": 648,
-          "jitter_ms": 22,
+          "http_ms": 419,
+          "jitter_ms": 52,
           "success_rate": 1.0,
           "exit": "RU"
         },
         {
           "server": "213.226.127.71:2066",
-          "http_ms": 974,
-          "jitter_ms": 73,
+          "http_ms": 724,
+          "jitter_ms": 125,
           "success_rate": 1.0,
           "exit": "RU"
         },
         {
           "server": "xsru1.ddnsfree.com:443",
-          "http_ms": 1117,
-          "jitter_ms": 658,
+          "http_ms": 902,
+          "jitter_ms": 473,
           "success_rate": 1.0,
           "exit": "RU"
         },
         {
           "server": "xsru2.freeddns.org:443",
-          "http_ms": 1648,
-          "jitter_ms": 6,
-          "success_rate": 1.0,
+          "http_ms": 1178,
+          "jitter_ms": null,
+          "success_rate": 0.5,
           "exit": "RU"
         }
       ]
@@ -2336,5 +2336,6 @@
         }
       ]
     }
-  }
+  },
+  "ru_updated_utc": "2026-10-23T21:39:32Z"
 }
