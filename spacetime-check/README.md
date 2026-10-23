@@ -1,15 +1,18 @@
 # XetsiwVPN — Spacetime diagnostics
 
-Independent diagnostics; does not modify existing VPN profiles.
+GitHub Actions checks network reachability and **actually starts Xray** with the existing separate Spacetime VLESS profile. The main VPN subscription is never overwritten.
 
-## What it checks
-- TCP reachability of listed candidate endpoints
-- HTTPS availability of a *specified* Spacetime domain from a GitHub-hosted runner
-- Runner public egress IP and response statuses
+## Checks
+- TCP reachability of known candidates (TCP open does not imply VPN access)
+- Runs Xray using `vpn/XetsiwVPN_Spacetime_NEW_IP.json`, validates the config and sends two HTTPS requests through local SOCKS5
+- Confirms public tunnel exit IP, US exit country, and that the exit differs from the GitHub runner IP and existing subscription endpoints
+- Saves machine-readable `spacetime-xray-tunnel-report` artifact
+- Optional direct HTTPS probe of a specified Spacetime hostname (from GitHub runner, not the tunnel)
 
-**Important:** a reachable TCP socket does not mean the endpoint is a working VPN, that its *VPN exit IP* differs from older profiles, or that Spacetime accepts it. GitHub Actions uses a separate network from an actual VPN connection.
+## Limitations
+A successful tunnel check **does not** demonstrate that the Spacetime game/service accepts that IP. Its actual host, login and application-level block response have not been tested. A reachable TCP port alone is never sufficient.
 
-## Running
-Open **Actions → Spacetime connectivity check → Run workflow**, enter the actual Spacetime hostname (without https://) and run. Find the downloadable diagnostic report in the run's Artifacts section.
+## How to run
+GitHub → Actions → Spacetime connectivity check → Run workflow, or submit a PR modifying `spacetime-check/**`.
 
-Candidates are listed in `candidates.csv`. Do not put access keys, authentication URLs, or VPN subscription tokens in that file.
+Known candidates are listed in `candidates.csv`. Do not put credentials or private subscription tokens in that file.
