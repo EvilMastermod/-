@@ -350,36 +350,15 @@
     },
     "RU": {
       "tested": 420,
-      "country_verified": 4,
-      "wrong_country": 40,
+      "country_verified": 1,
+      "wrong_country": 41,
       "retained_old_nodes": false,
       "selected": [
         {
           "server": "213.226.127.71:2066",
-          "http_ms": 998,
-          "jitter_ms": 118,
+          "http_ms": 1051,
+          "jitter_ms": 258,
           "success_rate": 1.0,
-          "exit": "RU"
-        },
-        {
-          "server": "147.45.175.81:443",
-          "http_ms": 784,
-          "jitter_ms": null,
-          "success_rate": 0.5,
-          "exit": "RU"
-        },
-        {
-          "server": "xsru1.ddnsfree.com:443",
-          "http_ms": 798,
-          "jitter_ms": null,
-          "success_rate": 0.5,
-          "exit": "RU"
-        },
-        {
-          "server": "194.87.143.165:8443",
-          "http_ms": 1053,
-          "jitter_ms": null,
-          "success_rate": 0.5,
           "exit": "RU"
         }
       ]
@@ -2126,5 +2105,6 @@
         }
       ]
     }
-  }
+  },
+  "ru_updated_utc": "2026-10-23T17:26:46Z"
 }
