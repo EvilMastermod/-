@@ -1,0 +1,10 @@
+{
+  "country": "US",
+  "exit_ip": "216.167.126.97",
+  "server_endpoint": "216.167.126.97:443",
+  "checked_utc": "2026-10-23T16:30:24Z",
+  "http_ms_from_github_runner": 166,
+  "not_in_existing_subscription_endpoints": true,
+  "existing_profiles_kept_unchanged": true,
+  "note": "A fresh endpoint/exit IP is not proof that the game has not blocked it."
+}
