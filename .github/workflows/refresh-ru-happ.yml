@@ -1,0 +1,58 @@
+name: Happ VPN Russia - extra verification
+
+on:
+  schedule:
+    - cron: "41 */3 * * *"
+  workflow_dispatch:
+  push:
+    paths:
+      - "vpn/refresh_ru.py"
+      - ".github/workflows/refresh-ru-happ.yml"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: happ-vpn-refresh
+  cancel-in-progress: false
+
+jobs:
+  verify-ru:
+    runs-on: ubuntu-latest
+    timeout-minutes: 16
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download Xray and geoip data
+        run: |
+          curl -fLsS --retry 2 -o /tmp/xray.zip https://github.com/XTLS/Xray-core/releases/latest/download/Xray-linux-64.zip
+          unzip -o -j /tmp/xray.zip xray geoip.dat geosite.dat -d .
+          chmod +x xray
+      - name: Verify live Russian egress and measure HTTP delay
+        run: python3 vpn/refresh_ru.py
+      - name: Test the refreshed Russian profiles in Xray
+        run: |
+          python3 - <<'PY'
+          import json, os, pathlib, subprocess, tempfile
+          data=json.loads(pathlib.Path("vpn/Happ_US_RU_Auto.json").read_text(encoding="utf-8"))
+          profiles=[p for p in data if "РОССИЯ" in p["remarks"] or p["remarks"].startswith("🌍 ВЕСЬ МИР")]
+          with tempfile.TemporaryDirectory() as tmp:
+              for i,p in enumerate(profiles):
+                  path=pathlib.Path(tmp)/f"ru_{i}.json"
+                  path.write_text(json.dumps(p,ensure_ascii=False),encoding="utf-8")
+                  checked=subprocess.run(["./xray","run","-test","-config",str(path)],
+                                         capture_output=True,text=True,env=dict(os.environ,XRAY_LOCATION_ASSET="."))
+                  if checked.returncode:
+                      raise RuntimeError(f'{p["remarks"]} failed: {checked.stderr[-700:]}')
+          print("Validated",len(profiles),"RU and world profiles with Xray")
+          PY
+      - name: Publish checked RU profiles in the same subscription
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git fetch origin main
+          git reset --mixed origin/main
+          git add vpn/Happ_US_RU_Auto.json vpn/FAST_NODES_RESULTS.json
+          if ! git diff --cached --quiet; then
+            git commit -m "Refresh independently verified RU exits for Happ"
+            git push origin HEAD:main
+          fi
