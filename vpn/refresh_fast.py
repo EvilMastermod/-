@@ -54,19 +54,24 @@ COUNTRIES = {
     "UA": ("🇺🇦", "УКРАИНА"),
 }
 # Sampling limits, not a promise that a server will be reachable from the end user's network.
-MAX_TESTS = {"US": 155, "RU": 360, "DE": 110, "NL": 110, "FI": 85,
-             "FR": 90, "PL": 75, "GB": 75, "CA": 75, "JP": 100, "SG": 90, "SE": 75,
+MAX_TESTS = {"US": 185, "RU": 420, "DE": 135, "NL": 135, "FI": 100,
+             "FR": 115, "PL": 80, "GB": 95, "CA": 95, "JP": 130, "SG": 115, "SE": 85,
              "AT": 55, "CZ": 55, "CH": 55, "IT": 55, "ES": 55, "HK": 70,
              "KR": 70, "AU": 65, "TW": 65, "TR": 60, "UA": 60}
-MAX_POOL = {"US": 32, "RU": 28, "DE": 28, "NL": 28, "FI": 18,
-            "FR": 22, "PL": 18, "GB": 20, "CA": 20, "JP": 25, "SG": 24, "SE": 18,
-            "AT": 15, "CZ": 15, "CH": 15, "IT": 15, "ES": 15, "HK": 20,
-            "KR": 20, "AU": 18, "TW": 18, "TR": 16, "UA": 16}
-MANUAL_LIMIT = {"US": 16, "RU": 22, "DE": 15, "NL": 15, "FI": 12,
-                "FR": 14, "PL": 14, "GB": 12, "CA": 12, "JP": 14, "SG": 14, "SE": 12,
-                "AT": 10, "CZ": 10, "CH": 10, "IT": 10, "ES": 10, "HK": 12,
-                "KR": 12, "AU": 12, "TW": 12, "TR": 10, "UA": 10}
+MAX_POOL = {"US": 48, "RU": 36, "DE": 38, "NL": 38, "FI": 24,
+            "FR": 30, "PL": 22, "GB": 24, "CA": 24, "JP": 36, "SG": 36, "SE": 24,
+            "AT": 20, "CZ": 20, "CH": 20, "IT": 20, "ES": 20, "HK": 28,
+            "KR": 28, "AU": 24, "TW": 24, "TR": 20, "UA": 20}
+MANUAL_LIMIT = {"US": 30, "RU": 28, "DE": 26, "NL": 26, "FI": 20,
+                "FR": 24, "PL": 18, "GB": 20, "CA": 20, "JP": 28, "SG": 28, "SE": 20,
+                "AT": 16, "CZ": 16, "CH": 16, "IT": 16, "ES": 16, "HK": 24,
+                "KR": 24, "AU": 20, "TW": 20, "TR": 16, "UA": 16}
 PRIVATE_IPS = ["geoip:private"]
+BRAND = "XetsiwVPN"
+
+def branded(title):
+    return f"{BRAND} · {title}"
+
 
 
 def download(url):
@@ -310,15 +315,17 @@ def probe(proxy, country):
 
 def choose_verified(results, country):
     """Prefer stable responses, then short latency, while avoiding shared server subnets."""
-    selected, net_seen = [], {}
+    selected, net_seen, seen_servers = [], {}, set()
     candidates = sorted((r for r in results if r["ok"]),
                         key=lambda r: (r["success_rate"] < 1.0,
                                        (r["http_ms"] or 10000) + (r["jitter_ms"] or 700) * 0.25))
     for r in candidates:
         k = subnet(r["proxy"])
-        if net_seen.get(k, 0) >= (3 if country == "RU" else 2):
+        endpoint = server(r["proxy"])
+        if endpoint in seen_servers or net_seen.get(k, 0) >= (3 if country == "RU" else 2):
             continue
         net_seen[k] = net_seen.get(k, 0) + 1
+        seen_servers.add(endpoint)
         selected.append(r)
         if len(selected) == MAX_POOL[country]:
             break
@@ -327,7 +334,7 @@ def choose_verified(results, country):
 def build_auto(template, country, emoji, name, verified, gaming=False):
     cfg = copy.deepcopy(template)
     suffix = "ИГРЫ — МИНИМАЛЬНЫЙ ПИНГ" if gaming else "АВТОВЫБОР — СТАБИЛЬНЫЙ"
-    cfg["remarks"] = f"{emoji} {name} — {suffix}"
+    cfg["remarks"] = branded(f"{emoji} {name} — {suffix}")
     ranked = sorted(verified, key=lambda r: r["http_ms"] or 10000) if gaming else verified
     ranked = ranked[:5] if gaming else ranked
     outbounds = []
@@ -370,12 +377,12 @@ def build_world(template, selected):
     if not all_proxies:
         raise RuntimeError("No working nodes to build world-wide selection")
     cfg = copy.deepcopy(template)
-    cfg["remarks"] = "🌍 ВЕСЬ МИР — АВТОВЫБОР — МИНИМАЛЬНЫЙ ПИНГ"
+    cfg["remarks"] = branded("🌍 ВЕСЬ МИР — АВТОВЫБОР — МИНИМАЛЬНЫЙ ПИНГ")
     # Fallback and initial ordering prefer fastest known probe.
     all_proxies.sort(key=lambda x: (x.get("http_ms") is None,
                                     x.get("http_ms") or 99999))
     # Include a little of each country first, then rank by measured response delay.
-    # Cap at 180: Xray checks all outbounds; huge lists create traffic and CPU load.
+    # Cap at 240: Xray checks all outbounds; huge lists create traffic and CPU load.
     representative = []
     picked = set()
     for code, group in selected.items():
@@ -385,7 +392,7 @@ def build_world(template, selected):
                 picked.add(key)
                 representative.append(r)
     remainder = [r for r in all_proxies if server(r["proxy"]) not in picked]
-    all_proxies = representative + remainder[:max(0, 180 - len(representative))]
+    all_proxies = representative + remainder[:max(0, 240 - len(representative))]
     outbounds = []
     for i, record in enumerate(all_proxies, 1):
         p = copy.deepcopy(record["proxy"])
@@ -407,11 +414,44 @@ def build_world(template, selected):
             {"type": "field", "inboundTag": ["socks", "http"], "balancerTag": "auto"}
         ]
     }
-    # Probing all at once frequently is excessive; 90 seconds balances freshness and load.
+    # Probing all at once frequently is excessive; 150 seconds limits CPU/bandwidth load.
     cfg["observatory"] = {
         "subjectSelector": ["world-"],
         "probeUrl": "https://www.gstatic.com/generate_204",
-        "probeInterval": "90s",
+        "probeInterval": "150s",
+        "enableConcurrency": True
+    }
+    return cfg
+
+
+def build_ultra_world(world_cfg):
+    """All-country ultra selector (112 unique already-verified proxy endpoints).
+
+    Final leastPing check is made by Xray on the user's machine. This does not
+    guarantee the lowest game RTT and does not change the country automatically
+    based on the game the user is running.
+    """
+    cfg = copy.deepcopy(world_cfg)
+    candidates = [p for p in world_cfg["outbounds"] if p.get("protocol") == "vless"]
+    # The world pool has been ordered by the source runner's verified HTTP RTT.
+    if len(candidates) < 80:
+        raise ValueError("Need >=80 actually verified candidates for ultra mode")
+    ranked = candidates[:min(112, len(candidates))]
+    proxies = []
+    for index, p in enumerate(ranked, 1):
+        node = copy.deepcopy(p)
+        node["tag"] = f"ultra-{index}"
+        proxies.append(node)
+    cfg["remarks"] = branded("⚡ ВЕСЬ МИР — УЛЬТРА-ПИНГ — АВТОВЫБОР")
+    cfg["outbounds"] = proxies + [{"tag": "direct", "protocol": "freedom", "settings": {}}]
+    cfg["routing"]["balancers"] = [{
+        "tag": "auto", "selector": ["ultra-"],
+        "fallbackTag": "ultra-1", "strategy": {"type": "leastPing"}
+    }]
+    cfg["observatory"] = {
+        "subjectSelector": ["ultra-"],
+        "probeUrl": "https://www.gstatic.com/generate_204",
+        "probeInterval": "60s",
         "enableConcurrency": True
     }
     return cfg
@@ -419,7 +459,7 @@ def build_world(template, selected):
 
 def build_manual(template, country, emoji, name, verified, i):
     cfg = copy.deepcopy(template)
-    cfg["remarks"] = f"{emoji} {name} — СЕРВЕР {i + 1}"
+    cfg["remarks"] = branded(f"{emoji} {name} — СЕРВЕР {i + 1}")
     p = copy.deepcopy(verified[i]["proxy"])
     p["tag"] = "proxy"
     cfg["outbounds"] = [p, {"tag": "direct", "protocol": "freedom", "settings": {}}]
@@ -445,7 +485,7 @@ def build_ru_fast(template, verified):
     if not chosen:
         raise ValueError("No RU candidates for fast mode")
     cfg = copy.deepcopy(template)
-    cfg["remarks"] = "🇷🇺 РОССИЯ — БЫСТРЫЙ АВТОВЫБОР"
+    cfg["remarks"] = branded("🇷🇺 РОССИЯ — БЫСТРЫЙ АВТОВЫБОР")
     out = []
     for i, item in enumerate(chosen, 1):
         p = copy.deepcopy(item["proxy"])
@@ -489,7 +529,7 @@ def build_discord_voice(template, country, emoji, name, verified, backup=False):
     index = 1 if backup and len(eligible) > 1 else 0
     picked = eligible[index]
     cfg = copy.deepcopy(template)
-    cfg["remarks"] = f"🎧 DISCORD — {name} — " + ("РЕЗЕРВ" if backup else "ГОЛОС RTC")
+    cfg["remarks"] = branded(f"🎧 DISCORD — {name} — " + ("РЕЗЕРВ" if backup else "ГОЛОС RTC"))
     proxy = copy.deepcopy(picked["proxy"])
     proxy["tag"] = "proxy"
     cfg["outbounds"] = [proxy, {"tag": "direct", "protocol": "freedom", "settings": {}}]
@@ -523,6 +563,7 @@ def preflight_profiles(existing):
     build_auto(template, "US", "🇺🇸", "США", [sample], gaming=True)
     build_manual(template, "US", "🇺🇸", "США", [sample], 0)
     build_world(template, {"US": [sample]})
+    # Ultra needs >=80 distinct verified servers; checked at actual build time.
     build_discord_voice(template, "US", "🇺🇸", "США", [sample])
     build_ru_fast(template, [sample])
 
@@ -534,8 +575,7 @@ def main():
     old_bases = {}
     for country, (_, label) in COUNTRIES.items():
         old_bases[country] = next((p for p in current
-                                   if label in p.get("remarks", "")
-                                   and "АВТОВЫБОР" in p.get("remarks", "")), None)
+                                   if f"{COUNTRIES[country][0]} {label} — АВТОВЫБОР — СТАБИЛЬНЫЙ" in p.get("remarks", "")), None)
     template = old_bases["US"] or old_bases["RU"]
     if template is None:
         raise RuntimeError("No usable template found in existing Happ subscription")
@@ -582,6 +622,8 @@ def main():
                 for x in verified]
         }
     profiles = [build_world(template, selected)] if selected else []
+    if profiles and sum(1 for x in profiles[0]["outbounds"] if x["protocol"] == "vless") >= 80:
+        profiles.insert(0, build_ultra_world(profiles[0]))
     for country, (emoji, name) in COUNTRIES.items():
         verified = selected.get(country)
         if not verified:
