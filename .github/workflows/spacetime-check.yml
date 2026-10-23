@@ -1,0 +1,31 @@
+name: Spacetime connectivity check
+on:
+  workflow_dispatch:
+    inputs:
+      spacetime_host:
+        description: "Spacetime website hostname (optional; no https://)"
+        required: false
+        type: string
+  push:
+    paths:
+      - 'spacetime-check/**'
+      - '.github/workflows/spacetime-check.yml'
+jobs:
+  connectivity:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - name: Probe endpoints and target
+        env:
+          SPACETIME_HOST: ${{ github.event.inputs.spacetime_host }}
+        run: python3 spacetime-check/check.py
+      - name: Upload diagnostic report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: spacetime-diagnostics
+          path: spacetime-check/report.json
+          if-no-files-found: warn
