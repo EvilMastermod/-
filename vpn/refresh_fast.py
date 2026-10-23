@@ -222,7 +222,7 @@ def gather(country, old):
                 print(f"RU source {name}: {len(inputs[name])} compatible configs", flush=True)
             except Exception as e:
                 print(f"RU source {name} failed: {str(e)[:160]}", flush=True)
-    for key in ("au", "nexus", "radikal", "ru_extra", *RU_MORE_SOURCES):
+    for key in ("au", "nexus", "radikal", "ru_extra", *(RU_MORE_SOURCES if country == "RU" else ())):
         rng.shuffle(inputs[key])
     dedup, seen, blocks = [], set(), {}
     # Existing working endpoints are sampled too; broaden to several operators / subnets.
