@@ -678,6 +678,13 @@ def main():
         for i in range(min(len(verified), MANUAL_LIMIT[country])):
             profiles.append(build_manual(old_bases[country] or template, country,
                                          emoji, name, verified, i))
+    # Preserve the separately checked Spacetime RU exit. It must not be
+    # replaced by a generic node or silently lost during automatic refresh.
+    one_off_prefix = branded("🇷🇺 SPACETIME — ДРУГОЙ РОССИЙСКИЙ IP")
+    one_off = next((p for p in current
+                    if p.get("remarks", "").startswith(one_off_prefix)), None)
+    if one_off is not None:
+        profiles.insert(min(2, len(profiles)), copy.deepcopy(one_off))
     # Validate selected tags / Xray balancer references to prevent startup failures.
     unique_names = set()
     for item in profiles:
