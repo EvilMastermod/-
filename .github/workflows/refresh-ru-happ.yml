@@ -34,7 +34,7 @@ jobs:
           python3 - <<'PY'
           import json, os, pathlib, subprocess, tempfile
           data=json.loads(pathlib.Path("vpn/Happ_US_RU_Auto.json").read_text(encoding="utf-8"))
-          profiles=[p for p in data if "РОССИЯ" in p["remarks"] or p["remarks"].startswith("🌍 ВЕСЬ МИР")]
+          profiles=[p for p in data if "РОССИЯ" in p["remarks"] or "🌍 ВЕСЬ МИР" in p["remarks"] or "⚡ ВЕСЬ МИР" in p["remarks"]]
           with tempfile.TemporaryDirectory() as tmp:
               for i,p in enumerate(profiles):
                   path=pathlib.Path(tmp)/f"ru_{i}.json"
