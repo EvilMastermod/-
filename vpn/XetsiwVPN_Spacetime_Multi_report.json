@@ -1,0 +1,103 @@
+{
+  "checked_utc": "2026-10-23T17:20:27Z",
+  "verified_from": "GitHub Actions Xray SOCKS5",
+  "original_profile_count": 255,
+  "original_subscription_unchanged": true,
+  "previous_single_ip_excluded": "216.167.126.97",
+  "searched_countries": [
+    "US",
+    "UA",
+    "RU"
+  ],
+  "candidates_by_country": {
+    "US": {
+      "new_endpoints_available": 124,
+      "tunnel_country_verified": 35,
+      "new_distinct_exits": 10
+    },
+    "UA": {
+      "new_endpoints_available": 9,
+      "tunnel_country_verified": 0,
+      "new_distinct_exits": 0
+    },
+    "RU": {
+      "new_endpoints_available": 180,
+      "tunnel_country_verified": 0,
+      "new_distinct_exits": 0
+    }
+  },
+  "verified_distinct_alternatives": 10,
+  "servers": [
+    {
+      "country": "US",
+      "exit_ip": "147.182.212.232",
+      "endpoint": "147.182.212.232:56565",
+      "http_ms": 230,
+      "success_rate": 1.0
+    },
+    {
+      "country": "US",
+      "exit_ip": "104.28.164.79",
+      "endpoint": "104.24.197.20:443",
+      "http_ms": 286,
+      "success_rate": 1.0
+    },
+    {
+      "country": "US",
+      "exit_ip": "104.28.161.127",
+      "endpoint": "162.159.128.253:443",
+      "http_ms": 331,
+      "success_rate": 1.0
+    },
+    {
+      "country": "US",
+      "exit_ip": "185.195.57.176",
+      "endpoint": "169.40.42.225:443",
+      "http_ms": 347,
+      "success_rate": 1.0
+    },
+    {
+      "country": "US",
+      "exit_ip": "185.195.57.173",
+      "endpoint": "169.40.42.35:443",
+      "http_ms": 366,
+      "success_rate": 1.0
+    },
+    {
+      "country": "US",
+      "exit_ip": "65.49.198.53",
+      "endpoint": "tuic.moxin1245.win:8443",
+      "http_ms": 481,
+      "success_rate": 1.0
+    },
+    {
+      "country": "US",
+      "exit_ip": "128.90.172.16",
+      "endpoint": "83.147.18.75:443",
+      "http_ms": 573,
+      "success_rate": 1.0
+    },
+    {
+      "country": "US",
+      "exit_ip": "185.195.57.168",
+      "endpoint": "169.40.42.90:443",
+      "http_ms": 711,
+      "success_rate": 1.0
+    },
+    {
+      "country": "US",
+      "exit_ip": "129.146.86.61",
+      "endpoint": "141.101.122.147:443",
+      "http_ms": 1086,
+      "success_rate": 1.0
+    },
+    {
+      "country": "US",
+      "exit_ip": "23.95.222.127",
+      "endpoint": "23.95.222.127:8443",
+      "http_ms": 2446,
+      "success_rate": 0.5
+    }
+  ],
+  "note": "Verified tunnels do not prove Spacetime accepts an IP. No Spacetime app login was tested."
+}
