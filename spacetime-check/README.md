@@ -13,3 +13,5 @@ Independent diagnostics; does not modify existing VPN profiles.
 Open **Actions → Spacetime connectivity check → Run workflow**, enter the actual Spacetime hostname (without https://) and run. Find the downloadable diagnostic report in the run's Artifacts section.
 
 Candidates are listed in `candidates.csv`. Do not put access keys, authentication URLs, or VPN subscription tokens in that file.
+
+CI validation: This branch runs the network diagnostic in GitHub Actions with no credentials and no changes to existing VPN profiles.
