@@ -94,8 +94,20 @@ def run():
             print(url,"new unique candidates so far",len(candidates),flush=True)
         except Exception as e:
             print("Source unavailable:",url,str(e)[:150],flush=True)
+    # Also test the hostname form independently. Public checks have recently
+    # observed a Russian egress on the 9f6635t.msk1 host, while the original
+    # feed often embeds a front IP and uses that hostname only as TLS SNI.
+    expanded=[]
+    for priority,p in candidates:
+        if p["settings"]["vnext"][0]["address"]=="45.91.52.28" and (
+            p.get("streamSettings",{}).get("realitySettings",{}).get("serverName")=="9f6635t.msk1.h1clayd.click"):
+            alternative=copy.deepcopy(p)
+            alternative["settings"]["vnext"][0]["address"]="9f6635t.msk1.h1clayd.click"
+            if core.server(alternative) not in prev:
+                expanded.append((-1,alternative))
+    candidates=expanded+candidates
     candidates.sort(key=lambda item:item[0])
-    candidates=[p for _,p in candidates[:125]]
+    candidates=[p for _,p in candidates[:350]]
     if not candidates:
         raise RuntimeError("No new VLESS server endpoints outside existing subscription")
     print("Checking fresh candidates",len(candidates),flush=True)
