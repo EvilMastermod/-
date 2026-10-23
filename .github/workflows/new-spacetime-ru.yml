@@ -11,7 +11,7 @@ permissions:
   contents: write
 
 concurrency:
-  group: happ-vpn-refresh
+  group: xetsiwvpn-spacetime
   cancel-in-progress: false
 
 jobs:
