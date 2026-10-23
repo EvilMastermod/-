@@ -49,10 +49,17 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git fetch origin main
-          git reset --mixed origin/main
-          git add vpn/Happ_US_RU_Auto.json vpn/FAST_NODES_RESULTS.json
-          if ! git diff --cached --quiet; then
-            git commit -m "Refresh independently verified RU exits for Happ"
-            git push origin HEAD:main
-          fi
+          for attempt in 1 2 3 4 5; do
+            git fetch origin main
+            git reset --mixed origin/main
+            git add vpn/Happ_US_RU_Auto.json vpn/FAST_NODES_RESULTS.json
+            if git diff --cached --quiet; then
+              exit 0
+            fi
+            git commit -m "Refresh XetsiwVPN verified RU exit pool"
+            if git push origin HEAD:main; then
+              exit 0
+            fi
+            echo "GitHub main advanced: retrying ($attempt/5)"
+          done
+          exit 1
