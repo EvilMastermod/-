@@ -1,0 +1,29 @@
+name: XetsiwVPN alternate exit verification
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - .github/workflows/xetsiwvpn-alternate-check.yml
+permissions:
+  contents: write
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 16
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Xray
+        run: |
+          curl -fLsS -o /tmp/xray.zip https://github.com/XTLS/Xray-core/releases/latest/download/Xray-linux-64.zip
+          unzip -o -j /tmp/xray.zip xray geoip.dat geosite.dat -d .
+          chmod +x xray
+      - name: Verify new exit with Xray
+        run: python3 vpn/find_alternative_spacetime.py
+      - name: Publish verified separate subscription
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add vpn/XetsiwVPN_Spacetime_NEW_IP.json vpn/XetsiwVPN_Spacetime_NEW_IP_report.json
+          git commit -m "Publish verified separate XetsiwVPN IP"
+          git pull --rebase origin main
+          git push origin HEAD:main
