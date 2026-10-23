@@ -1,4 +1,4 @@
-name: Happ VPN 2.0 - health checks and fast nodes
+name: XetsiwVPN - verify worldwide and country VPN nodes
 
 on:
   schedule:
@@ -57,10 +57,21 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           # Keep the freshly generated, Xray-validated files when main has moved
           # during the check. Mixed reset updates index/HEAD, not the generated files.
-          git fetch origin main
-          git reset --mixed origin/main
-          git add vpn/Happ_US_RU_Auto.json vpn/FAST_NODES_RESULTS.json
-          if ! git diff --cached --quiet; then
-            git commit -m "Refresh verified Happ global and country proxy pools"
-            git push origin HEAD:main
-          fi
+          # The generated files stay in the working tree between retries.
+          # Another workflow or an editor can advance main while tests finish.
+          for attempt in 1 2 3 4 5; do
+            git fetch origin main
+            git reset --mixed origin/main
+            git add vpn/Happ_US_RU_Auto.json vpn/FAST_NODES_RESULTS.json
+            if git diff --cached --quiet; then
+              echo "Already current"
+              exit 0
+            fi
+            git commit -m "Update checked XetsiwVPN world and country servers"
+            if git push origin HEAD:main; then
+              exit 0
+            fi
+            echo "Remote moved; retrying upload ($attempt/5)"
+          done
+          echo "Unable to publish XetsiwVPN after retries" >&2
+          exit 1
