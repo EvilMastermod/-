@@ -33,3 +33,18 @@ jobs:
           name: spacetime-diagnostics
           path: spacetime-check/report.json
           if-no-files-found: warn
+
+      - name: Install Xray for real VPN verification
+        run: |
+          curl -fLsS --retry 2 -o /tmp/xray.zip https://github.com/XTLS/Xray-core/releases/latest/download/Xray-linux-64.zip
+          unzip -o -j /tmp/xray.zip xray geoip.dat geosite.dat -d .
+          chmod +x xray
+      - name: Verify actual exit IP through VLESS tunnel
+        run: python3 spacetime-check/verify_tunnel.py
+      - name: Save real tunnel report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: spacetime-xray-tunnel-report
+          path: spacetime-check/tunnel_report.json
+          if-no-files-found: warn
