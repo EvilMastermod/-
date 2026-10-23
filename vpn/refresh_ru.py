@@ -86,6 +86,13 @@ def refresh():
                       "exit": r["exit"]} for r in selected]
     }
     report["ru_updated_utc"] = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
+    # Other concurrent jobs may have generated older, unbranded profiles.
+    for p in profiles:
+        if not p["remarks"].startswith(core.BRAND + " · "):
+            p["remarks"] = core.branded(p["remarks"])
+    if world and not any("⚡ ВЕСЬ МИР — УЛЬТРА-ПИНГ" in p["remarks"] for p in profiles):
+        if len([p for p in world["outbounds"] if p["protocol"] == "vless"]) >= 80:
+            profiles.insert(0, core.build_ultra_world(world))
     profile_names = [p["remarks"] for p in profiles]
     if len(profile_names) != len(set(profile_names)):
         raise ValueError("Duplicate profile names after RU-only refresh")
