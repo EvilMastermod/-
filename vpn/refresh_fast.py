@@ -36,13 +36,31 @@ COUNTRIES = {
     "JP": ("🇯🇵", "ЯПОНИЯ"),
     "SG": ("🇸🇬", "СИНГАПУР"),
     "SE": ("🇸🇪", "ШВЕЦИЯ"),
+    "AT": ("🇦🇹", "АВСТРИЯ"),
+    "CZ": ("🇨🇿", "ЧЕХИЯ"),
+    "CH": ("🇨🇭", "ШВЕЙЦАРИЯ"),
+    "IT": ("🇮🇹", "ИТАЛИЯ"),
+    "ES": ("🇪🇸", "ИСПАНИЯ"),
+    "HK": ("🇭🇰", "ГОНКОНГ"),
+    "KR": ("🇰🇷", "ЮЖНАЯ КОРЕЯ"),
+    "AU": ("🇦🇺", "АВСТРАЛИЯ"),
+    "TW": ("🇹🇼", "ТАЙВАНЬ"),
+    "TR": ("🇹🇷", "ТУРЦИЯ"),
+    "UA": ("🇺🇦", "УКРАИНА"),
 }
-MAX_TESTS = {"US": 130, "RU": 170, "DE": 85, "NL": 85, "FI": 70,
-             "FR": 70, "PL": 70, "GB": 60, "CA": 65, "JP": 75, "SG": 65, "SE": 65}
-MAX_POOL = {"US": 24, "RU": 16, "DE": 20, "NL": 20, "FI": 12,
-            "FR": 16, "PL": 16, "GB": 14, "CA": 16, "JP": 18, "SG": 16, "SE": 14}
-MANUAL_LIMIT = {"US": 12, "RU": 12, "DE": 10, "NL": 10, "FI": 9,
-                "FR": 10, "PL": 10, "GB": 10, "CA": 10, "JP": 10, "SG": 10, "SE": 10}
+# Sampling limits, not a promise that a server will be reachable from the end user's network.
+MAX_TESTS = {"US": 155, "RU": 190, "DE": 110, "NL": 110, "FI": 85,
+             "FR": 90, "PL": 75, "GB": 75, "CA": 75, "JP": 100, "SG": 90, "SE": 75,
+             "AT": 55, "CZ": 55, "CH": 55, "IT": 55, "ES": 55, "HK": 70,
+             "KR": 70, "AU": 65, "TW": 65, "TR": 60, "UA": 60}
+MAX_POOL = {"US": 32, "RU": 18, "DE": 28, "NL": 28, "FI": 18,
+            "FR": 22, "PL": 18, "GB": 20, "CA": 20, "JP": 25, "SG": 24, "SE": 18,
+            "AT": 15, "CZ": 15, "CH": 15, "IT": 15, "ES": 15, "HK": 20,
+            "KR": 20, "AU": 18, "TW": 18, "TR": 16, "UA": 16}
+MANUAL_LIMIT = {"US": 16, "RU": 14, "DE": 15, "NL": 15, "FI": 12,
+                "FR": 14, "PL": 14, "GB": 12, "CA": 12, "JP": 14, "SG": 14, "SE": 12,
+                "AT": 10, "CZ": 10, "CH": 10, "IT": 10, "ES": 10, "HK": 12,
+                "KR": 12, "AU": 12, "TW": 12, "TR": 10, "UA": 10}
 PRIVATE_IPS = ["geoip:private"]
 
 
@@ -335,6 +353,18 @@ def build_world(template, selected):
     # Fallback and initial ordering prefer fastest known probe.
     all_proxies.sort(key=lambda x: (x.get("http_ms") is None,
                                     x.get("http_ms") or 99999))
+    # Include a little of each country first, then rank by measured response delay.
+    # Cap at 180: Xray checks all outbounds; huge lists create traffic and CPU load.
+    representative = []
+    picked = set()
+    for code, group in selected.items():
+        for r in sorted(group, key=lambda x: x.get("http_ms") or 99999)[:2]:
+            key = server(r["proxy"])
+            if key not in picked:
+                picked.add(key)
+                representative.append(r)
+    remainder = [r for r in all_proxies if server(r["proxy"]) not in picked]
+    all_proxies = representative + remainder[:max(0, 180 - len(representative))]
     outbounds = []
     for i, record in enumerate(all_proxies, 1):
         p = copy.deepcopy(record["proxy"])
@@ -505,7 +535,7 @@ def main():
             profiles.append(build_auto(old_bases[country] or template,
                                        country, emoji, name, selected[country], gaming=True))
     europe = []
-    for code in ("DE", "NL", "FI", "FR", "PL", "GB", "SE"):
+    for code in ("DE", "NL", "FI", "FR", "PL", "GB", "SE", "AT", "CZ", "CH", "IT", "ES", "TR", "UA"):
         europe.extend(selected.get(code, []))
     if europe:
         europe = sorted(europe, key=lambda x: x["http_ms"] or 99999)[:8]
