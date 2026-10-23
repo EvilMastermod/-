@@ -23,6 +23,11 @@ AU_SOURCE = "https://raw.githubusercontent.com/Au1rxx/free-vpn-subscriptions/mai
 NEXUS_SOURCE = "https://raw.githubusercontent.com/ninjastrikers/Nexus-nodes/main/configs/countries/{}/all.txt"
 RADIKAL_SOURCE = "https://raw.githubusercontent.com/0xRadikal/Free-v2ray-Configs/main/top100.txt"
 RU_EXTRA_SOURCE = "https://raw.githubusercontent.com/aviamastersgh/vpn-free-russia/main/ru_configs.txt"
+RU_MORE_SOURCES = {
+    "fastnodes_ru": "https://raw.githubusercontent.com/rtwo2/FastNodes/main/sub/countries/RU.txt",
+    "cheburnet_ru": "https://raw.githubusercontent.com/JeBance/CheburNet/gh-pages/cheburnet.txt",
+    "nosok_verified": "https://raw.githubusercontent.com/aviamastersgh/vpn-free-russia/main/verified_configs.txt",
+}
 COUNTRIES = {
     "US": ("🇺🇸", "США"),
     "RU": ("🇷🇺", "РОССИЯ"),
@@ -49,15 +54,15 @@ COUNTRIES = {
     "UA": ("🇺🇦", "УКРАИНА"),
 }
 # Sampling limits, not a promise that a server will be reachable from the end user's network.
-MAX_TESTS = {"US": 155, "RU": 190, "DE": 110, "NL": 110, "FI": 85,
+MAX_TESTS = {"US": 155, "RU": 360, "DE": 110, "NL": 110, "FI": 85,
              "FR": 90, "PL": 75, "GB": 75, "CA": 75, "JP": 100, "SG": 90, "SE": 75,
              "AT": 55, "CZ": 55, "CH": 55, "IT": 55, "ES": 55, "HK": 70,
              "KR": 70, "AU": 65, "TW": 65, "TR": 60, "UA": 60}
-MAX_POOL = {"US": 32, "RU": 18, "DE": 28, "NL": 28, "FI": 18,
+MAX_POOL = {"US": 32, "RU": 28, "DE": 28, "NL": 28, "FI": 18,
             "FR": 22, "PL": 18, "GB": 20, "CA": 20, "JP": 25, "SG": 24, "SE": 18,
             "AT": 15, "CZ": 15, "CH": 15, "IT": 15, "ES": 15, "HK": 20,
             "KR": 20, "AU": 18, "TW": 18, "TR": 16, "UA": 16}
-MANUAL_LIMIT = {"US": 16, "RU": 14, "DE": 15, "NL": 15, "FI": 12,
+MANUAL_LIMIT = {"US": 16, "RU": 22, "DE": 15, "NL": 15, "FI": 12,
                 "FR": 14, "PL": 14, "GB": 12, "CA": 12, "JP": 14, "SG": 14, "SE": 12,
                 "AT": 10, "CZ": 10, "CH": 10, "IT": 10, "ES": 10, "HK": 12,
                 "KR": 12, "AU": 12, "TW": 12, "TR": 10, "UA": 10}
@@ -185,7 +190,8 @@ def subnet(proxy):
 
 def gather(country, old):
     rng = random.Random(int(time.time() // 86400) + sum(map(ord, country)))
-    inputs = {"old": [], "au": [], "nexus": [], "radikal": [], "ru_extra": []}
+    inputs = {"old": [], "au": [], "nexus": [], "radikal": [], "ru_extra": [],
+              **({k: [] for k in RU_MORE_SOURCES} if country == "RU" else {})}
     inputs["old"] = [o for o in old if safe(o)]
     try:
         raw = json.loads(download(AU_SOURCE.format(country)))
@@ -209,11 +215,21 @@ def gather(country, old):
             inputs["ru_extra"] = [x for x in (convert_link(line) for line in data.splitlines()) if x]
         except Exception as e:
             print(f"{country} extra source: {str(e)[:160]}", flush=True)
-    for key in ("au", "nexus", "radikal", "ru_extra"):
+        for name, source_url in RU_MORE_SOURCES.items():
+            try:
+                data = qdecode(download(source_url))
+                inputs[name] = [x for x in (convert_link(line) for line in data.splitlines()) if x]
+                print(f"RU source {name}: {len(inputs[name])} compatible configs", flush=True)
+            except Exception as e:
+                print(f"RU source {name} failed: {str(e)[:160]}", flush=True)
+    for key in ("au", "nexus", "radikal", "ru_extra", *RU_MORE_SOURCES):
         rng.shuffle(inputs[key])
     dedup, seen, blocks = [], set(), {}
     # Existing working endpoints are sampled too; broaden to several operators / subnets.
-    order = ["old", "au", "ru_extra", "nexus", "au", "nexus", "radikal"]
+    order = (["old", "fastnodes_ru", "nexus", "cheburnet_ru",
+              "nosok_verified", "ru_extra", "fastnodes_ru", "nexus", "radikal"]
+             if country == "RU" else
+             ["old", "au", "nexus", "au", "nexus", "radikal"])
     while len(dedup) < MAX_TESTS[country] and any(inputs.values()):
         advanced = False
         for source in order:
@@ -221,9 +237,14 @@ def gather(country, old):
                 p = inputs[source].pop()
                 if not safe(p): continue
                 s, b = server(p), subnet(p)
-                if s in seen or blocks.get(b, 0) >= 3:
+                # Same endpoint with a different public credential can work after
+                # the previous credential expires; test two variants per address.
+                uid = p["settings"]["vnext"][0]["users"][0]["id"]
+                credential = (s, uid, p["streamSettings"]["network"])
+                block_limit = 7 if country == "RU" else 3
+                if credential in seen or blocks.get(b, 0) >= block_limit:
                     continue
-                seen.add(s); blocks[b] = blocks.get(b, 0) + 1
+                seen.add(credential); blocks[b] = blocks.get(b, 0) + 1
                 dedup.append(p)
                 advanced = True
                 break
@@ -295,7 +316,7 @@ def choose_verified(results, country):
                                        (r["http_ms"] or 10000) + (r["jitter_ms"] or 700) * 0.25))
     for r in candidates:
         k = subnet(r["proxy"])
-        if net_seen.get(k, 0) >= 2:
+        if net_seen.get(k, 0) >= (3 if country == "RU" else 2):
             continue
         net_seen[k] = net_seen.get(k, 0) + 1
         selected.append(r)
@@ -412,6 +433,45 @@ def build_manual(template, country, emoji, name, verified, i):
     return cfg
 
 
+def build_ru_fast(template, verified):
+    """Small checked Russian-only leastPing pool, avoiding saturated slow fallbacks."""
+    stable = [x for x in verified if x.get("success_rate", 0) == 1 and
+              x.get("http_ms") is not None]
+    stable.sort(key=lambda x: ((x["http_ms"] or 99999) +
+                               (x.get("jitter_ms") or 0) * .2))
+    chosen = stable[:min(6, len(stable))]
+    if not chosen:
+        chosen = [x for x in verified if x.get("proxy")][:3]
+    if not chosen:
+        raise ValueError("No RU candidates for fast mode")
+    cfg = copy.deepcopy(template)
+    cfg["remarks"] = "🇷🇺 РОССИЯ — БЫСТРЫЙ АВТОВЫБОР"
+    out = []
+    for i, item in enumerate(chosen, 1):
+        p = copy.deepcopy(item["proxy"])
+        p["tag"] = f"ru-fast-{i}"
+        out.append(p)
+    cfg["outbounds"] = out + [{"tag": "direct", "protocol": "freedom", "settings": {}}]
+    cfg["routing"] = {
+        "domainStrategy": "AsIs",
+        "balancers": [{
+            "tag": "auto", "selector": ["ru-fast-"],
+            "fallbackTag": out[0]["tag"], "strategy": {"type": "leastPing"}
+        }],
+        "rules": [
+            {"type": "field", "ip": PRIVATE_IPS, "outboundTag": "direct"},
+            {"type": "field", "inboundTag": ["socks", "http"], "balancerTag": "auto"}
+        ]
+    }
+    cfg["observatory"] = {
+        "subjectSelector": ["ru-fast-"],
+        "probeUrl": "https://www.gstatic.com/generate_204",
+        "probeInterval": "45s",
+        "enableConcurrency": True
+    }
+    return cfg
+
+
 def build_discord_voice(template, country, emoji, name, verified, backup=False):
     """Pin Discord voice to one checked endpoint to avoid mid-call auto-switching.
     
@@ -464,6 +524,7 @@ def preflight_profiles(existing):
     build_manual(template, "US", "🇺🇸", "США", [sample], 0)
     build_world(template, {"US": [sample]})
     build_discord_voice(template, "US", "🇺🇸", "США", [sample])
+    build_ru_fast(template, [sample])
 
 
 def main():
@@ -528,6 +589,8 @@ def main():
             continue
         template_country = old_bases[country] or template
         profiles.append(build_auto(template_country, country, emoji, name, verified))
+    if selected.get("RU"):
+        profiles.insert(1, build_ru_fast(old_bases["RU"] or template, selected["RU"]))
     # Keep gaming modes distinct; gaming selector prioritizes the lowest measured HTTP RTT.
     for country in ("US", "RU"):
         if selected.get(country):
