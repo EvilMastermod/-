@@ -18,7 +18,7 @@ def key(node):
 def refresh():
     profiles = json.loads(CONFIG.read_text(encoding="utf-8"))
     report = json.loads(REPORT.read_text(encoding="utf-8"))
-    ru = next(p for p in profiles if p["remarks"] == "🇷🇺 РОССИЯ — АВТОВЫБОР — СТАБИЛЬНЫЙ")
+    ru = next(p for p in profiles if "🇷🇺 РОССИЯ — АВТОВЫБОР — СТАБИЛЬНЫЙ" in p["remarks"])
     original_nodes = [x for x in ru["outbounds"] if x.get("protocol") == "vless"]
     candidates = core.gather("RU", original_nodes)
     results = []
@@ -44,13 +44,13 @@ def refresh():
         new_profiles.append(core.build_discord_voice(ru, "RU", "🇷🇺", "РОССИЯ", selected, backup=True))
     # Keep other country profiles unchanged.
     profiles = [p for p in profiles
-                if not (p["remarks"].startswith("🇷🇺 РОССИЯ — ") or
-                        p["remarks"].startswith("🎧 DISCORD — РОССИЯ — "))]
-    at = 1 if profiles and profiles[0]["remarks"].startswith("🌍 ВЕСЬ МИР") else 0
+                if not ("🇷🇺 РОССИЯ — " in p["remarks"] or
+                        "🎧 DISCORD — РОССИЯ — " in p["remarks"])]
+    at = 2 if len(profiles) > 1 and any("⚡ ВЕСЬ МИР" in p["remarks"] for p in profiles) else (1 if profiles and any("🌍 ВЕСЬ МИР" in p["remarks"] for p in profiles) else 0)
     profiles[at:at] = new_profiles
 
     # Refresh only Russian candidates in worldwide auto mode; preserve global pool and other locations.
-    world = next((p for p in profiles if p["remarks"].startswith("🌍 ВЕСЬ МИР")), None)
+    world = next((p for p in profiles if "🌍 ВЕСЬ МИР" in p["remarks"]), None)
     if world:
         previous = {key(p) for p in original_nodes}
         existing = [p for p in world["outbounds"] if p["protocol"] == "vless"
@@ -63,13 +63,18 @@ def refresh():
                 continue
             additions.append(p)
             known.add(key(p))
-        max_size = 180
+        max_size = 240
         remaining = existing[:max(0, max_size-len(additions))]
         all_nodes = remaining + additions
         for i, p in enumerate(all_nodes, 1):
             p["tag"] = f"world-{i}"
         world["outbounds"] = all_nodes + [{"tag": "direct", "protocol": "freedom", "settings": {}}]
         world["routing"]["balancers"][0]["fallbackTag"] = all_nodes[0]["tag"]
+        # Keep the separate >=80-node branded ultra mode synchronized.
+        ultra_index = next((i for i, p in enumerate(profiles)
+                            if "⚡ ВЕСЬ МИР — УЛЬТРА-ПИНГ" in p["remarks"]), None)
+        if ultra_index is not None and len(all_nodes) >= 80:
+            profiles[ultra_index] = core.build_ultra_world(world)
 
     report.setdefault("countries", {})["RU"] = {
         "tested": len(results),
