@@ -6,6 +6,10 @@ on:
         description: "Spacetime website hostname (optional; no https://)"
         required: false
         type: string
+  pull_request:
+    paths:
+      - 'spacetime-check/**'
+      - '.github/workflows/spacetime-check.yml'
   push:
     paths:
       - 'spacetime-check/**'
