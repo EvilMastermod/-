@@ -1,0 +1,8 @@
+#profile-title: base64:4p2EINCh0LXQstC10YAgVlBOIOKAoiBNaW5lY3JhZnQ=
+#announce: base64:8J+OriBTa3lUaW1lIOKAoiBTcGFjZSDigKIgRnVuU2t5CuKIniDQn9C+0LTQv9C40YHQutCwINCx0LXQtyDRgdC+0LHRgdGC0LLQtdC90L3QvtCz0L4g0LvQuNC80LjRgtCwINGC0YDQsNGE0LjQutCwCvCfh7fwn4e6INCg0L7RgdGB0LjRjyArINGA0LXQt9C10YDQsiDCtyDQkNCy0YLQvtCy0YvQsdC+0YAK0J/Rg9Cx0LvQuNGH0L3Ri9C1INGD0LfQu9GLOiDQtNC+0YHRgtGD0L/QvdC+0YHRgtGMINC4INC+0LPRgNCw0L3QuNGH0LXQvdC40Y8g0LfQsNCy0LjRgdGP0YIg0L7RgiDQstC70LDQtNC10LvRjNGG0LXQsi4=
+#subscription-userinfo: upload=0; download=0; total=0; expire=0
+#profile-web-page-url: https://github.com/EvilMastermod/-/blob/main/vpn/Sever_Minecraft.md
+#sub-info-text: ∞ Без лимита со стороны подписки. Публичные узлы: ограничения и доступность зависят от владельцев.
+#sub-info-color: blue
+#new-url: https://raw.githubusercontent.com/EvilMastermod/-/main/vpn/Sever_Minecraft.json
+socks://127.0.0.1:9#%D0%9D%D0%B0%D0%B6%D0%BC%D0%B8%20%E2%86%BB%20%D0%B4%D0%BB%D1%8F%20%D0%B7%D0%B0%D0%B3%D1%80%D1%83%D0%B7%D0%BA%D0%B8%20%D1%81%D0%B5%D1%80%D0%B2%D0%B5%D1%80%D0%BE%D0%B2
