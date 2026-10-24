@@ -2,7 +2,7 @@
   {
     "remarks": "Север • Авто — Россия",
     "meta": {
-      "serverDescription": "Автовыбор по HTTP-задержке раз в 60 с. Игровые адреса направляются через узлы, ответившие при проверке. Вход в аккаунт не проверялся."
+      "serverDescription": "Начни здесь · 5 RU · авто 60с"
     },
     "log": {
       "loglevel": "warning"
@@ -101,6 +101,114 @@
           "enabled": false
         },
         "tag": "sever-ru-02"
+      },
+      {
+        "protocol": "vless",
+        "settings": {
+          "vnext": [
+            {
+              "address": "162.159.135.234",
+              "port": 443,
+              "users": [
+                {
+                  "id": "495c7195-85b8-498a-bf20-2ea9ce9175b5",
+                  "encryption": "none"
+                }
+              ]
+            }
+          ]
+        },
+        "streamSettings": {
+          "network": "ws",
+          "security": "tls",
+          "tlsSettings": {
+            "serverName": "snip.edgeoneai.cc.cd",
+            "allowInsecure": false,
+            "fingerprint": "chrome"
+          },
+          "wsSettings": {
+            "path": "/",
+            "headers": {
+              "Host": "snip.edgeoneai.cc.cd"
+            }
+          }
+        },
+        "mux": {
+          "enabled": false
+        },
+        "tag": "sever-ru-03"
+      },
+      {
+        "protocol": "vless",
+        "settings": {
+          "vnext": [
+            {
+              "address": "162.159.140.116",
+              "port": 443,
+              "users": [
+                {
+                  "id": "495c7195-85b8-498a-bf20-2ea9ce9175b5",
+                  "encryption": "none"
+                }
+              ]
+            }
+          ]
+        },
+        "streamSettings": {
+          "network": "ws",
+          "security": "tls",
+          "tlsSettings": {
+            "serverName": "snip.edgeoneai.cc.cd",
+            "allowInsecure": false,
+            "fingerprint": "chrome"
+          },
+          "wsSettings": {
+            "path": "/",
+            "headers": {
+              "Host": "snip.edgeoneai.cc.cd"
+            }
+          }
+        },
+        "mux": {
+          "enabled": false
+        },
+        "tag": "sever-ru-04"
+      },
+      {
+        "protocol": "vless",
+        "settings": {
+          "vnext": [
+            {
+              "address": "188.114.98.0",
+              "port": 443,
+              "users": [
+                {
+                  "id": "495c7195-85b8-498a-bf20-2ea9ce9175b5",
+                  "encryption": "none"
+                }
+              ]
+            }
+          ]
+        },
+        "streamSettings": {
+          "network": "ws",
+          "security": "tls",
+          "tlsSettings": {
+            "serverName": "snip.edgeoneai.cc.cd",
+            "allowInsecure": false,
+            "fingerprint": "unsafe"
+          },
+          "wsSettings": {
+            "path": "/?TELEGRAM-TOOTFFARANGI",
+            "headers": {
+              "Host": "snip.edgeoneai.cc.cd"
+            }
+          }
+        },
+        "mux": {
+          "enabled": false
+        },
+        "tag": "sever-ru-05"
       }
     ],
     "routing": {
@@ -163,7 +271,10 @@
           "tag": "auto",
           "selector": [
             "sever-ru-01",
-            "sever-ru-02"
+            "sever-ru-02",
+            "sever-ru-03",
+            "sever-ru-04",
+            "sever-ru-05"
           ],
           "fallbackTag": "sever-ru-01",
           "strategy": {
@@ -174,7 +285,10 @@
           "tag": "game-0",
           "selector": [
             "sever-ru-02",
-            "sever-ru-01"
+            "sever-ru-03",
+            "sever-ru-05",
+            "sever-ru-01",
+            "sever-ru-04"
           ],
           "fallbackTag": "sever-ru-02",
           "strategy": {
@@ -184,10 +298,12 @@
         {
           "tag": "game-1",
           "selector": [
+            "sever-ru-05",
+            "sever-ru-04",
             "sever-ru-01",
-            "sever-ru-02"
+            "sever-ru-03"
           ],
-          "fallbackTag": "sever-ru-01",
+          "fallbackTag": "sever-ru-05",
           "strategy": {
             "type": "leastPing"
           }
@@ -195,10 +311,12 @@
         {
           "tag": "game-2",
           "selector": [
-            "sever-ru-01",
-            "sever-ru-02"
+            "sever-ru-03",
+            "sever-ru-04",
+            "sever-ru-05",
+            "sever-ru-01"
           ],
-          "fallbackTag": "sever-ru-01",
+          "fallbackTag": "sever-ru-03",
           "strategy": {
             "type": "leastPing"
           }
@@ -208,7 +326,785 @@
     "observatory": {
       "subjectSelector": [
         "sever-ru-01",
-        "sever-ru-02"
+        "sever-ru-02",
+        "sever-ru-03",
+        "sever-ru-04",
+        "sever-ru-05"
+      ],
+      "probeUrl": "https://www.gstatic.com/generate_204",
+      "probeInterval": "60s",
+      "enableConcurrency": true
+    }
+  },
+  {
+    "remarks": "Север • SkyTime — Авто",
+    "meta": {
+      "serverDescription": "Топ-3 · 24.10 · авто 60с"
+    },
+    "log": {
+      "loglevel": "warning"
+    },
+    "dns": {
+      "servers": [
+        "1.1.1.1",
+        "8.8.8.8"
+      ]
+    },
+    "inbounds": [
+      {
+        "tag": "socks",
+        "listen": "127.0.0.1",
+        "port": 10808,
+        "protocol": "socks",
+        "settings": {
+          "auth": "noauth",
+          "udp": true
+        }
+      },
+      {
+        "tag": "http",
+        "listen": "127.0.0.1",
+        "port": 10809,
+        "protocol": "http",
+        "settings": {}
+      }
+    ],
+    "outbounds": [
+      {
+        "protocol": "vless",
+        "settings": {
+          "vnext": [
+            {
+              "address": "213.226.127.71",
+              "port": 2066,
+              "users": [
+                {
+                  "id": "5ad13ef8-ced8-43b5-9d8c-f046a3ce9ddc",
+                  "encryption": "none",
+                  "flow": "xtls-rprx-vision"
+                }
+              ]
+            }
+          ]
+        },
+        "streamSettings": {
+          "network": "tcp",
+          "security": "reality",
+          "realitySettings": {
+            "publicKey": "kLCwYNBhCg68BQah9El1lNg6GQ7-7Y7xfTtIs6MiTEg",
+            "shortId": "d18f4e",
+            "serverName": "tiktok.com",
+            "fingerprint": "chrome",
+            "spiderX": "/"
+          }
+        },
+        "mux": {
+          "enabled": false
+        },
+        "tag": "sever-ru-02"
+      },
+      {
+        "protocol": "vless",
+        "settings": {
+          "vnext": [
+            {
+              "address": "162.159.135.234",
+              "port": 443,
+              "users": [
+                {
+                  "id": "495c7195-85b8-498a-bf20-2ea9ce9175b5",
+                  "encryption": "none"
+                }
+              ]
+            }
+          ]
+        },
+        "streamSettings": {
+          "network": "ws",
+          "security": "tls",
+          "tlsSettings": {
+            "serverName": "snip.edgeoneai.cc.cd",
+            "allowInsecure": false,
+            "fingerprint": "chrome"
+          },
+          "wsSettings": {
+            "path": "/",
+            "headers": {
+              "Host": "snip.edgeoneai.cc.cd"
+            }
+          }
+        },
+        "mux": {
+          "enabled": false
+        },
+        "tag": "sever-ru-03"
+      },
+      {
+        "protocol": "vless",
+        "settings": {
+          "vnext": [
+            {
+              "address": "188.114.98.0",
+              "port": 443,
+              "users": [
+                {
+                  "id": "495c7195-85b8-498a-bf20-2ea9ce9175b5",
+                  "encryption": "none"
+                }
+              ]
+            }
+          ]
+        },
+        "streamSettings": {
+          "network": "ws",
+          "security": "tls",
+          "tlsSettings": {
+            "serverName": "snip.edgeoneai.cc.cd",
+            "allowInsecure": false,
+            "fingerprint": "unsafe"
+          },
+          "wsSettings": {
+            "path": "/?TELEGRAM-TOOTFFARANGI",
+            "headers": {
+              "Host": "snip.edgeoneai.cc.cd"
+            }
+          }
+        },
+        "mux": {
+          "enabled": false
+        },
+        "tag": "sever-ru-05"
+      }
+    ],
+    "routing": {
+      "domainStrategy": "AsIs",
+      "rules": [
+        {
+          "type": "field",
+          "domain": [
+            "domain:skytime.su"
+          ],
+          "balancerTag": "game-0"
+        },
+        {
+          "type": "field",
+          "ip": [
+            "185.207.214.26/32"
+          ],
+          "balancerTag": "game-0"
+        },
+        {
+          "type": "field",
+          "domain": [
+            "domain:space-times.fun",
+            "domain:space-times.ru"
+          ],
+          "balancerTag": "game-1"
+        },
+        {
+          "type": "field",
+          "ip": [
+            "195.18.27.87/32"
+          ],
+          "balancerTag": "game-1"
+        },
+        {
+          "type": "field",
+          "domain": [
+            "domain:funsky.ru",
+            "domain:funsky.pro",
+            "domain:funsky.su",
+            "domain:funsky.fun"
+          ],
+          "balancerTag": "game-2"
+        },
+        {
+          "type": "field",
+          "ip": [
+            "195.18.27.53/32"
+          ],
+          "balancerTag": "game-2"
+        },
+        {
+          "type": "field",
+          "network": "tcp,udp",
+          "balancerTag": "auto"
+        }
+      ],
+      "balancers": [
+        {
+          "tag": "auto",
+          "selector": [
+            "sever-ru-02",
+            "sever-ru-03",
+            "sever-ru-05"
+          ],
+          "fallbackTag": "sever-ru-02",
+          "strategy": {
+            "type": "leastPing"
+          }
+        },
+        {
+          "tag": "game-0",
+          "selector": [
+            "sever-ru-02",
+            "sever-ru-03",
+            "sever-ru-05"
+          ],
+          "fallbackTag": "sever-ru-02",
+          "strategy": {
+            "type": "leastPing"
+          }
+        },
+        {
+          "tag": "game-1",
+          "selector": [
+            "sever-ru-05",
+            "sever-ru-03"
+          ],
+          "fallbackTag": "sever-ru-05",
+          "strategy": {
+            "type": "leastPing"
+          }
+        },
+        {
+          "tag": "game-2",
+          "selector": [
+            "sever-ru-03",
+            "sever-ru-05"
+          ],
+          "fallbackTag": "sever-ru-03",
+          "strategy": {
+            "type": "leastPing"
+          }
+        }
+      ]
+    },
+    "observatory": {
+      "subjectSelector": [
+        "sever-ru-02",
+        "sever-ru-03",
+        "sever-ru-05"
+      ],
+      "probeUrl": "https://www.gstatic.com/generate_204",
+      "probeInterval": "60s",
+      "enableConcurrency": true
+    }
+  },
+  {
+    "remarks": "Север • Space — Авто",
+    "meta": {
+      "serverDescription": "Топ-3 · 24.10 · авто 60с"
+    },
+    "log": {
+      "loglevel": "warning"
+    },
+    "dns": {
+      "servers": [
+        "1.1.1.1",
+        "8.8.8.8"
+      ]
+    },
+    "inbounds": [
+      {
+        "tag": "socks",
+        "listen": "127.0.0.1",
+        "port": 10808,
+        "protocol": "socks",
+        "settings": {
+          "auth": "noauth",
+          "udp": true
+        }
+      },
+      {
+        "tag": "http",
+        "listen": "127.0.0.1",
+        "port": 10809,
+        "protocol": "http",
+        "settings": {}
+      }
+    ],
+    "outbounds": [
+      {
+        "protocol": "vless",
+        "settings": {
+          "vnext": [
+            {
+              "address": "188.114.98.0",
+              "port": 443,
+              "users": [
+                {
+                  "id": "495c7195-85b8-498a-bf20-2ea9ce9175b5",
+                  "encryption": "none"
+                }
+              ]
+            }
+          ]
+        },
+        "streamSettings": {
+          "network": "ws",
+          "security": "tls",
+          "tlsSettings": {
+            "serverName": "snip.edgeoneai.cc.cd",
+            "allowInsecure": false,
+            "fingerprint": "unsafe"
+          },
+          "wsSettings": {
+            "path": "/?TELEGRAM-TOOTFFARANGI",
+            "headers": {
+              "Host": "snip.edgeoneai.cc.cd"
+            }
+          }
+        },
+        "mux": {
+          "enabled": false
+        },
+        "tag": "sever-ru-05"
+      },
+      {
+        "protocol": "vless",
+        "settings": {
+          "vnext": [
+            {
+              "address": "162.159.140.116",
+              "port": 443,
+              "users": [
+                {
+                  "id": "495c7195-85b8-498a-bf20-2ea9ce9175b5",
+                  "encryption": "none"
+                }
+              ]
+            }
+          ]
+        },
+        "streamSettings": {
+          "network": "ws",
+          "security": "tls",
+          "tlsSettings": {
+            "serverName": "snip.edgeoneai.cc.cd",
+            "allowInsecure": false,
+            "fingerprint": "chrome"
+          },
+          "wsSettings": {
+            "path": "/",
+            "headers": {
+              "Host": "snip.edgeoneai.cc.cd"
+            }
+          }
+        },
+        "mux": {
+          "enabled": false
+        },
+        "tag": "sever-ru-04"
+      },
+      {
+        "protocol": "vless",
+        "settings": {
+          "vnext": [
+            {
+              "address": "104.17.153.11",
+              "port": 443,
+              "users": [
+                {
+                  "id": "495c7195-85b8-498a-bf20-2ea9ce9175b5",
+                  "encryption": "none"
+                }
+              ]
+            }
+          ]
+        },
+        "streamSettings": {
+          "network": "ws",
+          "security": "tls",
+          "tlsSettings": {
+            "serverName": "snip.edgeoneai.cc.cd",
+            "allowInsecure": false,
+            "fingerprint": "chrome"
+          },
+          "wsSettings": {
+            "path": "/",
+            "headers": {
+              "Host": "snip.edgeoneai.cc.cd"
+            }
+          }
+        },
+        "mux": {
+          "enabled": false
+        },
+        "tag": "sever-se-02"
+      }
+    ],
+    "routing": {
+      "domainStrategy": "AsIs",
+      "rules": [
+        {
+          "type": "field",
+          "domain": [
+            "domain:skytime.su"
+          ],
+          "balancerTag": "game-0"
+        },
+        {
+          "type": "field",
+          "ip": [
+            "185.207.214.26/32"
+          ],
+          "balancerTag": "game-0"
+        },
+        {
+          "type": "field",
+          "domain": [
+            "domain:space-times.fun",
+            "domain:space-times.ru"
+          ],
+          "balancerTag": "game-1"
+        },
+        {
+          "type": "field",
+          "ip": [
+            "195.18.27.87/32"
+          ],
+          "balancerTag": "game-1"
+        },
+        {
+          "type": "field",
+          "domain": [
+            "domain:funsky.ru",
+            "domain:funsky.pro",
+            "domain:funsky.su",
+            "domain:funsky.fun"
+          ],
+          "balancerTag": "game-2"
+        },
+        {
+          "type": "field",
+          "ip": [
+            "195.18.27.53/32"
+          ],
+          "balancerTag": "game-2"
+        },
+        {
+          "type": "field",
+          "network": "tcp,udp",
+          "balancerTag": "auto"
+        }
+      ],
+      "balancers": [
+        {
+          "tag": "auto",
+          "selector": [
+            "sever-ru-05",
+            "sever-ru-04",
+            "sever-se-02"
+          ],
+          "fallbackTag": "sever-ru-05",
+          "strategy": {
+            "type": "leastPing"
+          }
+        },
+        {
+          "tag": "game-0",
+          "selector": [
+            "sever-ru-05",
+            "sever-se-02",
+            "sever-ru-04"
+          ],
+          "fallbackTag": "sever-ru-05",
+          "strategy": {
+            "type": "leastPing"
+          }
+        },
+        {
+          "tag": "game-1",
+          "selector": [
+            "sever-ru-05",
+            "sever-ru-04",
+            "sever-se-02"
+          ],
+          "fallbackTag": "sever-ru-05",
+          "strategy": {
+            "type": "leastPing"
+          }
+        },
+        {
+          "tag": "game-2",
+          "selector": [
+            "sever-ru-05",
+            "sever-ru-04",
+            "sever-se-02"
+          ],
+          "fallbackTag": "sever-ru-05",
+          "strategy": {
+            "type": "leastPing"
+          }
+        }
+      ]
+    },
+    "observatory": {
+      "subjectSelector": [
+        "sever-ru-05",
+        "sever-ru-04",
+        "sever-se-02"
+      ],
+      "probeUrl": "https://www.gstatic.com/generate_204",
+      "probeInterval": "60s",
+      "enableConcurrency": true
+    }
+  },
+  {
+    "remarks": "Север • FunSky — Авто",
+    "meta": {
+      "serverDescription": "Топ-3 · 24.10 · авто 60с"
+    },
+    "log": {
+      "loglevel": "warning"
+    },
+    "dns": {
+      "servers": [
+        "1.1.1.1",
+        "8.8.8.8"
+      ]
+    },
+    "inbounds": [
+      {
+        "tag": "socks",
+        "listen": "127.0.0.1",
+        "port": 10808,
+        "protocol": "socks",
+        "settings": {
+          "auth": "noauth",
+          "udp": true
+        }
+      },
+      {
+        "tag": "http",
+        "listen": "127.0.0.1",
+        "port": 10809,
+        "protocol": "http",
+        "settings": {}
+      }
+    ],
+    "outbounds": [
+      {
+        "protocol": "vless",
+        "settings": {
+          "vnext": [
+            {
+              "address": "162.159.135.234",
+              "port": 443,
+              "users": [
+                {
+                  "id": "495c7195-85b8-498a-bf20-2ea9ce9175b5",
+                  "encryption": "none"
+                }
+              ]
+            }
+          ]
+        },
+        "streamSettings": {
+          "network": "ws",
+          "security": "tls",
+          "tlsSettings": {
+            "serverName": "snip.edgeoneai.cc.cd",
+            "allowInsecure": false,
+            "fingerprint": "chrome"
+          },
+          "wsSettings": {
+            "path": "/",
+            "headers": {
+              "Host": "snip.edgeoneai.cc.cd"
+            }
+          }
+        },
+        "mux": {
+          "enabled": false
+        },
+        "tag": "sever-ru-03"
+      },
+      {
+        "protocol": "vless",
+        "settings": {
+          "vnext": [
+            {
+              "address": "162.159.140.116",
+              "port": 443,
+              "users": [
+                {
+                  "id": "495c7195-85b8-498a-bf20-2ea9ce9175b5",
+                  "encryption": "none"
+                }
+              ]
+            }
+          ]
+        },
+        "streamSettings": {
+          "network": "ws",
+          "security": "tls",
+          "tlsSettings": {
+            "serverName": "snip.edgeoneai.cc.cd",
+            "allowInsecure": false,
+            "fingerprint": "chrome"
+          },
+          "wsSettings": {
+            "path": "/",
+            "headers": {
+              "Host": "snip.edgeoneai.cc.cd"
+            }
+          }
+        },
+        "mux": {
+          "enabled": false
+        },
+        "tag": "sever-ru-04"
+      },
+      {
+        "protocol": "vless",
+        "settings": {
+          "vnext": [
+            {
+              "address": "188.114.98.0",
+              "port": 443,
+              "users": [
+                {
+                  "id": "495c7195-85b8-498a-bf20-2ea9ce9175b5",
+                  "encryption": "none"
+                }
+              ]
+            }
+          ]
+        },
+        "streamSettings": {
+          "network": "ws",
+          "security": "tls",
+          "tlsSettings": {
+            "serverName": "snip.edgeoneai.cc.cd",
+            "allowInsecure": false,
+            "fingerprint": "unsafe"
+          },
+          "wsSettings": {
+            "path": "/?TELEGRAM-TOOTFFARANGI",
+            "headers": {
+              "Host": "snip.edgeoneai.cc.cd"
+            }
+          }
+        },
+        "mux": {
+          "enabled": false
+        },
+        "tag": "sever-ru-05"
+      }
+    ],
+    "routing": {
+      "domainStrategy": "AsIs",
+      "rules": [
+        {
+          "type": "field",
+          "domain": [
+            "domain:skytime.su"
+          ],
+          "balancerTag": "game-0"
+        },
+        {
+          "type": "field",
+          "ip": [
+            "185.207.214.26/32"
+          ],
+          "balancerTag": "game-0"
+        },
+        {
+          "type": "field",
+          "domain": [
+            "domain:space-times.fun",
+            "domain:space-times.ru"
+          ],
+          "balancerTag": "game-1"
+        },
+        {
+          "type": "field",
+          "ip": [
+            "195.18.27.87/32"
+          ],
+          "balancerTag": "game-1"
+        },
+        {
+          "type": "field",
+          "domain": [
+            "domain:funsky.ru",
+            "domain:funsky.pro",
+            "domain:funsky.su",
+            "domain:funsky.fun"
+          ],
+          "balancerTag": "game-2"
+        },
+        {
+          "type": "field",
+          "ip": [
+            "195.18.27.53/32"
+          ],
+          "balancerTag": "game-2"
+        },
+        {
+          "type": "field",
+          "network": "tcp,udp",
+          "balancerTag": "auto"
+        }
+      ],
+      "balancers": [
+        {
+          "tag": "auto",
+          "selector": [
+            "sever-ru-03",
+            "sever-ru-04",
+            "sever-ru-05"
+          ],
+          "fallbackTag": "sever-ru-03",
+          "strategy": {
+            "type": "leastPing"
+          }
+        },
+        {
+          "tag": "game-0",
+          "selector": [
+            "sever-ru-03",
+            "sever-ru-05",
+            "sever-ru-04"
+          ],
+          "fallbackTag": "sever-ru-03",
+          "strategy": {
+            "type": "leastPing"
+          }
+        },
+        {
+          "tag": "game-1",
+          "selector": [
+            "sever-ru-05",
+            "sever-ru-04",
+            "sever-ru-03"
+          ],
+          "fallbackTag": "sever-ru-05",
+          "strategy": {
+            "type": "leastPing"
+          }
+        },
+        {
+          "tag": "game-2",
+          "selector": [
+            "sever-ru-03",
+            "sever-ru-04",
+            "sever-ru-05"
+          ],
+          "fallbackTag": "sever-ru-03",
+          "strategy": {
+            "type": "leastPing"
+          }
+        }
+      ]
+    },
+    "observatory": {
+      "subjectSelector": [
+        "sever-ru-03",
+        "sever-ru-04",
+        "sever-ru-05"
       ],
       "probeUrl": "https://www.gstatic.com/generate_204",
       "probeInterval": "60s",
@@ -218,7 +1114,7 @@
   {
     "remarks": "Север • Авто — Minecraft + резерв",
     "meta": {
-      "serverDescription": "Автовыбор по HTTP-задержке раз в 60 с. Игровые адреса направляются через узлы, ответившие при проверке. Вход в аккаунт не проверялся."
+      "serverDescription": "Все страны · резерв · авто 60с"
     },
     "log": {
       "loglevel": "warning"
@@ -323,57 +1219,108 @@
         "settings": {
           "vnext": [
             {
-              "address": "rn.20066002.xyz",
+              "address": "162.159.135.234",
               "port": 443,
               "users": [
                 {
-                  "id": "444715e6-1c6a-4027-90df-fa01ac984669",
-                  "encryption": "none",
-                  "flow": "xtls-rprx-vision"
+                  "id": "495c7195-85b8-498a-bf20-2ea9ce9175b5",
+                  "encryption": "none"
                 }
               ]
             }
           ]
         },
         "streamSettings": {
-          "network": "tcp",
-          "security": "reality",
-          "realitySettings": {
-            "publicKey": "q6WMAqAzFYui3TiWXdOJ1-E4NbiHHk5o1mx6W6m4hEM",
-            "shortId": "c4623fa4291795e7",
-            "serverName": "gateway.icloud.com",
-            "fingerprint": "chrome",
-            "spiderX": "/"
+          "network": "ws",
+          "security": "tls",
+          "tlsSettings": {
+            "serverName": "snip.edgeoneai.cc.cd",
+            "allowInsecure": false,
+            "fingerprint": "chrome"
+          },
+          "wsSettings": {
+            "path": "/",
+            "headers": {
+              "Host": "snip.edgeoneai.cc.cd"
+            }
           }
         },
         "mux": {
           "enabled": false
         },
-        "tag": "sever-us-01"
+        "tag": "sever-ru-03"
       },
       {
-        "protocol": "trojan",
+        "protocol": "vless",
         "settings": {
-          "servers": [
+          "vnext": [
             {
-              "address": "ui108.pacemakere.com",
-              "port": 20008,
-              "password": "6ab93ec68bd94b76"
+              "address": "162.159.140.116",
+              "port": 443,
+              "users": [
+                {
+                  "id": "495c7195-85b8-498a-bf20-2ea9ce9175b5",
+                  "encryption": "none"
+                }
+              ]
             }
           ]
         },
         "streamSettings": {
-          "network": "tcp",
+          "network": "ws",
           "security": "tls",
           "tlsSettings": {
-            "serverName": "ui108.pacemakere.com",
-            "fingerprint": "qq"
+            "serverName": "snip.edgeoneai.cc.cd",
+            "allowInsecure": false,
+            "fingerprint": "chrome"
+          },
+          "wsSettings": {
+            "path": "/",
+            "headers": {
+              "Host": "snip.edgeoneai.cc.cd"
+            }
           }
         },
         "mux": {
           "enabled": false
         },
-        "tag": "sever-us-02"
+        "tag": "sever-ru-04"
+      },
+      {
+        "protocol": "vless",
+        "settings": {
+          "vnext": [
+            {
+              "address": "188.114.98.0",
+              "port": 443,
+              "users": [
+                {
+                  "id": "495c7195-85b8-498a-bf20-2ea9ce9175b5",
+                  "encryption": "none"
+                }
+              ]
+            }
+          ]
+        },
+        "streamSettings": {
+          "network": "ws",
+          "security": "tls",
+          "tlsSettings": {
+            "serverName": "snip.edgeoneai.cc.cd",
+            "allowInsecure": false,
+            "fingerprint": "unsafe"
+          },
+          "wsSettings": {
+            "path": "/?TELEGRAM-TOOTFFARANGI",
+            "headers": {
+              "Host": "snip.edgeoneai.cc.cd"
+            }
+          }
+        },
+        "mux": {
+          "enabled": false
+        },
+        "tag": "sever-ru-05"
       },
       {
         "protocol": "vless",
@@ -446,150 +1393,6 @@
           "enabled": false
         },
         "tag": "sever-se-02"
-      },
-      {
-        "protocol": "vless",
-        "settings": {
-          "vnext": [
-            {
-              "address": "104.16.137.145",
-              "port": 443,
-              "users": [
-                {
-                  "id": "495c7195-85b8-498a-bf20-2ea9ce9175b5",
-                  "encryption": "none"
-                }
-              ]
-            }
-          ]
-        },
-        "streamSettings": {
-          "network": "ws",
-          "security": "tls",
-          "tlsSettings": {
-            "serverName": "snip.edgeoneai.cc.cd",
-            "allowInsecure": false,
-            "fingerprint": "chrome"
-          },
-          "wsSettings": {
-            "path": "/",
-            "headers": {
-              "Host": "snip.edgeoneai.cc.cd"
-            }
-          }
-        },
-        "mux": {
-          "enabled": false
-        },
-        "tag": "sever-se-03"
-      },
-      {
-        "protocol": "vless",
-        "settings": {
-          "vnext": [
-            {
-              "address": "162.159.135.234",
-              "port": 443,
-              "users": [
-                {
-                  "id": "495c7195-85b8-498a-bf20-2ea9ce9175b5",
-                  "encryption": "none"
-                }
-              ]
-            }
-          ]
-        },
-        "streamSettings": {
-          "network": "ws",
-          "security": "tls",
-          "tlsSettings": {
-            "serverName": "snip.edgeoneai.cc.cd",
-            "allowInsecure": false,
-            "fingerprint": "chrome"
-          },
-          "wsSettings": {
-            "path": "/",
-            "headers": {
-              "Host": "snip.edgeoneai.cc.cd"
-            }
-          }
-        },
-        "mux": {
-          "enabled": false
-        },
-        "tag": "sever-se-04"
-      },
-      {
-        "protocol": "vless",
-        "settings": {
-          "vnext": [
-            {
-              "address": "162.159.140.116",
-              "port": 443,
-              "users": [
-                {
-                  "id": "495c7195-85b8-498a-bf20-2ea9ce9175b5",
-                  "encryption": "none"
-                }
-              ]
-            }
-          ]
-        },
-        "streamSettings": {
-          "network": "ws",
-          "security": "tls",
-          "tlsSettings": {
-            "serverName": "snip.edgeoneai.cc.cd",
-            "allowInsecure": false,
-            "fingerprint": "chrome"
-          },
-          "wsSettings": {
-            "path": "/",
-            "headers": {
-              "Host": "snip.edgeoneai.cc.cd"
-            }
-          }
-        },
-        "mux": {
-          "enabled": false
-        },
-        "tag": "sever-se-05"
-      },
-      {
-        "protocol": "vless",
-        "settings": {
-          "vnext": [
-            {
-              "address": "188.114.98.0",
-              "port": 443,
-              "users": [
-                {
-                  "id": "495c7195-85b8-498a-bf20-2ea9ce9175b5",
-                  "encryption": "none"
-                }
-              ]
-            }
-          ]
-        },
-        "streamSettings": {
-          "network": "ws",
-          "security": "tls",
-          "tlsSettings": {
-            "serverName": "snip.edgeoneai.cc.cd",
-            "allowInsecure": false,
-            "fingerprint": "unsafe"
-          },
-          "wsSettings": {
-            "path": "/?TELEGRAM-TOOTFFARANGI",
-            "headers": {
-              "Host": "snip.edgeoneai.cc.cd"
-            }
-          }
-        },
-        "mux": {
-          "enabled": false
-        },
-        "tag": "sever-se-06"
       }
     ],
     "routing": {
@@ -653,14 +1456,11 @@
           "selector": [
             "sever-ru-01",
             "sever-ru-02",
-            "sever-us-01",
-            "sever-us-02",
+            "sever-ru-03",
+            "sever-ru-04",
+            "sever-ru-05",
             "sever-se-01",
-            "sever-se-02",
-            "sever-se-03",
-            "sever-se-04",
-            "sever-se-05",
-            "sever-se-06"
+            "sever-se-02"
           ],
           "fallbackTag": "sever-ru-01",
           "strategy": {
@@ -671,12 +1471,12 @@
           "tag": "game-0",
           "selector": [
             "sever-ru-02",
+            "sever-ru-03",
+            "sever-ru-05",
             "sever-se-02",
-            "sever-ru-01",
             "sever-se-01",
-            "sever-us-02",
-            "sever-se-03",
-            "sever-se-04"
+            "sever-ru-01",
+            "sever-ru-04"
           ],
           "fallbackTag": "sever-ru-02",
           "strategy": {
@@ -686,18 +1486,14 @@
         {
           "tag": "game-1",
           "selector": [
-            "sever-ru-01",
-            "sever-ru-02",
+            "sever-ru-05",
+            "sever-ru-04",
+            "sever-se-02",
             "sever-se-01",
-            "sever-se-03",
-            "sever-se-06",
-            "sever-se-04",
-            "sever-se-05",
-            "sever-us-01",
-            "sever-us-02",
-            "sever-se-02"
+            "sever-ru-01",
+            "sever-ru-03"
           ],
-          "fallbackTag": "sever-ru-01",
+          "fallbackTag": "sever-ru-05",
           "strategy": {
             "type": "leastPing"
           }
@@ -705,16 +1501,14 @@
         {
           "tag": "game-2",
           "selector": [
-            "sever-ru-01",
-            "sever-ru-02",
-            "sever-se-02",
-            "sever-se-03",
-            "sever-se-05",
-            "sever-se-04",
+            "sever-ru-03",
+            "sever-ru-04",
+            "sever-ru-05",
             "sever-se-01",
-            "sever-se-06"
+            "sever-se-02",
+            "sever-ru-01"
           ],
-          "fallbackTag": "sever-ru-01",
+          "fallbackTag": "sever-ru-03",
           "strategy": {
             "type": "leastPing"
           }
@@ -725,14 +1519,11 @@
       "subjectSelector": [
         "sever-ru-01",
         "sever-ru-02",
-        "sever-us-01",
-        "sever-us-02",
+        "sever-ru-03",
+        "sever-ru-04",
+        "sever-ru-05",
         "sever-se-01",
-        "sever-se-02",
-        "sever-se-03",
-        "sever-se-04",
-        "sever-se-05",
-        "sever-se-06"
+        "sever-se-02"
       ],
       "probeUrl": "https://www.gstatic.com/generate_204",
       "probeInterval": "60s",
@@ -742,7 +1533,7 @@
   {
     "remarks": "Север • Россия 01",
     "meta": {
-      "serverDescription": "Ответ Minecraft подтверждён 23.10.2026: SkyTime, Space, FunSky. Фиксированный выход."
+      "serverDescription": "3 игры · 90–374мс · 24.10"
     },
     "log": {
       "loglevel": "warning"
@@ -824,7 +1615,7 @@
   {
     "remarks": "Север • Россия 02",
     "meta": {
-      "serverDescription": "Ответ Minecraft подтверждён 23.10.2026: SkyTime, Space, FunSky. Фиксированный выход."
+      "serverDescription": "Sky · 52мс · 24.10"
     },
     "log": {
       "loglevel": "warning"
@@ -901,9 +1692,9 @@
     }
   },
   {
-    "remarks": "Север • США 01",
+    "remarks": "Север • Россия 03",
     "meta": {
-      "serverDescription": "Ответ Minecraft подтверждён 23.10.2026: Space. Фиксированный выход."
+      "serverDescription": "3 игры · 52–67мс · 24.10"
     },
     "log": {
       "loglevel": "warning"
@@ -939,33 +1730,36 @@
         "settings": {
           "vnext": [
             {
-              "address": "rn.20066002.xyz",
+              "address": "162.159.135.234",
               "port": 443,
               "users": [
                 {
-                  "id": "444715e6-1c6a-4027-90df-fa01ac984669",
-                  "encryption": "none",
-                  "flow": "xtls-rprx-vision"
+                  "id": "495c7195-85b8-498a-bf20-2ea9ce9175b5",
+                  "encryption": "none"
                 }
               ]
             }
           ]
         },
         "streamSettings": {
-          "network": "tcp",
-          "security": "reality",
-          "realitySettings": {
-            "publicKey": "q6WMAqAzFYui3TiWXdOJ1-E4NbiHHk5o1mx6W6m4hEM",
-            "shortId": "c4623fa4291795e7",
-            "serverName": "gateway.icloud.com",
-            "fingerprint": "chrome",
-            "spiderX": "/"
+          "network": "ws",
+          "security": "tls",
+          "tlsSettings": {
+            "serverName": "snip.edgeoneai.cc.cd",
+            "allowInsecure": false,
+            "fingerprint": "chrome"
+          },
+          "wsSettings": {
+            "path": "/",
+            "headers": {
+              "Host": "snip.edgeoneai.cc.cd"
+            }
           }
         },
         "mux": {
           "enabled": false
         },
-        "tag": "sever-us-01"
+        "tag": "sever-ru-03"
       }
     ],
     "routing": {
@@ -974,15 +1768,15 @@
         {
           "type": "field",
           "network": "tcp,udp",
-          "outboundTag": "sever-us-01"
+          "outboundTag": "sever-ru-03"
         }
       ]
     }
   },
   {
-    "remarks": "Север • США 02",
+    "remarks": "Север • Россия 04",
     "meta": {
-      "serverDescription": "Ответ Minecraft подтверждён 23.10.2026: SkyTime, Space. Фиксированный выход."
+      "serverDescription": "3 игры · 54–142мс · 24.10"
     },
     "log": {
       "loglevel": "warning"
@@ -1014,28 +1808,40 @@
     ],
     "outbounds": [
       {
-        "protocol": "trojan",
+        "protocol": "vless",
         "settings": {
-          "servers": [
+          "vnext": [
             {
-              "address": "ui108.pacemakere.com",
-              "port": 20008,
-              "password": "6ab93ec68bd94b76"
+              "address": "162.159.140.116",
+              "port": 443,
+              "users": [
+                {
+                  "id": "495c7195-85b8-498a-bf20-2ea9ce9175b5",
+                  "encryption": "none"
+                }
+              ]
             }
           ]
         },
         "streamSettings": {
-          "network": "tcp",
+          "network": "ws",
           "security": "tls",
           "tlsSettings": {
-            "serverName": "ui108.pacemakere.com",
-            "fingerprint": "qq"
+            "serverName": "snip.edgeoneai.cc.cd",
+            "allowInsecure": false,
+            "fingerprint": "chrome"
+          },
+          "wsSettings": {
+            "path": "/",
+            "headers": {
+              "Host": "snip.edgeoneai.cc.cd"
+            }
           }
         },
         "mux": {
           "enabled": false
         },
-        "tag": "sever-us-02"
+        "tag": "sever-ru-04"
       }
     ],
     "routing": {
@@ -1044,7 +1850,89 @@
         {
           "type": "field",
           "network": "tcp,udp",
-          "outboundTag": "sever-us-02"
+          "outboundTag": "sever-ru-04"
+        }
+      ]
+    }
+  },
+  {
+    "remarks": "Север • Россия 05",
+    "meta": {
+      "serverDescription": "3 игры · 54мс · 24.10"
+    },
+    "log": {
+      "loglevel": "warning"
+    },
+    "dns": {
+      "servers": [
+        "1.1.1.1",
+        "8.8.8.8"
+      ]
+    },
+    "inbounds": [
+      {
+        "tag": "socks",
+        "listen": "127.0.0.1",
+        "port": 10808,
+        "protocol": "socks",
+        "settings": {
+          "auth": "noauth",
+          "udp": true
+        }
+      },
+      {
+        "tag": "http",
+        "listen": "127.0.0.1",
+        "port": 10809,
+        "protocol": "http",
+        "settings": {}
+      }
+    ],
+    "outbounds": [
+      {
+        "protocol": "vless",
+        "settings": {
+          "vnext": [
+            {
+              "address": "188.114.98.0",
+              "port": 443,
+              "users": [
+                {
+                  "id": "495c7195-85b8-498a-bf20-2ea9ce9175b5",
+                  "encryption": "none"
+                }
+              ]
+            }
+          ]
+        },
+        "streamSettings": {
+          "network": "ws",
+          "security": "tls",
+          "tlsSettings": {
+            "serverName": "snip.edgeoneai.cc.cd",
+            "allowInsecure": false,
+            "fingerprint": "unsafe"
+          },
+          "wsSettings": {
+            "path": "/?TELEGRAM-TOOTFFARANGI",
+            "headers": {
+              "Host": "snip.edgeoneai.cc.cd"
+            }
+          }
+        },
+        "mux": {
+          "enabled": false
+        },
+        "tag": "sever-ru-05"
+      }
+    ],
+    "routing": {
+      "domainStrategy": "AsIs",
+      "rules": [
+        {
+          "type": "field",
+          "network": "tcp,udp",
+          "outboundTag": "sever-ru-05"
         }
       ]
     }
@@ -1052,7 +1940,7 @@
   {
     "remarks": "Север • Швеция 01",
     "meta": {
-      "serverDescription": "Ответ Minecraft подтверждён 23.10.2026: SkyTime, Space, FunSky. Фиксированный выход."
+      "serverDescription": "3 игры · 66–80мс · 24.10"
     },
     "log": {
       "loglevel": "warning"
@@ -1134,7 +2022,7 @@
   {
     "remarks": "Север • Швеция 02",
     "meta": {
-      "serverDescription": "Ответ Minecraft подтверждён 23.10.2026: SkyTime, Space, FunSky. Фиксированный выход."
+      "serverDescription": "3 игры · 56–99мс · 24.10"
     },
     "log": {
       "loglevel": "warning"
@@ -1209,334 +2097,6 @@
           "type": "field",
           "network": "tcp,udp",
           "outboundTag": "sever-se-02"
-        }
-      ]
-    }
-  },
-  {
-    "remarks": "Север • Швеция 03",
-    "meta": {
-      "serverDescription": "Ответ Minecraft подтверждён 23.10.2026: SkyTime, Space, FunSky. Фиксированный выход."
-    },
-    "log": {
-      "loglevel": "warning"
-    },
-    "dns": {
-      "servers": [
-        "1.1.1.1",
-        "8.8.8.8"
-      ]
-    },
-    "inbounds": [
-      {
-        "tag": "socks",
-        "listen": "127.0.0.1",
-        "port": 10808,
-        "protocol": "socks",
-        "settings": {
-          "auth": "noauth",
-          "udp": true
-        }
-      },
-      {
-        "tag": "http",
-        "listen": "127.0.0.1",
-        "port": 10809,
-        "protocol": "http",
-        "settings": {}
-      }
-    ],
-    "outbounds": [
-      {
-        "protocol": "vless",
-        "settings": {
-          "vnext": [
-            {
-              "address": "104.16.137.145",
-              "port": 443,
-              "users": [
-                {
-                  "id": "495c7195-85b8-498a-bf20-2ea9ce9175b5",
-                  "encryption": "none"
-                }
-              ]
-            }
-          ]
-        },
-        "streamSettings": {
-          "network": "ws",
-          "security": "tls",
-          "tlsSettings": {
-            "serverName": "snip.edgeoneai.cc.cd",
-            "allowInsecure": false,
-            "fingerprint": "chrome"
-          },
-          "wsSettings": {
-            "path": "/",
-            "headers": {
-              "Host": "snip.edgeoneai.cc.cd"
-            }
-          }
-        },
-        "mux": {
-          "enabled": false
-        },
-        "tag": "sever-se-03"
-      }
-    ],
-    "routing": {
-      "domainStrategy": "AsIs",
-      "rules": [
-        {
-          "type": "field",
-          "network": "tcp,udp",
-          "outboundTag": "sever-se-03"
-        }
-      ]
-    }
-  },
-  {
-    "remarks": "Север • Швеция 04",
-    "meta": {
-      "serverDescription": "Ответ Minecraft подтверждён 23.10.2026: SkyTime, Space, FunSky. Фиксированный выход."
-    },
-    "log": {
-      "loglevel": "warning"
-    },
-    "dns": {
-      "servers": [
-        "1.1.1.1",
-        "8.8.8.8"
-      ]
-    },
-    "inbounds": [
-      {
-        "tag": "socks",
-        "listen": "127.0.0.1",
-        "port": 10808,
-        "protocol": "socks",
-        "settings": {
-          "auth": "noauth",
-          "udp": true
-        }
-      },
-      {
-        "tag": "http",
-        "listen": "127.0.0.1",
-        "port": 10809,
-        "protocol": "http",
-        "settings": {}
-      }
-    ],
-    "outbounds": [
-      {
-        "protocol": "vless",
-        "settings": {
-          "vnext": [
-            {
-              "address": "162.159.135.234",
-              "port": 443,
-              "users": [
-                {
-                  "id": "495c7195-85b8-498a-bf20-2ea9ce9175b5",
-                  "encryption": "none"
-                }
-              ]
-            }
-          ]
-        },
-        "streamSettings": {
-          "network": "ws",
-          "security": "tls",
-          "tlsSettings": {
-            "serverName": "snip.edgeoneai.cc.cd",
-            "allowInsecure": false,
-            "fingerprint": "chrome"
-          },
-          "wsSettings": {
-            "path": "/",
-            "headers": {
-              "Host": "snip.edgeoneai.cc.cd"
-            }
-          }
-        },
-        "mux": {
-          "enabled": false
-        },
-        "tag": "sever-se-04"
-      }
-    ],
-    "routing": {
-      "domainStrategy": "AsIs",
-      "rules": [
-        {
-          "type": "field",
-          "network": "tcp,udp",
-          "outboundTag": "sever-se-04"
-        }
-      ]
-    }
-  },
-  {
-    "remarks": "Север • Швеция 05",
-    "meta": {
-      "serverDescription": "Ответ Minecraft подтверждён 23.10.2026: Space, FunSky. Фиксированный выход."
-    },
-    "log": {
-      "loglevel": "warning"
-    },
-    "dns": {
-      "servers": [
-        "1.1.1.1",
-        "8.8.8.8"
-      ]
-    },
-    "inbounds": [
-      {
-        "tag": "socks",
-        "listen": "127.0.0.1",
-        "port": 10808,
-        "protocol": "socks",
-        "settings": {
-          "auth": "noauth",
-          "udp": true
-        }
-      },
-      {
-        "tag": "http",
-        "listen": "127.0.0.1",
-        "port": 10809,
-        "protocol": "http",
-        "settings": {}
-      }
-    ],
-    "outbounds": [
-      {
-        "protocol": "vless",
-        "settings": {
-          "vnext": [
-            {
-              "address": "162.159.140.116",
-              "port": 443,
-              "users": [
-                {
-                  "id": "495c7195-85b8-498a-bf20-2ea9ce9175b5",
-                  "encryption": "none"
-                }
-              ]
-            }
-          ]
-        },
-        "streamSettings": {
-          "network": "ws",
-          "security": "tls",
-          "tlsSettings": {
-            "serverName": "snip.edgeoneai.cc.cd",
-            "allowInsecure": false,
-            "fingerprint": "chrome"
-          },
-          "wsSettings": {
-            "path": "/",
-            "headers": {
-              "Host": "snip.edgeoneai.cc.cd"
-            }
-          }
-        },
-        "mux": {
-          "enabled": false
-        },
-        "tag": "sever-se-05"
-      }
-    ],
-    "routing": {
-      "domainStrategy": "AsIs",
-      "rules": [
-        {
-          "type": "field",
-          "network": "tcp,udp",
-          "outboundTag": "sever-se-05"
-        }
-      ]
-    }
-  },
-  {
-    "remarks": "Север • Швеция 06",
-    "meta": {
-      "serverDescription": "Ответ Minecraft подтверждён 23.10.2026: Space, FunSky. Фиксированный выход."
-    },
-    "log": {
-      "loglevel": "warning"
-    },
-    "dns": {
-      "servers": [
-        "1.1.1.1",
-        "8.8.8.8"
-      ]
-    },
-    "inbounds": [
-      {
-        "tag": "socks",
-        "listen": "127.0.0.1",
-        "port": 10808,
-        "protocol": "socks",
-        "settings": {
-          "auth": "noauth",
-          "udp": true
-        }
-      },
-      {
-        "tag": "http",
-        "listen": "127.0.0.1",
-        "port": 10809,
-        "protocol": "http",
-        "settings": {}
-      }
-    ],
-    "outbounds": [
-      {
-        "protocol": "vless",
-        "settings": {
-          "vnext": [
-            {
-              "address": "188.114.98.0",
-              "port": 443,
-              "users": [
-                {
-                  "id": "495c7195-85b8-498a-bf20-2ea9ce9175b5",
-                  "encryption": "none"
-                }
-              ]
-            }
-          ]
-        },
-        "streamSettings": {
-          "network": "ws",
-          "security": "tls",
-          "tlsSettings": {
-            "serverName": "snip.edgeoneai.cc.cd",
-            "allowInsecure": false,
-            "fingerprint": "unsafe"
-          },
-          "wsSettings": {
-            "path": "/?TELEGRAM-TOOTFFARANGI",
-            "headers": {
-              "Host": "snip.edgeoneai.cc.cd"
-            }
-          }
-        },
-        "mux": {
-          "enabled": false
-        },
-        "tag": "sever-se-06"
-      }
-    ],
-    "routing": {
-      "domainStrategy": "AsIs",
-      "rules": [
-        {
-          "type": "field",
-          "network": "tcp,udp",
-          "outboundTag": "sever-se-06"
         }
       ]
     }
