@@ -10280,7 +10280,37 @@
         "settings": {
           "vnext": [
             {
-              "address": "45.9.118.218",
+              "address": "45.9.118.177",
+              "port": 8443,
+              "users": [
+                {
+                  "id": "88c4ce99-31f1-4329-912d-2a3564b3d58b",
+                  "encryption": "none",
+                  "flow": "xtls-rprx-vision"
+                }
+              ]
+            }
+          ]
+        },
+        "streamSettings": {
+          "network": "tcp",
+          "security": "reality",
+          "realitySettings": {
+            "publicKey": "SbVKOEMjK0sIlbwg4akyBg5mL5KZwwB-ed4eEE7YnRc",
+            "shortId": "",
+            "serverName": "apple.com",
+            "fingerprint": "firefox",
+            "spiderX": "/"
+          }
+        }
+      },
+      {
+        "tag": "world-225",
+        "protocol": "vless",
+        "settings": {
+          "vnext": [
+            {
+              "address": "37.235.249.29",
               "port": 443,
               "users": [
                 {
@@ -10299,18 +10329,18 @@
             "publicKey": "SbVKOEMjK0sIlbwg4akyBg5mL5KZwwB-ed4eEE7YnRc",
             "shortId": "",
             "serverName": "ozon.ru",
-            "fingerprint": "safari",
+            "fingerprint": "firefox",
             "spiderX": "/"
           }
         }
       },
       {
-        "tag": "world-225",
+        "tag": "world-226",
         "protocol": "vless",
         "settings": {
           "vnext": [
             {
-              "address": "193.160.140.99",
+              "address": "193.160.140.115",
               "port": 443,
               "users": [
                 {
@@ -10329,37 +10359,7 @@
             "publicKey": "SbVKOEMjK0sIlbwg4akyBg5mL5KZwwB-ed4eEE7YnRc",
             "shortId": "",
             "serverName": "ozon.ru",
-            "fingerprint": "",
-            "spiderX": "/"
-          }
-        }
-      },
-      {
-        "tag": "world-226",
-        "protocol": "vless",
-        "settings": {
-          "vnext": [
-            {
-              "address": "193.160.141.2",
-              "port": 8443,
-              "users": [
-                {
-                  "id": "d24e0961-dd20-4528-8796-2a974e79348e",
-                  "encryption": "none",
-                  "flow": "xtls-rprx-vision"
-                }
-              ]
-            }
-          ]
-        },
-        "streamSettings": {
-          "network": "tcp",
-          "security": "reality",
-          "realitySettings": {
-            "publicKey": "SbVKOEMjK0sIlbwg4akyBg5mL5KZwwB-ed4eEE7YnRc",
-            "shortId": "",
-            "serverName": "apple.com",
-            "fingerprint": "chrome",
+            "fingerprint": "firefox",
             "spiderX": "/"
           }
         }
@@ -10400,11 +10400,11 @@
         "settings": {
           "vnext": [
             {
-              "address": "45.9.118.177",
-              "port": 8443,
+              "address": "193.223.104.147",
+              "port": 443,
               "users": [
                 {
-                  "id": "88c4ce99-31f1-4329-912d-2a3564b3d58b",
+                  "id": "680e92ac-1688-49e0-af96-7327fbc30ce8",
                   "encryption": "none",
                   "flow": "xtls-rprx-vision"
                 }
@@ -10418,7 +10418,7 @@
           "realitySettings": {
             "publicKey": "SbVKOEMjK0sIlbwg4akyBg5mL5KZwwB-ed4eEE7YnRc",
             "shortId": "",
-            "serverName": "apple.com",
+            "serverName": "abuse.ozon.ru",
             "fingerprint": "firefox",
             "spiderX": "/"
           }
@@ -10430,11 +10430,11 @@
         "settings": {
           "vnext": [
             {
-              "address": "193.160.140.117",
-              "port": 8443,
+              "address": "45.9.118.219",
+              "port": 443,
               "users": [
                 {
-                  "id": "57c87188-1056-4bd5-92f8-c7ca1fd19147",
+                  "id": "04edf721-b2b7-4a80-9fbd-c949438c58c9",
                   "encryption": "none",
                   "flow": "xtls-rprx-vision"
                 }
@@ -10448,14 +10448,44 @@
           "realitySettings": {
             "publicKey": "SbVKOEMjK0sIlbwg4akyBg5mL5KZwwB-ed4eEE7YnRc",
             "shortId": "",
-            "serverName": "apple.com",
-            "fingerprint": "chrome",
+            "serverName": "ozon.ru",
+            "fingerprint": "firefox",
             "spiderX": "/"
           }
         }
       },
       {
         "tag": "world-230",
+        "protocol": "vless",
+        "settings": {
+          "vnext": [
+            {
+              "address": "45.9.118.194",
+              "port": 443,
+              "users": [
+                {
+                  "id": "04edf721-b2b7-4a80-9fbd-c949438c58c9",
+                  "encryption": "none",
+                  "flow": "xtls-rprx-vision"
+                }
+              ]
+            }
+          ]
+        },
+        "streamSettings": {
+          "network": "tcp",
+          "security": "reality",
+          "realitySettings": {
+            "publicKey": "SbVKOEMjK0sIlbwg4akyBg5mL5KZwwB-ed4eEE7YnRc",
+            "shortId": "",
+            "serverName": "ozon.ru",
+            "fingerprint": "firefox",
+            "spiderX": "/"
+          }
+        }
+      },
+      {
+        "tag": "world-231",
         "protocol": "vless",
         "settings": {
           "vnext": [
@@ -10485,42 +10515,12 @@
         }
       },
       {
-        "tag": "world-231",
-        "protocol": "vless",
-        "settings": {
-          "vnext": [
-            {
-              "address": "193.160.141.12",
-              "port": 443,
-              "users": [
-                {
-                  "id": "04edf721-b2b7-4a80-9fbd-c949438c58c9",
-                  "encryption": "none",
-                  "flow": "xtls-rprx-vision"
-                }
-              ]
-            }
-          ]
-        },
-        "streamSettings": {
-          "network": "tcp",
-          "security": "reality",
-          "realitySettings": {
-            "publicKey": "SbVKOEMjK0sIlbwg4akyBg5mL5KZwwB-ed4eEE7YnRc",
-            "shortId": "",
-            "serverName": "ozon.ru",
-            "fingerprint": "firefox",
-            "spiderX": "/"
-          }
-        }
-      },
-      {
         "tag": "world-232",
         "protocol": "vless",
         "settings": {
           "vnext": [
             {
-              "address": "193.160.140.115",
+              "address": "193.160.140.99",
               "port": 443,
               "users": [
                 {
@@ -10539,7 +10539,7 @@
             "publicKey": "SbVKOEMjK0sIlbwg4akyBg5mL5KZwwB-ed4eEE7YnRc",
             "shortId": "",
             "serverName": "ozon.ru",
-            "fingerprint": "firefox",
+            "fingerprint": "chrome",
             "spiderX": "/"
           }
         }
@@ -10550,11 +10550,11 @@
         "settings": {
           "vnext": [
             {
-              "address": "193.160.141.8",
-              "port": 443,
+              "address": "193.160.140.117",
+              "port": 8443,
               "users": [
                 {
-                  "id": "680e92ac-1688-49e0-af96-7327fbc30ce8",
+                  "id": "57c87188-1056-4bd5-92f8-c7ca1fd19147",
                   "encryption": "none",
                   "flow": "xtls-rprx-vision"
                 }
@@ -10568,8 +10568,8 @@
           "realitySettings": {
             "publicKey": "SbVKOEMjK0sIlbwg4akyBg5mL5KZwwB-ed4eEE7YnRc",
             "shortId": "",
-            "serverName": "ozon.ru",
-            "fingerprint": "firefox",
+            "serverName": "apple.com",
+            "fingerprint": "chrome",
             "spiderX": "/"
           }
         }
@@ -10599,7 +10599,7 @@
             "publicKey": "SbVKOEMjK0sIlbwg4akyBg5mL5KZwwB-ed4eEE7YnRc",
             "shortId": "",
             "serverName": "ozon.ru",
-            "fingerprint": "firefox",
+            "fingerprint": "chrome",
             "spiderX": "/"
           }
         }
@@ -10610,11 +10610,11 @@
         "settings": {
           "vnext": [
             {
-              "address": "178.130.132.12",
-              "port": 443,
+              "address": "193.160.141.2",
+              "port": 8443,
               "users": [
                 {
-                  "id": "04edf721-b2b7-4a80-9fbd-c949438c58c9",
+                  "id": "d24e0961-dd20-4528-8796-2a974e79348e",
                   "encryption": "none",
                   "flow": "xtls-rprx-vision"
                 }
@@ -10628,8 +10628,8 @@
           "realitySettings": {
             "publicKey": "SbVKOEMjK0sIlbwg4akyBg5mL5KZwwB-ed4eEE7YnRc",
             "shortId": "",
-            "serverName": "abuse.ozon.ru",
-            "fingerprint": "safari",
+            "serverName": "apple.com",
+            "fingerprint": "",
             "spiderX": "/"
           }
         }
@@ -10640,11 +10640,11 @@
         "settings": {
           "vnext": [
             {
-              "address": "45.151.71.152",
+              "address": "193.160.141.8",
               "port": 443,
               "users": [
                 {
-                  "id": "8a1f8853-9a71-4ef2-a64c-4f0a94c2e14b",
+                  "id": "680e92ac-1688-49e0-af96-7327fbc30ce8",
                   "encryption": "none",
                   "flow": "xtls-rprx-vision"
                 }
@@ -10658,44 +10658,14 @@
           "realitySettings": {
             "publicKey": "SbVKOEMjK0sIlbwg4akyBg5mL5KZwwB-ed4eEE7YnRc",
             "shortId": "",
-            "serverName": "abuse.ozon.ru",
-            "fingerprint": "chrome",
-            "spiderX": "/"
-          }
-        }
-      },
-      {
-        "tag": "world-237",
-        "protocol": "vless",
-        "settings": {
-          "vnext": [
-            {
-              "address": "147.45.46.187",
-              "port": 443,
-              "users": [
-                {
-                  "id": "04edf721-b2b7-4a80-9fbd-c949438c58c9",
-                  "encryption": "none",
-                  "flow": "xtls-rprx-vision"
-                }
-              ]
-            }
-          ]
-        },
-        "streamSettings": {
-          "network": "tcp",
-          "security": "reality",
-          "realitySettings": {
-            "publicKey": "SbVKOEMjK0sIlbwg4akyBg5mL5KZwwB-ed4eEE7YnRc",
-            "shortId": "",
-            "serverName": "abuse.ozon.ru",
+            "serverName": "ozon.ru",
             "fingerprint": "firefox",
             "spiderX": "/"
           }
         }
       },
       {
-        "tag": "world-238",
+        "tag": "world-237",
         "protocol": "vless",
         "settings": {
           "vnext": [
@@ -10728,7 +10698,7 @@
         }
       },
       {
-        "tag": "world-239",
+        "tag": "world-238",
         "protocol": "vless",
         "settings": {
           "vnext": [
@@ -10759,7 +10729,7 @@
         }
       },
       {
-        "tag": "world-240",
+        "tag": "world-239",
         "protocol": "vless",
         "settings": {
           "vnext": [
@@ -10881,7 +10851,37 @@
         "settings": {
           "vnext": [
             {
-              "address": "45.9.118.218",
+              "address": "45.9.118.177",
+              "port": 8443,
+              "users": [
+                {
+                  "id": "88c4ce99-31f1-4329-912d-2a3564b3d58b",
+                  "encryption": "none",
+                  "flow": "xtls-rprx-vision"
+                }
+              ]
+            }
+          ]
+        },
+        "streamSettings": {
+          "network": "tcp",
+          "security": "reality",
+          "realitySettings": {
+            "publicKey": "SbVKOEMjK0sIlbwg4akyBg5mL5KZwwB-ed4eEE7YnRc",
+            "shortId": "",
+            "serverName": "apple.com",
+            "fingerprint": "firefox",
+            "spiderX": "/"
+          }
+        }
+      },
+      {
+        "tag": "ru-2",
+        "protocol": "vless",
+        "settings": {
+          "vnext": [
+            {
+              "address": "37.235.249.29",
               "port": 443,
               "users": [
                 {
@@ -10900,18 +10900,18 @@
             "publicKey": "SbVKOEMjK0sIlbwg4akyBg5mL5KZwwB-ed4eEE7YnRc",
             "shortId": "",
             "serverName": "ozon.ru",
-            "fingerprint": "safari",
+            "fingerprint": "firefox",
             "spiderX": "/"
           }
         }
       },
       {
-        "tag": "ru-2",
+        "tag": "ru-3",
         "protocol": "vless",
         "settings": {
           "vnext": [
             {
-              "address": "193.160.140.99",
+              "address": "193.160.140.115",
               "port": 443,
               "users": [
                 {
@@ -10930,37 +10930,7 @@
             "publicKey": "SbVKOEMjK0sIlbwg4akyBg5mL5KZwwB-ed4eEE7YnRc",
             "shortId": "",
             "serverName": "ozon.ru",
-            "fingerprint": "",
-            "spiderX": "/"
-          }
-        }
-      },
-      {
-        "tag": "ru-3",
-        "protocol": "vless",
-        "settings": {
-          "vnext": [
-            {
-              "address": "193.160.141.2",
-              "port": 8443,
-              "users": [
-                {
-                  "id": "d24e0961-dd20-4528-8796-2a974e79348e",
-                  "encryption": "none",
-                  "flow": "xtls-rprx-vision"
-                }
-              ]
-            }
-          ]
-        },
-        "streamSettings": {
-          "network": "tcp",
-          "security": "reality",
-          "realitySettings": {
-            "publicKey": "SbVKOEMjK0sIlbwg4akyBg5mL5KZwwB-ed4eEE7YnRc",
-            "shortId": "",
-            "serverName": "apple.com",
-            "fingerprint": "chrome",
+            "fingerprint": "firefox",
             "spiderX": "/"
           }
         }
@@ -11001,11 +10971,11 @@
         "settings": {
           "vnext": [
             {
-              "address": "45.9.118.177",
-              "port": 8443,
+              "address": "193.223.104.147",
+              "port": 443,
               "users": [
                 {
-                  "id": "88c4ce99-31f1-4329-912d-2a3564b3d58b",
+                  "id": "680e92ac-1688-49e0-af96-7327fbc30ce8",
                   "encryption": "none",
                   "flow": "xtls-rprx-vision"
                 }
@@ -11019,7 +10989,7 @@
           "realitySettings": {
             "publicKey": "SbVKOEMjK0sIlbwg4akyBg5mL5KZwwB-ed4eEE7YnRc",
             "shortId": "",
-            "serverName": "apple.com",
+            "serverName": "abuse.ozon.ru",
             "fingerprint": "firefox",
             "spiderX": "/"
           }
@@ -11031,11 +11001,11 @@
         "settings": {
           "vnext": [
             {
-              "address": "193.160.140.117",
-              "port": 8443,
+              "address": "45.9.118.219",
+              "port": 443,
               "users": [
                 {
-                  "id": "57c87188-1056-4bd5-92f8-c7ca1fd19147",
+                  "id": "04edf721-b2b7-4a80-9fbd-c949438c58c9",
                   "encryption": "none",
                   "flow": "xtls-rprx-vision"
                 }
@@ -11049,14 +11019,44 @@
           "realitySettings": {
             "publicKey": "SbVKOEMjK0sIlbwg4akyBg5mL5KZwwB-ed4eEE7YnRc",
             "shortId": "",
-            "serverName": "apple.com",
-            "fingerprint": "chrome",
+            "serverName": "ozon.ru",
+            "fingerprint": "firefox",
             "spiderX": "/"
           }
         }
       },
       {
         "tag": "ru-7",
+        "protocol": "vless",
+        "settings": {
+          "vnext": [
+            {
+              "address": "45.9.118.194",
+              "port": 443,
+              "users": [
+                {
+                  "id": "04edf721-b2b7-4a80-9fbd-c949438c58c9",
+                  "encryption": "none",
+                  "flow": "xtls-rprx-vision"
+                }
+              ]
+            }
+          ]
+        },
+        "streamSettings": {
+          "network": "tcp",
+          "security": "reality",
+          "realitySettings": {
+            "publicKey": "SbVKOEMjK0sIlbwg4akyBg5mL5KZwwB-ed4eEE7YnRc",
+            "shortId": "",
+            "serverName": "ozon.ru",
+            "fingerprint": "firefox",
+            "spiderX": "/"
+          }
+        }
+      },
+      {
+        "tag": "ru-8",
         "protocol": "vless",
         "settings": {
           "vnext": [
@@ -11086,42 +11086,12 @@
         }
       },
       {
-        "tag": "ru-8",
-        "protocol": "vless",
-        "settings": {
-          "vnext": [
-            {
-              "address": "193.160.141.12",
-              "port": 443,
-              "users": [
-                {
-                  "id": "04edf721-b2b7-4a80-9fbd-c949438c58c9",
-                  "encryption": "none",
-                  "flow": "xtls-rprx-vision"
-                }
-              ]
-            }
-          ]
-        },
-        "streamSettings": {
-          "network": "tcp",
-          "security": "reality",
-          "realitySettings": {
-            "publicKey": "SbVKOEMjK0sIlbwg4akyBg5mL5KZwwB-ed4eEE7YnRc",
-            "shortId": "",
-            "serverName": "ozon.ru",
-            "fingerprint": "firefox",
-            "spiderX": "/"
-          }
-        }
-      },
-      {
         "tag": "ru-9",
         "protocol": "vless",
         "settings": {
           "vnext": [
             {
-              "address": "193.160.140.115",
+              "address": "193.160.140.99",
               "port": 443,
               "users": [
                 {
@@ -11140,7 +11110,7 @@
             "publicKey": "SbVKOEMjK0sIlbwg4akyBg5mL5KZwwB-ed4eEE7YnRc",
             "shortId": "",
             "serverName": "ozon.ru",
-            "fingerprint": "firefox",
+            "fingerprint": "chrome",
             "spiderX": "/"
           }
         }
@@ -11151,11 +11121,11 @@
         "settings": {
           "vnext": [
             {
-              "address": "193.160.141.8",
-              "port": 443,
+              "address": "193.160.140.117",
+              "port": 8443,
               "users": [
                 {
-                  "id": "680e92ac-1688-49e0-af96-7327fbc30ce8",
+                  "id": "57c87188-1056-4bd5-92f8-c7ca1fd19147",
                   "encryption": "none",
                   "flow": "xtls-rprx-vision"
                 }
@@ -11169,8 +11139,8 @@
           "realitySettings": {
             "publicKey": "SbVKOEMjK0sIlbwg4akyBg5mL5KZwwB-ed4eEE7YnRc",
             "shortId": "",
-            "serverName": "ozon.ru",
-            "fingerprint": "firefox",
+            "serverName": "apple.com",
+            "fingerprint": "chrome",
             "spiderX": "/"
           }
         }
@@ -11200,7 +11170,7 @@
             "publicKey": "SbVKOEMjK0sIlbwg4akyBg5mL5KZwwB-ed4eEE7YnRc",
             "shortId": "",
             "serverName": "ozon.ru",
-            "fingerprint": "firefox",
+            "fingerprint": "chrome",
             "spiderX": "/"
           }
         }
@@ -11211,11 +11181,11 @@
         "settings": {
           "vnext": [
             {
-              "address": "178.130.132.12",
-              "port": 443,
+              "address": "193.160.141.2",
+              "port": 8443,
               "users": [
                 {
-                  "id": "04edf721-b2b7-4a80-9fbd-c949438c58c9",
+                  "id": "d24e0961-dd20-4528-8796-2a974e79348e",
                   "encryption": "none",
                   "flow": "xtls-rprx-vision"
                 }
@@ -11229,8 +11199,8 @@
           "realitySettings": {
             "publicKey": "SbVKOEMjK0sIlbwg4akyBg5mL5KZwwB-ed4eEE7YnRc",
             "shortId": "",
-            "serverName": "abuse.ozon.ru",
-            "fingerprint": "safari",
+            "serverName": "apple.com",
+            "fingerprint": "",
             "spiderX": "/"
           }
         }
@@ -11241,11 +11211,11 @@
         "settings": {
           "vnext": [
             {
-              "address": "45.151.71.152",
+              "address": "193.160.141.8",
               "port": 443,
               "users": [
                 {
-                  "id": "8a1f8853-9a71-4ef2-a64c-4f0a94c2e14b",
+                  "id": "680e92ac-1688-49e0-af96-7327fbc30ce8",
                   "encryption": "none",
                   "flow": "xtls-rprx-vision"
                 }
@@ -11259,44 +11229,14 @@
           "realitySettings": {
             "publicKey": "SbVKOEMjK0sIlbwg4akyBg5mL5KZwwB-ed4eEE7YnRc",
             "shortId": "",
-            "serverName": "abuse.ozon.ru",
-            "fingerprint": "chrome",
-            "spiderX": "/"
-          }
-        }
-      },
-      {
-        "tag": "ru-14",
-        "protocol": "vless",
-        "settings": {
-          "vnext": [
-            {
-              "address": "147.45.46.187",
-              "port": 443,
-              "users": [
-                {
-                  "id": "04edf721-b2b7-4a80-9fbd-c949438c58c9",
-                  "encryption": "none",
-                  "flow": "xtls-rprx-vision"
-                }
-              ]
-            }
-          ]
-        },
-        "streamSettings": {
-          "network": "tcp",
-          "security": "reality",
-          "realitySettings": {
-            "publicKey": "SbVKOEMjK0sIlbwg4akyBg5mL5KZwwB-ed4eEE7YnRc",
-            "shortId": "",
-            "serverName": "abuse.ozon.ru",
+            "serverName": "ozon.ru",
             "fingerprint": "firefox",
             "spiderX": "/"
           }
         }
       },
       {
-        "tag": "ru-15",
+        "tag": "ru-14",
         "protocol": "vless",
         "settings": {
           "vnext": [
@@ -11329,7 +11269,7 @@
         }
       },
       {
-        "tag": "ru-16",
+        "tag": "ru-15",
         "protocol": "vless",
         "settings": {
           "vnext": [
@@ -11360,7 +11300,7 @@
         }
       },
       {
-        "tag": "ru-17",
+        "tag": "ru-16",
         "protocol": "vless",
         "settings": {
           "vnext": [
@@ -11482,7 +11422,37 @@
         "settings": {
           "vnext": [
             {
-              "address": "45.9.118.218",
+              "address": "45.9.118.177",
+              "port": 8443,
+              "users": [
+                {
+                  "id": "88c4ce99-31f1-4329-912d-2a3564b3d58b",
+                  "encryption": "none",
+                  "flow": "xtls-rprx-vision"
+                }
+              ]
+            }
+          ]
+        },
+        "streamSettings": {
+          "network": "tcp",
+          "security": "reality",
+          "realitySettings": {
+            "publicKey": "SbVKOEMjK0sIlbwg4akyBg5mL5KZwwB-ed4eEE7YnRc",
+            "shortId": "",
+            "serverName": "apple.com",
+            "fingerprint": "firefox",
+            "spiderX": "/"
+          }
+        }
+      },
+      {
+        "tag": "ru-fast-2",
+        "protocol": "vless",
+        "settings": {
+          "vnext": [
+            {
+              "address": "37.235.249.29",
               "port": 443,
               "users": [
                 {
@@ -11501,18 +11471,18 @@
             "publicKey": "SbVKOEMjK0sIlbwg4akyBg5mL5KZwwB-ed4eEE7YnRc",
             "shortId": "",
             "serverName": "ozon.ru",
-            "fingerprint": "safari",
+            "fingerprint": "firefox",
             "spiderX": "/"
           }
         }
       },
       {
-        "tag": "ru-fast-2",
+        "tag": "ru-fast-3",
         "protocol": "vless",
         "settings": {
           "vnext": [
             {
-              "address": "193.160.140.99",
+              "address": "193.160.140.115",
               "port": 443,
               "users": [
                 {
@@ -11531,37 +11501,7 @@
             "publicKey": "SbVKOEMjK0sIlbwg4akyBg5mL5KZwwB-ed4eEE7YnRc",
             "shortId": "",
             "serverName": "ozon.ru",
-            "fingerprint": "",
-            "spiderX": "/"
-          }
-        }
-      },
-      {
-        "tag": "ru-fast-3",
-        "protocol": "vless",
-        "settings": {
-          "vnext": [
-            {
-              "address": "193.160.141.2",
-              "port": 8443,
-              "users": [
-                {
-                  "id": "d24e0961-dd20-4528-8796-2a974e79348e",
-                  "encryption": "none",
-                  "flow": "xtls-rprx-vision"
-                }
-              ]
-            }
-          ]
-        },
-        "streamSettings": {
-          "network": "tcp",
-          "security": "reality",
-          "realitySettings": {
-            "publicKey": "SbVKOEMjK0sIlbwg4akyBg5mL5KZwwB-ed4eEE7YnRc",
-            "shortId": "",
-            "serverName": "apple.com",
-            "fingerprint": "chrome",
+            "fingerprint": "firefox",
             "spiderX": "/"
           }
         }
@@ -11602,11 +11542,11 @@
         "settings": {
           "vnext": [
             {
-              "address": "45.9.118.177",
-              "port": 8443,
+              "address": "193.223.104.147",
+              "port": 443,
               "users": [
                 {
-                  "id": "88c4ce99-31f1-4329-912d-2a3564b3d58b",
+                  "id": "680e92ac-1688-49e0-af96-7327fbc30ce8",
                   "encryption": "none",
                   "flow": "xtls-rprx-vision"
                 }
@@ -11620,7 +11560,7 @@
           "realitySettings": {
             "publicKey": "SbVKOEMjK0sIlbwg4akyBg5mL5KZwwB-ed4eEE7YnRc",
             "shortId": "",
-            "serverName": "apple.com",
+            "serverName": "abuse.ozon.ru",
             "fingerprint": "firefox",
             "spiderX": "/"
           }
@@ -11632,11 +11572,11 @@
         "settings": {
           "vnext": [
             {
-              "address": "193.160.140.117",
-              "port": 8443,
+              "address": "45.9.118.194",
+              "port": 443,
               "users": [
                 {
-                  "id": "57c87188-1056-4bd5-92f8-c7ca1fd19147",
+                  "id": "04edf721-b2b7-4a80-9fbd-c949438c58c9",
                   "encryption": "none",
                   "flow": "xtls-rprx-vision"
                 }
@@ -11650,8 +11590,8 @@
           "realitySettings": {
             "publicKey": "SbVKOEMjK0sIlbwg4akyBg5mL5KZwwB-ed4eEE7YnRc",
             "shortId": "",
-            "serverName": "apple.com",
-            "fingerprint": "chrome",
+            "serverName": "ozon.ru",
+            "fingerprint": "firefox",
             "spiderX": "/"
           }
         }
@@ -11748,11 +11688,11 @@
         "settings": {
           "vnext": [
             {
-              "address": "193.160.140.99",
-              "port": 443,
+              "address": "45.9.118.177",
+              "port": 8443,
               "users": [
                 {
-                  "id": "fd0a5c32-afc0-4d57-b95a-ca6ec8f93e87",
+                  "id": "88c4ce99-31f1-4329-912d-2a3564b3d58b",
                   "encryption": "none",
                   "flow": "xtls-rprx-vision"
                 }
@@ -11766,8 +11706,8 @@
           "realitySettings": {
             "publicKey": "SbVKOEMjK0sIlbwg4akyBg5mL5KZwwB-ed4eEE7YnRc",
             "shortId": "",
-            "serverName": "ozon.ru",
-            "fingerprint": "",
+            "serverName": "apple.com",
+            "fingerprint": "firefox",
             "spiderX": "/"
           }
         }
@@ -11778,7 +11718,7 @@
         "settings": {
           "vnext": [
             {
-              "address": "45.9.118.218",
+              "address": "37.235.249.29",
               "port": 443,
               "users": [
                 {
@@ -11797,13 +11737,43 @@
             "publicKey": "SbVKOEMjK0sIlbwg4akyBg5mL5KZwwB-ed4eEE7YnRc",
             "shortId": "",
             "serverName": "ozon.ru",
-            "fingerprint": "safari",
+            "fingerprint": "firefox",
             "spiderX": "/"
           }
         }
       },
       {
         "tag": "ru-game-3",
+        "protocol": "vless",
+        "settings": {
+          "vnext": [
+            {
+              "address": "45.9.118.194",
+              "port": 443,
+              "users": [
+                {
+                  "id": "04edf721-b2b7-4a80-9fbd-c949438c58c9",
+                  "encryption": "none",
+                  "flow": "xtls-rprx-vision"
+                }
+              ]
+            }
+          ]
+        },
+        "streamSettings": {
+          "network": "tcp",
+          "security": "reality",
+          "realitySettings": {
+            "publicKey": "SbVKOEMjK0sIlbwg4akyBg5mL5KZwwB-ed4eEE7YnRc",
+            "shortId": "",
+            "serverName": "ozon.ru",
+            "fingerprint": "firefox",
+            "spiderX": "/"
+          }
+        }
+      },
+      {
+        "tag": "ru-game-4",
         "protocol": "vless",
         "settings": {
           "vnext": [
@@ -11833,46 +11803,16 @@
         }
       },
       {
-        "tag": "ru-game-4",
-        "protocol": "vless",
-        "settings": {
-          "vnext": [
-            {
-              "address": "193.160.141.2",
-              "port": 8443,
-              "users": [
-                {
-                  "id": "d24e0961-dd20-4528-8796-2a974e79348e",
-                  "encryption": "none",
-                  "flow": "xtls-rprx-vision"
-                }
-              ]
-            }
-          ]
-        },
-        "streamSettings": {
-          "network": "tcp",
-          "security": "reality",
-          "realitySettings": {
-            "publicKey": "SbVKOEMjK0sIlbwg4akyBg5mL5KZwwB-ed4eEE7YnRc",
-            "shortId": "",
-            "serverName": "apple.com",
-            "fingerprint": "chrome",
-            "spiderX": "/"
-          }
-        }
-      },
-      {
         "tag": "ru-game-5",
         "protocol": "vless",
         "settings": {
           "vnext": [
             {
-              "address": "193.160.140.117",
-              "port": 8443,
+              "address": "45.9.118.219",
+              "port": 443,
               "users": [
                 {
-                  "id": "57c87188-1056-4bd5-92f8-c7ca1fd19147",
+                  "id": "04edf721-b2b7-4a80-9fbd-c949438c58c9",
                   "encryption": "none",
                   "flow": "xtls-rprx-vision"
                 }
@@ -11886,8 +11826,8 @@
           "realitySettings": {
             "publicKey": "SbVKOEMjK0sIlbwg4akyBg5mL5KZwwB-ed4eEE7YnRc",
             "shortId": "",
-            "serverName": "apple.com",
-            "fingerprint": "chrome",
+            "serverName": "ozon.ru",
+            "fingerprint": "firefox",
             "spiderX": "/"
           }
         }
@@ -11984,11 +11924,11 @@
         "settings": {
           "vnext": [
             {
-              "address": "45.9.118.218",
-              "port": 443,
+              "address": "45.9.118.177",
+              "port": 8443,
               "users": [
                 {
-                  "id": "04edf721-b2b7-4a80-9fbd-c949438c58c9",
+                  "id": "88c4ce99-31f1-4329-912d-2a3564b3d58b",
                   "encryption": "none",
                   "flow": "xtls-rprx-vision"
                 }
@@ -12002,8 +11942,8 @@
           "realitySettings": {
             "publicKey": "SbVKOEMjK0sIlbwg4akyBg5mL5KZwwB-ed4eEE7YnRc",
             "shortId": "",
-            "serverName": "ozon.ru",
-            "fingerprint": "safari",
+            "serverName": "apple.com",
+            "fingerprint": "firefox",
             "spiderX": "/"
           }
         }
@@ -12080,11 +12020,11 @@
         "settings": {
           "vnext": [
             {
-              "address": "193.160.140.99",
+              "address": "37.235.249.29",
               "port": 443,
               "users": [
                 {
-                  "id": "fd0a5c32-afc0-4d57-b95a-ca6ec8f93e87",
+                  "id": "04edf721-b2b7-4a80-9fbd-c949438c58c9",
                   "encryption": "none",
                   "flow": "xtls-rprx-vision"
                 }
@@ -12099,7 +12039,7 @@
             "publicKey": "SbVKOEMjK0sIlbwg4akyBg5mL5KZwwB-ed4eEE7YnRc",
             "shortId": "",
             "serverName": "ozon.ru",
-            "fingerprint": "",
+            "fingerprint": "firefox",
             "spiderX": "/"
           }
         }
@@ -12176,11 +12116,11 @@
         "settings": {
           "vnext": [
             {
-              "address": "193.160.141.2",
-              "port": 8443,
+              "address": "193.160.140.115",
+              "port": 443,
               "users": [
                 {
-                  "id": "d24e0961-dd20-4528-8796-2a974e79348e",
+                  "id": "fd0a5c32-afc0-4d57-b95a-ca6ec8f93e87",
                   "encryption": "none",
                   "flow": "xtls-rprx-vision"
                 }
@@ -12194,8 +12134,8 @@
           "realitySettings": {
             "publicKey": "SbVKOEMjK0sIlbwg4akyBg5mL5KZwwB-ed4eEE7YnRc",
             "shortId": "",
-            "serverName": "apple.com",
-            "fingerprint": "chrome",
+            "serverName": "ozon.ru",
+            "fingerprint": "firefox",
             "spiderX": "/"
           }
         }
@@ -12368,11 +12308,11 @@
         "settings": {
           "vnext": [
             {
-              "address": "45.9.118.177",
-              "port": 8443,
+              "address": "193.223.104.147",
+              "port": 443,
               "users": [
                 {
-                  "id": "88c4ce99-31f1-4329-912d-2a3564b3d58b",
+                  "id": "680e92ac-1688-49e0-af96-7327fbc30ce8",
                   "encryption": "none",
                   "flow": "xtls-rprx-vision"
                 }
@@ -12386,7 +12326,7 @@
           "realitySettings": {
             "publicKey": "SbVKOEMjK0sIlbwg4akyBg5mL5KZwwB-ed4eEE7YnRc",
             "shortId": "",
-            "serverName": "apple.com",
+            "serverName": "abuse.ozon.ru",
             "fingerprint": "firefox",
             "spiderX": "/"
           }
@@ -12464,11 +12404,11 @@
         "settings": {
           "vnext": [
             {
-              "address": "193.160.140.117",
-              "port": 8443,
+              "address": "45.9.118.219",
+              "port": 443,
               "users": [
                 {
-                  "id": "57c87188-1056-4bd5-92f8-c7ca1fd19147",
+                  "id": "04edf721-b2b7-4a80-9fbd-c949438c58c9",
                   "encryption": "none",
                   "flow": "xtls-rprx-vision"
                 }
@@ -12482,8 +12422,8 @@
           "realitySettings": {
             "publicKey": "SbVKOEMjK0sIlbwg4akyBg5mL5KZwwB-ed4eEE7YnRc",
             "shortId": "",
-            "serverName": "apple.com",
-            "fingerprint": "chrome",
+            "serverName": "ozon.ru",
+            "fingerprint": "firefox",
             "spiderX": "/"
           }
         }
@@ -12517,6 +12457,102 @@
   },
   {
     "remarks": "XetsiwVPN · 🇷🇺 РОССИЯ — СЕРВЕР 7",
+    "log": {
+      "loglevel": "warning"
+    },
+    "dns": {
+      "servers": [
+        "1.1.1.1",
+        "8.8.8.8"
+      ]
+    },
+    "inbounds": [
+      {
+        "tag": "socks",
+        "listen": "127.0.0.1",
+        "port": 10808,
+        "protocol": "socks",
+        "settings": {
+          "auth": "noauth",
+          "udp": true
+        },
+        "sniffing": {
+          "enabled": true,
+          "destOverride": [
+            "http",
+            "tls",
+            "quic"
+          ]
+        }
+      },
+      {
+        "tag": "http",
+        "listen": "127.0.0.1",
+        "port": 10809,
+        "protocol": "http",
+        "settings": {}
+      }
+    ],
+    "outbounds": [
+      {
+        "tag": "proxy",
+        "protocol": "vless",
+        "settings": {
+          "vnext": [
+            {
+              "address": "45.9.118.194",
+              "port": 443,
+              "users": [
+                {
+                  "id": "04edf721-b2b7-4a80-9fbd-c949438c58c9",
+                  "encryption": "none",
+                  "flow": "xtls-rprx-vision"
+                }
+              ]
+            }
+          ]
+        },
+        "streamSettings": {
+          "network": "tcp",
+          "security": "reality",
+          "realitySettings": {
+            "publicKey": "SbVKOEMjK0sIlbwg4akyBg5mL5KZwwB-ed4eEE7YnRc",
+            "shortId": "",
+            "serverName": "ozon.ru",
+            "fingerprint": "firefox",
+            "spiderX": "/"
+          }
+        }
+      },
+      {
+        "tag": "direct",
+        "protocol": "freedom",
+        "settings": {}
+      }
+    ],
+    "routing": {
+      "domainStrategy": "AsIs",
+      "rules": [
+        {
+          "type": "field",
+          "ip": [
+            "geoip:private"
+          ],
+          "outboundTag": "direct"
+        },
+        {
+          "type": "field",
+          "inboundTag": [
+            "socks",
+            "http"
+          ],
+          "outboundTag": "proxy"
+        }
+      ]
+    }
+  },
+  {
+    "remarks": "XetsiwVPN · 🇷🇺 РОССИЯ — СЕРВЕР 8",
     "log": {
       "loglevel": "warning"
     },
@@ -12612,102 +12648,6 @@
     }
   },
   {
-    "remarks": "XetsiwVPN · 🇷🇺 РОССИЯ — СЕРВЕР 8",
-    "log": {
-      "loglevel": "warning"
-    },
-    "dns": {
-      "servers": [
-        "1.1.1.1",
-        "8.8.8.8"
-      ]
-    },
-    "inbounds": [
-      {
-        "tag": "socks",
-        "listen": "127.0.0.1",
-        "port": 10808,
-        "protocol": "socks",
-        "settings": {
-          "auth": "noauth",
-          "udp": true
-        },
-        "sniffing": {
-          "enabled": true,
-          "destOverride": [
-            "http",
-            "tls",
-            "quic"
-          ]
-        }
-      },
-      {
-        "tag": "http",
-        "listen": "127.0.0.1",
-        "port": 10809,
-        "protocol": "http",
-        "settings": {}
-      }
-    ],
-    "outbounds": [
-      {
-        "tag": "proxy",
-        "protocol": "vless",
-        "settings": {
-          "vnext": [
-            {
-              "address": "193.160.141.12",
-              "port": 443,
-              "users": [
-                {
-                  "id": "04edf721-b2b7-4a80-9fbd-c949438c58c9",
-                  "encryption": "none",
-                  "flow": "xtls-rprx-vision"
-                }
-              ]
-            }
-          ]
-        },
-        "streamSettings": {
-          "network": "tcp",
-          "security": "reality",
-          "realitySettings": {
-            "publicKey": "SbVKOEMjK0sIlbwg4akyBg5mL5KZwwB-ed4eEE7YnRc",
-            "shortId": "",
-            "serverName": "ozon.ru",
-            "fingerprint": "firefox",
-            "spiderX": "/"
-          }
-        }
-      },
-      {
-        "tag": "direct",
-        "protocol": "freedom",
-        "settings": {}
-      }
-    ],
-    "routing": {
-      "domainStrategy": "AsIs",
-      "rules": [
-        {
-          "type": "field",
-          "ip": [
-            "geoip:private"
-          ],
-          "outboundTag": "direct"
-        },
-        {
-          "type": "field",
-          "inboundTag": [
-            "socks",
-            "http"
-          ],
-          "outboundTag": "proxy"
-        }
-      ]
-    }
-  },
-  {
     "remarks": "XetsiwVPN · 🇷🇺 РОССИЯ — СЕРВЕР 9",
     "log": {
       "loglevel": "warning"
@@ -12752,7 +12692,7 @@
         "settings": {
           "vnext": [
             {
-              "address": "193.160.140.115",
+              "address": "193.160.140.99",
               "port": 443,
               "users": [
                 {
@@ -12771,7 +12711,7 @@
             "publicKey": "SbVKOEMjK0sIlbwg4akyBg5mL5KZwwB-ed4eEE7YnRc",
             "shortId": "",
             "serverName": "ozon.ru",
-            "fingerprint": "firefox",
+            "fingerprint": "chrome",
             "spiderX": "/"
           }
         }
@@ -12848,11 +12788,11 @@
         "settings": {
           "vnext": [
             {
-              "address": "193.160.141.8",
-              "port": 443,
+              "address": "193.160.140.117",
+              "port": 8443,
               "users": [
                 {
-                  "id": "680e92ac-1688-49e0-af96-7327fbc30ce8",
+                  "id": "57c87188-1056-4bd5-92f8-c7ca1fd19147",
                   "encryption": "none",
                   "flow": "xtls-rprx-vision"
                 }
@@ -12866,8 +12806,8 @@
           "realitySettings": {
             "publicKey": "SbVKOEMjK0sIlbwg4akyBg5mL5KZwwB-ed4eEE7YnRc",
             "shortId": "",
-            "serverName": "ozon.ru",
-            "fingerprint": "firefox",
+            "serverName": "apple.com",
+            "fingerprint": "chrome",
             "spiderX": "/"
           }
         }
@@ -12963,7 +12903,7 @@
             "publicKey": "SbVKOEMjK0sIlbwg4akyBg5mL5KZwwB-ed4eEE7YnRc",
             "shortId": "",
             "serverName": "ozon.ru",
-            "fingerprint": "firefox",
+            "fingerprint": "chrome",
             "spiderX": "/"
           }
         }
@@ -13040,11 +12980,11 @@
         "settings": {
           "vnext": [
             {
-              "address": "178.130.132.12",
-              "port": 443,
+              "address": "193.160.141.2",
+              "port": 8443,
               "users": [
                 {
-                  "id": "04edf721-b2b7-4a80-9fbd-c949438c58c9",
+                  "id": "d24e0961-dd20-4528-8796-2a974e79348e",
                   "encryption": "none",
                   "flow": "xtls-rprx-vision"
                 }
@@ -13058,8 +12998,8 @@
           "realitySettings": {
             "publicKey": "SbVKOEMjK0sIlbwg4akyBg5mL5KZwwB-ed4eEE7YnRc",
             "shortId": "",
-            "serverName": "abuse.ozon.ru",
-            "fingerprint": "safari",
+            "serverName": "apple.com",
+            "fingerprint": "",
             "spiderX": "/"
           }
         }
@@ -13136,11 +13076,11 @@
         "settings": {
           "vnext": [
             {
-              "address": "45.151.71.152",
+              "address": "193.160.141.8",
               "port": 443,
               "users": [
                 {
-                  "id": "8a1f8853-9a71-4ef2-a64c-4f0a94c2e14b",
+                  "id": "680e92ac-1688-49e0-af96-7327fbc30ce8",
                   "encryption": "none",
                   "flow": "xtls-rprx-vision"
                 }
@@ -13154,103 +13094,7 @@
           "realitySettings": {
             "publicKey": "SbVKOEMjK0sIlbwg4akyBg5mL5KZwwB-ed4eEE7YnRc",
             "shortId": "",
-            "serverName": "abuse.ozon.ru",
-            "fingerprint": "chrome",
-            "spiderX": "/"
-          }
-        }
-      },
-      {
-        "tag": "direct",
-        "protocol": "freedom",
-        "settings": {}
-      }
-    ],
-    "routing": {
-      "domainStrategy": "AsIs",
-      "rules": [
-        {
-          "type": "field",
-          "ip": [
-            "geoip:private"
-          ],
-          "outboundTag": "direct"
-        },
-        {
-          "type": "field",
-          "inboundTag": [
-            "socks",
-            "http"
-          ],
-          "outboundTag": "proxy"
-        }
-      ]
-    }
-  },
-  {
-    "remarks": "XetsiwVPN · 🇷🇺 РОССИЯ — СЕРВЕР 14",
-    "log": {
-      "loglevel": "warning"
-    },
-    "dns": {
-      "servers": [
-        "1.1.1.1",
-        "8.8.8.8"
-      ]
-    },
-    "inbounds": [
-      {
-        "tag": "socks",
-        "listen": "127.0.0.1",
-        "port": 10808,
-        "protocol": "socks",
-        "settings": {
-          "auth": "noauth",
-          "udp": true
-        },
-        "sniffing": {
-          "enabled": true,
-          "destOverride": [
-            "http",
-            "tls",
-            "quic"
-          ]
-        }
-      },
-      {
-        "tag": "http",
-        "listen": "127.0.0.1",
-        "port": 10809,
-        "protocol": "http",
-        "settings": {}
-      }
-    ],
-    "outbounds": [
-      {
-        "tag": "proxy",
-        "protocol": "vless",
-        "settings": {
-          "vnext": [
-            {
-              "address": "147.45.46.187",
-              "port": 443,
-              "users": [
-                {
-                  "id": "04edf721-b2b7-4a80-9fbd-c949438c58c9",
-                  "encryption": "none",
-                  "flow": "xtls-rprx-vision"
-                }
-              ]
-            }
-          ]
-        },
-        "streamSettings": {
-          "network": "tcp",
-          "security": "reality",
-          "realitySettings": {
-            "publicKey": "SbVKOEMjK0sIlbwg4akyBg5mL5KZwwB-ed4eEE7YnRc",
-            "shortId": "",
-            "serverName": "abuse.ozon.ru",
+            "serverName": "ozon.ru",
             "fingerprint": "firefox",
             "spiderX": "/"
           }
@@ -13284,7 +13128,7 @@
     }
   },
   {
-    "remarks": "XetsiwVPN · 🇷🇺 РОССИЯ — СЕРВЕР 15",
+    "remarks": "XetsiwVPN · 🇷🇺 РОССИЯ — СЕРВЕР 14",
     "log": {
       "loglevel": "warning"
     },
@@ -13383,7 +13227,7 @@
     }
   },
   {
-    "remarks": "XetsiwVPN · 🇷🇺 РОССИЯ — СЕРВЕР 16",
+    "remarks": "XetsiwVPN · 🇷🇺 РОССИЯ — СЕРВЕР 15",
     "log": {
       "loglevel": "warning"
     },
@@ -13480,7 +13324,7 @@
     }
   },
   {
-    "remarks": "XetsiwVPN · 🇷🇺 РОССИЯ — СЕРВЕР 17",
+    "remarks": "XetsiwVPN · 🇷🇺 РОССИЯ — СЕРВЕР 16",
     "log": {
       "loglevel": "warning"
     },
@@ -13621,11 +13465,11 @@
         "settings": {
           "vnext": [
             {
-              "address": "45.9.118.218",
-              "port": 443,
+              "address": "45.9.118.177",
+              "port": 8443,
               "users": [
                 {
-                  "id": "04edf721-b2b7-4a80-9fbd-c949438c58c9",
+                  "id": "88c4ce99-31f1-4329-912d-2a3564b3d58b",
                   "encryption": "none",
                   "flow": "xtls-rprx-vision"
                 }
@@ -13639,8 +13483,8 @@
           "realitySettings": {
             "publicKey": "SbVKOEMjK0sIlbwg4akyBg5mL5KZwwB-ed4eEE7YnRc",
             "shortId": "",
-            "serverName": "ozon.ru",
-            "fingerprint": "safari",
+            "serverName": "apple.com",
+            "fingerprint": "firefox",
             "spiderX": "/"
           }
         }
@@ -13722,11 +13566,11 @@
         "settings": {
           "vnext": [
             {
-              "address": "193.160.140.99",
+              "address": "37.235.249.29",
               "port": 443,
               "users": [
                 {
-                  "id": "fd0a5c32-afc0-4d57-b95a-ca6ec8f93e87",
+                  "id": "04edf721-b2b7-4a80-9fbd-c949438c58c9",
                   "encryption": "none",
                   "flow": "xtls-rprx-vision"
                 }
@@ -13741,7 +13585,7 @@
             "publicKey": "SbVKOEMjK0sIlbwg4akyBg5mL5KZwwB-ed4eEE7YnRc",
             "shortId": "",
             "serverName": "ozon.ru",
-            "fingerprint": "",
+            "fingerprint": "firefox",
             "spiderX": "/"
           }
         }
