@@ -2,8 +2,8 @@
   {
     "remarks": "Север • Авто — Россия",
     "meta": {
-      "serverDescription": "1 RU · резерв пока недоступен",
-      "serverdescription": "1 RU · резерв пока недоступен"
+      "serverDescription": "1 RU · пока без выбора",
+      "serverdescription": "1 RU · пока без выбора"
     },
     "log": {
       "loglevel": "warning"
@@ -65,7 +65,7 @@
         "mux": {
           "enabled": false
         },
-        "tag": "sever-ru-02"
+        "tag": "sever-ru-01"
       }
     ],
     "routing": {
@@ -127,9 +127,9 @@
         {
           "tag": "auto",
           "selector": [
-            "sever-ru-02"
+            "sever-ru-01"
           ],
-          "fallbackTag": "sever-ru-02",
+          "fallbackTag": "sever-ru-01",
           "strategy": {
             "type": "leastPing"
           }
@@ -137,9 +137,9 @@
         {
           "tag": "game-0",
           "selector": [
-            "sever-ru-02"
+            "sever-ru-01"
           ],
-          "fallbackTag": "sever-ru-02",
+          "fallbackTag": "sever-ru-01",
           "strategy": {
             "type": "leastPing"
           }
@@ -147,9 +147,9 @@
         {
           "tag": "game-1",
           "selector": [
-            "sever-ru-02"
+            "sever-ru-01"
           ],
-          "fallbackTag": "sever-ru-02",
+          "fallbackTag": "sever-ru-01",
           "strategy": {
             "type": "leastPing"
           }
@@ -157,9 +157,9 @@
         {
           "tag": "game-2",
           "selector": [
-            "sever-ru-02"
+            "sever-ru-01"
           ],
-          "fallbackTag": "sever-ru-02",
+          "fallbackTag": "sever-ru-01",
           "strategy": {
             "type": "leastPing"
           }
@@ -168,7 +168,7 @@
     },
     "observatory": {
       "subjectSelector": [
-        "sever-ru-02"
+        "sever-ru-01"
       ],
       "probeUrl": "https://www.gstatic.com/generate_204",
       "probeInterval": "60s",
@@ -178,8 +178,8 @@
   {
     "remarks": "Север • Питер — Авто RU",
     "meta": {
-      "serverDescription": "Для СПб · 1 RU · проверка 60с",
-      "serverdescription": "Для СПб · 1 RU · проверка 60с"
+      "serverDescription": "Для СПб · 1 RU · авто 60с",
+      "serverdescription": "Для СПб · 1 RU · авто 60с"
     },
     "log": {
       "loglevel": "warning"
@@ -241,7 +241,7 @@
         "mux": {
           "enabled": false
         },
-        "tag": "sever-ru-02"
+        "tag": "sever-ru-01"
       }
     ],
     "routing": {
@@ -303,9 +303,9 @@
         {
           "tag": "auto",
           "selector": [
-            "sever-ru-02"
+            "sever-ru-01"
           ],
-          "fallbackTag": "sever-ru-02",
+          "fallbackTag": "sever-ru-01",
           "strategy": {
             "type": "leastPing"
           }
@@ -313,9 +313,9 @@
         {
           "tag": "game-0",
           "selector": [
-            "sever-ru-02"
+            "sever-ru-01"
           ],
-          "fallbackTag": "sever-ru-02",
+          "fallbackTag": "sever-ru-01",
           "strategy": {
             "type": "leastPing"
           }
@@ -323,9 +323,9 @@
         {
           "tag": "game-1",
           "selector": [
-            "sever-ru-02"
+            "sever-ru-01"
           ],
-          "fallbackTag": "sever-ru-02",
+          "fallbackTag": "sever-ru-01",
           "strategy": {
             "type": "leastPing"
           }
@@ -333,9 +333,9 @@
         {
           "tag": "game-2",
           "selector": [
-            "sever-ru-02"
+            "sever-ru-01"
           ],
-          "fallbackTag": "sever-ru-02",
+          "fallbackTag": "sever-ru-01",
           "strategy": {
             "type": "leastPing"
           }
@@ -344,7 +344,7 @@
     },
     "observatory": {
       "subjectSelector": [
-        "sever-ru-02"
+        "sever-ru-01"
       ],
       "probeUrl": "https://www.gstatic.com/generate_204",
       "probeInterval": "60s",
@@ -354,8 +354,8 @@
   {
     "remarks": "Север • SkyTime — Авто",
     "meta": {
-      "serverDescription": "1 RU · резерв пока недоступен",
-      "serverdescription": "1 RU · резерв пока недоступен"
+      "serverDescription": "2 узла · проверка 60с",
+      "serverdescription": "2 узла · проверка 60с"
     },
     "log": {
       "loglevel": "warning"
@@ -417,7 +417,40 @@
         "mux": {
           "enabled": false
         },
-        "tag": "sever-ru-02"
+        "tag": "sever-ru-01"
+      },
+      {
+        "protocol": "vless",
+        "settings": {
+          "vnext": [
+            {
+              "address": "45.144.221.169",
+              "port": 443,
+              "users": [
+                {
+                  "id": "30572b57-f5ab-4eb8-82d4-a24d399b99f6",
+                  "encryption": "none",
+                  "flow": "xtls-rprx-vision"
+                }
+              ]
+            }
+          ]
+        },
+        "streamSettings": {
+          "network": "tcp",
+          "security": "reality",
+          "realitySettings": {
+            "serverName": "arizona.eosapp.net",
+            "fingerprint": "qq",
+            "publicKey": "Buy9pirx5Ih_LHwc6R3BCmvRL4g4Ljx6B3MEsZfIZhU",
+            "shortId": "",
+            "spiderX": "/"
+          }
+        },
+        "mux": {
+          "enabled": false
+        },
+        "tag": "sever-us-01"
       }
     ],
     "routing": {
@@ -479,9 +512,10 @@
         {
           "tag": "auto",
           "selector": [
-            "sever-ru-02"
+            "sever-ru-01",
+            "sever-us-01"
           ],
-          "fallbackTag": "sever-ru-02",
+          "fallbackTag": "sever-ru-01",
           "strategy": {
             "type": "leastPing"
           }
@@ -489,9 +523,10 @@
         {
           "tag": "game-0",
           "selector": [
-            "sever-ru-02"
+            "sever-ru-01",
+            "sever-us-01"
           ],
-          "fallbackTag": "sever-ru-02",
+          "fallbackTag": "sever-ru-01",
           "strategy": {
             "type": "leastPing"
           }
@@ -499,9 +534,9 @@
         {
           "tag": "game-1",
           "selector": [
-            "sever-ru-02"
+            "sever-ru-01"
           ],
-          "fallbackTag": "sever-ru-02",
+          "fallbackTag": "sever-ru-01",
           "strategy": {
             "type": "leastPing"
           }
@@ -509,9 +544,10 @@
         {
           "tag": "game-2",
           "selector": [
-            "sever-ru-02"
+            "sever-us-01",
+            "sever-ru-01"
           ],
-          "fallbackTag": "sever-ru-02",
+          "fallbackTag": "sever-us-01",
           "strategy": {
             "type": "leastPing"
           }
@@ -520,7 +556,8 @@
     },
     "observatory": {
       "subjectSelector": [
-        "sever-ru-02"
+        "sever-ru-01",
+        "sever-us-01"
       ],
       "probeUrl": "https://www.gstatic.com/generate_204",
       "probeInterval": "60s",
@@ -530,8 +567,8 @@
   {
     "remarks": "Север • Space — Авто",
     "meta": {
-      "serverDescription": "1 RU · резерв пока недоступен",
-      "serverdescription": "1 RU · резерв пока недоступен"
+      "serverDescription": "1 RU · пока без выбора",
+      "serverdescription": "1 RU · пока без выбора"
     },
     "log": {
       "loglevel": "warning"
@@ -593,7 +630,7 @@
         "mux": {
           "enabled": false
         },
-        "tag": "sever-ru-02"
+        "tag": "sever-ru-01"
       }
     ],
     "routing": {
@@ -655,9 +692,9 @@
         {
           "tag": "auto",
           "selector": [
-            "sever-ru-02"
+            "sever-ru-01"
           ],
-          "fallbackTag": "sever-ru-02",
+          "fallbackTag": "sever-ru-01",
           "strategy": {
             "type": "leastPing"
           }
@@ -665,9 +702,9 @@
         {
           "tag": "game-0",
           "selector": [
-            "sever-ru-02"
+            "sever-ru-01"
           ],
-          "fallbackTag": "sever-ru-02",
+          "fallbackTag": "sever-ru-01",
           "strategy": {
             "type": "leastPing"
           }
@@ -675,9 +712,9 @@
         {
           "tag": "game-1",
           "selector": [
-            "sever-ru-02"
+            "sever-ru-01"
           ],
-          "fallbackTag": "sever-ru-02",
+          "fallbackTag": "sever-ru-01",
           "strategy": {
             "type": "leastPing"
           }
@@ -685,9 +722,9 @@
         {
           "tag": "game-2",
           "selector": [
-            "sever-ru-02"
+            "sever-ru-01"
           ],
-          "fallbackTag": "sever-ru-02",
+          "fallbackTag": "sever-ru-01",
           "strategy": {
             "type": "leastPing"
           }
@@ -696,7 +733,7 @@
     },
     "observatory": {
       "subjectSelector": [
-        "sever-ru-02"
+        "sever-ru-01"
       ],
       "probeUrl": "https://www.gstatic.com/generate_204",
       "probeInterval": "60s",
@@ -706,8 +743,8 @@
   {
     "remarks": "Север • FunSky — Авто",
     "meta": {
-      "serverDescription": "1 RU · резерв пока недоступен",
-      "serverdescription": "1 RU · резерв пока недоступен"
+      "serverDescription": "2 узла · проверка 60с",
+      "serverdescription": "2 узла · проверка 60с"
     },
     "log": {
       "loglevel": "warning"
@@ -743,6 +780,39 @@
         "settings": {
           "vnext": [
             {
+              "address": "45.144.221.169",
+              "port": 443,
+              "users": [
+                {
+                  "id": "30572b57-f5ab-4eb8-82d4-a24d399b99f6",
+                  "encryption": "none",
+                  "flow": "xtls-rprx-vision"
+                }
+              ]
+            }
+          ]
+        },
+        "streamSettings": {
+          "network": "tcp",
+          "security": "reality",
+          "realitySettings": {
+            "serverName": "arizona.eosapp.net",
+            "fingerprint": "qq",
+            "publicKey": "Buy9pirx5Ih_LHwc6R3BCmvRL4g4Ljx6B3MEsZfIZhU",
+            "shortId": "",
+            "spiderX": "/"
+          }
+        },
+        "mux": {
+          "enabled": false
+        },
+        "tag": "sever-us-01"
+      },
+      {
+        "protocol": "vless",
+        "settings": {
+          "vnext": [
+            {
               "address": "213.226.127.71",
               "port": 2066,
               "users": [
@@ -769,7 +839,7 @@
         "mux": {
           "enabled": false
         },
-        "tag": "sever-ru-02"
+        "tag": "sever-ru-01"
       }
     ],
     "routing": {
@@ -831,9 +901,10 @@
         {
           "tag": "auto",
           "selector": [
-            "sever-ru-02"
+            "sever-us-01",
+            "sever-ru-01"
           ],
-          "fallbackTag": "sever-ru-02",
+          "fallbackTag": "sever-us-01",
           "strategy": {
             "type": "leastPing"
           }
@@ -841,9 +912,10 @@
         {
           "tag": "game-0",
           "selector": [
-            "sever-ru-02"
+            "sever-ru-01",
+            "sever-us-01"
           ],
-          "fallbackTag": "sever-ru-02",
+          "fallbackTag": "sever-ru-01",
           "strategy": {
             "type": "leastPing"
           }
@@ -851,9 +923,9 @@
         {
           "tag": "game-1",
           "selector": [
-            "sever-ru-02"
+            "sever-ru-01"
           ],
-          "fallbackTag": "sever-ru-02",
+          "fallbackTag": "sever-ru-01",
           "strategy": {
             "type": "leastPing"
           }
@@ -861,9 +933,10 @@
         {
           "tag": "game-2",
           "selector": [
-            "sever-ru-02"
+            "sever-us-01",
+            "sever-ru-01"
           ],
-          "fallbackTag": "sever-ru-02",
+          "fallbackTag": "sever-us-01",
           "strategy": {
             "type": "leastPing"
           }
@@ -872,7 +945,8 @@
     },
     "observatory": {
       "subjectSelector": [
-        "sever-ru-02"
+        "sever-us-01",
+        "sever-ru-01"
       ],
       "probeUrl": "https://www.gstatic.com/generate_204",
       "probeInterval": "60s",
@@ -882,8 +956,8 @@
   {
     "remarks": "Север • Авто — Minecraft + резерв",
     "meta": {
-      "serverDescription": "1 RU · резерв пока недоступен",
-      "serverdescription": "1 RU · резерв пока недоступен"
+      "serverDescription": "2 узла · проверка 60с",
+      "serverdescription": "2 узла · проверка 60с"
     },
     "log": {
       "loglevel": "warning"
@@ -945,7 +1019,40 @@
         "mux": {
           "enabled": false
         },
-        "tag": "sever-ru-02"
+        "tag": "sever-ru-01"
+      },
+      {
+        "protocol": "vless",
+        "settings": {
+          "vnext": [
+            {
+              "address": "45.144.221.169",
+              "port": 443,
+              "users": [
+                {
+                  "id": "30572b57-f5ab-4eb8-82d4-a24d399b99f6",
+                  "encryption": "none",
+                  "flow": "xtls-rprx-vision"
+                }
+              ]
+            }
+          ]
+        },
+        "streamSettings": {
+          "network": "tcp",
+          "security": "reality",
+          "realitySettings": {
+            "serverName": "arizona.eosapp.net",
+            "fingerprint": "qq",
+            "publicKey": "Buy9pirx5Ih_LHwc6R3BCmvRL4g4Ljx6B3MEsZfIZhU",
+            "shortId": "",
+            "spiderX": "/"
+          }
+        },
+        "mux": {
+          "enabled": false
+        },
+        "tag": "sever-us-01"
       }
     ],
     "routing": {
@@ -1007,9 +1114,10 @@
         {
           "tag": "auto",
           "selector": [
-            "sever-ru-02"
+            "sever-ru-01",
+            "sever-us-01"
           ],
-          "fallbackTag": "sever-ru-02",
+          "fallbackTag": "sever-ru-01",
           "strategy": {
             "type": "leastPing"
           }
@@ -1017,9 +1125,10 @@
         {
           "tag": "game-0",
           "selector": [
-            "sever-ru-02"
+            "sever-ru-01",
+            "sever-us-01"
           ],
-          "fallbackTag": "sever-ru-02",
+          "fallbackTag": "sever-ru-01",
           "strategy": {
             "type": "leastPing"
           }
@@ -1027,9 +1136,9 @@
         {
           "tag": "game-1",
           "selector": [
-            "sever-ru-02"
+            "sever-ru-01"
           ],
-          "fallbackTag": "sever-ru-02",
+          "fallbackTag": "sever-ru-01",
           "strategy": {
             "type": "leastPing"
           }
@@ -1037,9 +1146,10 @@
         {
           "tag": "game-2",
           "selector": [
-            "sever-ru-02"
+            "sever-us-01",
+            "sever-ru-01"
           ],
-          "fallbackTag": "sever-ru-02",
+          "fallbackTag": "sever-us-01",
           "strategy": {
             "type": "leastPing"
           }
@@ -1048,7 +1158,8 @@
     },
     "observatory": {
       "subjectSelector": [
-        "sever-ru-02"
+        "sever-ru-01",
+        "sever-us-01"
       ],
       "probeUrl": "https://www.gstatic.com/generate_204",
       "probeInterval": "60s",
@@ -1056,10 +1167,10 @@
     }
   },
   {
-    "remarks": "Север • Россия — основной",
+    "remarks": "Север • Россия 01",
     "meta": {
-      "serverDescription": "3 игры · 87–190мс · 25.10",
-      "serverdescription": "3 игры · 87–190мс · 25.10"
+      "serverDescription": "3 игры · проверен 25.10",
+      "serverdescription": "3 игры · проверен 25.10"
     },
     "log": {
       "loglevel": "warning"
@@ -1121,7 +1232,7 @@
         "mux": {
           "enabled": false
         },
-        "tag": "sever-ru-02"
+        "tag": "sever-ru-01"
       }
     ],
     "routing": {
@@ -1130,7 +1241,87 @@
         {
           "type": "field",
           "network": "tcp,udp",
-          "outboundTag": "sever-ru-02"
+          "outboundTag": "sever-ru-01"
+        }
+      ]
+    }
+  },
+  {
+    "remarks": "Север • США 01",
+    "meta": {
+      "serverDescription": "Sky+Fun · проверен 25.10",
+      "serverdescription": "Sky+Fun · проверен 25.10"
+    },
+    "log": {
+      "loglevel": "warning"
+    },
+    "dns": {
+      "servers": [
+        "1.1.1.1",
+        "8.8.8.8"
+      ]
+    },
+    "inbounds": [
+      {
+        "tag": "socks",
+        "listen": "127.0.0.1",
+        "port": 10808,
+        "protocol": "socks",
+        "settings": {
+          "auth": "noauth",
+          "udp": true
+        }
+      },
+      {
+        "tag": "http",
+        "listen": "127.0.0.1",
+        "port": 10809,
+        "protocol": "http",
+        "settings": {}
+      }
+    ],
+    "outbounds": [
+      {
+        "protocol": "vless",
+        "settings": {
+          "vnext": [
+            {
+              "address": "45.144.221.169",
+              "port": 443,
+              "users": [
+                {
+                  "id": "30572b57-f5ab-4eb8-82d4-a24d399b99f6",
+                  "encryption": "none",
+                  "flow": "xtls-rprx-vision"
+                }
+              ]
+            }
+          ]
+        },
+        "streamSettings": {
+          "network": "tcp",
+          "security": "reality",
+          "realitySettings": {
+            "serverName": "arizona.eosapp.net",
+            "fingerprint": "qq",
+            "publicKey": "Buy9pirx5Ih_LHwc6R3BCmvRL4g4Ljx6B3MEsZfIZhU",
+            "shortId": "",
+            "spiderX": "/"
+          }
+        },
+        "mux": {
+          "enabled": false
+        },
+        "tag": "sever-us-01"
+      }
+    ],
+    "routing": {
+      "domainStrategy": "AsIs",
+      "rules": [
+        {
+          "type": "field",
+          "network": "tcp,udp",
+          "outboundTag": "sever-us-01"
         }
       ]
     }
