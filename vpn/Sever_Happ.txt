@@ -2,8 +2,8 @@
   {
     "remarks": "Север • Авто — Россия",
     "meta": {
-      "serverDescription": "4 узлов · авто 60с",
-      "serverdescription": "4 узлов · авто 60с"
+      "serverDescription": "1 RU · пока без выбора",
+      "serverdescription": "1 RU · пока без выбора"
     },
     "log": {
       "loglevel": "warning"
@@ -35,17 +35,17 @@
     ],
     "outbounds": [
       {
-        "protocol": "vmess",
+        "protocol": "vless",
         "settings": {
           "vnext": [
             {
-              "address": "158.160.180.165",
-              "port": 24212,
+              "address": "213.226.127.71",
+              "port": 2066,
               "users": [
                 {
-                  "id": "c58c1205-b308-416f-8503-c04557abf93d",
-                  "alterId": 0,
-                  "security": "auto"
+                  "id": "5ad13ef8-ced8-43b5-9d8c-f046a3ce9ddc",
+                  "encryption": "none",
+                  "flow": "xtls-rprx-vision"
                 }
               ]
             }
@@ -53,115 +53,19 @@
         },
         "streamSettings": {
           "network": "tcp",
-          "security": "tls",
-          "tlsSettings": {
-            "serverName": "158.160.180.165",
-            "fingerprint": "chrome"
+          "security": "reality",
+          "realitySettings": {
+            "publicKey": "kLCwYNBhCg68BQah9El1lNg6GQ7-7Y7xfTtIs6MiTEg",
+            "shortId": "d18f4e",
+            "serverName": "tiktok.com",
+            "fingerprint": "chrome",
+            "spiderX": "/"
           }
         },
         "mux": {
           "enabled": false
         },
         "tag": "sever-ru-01"
-      },
-      {
-        "protocol": "vless",
-        "settings": {
-          "vnext": [
-            {
-              "address": "147.45.46.157",
-              "port": 8443,
-              "users": [
-                {
-                  "id": "75985152-e16e-4a48-87ff-35c2615e0ab5",
-                  "encryption": "none",
-                  "flow": "xtls-rprx-vision"
-                }
-              ]
-            }
-          ]
-        },
-        "streamSettings": {
-          "network": "tcp",
-          "security": "reality",
-          "realitySettings": {
-            "serverName": "apple.com",
-            "fingerprint": "ios",
-            "publicKey": "SbVKOEMjK0sIlbwg4akyBg5mL5KZwwB-ed4eEE7YnRc",
-            "shortId": "",
-            "spiderX": "/"
-          }
-        },
-        "mux": {
-          "enabled": false
-        },
-        "tag": "sever-ru-02"
-      },
-      {
-        "protocol": "vless",
-        "settings": {
-          "vnext": [
-            {
-              "address": "45.9.118.179",
-              "port": 443,
-              "users": [
-                {
-                  "id": "fd0a5c32-afc0-4d57-b95a-ca6ec8f93e87",
-                  "encryption": "none",
-                  "flow": "xtls-rprx-vision"
-                }
-              ]
-            }
-          ]
-        },
-        "streamSettings": {
-          "network": "tcp",
-          "security": "reality",
-          "realitySettings": {
-            "serverName": "ozon.ru",
-            "fingerprint": "qq",
-            "publicKey": "SbVKOEMjK0sIlbwg4akyBg5mL5KZwwB-ed4eEE7YnRc",
-            "shortId": "",
-            "spiderX": "/"
-          }
-        },
-        "mux": {
-          "enabled": false
-        },
-        "tag": "sever-ru-03"
-      },
-      {
-        "protocol": "vless",
-        "settings": {
-          "vnext": [
-            {
-              "address": "45.128.78.196",
-              "port": 443,
-              "users": [
-                {
-                  "id": "fd0a5c32-afc0-4d57-b95a-ca6ec8f93e87",
-                  "encryption": "none",
-                  "flow": "xtls-rprx-vision"
-                }
-              ]
-            }
-          ]
-        },
-        "streamSettings": {
-          "network": "tcp",
-          "security": "reality",
-          "realitySettings": {
-            "serverName": "ozon.ru",
-            "fingerprint": "ios",
-            "publicKey": "SbVKOEMjK0sIlbwg4akyBg5mL5KZwwB-ed4eEE7YnRc",
-            "shortId": "",
-            "spiderX": "/"
-          }
-        },
-        "mux": {
-          "enabled": false
-        },
-        "tag": "sever-ru-04"
       }
     ],
     "routing": {
@@ -223,10 +127,7 @@
         {
           "tag": "auto",
           "selector": [
-            "sever-ru-01",
-            "sever-ru-02",
-            "sever-ru-03",
-            "sever-ru-04"
+            "sever-ru-01"
           ],
           "fallbackTag": "sever-ru-01",
           "strategy": {
@@ -236,10 +137,7 @@
         {
           "tag": "game-0",
           "selector": [
-            "sever-ru-01",
-            "sever-ru-03",
-            "sever-ru-02",
-            "sever-ru-04"
+            "sever-ru-01"
           ],
           "fallbackTag": "sever-ru-01",
           "strategy": {
@@ -249,10 +147,7 @@
         {
           "tag": "game-1",
           "selector": [
-            "sever-ru-01",
-            "sever-ru-02",
-            "sever-ru-03",
-            "sever-ru-04"
+            "sever-ru-01"
           ],
           "fallbackTag": "sever-ru-01",
           "strategy": {
@@ -262,10 +157,7 @@
         {
           "tag": "game-2",
           "selector": [
-            "sever-ru-01",
-            "sever-ru-02",
-            "sever-ru-03",
-            "sever-ru-04"
+            "sever-ru-01"
           ],
           "fallbackTag": "sever-ru-01",
           "strategy": {
@@ -276,10 +168,7 @@
     },
     "observatory": {
       "subjectSelector": [
-        "sever-ru-01",
-        "sever-ru-02",
-        "sever-ru-03",
-        "sever-ru-04"
+        "sever-ru-01"
       ],
       "probeUrl": "https://www.gstatic.com/generate_204",
       "probeInterval": "60s",
@@ -289,8 +178,8 @@
   {
     "remarks": "Север • Питер — Авто RU",
     "meta": {
-      "serverDescription": "Для СПб · 4 RU · авто 60с",
-      "serverdescription": "Для СПб · 4 RU · авто 60с"
+      "serverDescription": "Для СПб · 1 RU · авто 60с",
+      "serverdescription": "Для СПб · 1 RU · авто 60с"
     },
     "log": {
       "loglevel": "warning"
@@ -322,17 +211,17 @@
     ],
     "outbounds": [
       {
-        "protocol": "vmess",
+        "protocol": "vless",
         "settings": {
           "vnext": [
             {
-              "address": "158.160.180.165",
-              "port": 24212,
+              "address": "213.226.127.71",
+              "port": 2066,
               "users": [
                 {
-                  "id": "c58c1205-b308-416f-8503-c04557abf93d",
-                  "alterId": 0,
-                  "security": "auto"
+                  "id": "5ad13ef8-ced8-43b5-9d8c-f046a3ce9ddc",
+                  "encryption": "none",
+                  "flow": "xtls-rprx-vision"
                 }
               ]
             }
@@ -340,115 +229,19 @@
         },
         "streamSettings": {
           "network": "tcp",
-          "security": "tls",
-          "tlsSettings": {
-            "serverName": "158.160.180.165",
-            "fingerprint": "chrome"
+          "security": "reality",
+          "realitySettings": {
+            "publicKey": "kLCwYNBhCg68BQah9El1lNg6GQ7-7Y7xfTtIs6MiTEg",
+            "shortId": "d18f4e",
+            "serverName": "tiktok.com",
+            "fingerprint": "chrome",
+            "spiderX": "/"
           }
         },
         "mux": {
           "enabled": false
         },
         "tag": "sever-ru-01"
-      },
-      {
-        "protocol": "vless",
-        "settings": {
-          "vnext": [
-            {
-              "address": "147.45.46.157",
-              "port": 8443,
-              "users": [
-                {
-                  "id": "75985152-e16e-4a48-87ff-35c2615e0ab5",
-                  "encryption": "none",
-                  "flow": "xtls-rprx-vision"
-                }
-              ]
-            }
-          ]
-        },
-        "streamSettings": {
-          "network": "tcp",
-          "security": "reality",
-          "realitySettings": {
-            "serverName": "apple.com",
-            "fingerprint": "ios",
-            "publicKey": "SbVKOEMjK0sIlbwg4akyBg5mL5KZwwB-ed4eEE7YnRc",
-            "shortId": "",
-            "spiderX": "/"
-          }
-        },
-        "mux": {
-          "enabled": false
-        },
-        "tag": "sever-ru-02"
-      },
-      {
-        "protocol": "vless",
-        "settings": {
-          "vnext": [
-            {
-              "address": "45.9.118.179",
-              "port": 443,
-              "users": [
-                {
-                  "id": "fd0a5c32-afc0-4d57-b95a-ca6ec8f93e87",
-                  "encryption": "none",
-                  "flow": "xtls-rprx-vision"
-                }
-              ]
-            }
-          ]
-        },
-        "streamSettings": {
-          "network": "tcp",
-          "security": "reality",
-          "realitySettings": {
-            "serverName": "ozon.ru",
-            "fingerprint": "qq",
-            "publicKey": "SbVKOEMjK0sIlbwg4akyBg5mL5KZwwB-ed4eEE7YnRc",
-            "shortId": "",
-            "spiderX": "/"
-          }
-        },
-        "mux": {
-          "enabled": false
-        },
-        "tag": "sever-ru-03"
-      },
-      {
-        "protocol": "vless",
-        "settings": {
-          "vnext": [
-            {
-              "address": "45.128.78.196",
-              "port": 443,
-              "users": [
-                {
-                  "id": "fd0a5c32-afc0-4d57-b95a-ca6ec8f93e87",
-                  "encryption": "none",
-                  "flow": "xtls-rprx-vision"
-                }
-              ]
-            }
-          ]
-        },
-        "streamSettings": {
-          "network": "tcp",
-          "security": "reality",
-          "realitySettings": {
-            "serverName": "ozon.ru",
-            "fingerprint": "ios",
-            "publicKey": "SbVKOEMjK0sIlbwg4akyBg5mL5KZwwB-ed4eEE7YnRc",
-            "shortId": "",
-            "spiderX": "/"
-          }
-        },
-        "mux": {
-          "enabled": false
-        },
-        "tag": "sever-ru-04"
       }
     ],
     "routing": {
@@ -510,10 +303,7 @@
         {
           "tag": "auto",
           "selector": [
-            "sever-ru-01",
-            "sever-ru-02",
-            "sever-ru-03",
-            "sever-ru-04"
+            "sever-ru-01"
           ],
           "fallbackTag": "sever-ru-01",
           "strategy": {
@@ -523,10 +313,7 @@
         {
           "tag": "game-0",
           "selector": [
-            "sever-ru-01",
-            "sever-ru-03",
-            "sever-ru-02",
-            "sever-ru-04"
+            "sever-ru-01"
           ],
           "fallbackTag": "sever-ru-01",
           "strategy": {
@@ -536,10 +323,7 @@
         {
           "tag": "game-1",
           "selector": [
-            "sever-ru-01",
-            "sever-ru-02",
-            "sever-ru-03",
-            "sever-ru-04"
+            "sever-ru-01"
           ],
           "fallbackTag": "sever-ru-01",
           "strategy": {
@@ -549,10 +333,7 @@
         {
           "tag": "game-2",
           "selector": [
-            "sever-ru-01",
-            "sever-ru-02",
-            "sever-ru-03",
-            "sever-ru-04"
+            "sever-ru-01"
           ],
           "fallbackTag": "sever-ru-01",
           "strategy": {
@@ -563,10 +344,7 @@
     },
     "observatory": {
       "subjectSelector": [
-        "sever-ru-01",
-        "sever-ru-02",
-        "sever-ru-03",
-        "sever-ru-04"
+        "sever-ru-01"
       ],
       "probeUrl": "https://www.gstatic.com/generate_204",
       "probeInterval": "60s",
@@ -576,8 +354,8 @@
   {
     "remarks": "Север • SkyTime — Авто",
     "meta": {
-      "serverDescription": "3 узлов · авто 60с",
-      "serverdescription": "3 узлов · авто 60с"
+      "serverDescription": "2 узла · проверка 60с",
+      "serverdescription": "2 узла · проверка 60с"
     },
     "log": {
       "loglevel": "warning"
@@ -609,17 +387,17 @@
     ],
     "outbounds": [
       {
-        "protocol": "vmess",
+        "protocol": "vless",
         "settings": {
           "vnext": [
             {
-              "address": "158.160.180.165",
-              "port": 24212,
+              "address": "213.226.127.71",
+              "port": 2066,
               "users": [
                 {
-                  "id": "c58c1205-b308-416f-8503-c04557abf93d",
-                  "alterId": 0,
-                  "security": "auto"
+                  "id": "5ad13ef8-ced8-43b5-9d8c-f046a3ce9ddc",
+                  "encryption": "none",
+                  "flow": "xtls-rprx-vision"
                 }
               ]
             }
@@ -627,10 +405,13 @@
         },
         "streamSettings": {
           "network": "tcp",
-          "security": "tls",
-          "tlsSettings": {
-            "serverName": "158.160.180.165",
-            "fingerprint": "chrome"
+          "security": "reality",
+          "realitySettings": {
+            "publicKey": "kLCwYNBhCg68BQah9El1lNg6GQ7-7Y7xfTtIs6MiTEg",
+            "shortId": "d18f4e",
+            "serverName": "tiktok.com",
+            "fingerprint": "chrome",
+            "spiderX": "/"
           }
         },
         "mux": {
@@ -643,11 +424,11 @@
         "settings": {
           "vnext": [
             {
-              "address": "45.9.118.179",
+              "address": "45.144.221.169",
               "port": 443,
               "users": [
                 {
-                  "id": "fd0a5c32-afc0-4d57-b95a-ca6ec8f93e87",
+                  "id": "30572b57-f5ab-4eb8-82d4-a24d399b99f6",
                   "encryption": "none",
                   "flow": "xtls-rprx-vision"
                 }
@@ -659,9 +440,9 @@
           "network": "tcp",
           "security": "reality",
           "realitySettings": {
-            "serverName": "ozon.ru",
+            "serverName": "arizona.eosapp.net",
             "fingerprint": "qq",
-            "publicKey": "SbVKOEMjK0sIlbwg4akyBg5mL5KZwwB-ed4eEE7YnRc",
+            "publicKey": "Buy9pirx5Ih_LHwc6R3BCmvRL4g4Ljx6B3MEsZfIZhU",
             "shortId": "",
             "spiderX": "/"
           }
@@ -669,40 +450,7 @@
         "mux": {
           "enabled": false
         },
-        "tag": "sever-ru-03"
-      },
-      {
-        "protocol": "vless",
-        "settings": {
-          "vnext": [
-            {
-              "address": "147.45.46.157",
-              "port": 8443,
-              "users": [
-                {
-                  "id": "75985152-e16e-4a48-87ff-35c2615e0ab5",
-                  "encryption": "none",
-                  "flow": "xtls-rprx-vision"
-                }
-              ]
-            }
-          ]
-        },
-        "streamSettings": {
-          "network": "tcp",
-          "security": "reality",
-          "realitySettings": {
-            "serverName": "apple.com",
-            "fingerprint": "ios",
-            "publicKey": "SbVKOEMjK0sIlbwg4akyBg5mL5KZwwB-ed4eEE7YnRc",
-            "shortId": "",
-            "spiderX": "/"
-          }
-        },
-        "mux": {
-          "enabled": false
-        },
-        "tag": "sever-ru-02"
+        "tag": "sever-us-01"
       }
     ],
     "routing": {
@@ -765,8 +513,7 @@
           "tag": "auto",
           "selector": [
             "sever-ru-01",
-            "sever-ru-03",
-            "sever-ru-02"
+            "sever-us-01"
           ],
           "fallbackTag": "sever-ru-01",
           "strategy": {
@@ -777,8 +524,7 @@
           "tag": "game-0",
           "selector": [
             "sever-ru-01",
-            "sever-ru-03",
-            "sever-ru-02"
+            "sever-us-01"
           ],
           "fallbackTag": "sever-ru-01",
           "strategy": {
@@ -788,9 +534,7 @@
         {
           "tag": "game-1",
           "selector": [
-            "sever-ru-01",
-            "sever-ru-02",
-            "sever-ru-03"
+            "sever-ru-01"
           ],
           "fallbackTag": "sever-ru-01",
           "strategy": {
@@ -800,11 +544,10 @@
         {
           "tag": "game-2",
           "selector": [
-            "sever-ru-01",
-            "sever-ru-02",
-            "sever-ru-03"
+            "sever-us-01",
+            "sever-ru-01"
           ],
-          "fallbackTag": "sever-ru-01",
+          "fallbackTag": "sever-us-01",
           "strategy": {
             "type": "leastPing"
           }
@@ -814,8 +557,7 @@
     "observatory": {
       "subjectSelector": [
         "sever-ru-01",
-        "sever-ru-03",
-        "sever-ru-02"
+        "sever-us-01"
       ],
       "probeUrl": "https://www.gstatic.com/generate_204",
       "probeInterval": "60s",
@@ -825,8 +567,8 @@
   {
     "remarks": "Север • Space — Авто",
     "meta": {
-      "serverDescription": "3 узлов · авто 60с",
-      "serverdescription": "3 узлов · авто 60с"
+      "serverDescription": "1 RU · пока без выбора",
+      "serverdescription": "1 RU · пока без выбора"
     },
     "log": {
       "loglevel": "warning"
@@ -858,17 +600,17 @@
     ],
     "outbounds": [
       {
-        "protocol": "vmess",
+        "protocol": "vless",
         "settings": {
           "vnext": [
             {
-              "address": "158.160.180.165",
-              "port": 24212,
+              "address": "213.226.127.71",
+              "port": 2066,
               "users": [
                 {
-                  "id": "c58c1205-b308-416f-8503-c04557abf93d",
-                  "alterId": 0,
-                  "security": "auto"
+                  "id": "5ad13ef8-ced8-43b5-9d8c-f046a3ce9ddc",
+                  "encryption": "none",
+                  "flow": "xtls-rprx-vision"
                 }
               ]
             }
@@ -876,82 +618,19 @@
         },
         "streamSettings": {
           "network": "tcp",
-          "security": "tls",
-          "tlsSettings": {
-            "serverName": "158.160.180.165",
-            "fingerprint": "chrome"
+          "security": "reality",
+          "realitySettings": {
+            "publicKey": "kLCwYNBhCg68BQah9El1lNg6GQ7-7Y7xfTtIs6MiTEg",
+            "shortId": "d18f4e",
+            "serverName": "tiktok.com",
+            "fingerprint": "chrome",
+            "spiderX": "/"
           }
         },
         "mux": {
           "enabled": false
         },
         "tag": "sever-ru-01"
-      },
-      {
-        "protocol": "vless",
-        "settings": {
-          "vnext": [
-            {
-              "address": "147.45.46.157",
-              "port": 8443,
-              "users": [
-                {
-                  "id": "75985152-e16e-4a48-87ff-35c2615e0ab5",
-                  "encryption": "none",
-                  "flow": "xtls-rprx-vision"
-                }
-              ]
-            }
-          ]
-        },
-        "streamSettings": {
-          "network": "tcp",
-          "security": "reality",
-          "realitySettings": {
-            "serverName": "apple.com",
-            "fingerprint": "ios",
-            "publicKey": "SbVKOEMjK0sIlbwg4akyBg5mL5KZwwB-ed4eEE7YnRc",
-            "shortId": "",
-            "spiderX": "/"
-          }
-        },
-        "mux": {
-          "enabled": false
-        },
-        "tag": "sever-ru-02"
-      },
-      {
-        "protocol": "vless",
-        "settings": {
-          "vnext": [
-            {
-              "address": "45.9.118.179",
-              "port": 443,
-              "users": [
-                {
-                  "id": "fd0a5c32-afc0-4d57-b95a-ca6ec8f93e87",
-                  "encryption": "none",
-                  "flow": "xtls-rprx-vision"
-                }
-              ]
-            }
-          ]
-        },
-        "streamSettings": {
-          "network": "tcp",
-          "security": "reality",
-          "realitySettings": {
-            "serverName": "ozon.ru",
-            "fingerprint": "qq",
-            "publicKey": "SbVKOEMjK0sIlbwg4akyBg5mL5KZwwB-ed4eEE7YnRc",
-            "shortId": "",
-            "spiderX": "/"
-          }
-        },
-        "mux": {
-          "enabled": false
-        },
-        "tag": "sever-ru-03"
       }
     ],
     "routing": {
@@ -1013,9 +692,7 @@
         {
           "tag": "auto",
           "selector": [
-            "sever-ru-01",
-            "sever-ru-02",
-            "sever-ru-03"
+            "sever-ru-01"
           ],
           "fallbackTag": "sever-ru-01",
           "strategy": {
@@ -1025,9 +702,7 @@
         {
           "tag": "game-0",
           "selector": [
-            "sever-ru-01",
-            "sever-ru-03",
-            "sever-ru-02"
+            "sever-ru-01"
           ],
           "fallbackTag": "sever-ru-01",
           "strategy": {
@@ -1037,9 +712,7 @@
         {
           "tag": "game-1",
           "selector": [
-            "sever-ru-01",
-            "sever-ru-02",
-            "sever-ru-03"
+            "sever-ru-01"
           ],
           "fallbackTag": "sever-ru-01",
           "strategy": {
@@ -1049,9 +722,7 @@
         {
           "tag": "game-2",
           "selector": [
-            "sever-ru-01",
-            "sever-ru-02",
-            "sever-ru-03"
+            "sever-ru-01"
           ],
           "fallbackTag": "sever-ru-01",
           "strategy": {
@@ -1062,9 +733,7 @@
     },
     "observatory": {
       "subjectSelector": [
-        "sever-ru-01",
-        "sever-ru-02",
-        "sever-ru-03"
+        "sever-ru-01"
       ],
       "probeUrl": "https://www.gstatic.com/generate_204",
       "probeInterval": "60s",
@@ -1074,8 +743,8 @@
   {
     "remarks": "Север • FunSky — Авто",
     "meta": {
-      "serverDescription": "3 узлов · авто 60с",
-      "serverdescription": "3 узлов · авто 60с"
+      "serverDescription": "2 узла · проверка 60с",
+      "serverdescription": "2 узла · проверка 60с"
     },
     "log": {
       "loglevel": "warning"
@@ -1107,17 +776,17 @@
     ],
     "outbounds": [
       {
-        "protocol": "vmess",
+        "protocol": "vless",
         "settings": {
           "vnext": [
             {
-              "address": "158.160.180.165",
-              "port": 24212,
+              "address": "45.144.221.169",
+              "port": 443,
               "users": [
                 {
-                  "id": "c58c1205-b308-416f-8503-c04557abf93d",
-                  "alterId": 0,
-                  "security": "auto"
+                  "id": "30572b57-f5ab-4eb8-82d4-a24d399b99f6",
+                  "encryption": "none",
+                  "flow": "xtls-rprx-vision"
                 }
               ]
             }
@@ -1125,82 +794,52 @@
         },
         "streamSettings": {
           "network": "tcp",
-          "security": "tls",
-          "tlsSettings": {
-            "serverName": "158.160.180.165",
-            "fingerprint": "chrome"
+          "security": "reality",
+          "realitySettings": {
+            "serverName": "arizona.eosapp.net",
+            "fingerprint": "qq",
+            "publicKey": "Buy9pirx5Ih_LHwc6R3BCmvRL4g4Ljx6B3MEsZfIZhU",
+            "shortId": "",
+            "spiderX": "/"
+          }
+        },
+        "mux": {
+          "enabled": false
+        },
+        "tag": "sever-us-01"
+      },
+      {
+        "protocol": "vless",
+        "settings": {
+          "vnext": [
+            {
+              "address": "213.226.127.71",
+              "port": 2066,
+              "users": [
+                {
+                  "id": "5ad13ef8-ced8-43b5-9d8c-f046a3ce9ddc",
+                  "encryption": "none",
+                  "flow": "xtls-rprx-vision"
+                }
+              ]
+            }
+          ]
+        },
+        "streamSettings": {
+          "network": "tcp",
+          "security": "reality",
+          "realitySettings": {
+            "publicKey": "kLCwYNBhCg68BQah9El1lNg6GQ7-7Y7xfTtIs6MiTEg",
+            "shortId": "d18f4e",
+            "serverName": "tiktok.com",
+            "fingerprint": "chrome",
+            "spiderX": "/"
           }
         },
         "mux": {
           "enabled": false
         },
         "tag": "sever-ru-01"
-      },
-      {
-        "protocol": "vless",
-        "settings": {
-          "vnext": [
-            {
-              "address": "147.45.46.157",
-              "port": 8443,
-              "users": [
-                {
-                  "id": "75985152-e16e-4a48-87ff-35c2615e0ab5",
-                  "encryption": "none",
-                  "flow": "xtls-rprx-vision"
-                }
-              ]
-            }
-          ]
-        },
-        "streamSettings": {
-          "network": "tcp",
-          "security": "reality",
-          "realitySettings": {
-            "serverName": "apple.com",
-            "fingerprint": "ios",
-            "publicKey": "SbVKOEMjK0sIlbwg4akyBg5mL5KZwwB-ed4eEE7YnRc",
-            "shortId": "",
-            "spiderX": "/"
-          }
-        },
-        "mux": {
-          "enabled": false
-        },
-        "tag": "sever-ru-02"
-      },
-      {
-        "protocol": "vless",
-        "settings": {
-          "vnext": [
-            {
-              "address": "45.9.118.179",
-              "port": 443,
-              "users": [
-                {
-                  "id": "fd0a5c32-afc0-4d57-b95a-ca6ec8f93e87",
-                  "encryption": "none",
-                  "flow": "xtls-rprx-vision"
-                }
-              ]
-            }
-          ]
-        },
-        "streamSettings": {
-          "network": "tcp",
-          "security": "reality",
-          "realitySettings": {
-            "serverName": "ozon.ru",
-            "fingerprint": "qq",
-            "publicKey": "SbVKOEMjK0sIlbwg4akyBg5mL5KZwwB-ed4eEE7YnRc",
-            "shortId": "",
-            "spiderX": "/"
-          }
-        },
-        "mux": {
-          "enabled": false
-        },
-        "tag": "sever-ru-03"
       }
     ],
     "routing": {
@@ -1262,11 +901,10 @@
         {
           "tag": "auto",
           "selector": [
-            "sever-ru-01",
-            "sever-ru-02",
-            "sever-ru-03"
+            "sever-us-01",
+            "sever-ru-01"
           ],
-          "fallbackTag": "sever-ru-01",
+          "fallbackTag": "sever-us-01",
           "strategy": {
             "type": "leastPing"
           }
@@ -1275,8 +913,7 @@
           "tag": "game-0",
           "selector": [
             "sever-ru-01",
-            "sever-ru-03",
-            "sever-ru-02"
+            "sever-us-01"
           ],
           "fallbackTag": "sever-ru-01",
           "strategy": {
@@ -1286,9 +923,7 @@
         {
           "tag": "game-1",
           "selector": [
-            "sever-ru-01",
-            "sever-ru-02",
-            "sever-ru-03"
+            "sever-ru-01"
           ],
           "fallbackTag": "sever-ru-01",
           "strategy": {
@@ -1298,11 +933,10 @@
         {
           "tag": "game-2",
           "selector": [
-            "sever-ru-01",
-            "sever-ru-02",
-            "sever-ru-03"
+            "sever-us-01",
+            "sever-ru-01"
           ],
-          "fallbackTag": "sever-ru-01",
+          "fallbackTag": "sever-us-01",
           "strategy": {
             "type": "leastPing"
           }
@@ -1311,9 +945,8 @@
     },
     "observatory": {
       "subjectSelector": [
-        "sever-ru-01",
-        "sever-ru-02",
-        "sever-ru-03"
+        "sever-us-01",
+        "sever-ru-01"
       ],
       "probeUrl": "https://www.gstatic.com/generate_204",
       "probeInterval": "60s",
@@ -1323,8 +956,8 @@
   {
     "remarks": "Север • Авто — Minecraft + резерв",
     "meta": {
-      "serverDescription": "4 узлов · авто 60с",
-      "serverdescription": "4 узлов · авто 60с"
+      "serverDescription": "2 узла · проверка 60с",
+      "serverdescription": "2 узла · проверка 60с"
     },
     "log": {
       "loglevel": "warning"
@@ -1356,17 +989,17 @@
     ],
     "outbounds": [
       {
-        "protocol": "vmess",
+        "protocol": "vless",
         "settings": {
           "vnext": [
             {
-              "address": "158.160.180.165",
-              "port": 24212,
+              "address": "213.226.127.71",
+              "port": 2066,
               "users": [
                 {
-                  "id": "c58c1205-b308-416f-8503-c04557abf93d",
-                  "alterId": 0,
-                  "security": "auto"
+                  "id": "5ad13ef8-ced8-43b5-9d8c-f046a3ce9ddc",
+                  "encryption": "none",
+                  "flow": "xtls-rprx-vision"
                 }
               ]
             }
@@ -1374,10 +1007,13 @@
         },
         "streamSettings": {
           "network": "tcp",
-          "security": "tls",
-          "tlsSettings": {
-            "serverName": "158.160.180.165",
-            "fingerprint": "chrome"
+          "security": "reality",
+          "realitySettings": {
+            "publicKey": "kLCwYNBhCg68BQah9El1lNg6GQ7-7Y7xfTtIs6MiTEg",
+            "shortId": "d18f4e",
+            "serverName": "tiktok.com",
+            "fingerprint": "chrome",
+            "spiderX": "/"
           }
         },
         "mux": {
@@ -1390,44 +1026,11 @@
         "settings": {
           "vnext": [
             {
-              "address": "147.45.46.157",
-              "port": 8443,
-              "users": [
-                {
-                  "id": "75985152-e16e-4a48-87ff-35c2615e0ab5",
-                  "encryption": "none",
-                  "flow": "xtls-rprx-vision"
-                }
-              ]
-            }
-          ]
-        },
-        "streamSettings": {
-          "network": "tcp",
-          "security": "reality",
-          "realitySettings": {
-            "serverName": "apple.com",
-            "fingerprint": "ios",
-            "publicKey": "SbVKOEMjK0sIlbwg4akyBg5mL5KZwwB-ed4eEE7YnRc",
-            "shortId": "",
-            "spiderX": "/"
-          }
-        },
-        "mux": {
-          "enabled": false
-        },
-        "tag": "sever-ru-02"
-      },
-      {
-        "protocol": "vless",
-        "settings": {
-          "vnext": [
-            {
-              "address": "45.9.118.179",
+              "address": "45.144.221.169",
               "port": 443,
               "users": [
                 {
-                  "id": "fd0a5c32-afc0-4d57-b95a-ca6ec8f93e87",
+                  "id": "30572b57-f5ab-4eb8-82d4-a24d399b99f6",
                   "encryption": "none",
                   "flow": "xtls-rprx-vision"
                 }
@@ -1439,9 +1042,9 @@
           "network": "tcp",
           "security": "reality",
           "realitySettings": {
-            "serverName": "ozon.ru",
+            "serverName": "arizona.eosapp.net",
             "fingerprint": "qq",
-            "publicKey": "SbVKOEMjK0sIlbwg4akyBg5mL5KZwwB-ed4eEE7YnRc",
+            "publicKey": "Buy9pirx5Ih_LHwc6R3BCmvRL4g4Ljx6B3MEsZfIZhU",
             "shortId": "",
             "spiderX": "/"
           }
@@ -1449,40 +1052,7 @@
         "mux": {
           "enabled": false
         },
-        "tag": "sever-ru-03"
-      },
-      {
-        "protocol": "vless",
-        "settings": {
-          "vnext": [
-            {
-              "address": "45.128.78.196",
-              "port": 443,
-              "users": [
-                {
-                  "id": "fd0a5c32-afc0-4d57-b95a-ca6ec8f93e87",
-                  "encryption": "none",
-                  "flow": "xtls-rprx-vision"
-                }
-              ]
-            }
-          ]
-        },
-        "streamSettings": {
-          "network": "tcp",
-          "security": "reality",
-          "realitySettings": {
-            "serverName": "ozon.ru",
-            "fingerprint": "ios",
-            "publicKey": "SbVKOEMjK0sIlbwg4akyBg5mL5KZwwB-ed4eEE7YnRc",
-            "shortId": "",
-            "spiderX": "/"
-          }
-        },
-        "mux": {
-          "enabled": false
-        },
-        "tag": "sever-ru-04"
+        "tag": "sever-us-01"
       }
     ],
     "routing": {
@@ -1545,9 +1115,7 @@
           "tag": "auto",
           "selector": [
             "sever-ru-01",
-            "sever-ru-02",
-            "sever-ru-03",
-            "sever-ru-04"
+            "sever-us-01"
           ],
           "fallbackTag": "sever-ru-01",
           "strategy": {
@@ -1558,9 +1126,7 @@
           "tag": "game-0",
           "selector": [
             "sever-ru-01",
-            "sever-ru-03",
-            "sever-ru-02",
-            "sever-ru-04"
+            "sever-us-01"
           ],
           "fallbackTag": "sever-ru-01",
           "strategy": {
@@ -1570,10 +1136,7 @@
         {
           "tag": "game-1",
           "selector": [
-            "sever-ru-01",
-            "sever-ru-02",
-            "sever-ru-03",
-            "sever-ru-04"
+            "sever-ru-01"
           ],
           "fallbackTag": "sever-ru-01",
           "strategy": {
@@ -1583,12 +1146,10 @@
         {
           "tag": "game-2",
           "selector": [
-            "sever-ru-01",
-            "sever-ru-02",
-            "sever-ru-03",
-            "sever-ru-04"
+            "sever-us-01",
+            "sever-ru-01"
           ],
-          "fallbackTag": "sever-ru-01",
+          "fallbackTag": "sever-us-01",
           "strategy": {
             "type": "leastPing"
           }
@@ -1598,9 +1159,7 @@
     "observatory": {
       "subjectSelector": [
         "sever-ru-01",
-        "sever-ru-02",
-        "sever-ru-03",
-        "sever-ru-04"
+        "sever-us-01"
       ],
       "probeUrl": "https://www.gstatic.com/generate_204",
       "probeInterval": "60s",
@@ -1610,8 +1169,8 @@
   {
     "remarks": "Север • Россия 01",
     "meta": {
-      "serverDescription": "3 игры · 42–80мс · 25.10",
-      "serverdescription": "3 игры · 42–80мс · 25.10"
+      "serverDescription": "3 игры · проверен 25.10",
+      "serverdescription": "3 игры · проверен 25.10"
     },
     "log": {
       "loglevel": "warning"
@@ -1643,17 +1202,17 @@
     ],
     "outbounds": [
       {
-        "protocol": "vmess",
+        "protocol": "vless",
         "settings": {
           "vnext": [
             {
-              "address": "158.160.180.165",
-              "port": 24212,
+              "address": "213.226.127.71",
+              "port": 2066,
               "users": [
                 {
-                  "id": "c58c1205-b308-416f-8503-c04557abf93d",
-                  "alterId": 0,
-                  "security": "auto"
+                  "id": "5ad13ef8-ced8-43b5-9d8c-f046a3ce9ddc",
+                  "encryption": "none",
+                  "flow": "xtls-rprx-vision"
                 }
               ]
             }
@@ -1661,10 +1220,13 @@
         },
         "streamSettings": {
           "network": "tcp",
-          "security": "tls",
-          "tlsSettings": {
-            "serverName": "158.160.180.165",
-            "fingerprint": "chrome"
+          "security": "reality",
+          "realitySettings": {
+            "publicKey": "kLCwYNBhCg68BQah9El1lNg6GQ7-7Y7xfTtIs6MiTEg",
+            "shortId": "d18f4e",
+            "serverName": "tiktok.com",
+            "fingerprint": "chrome",
+            "spiderX": "/"
           }
         },
         "mux": {
@@ -1685,10 +1247,10 @@
     }
   },
   {
-    "remarks": "Север • Россия 02",
+    "remarks": "Север • США 01",
     "meta": {
-      "serverDescription": "3 игры · 134–160мс · 25.10",
-      "serverdescription": "3 игры · 134–160мс · 25.10"
+      "serverDescription": "Sky+Fun · проверен 25.10",
+      "serverdescription": "Sky+Fun · проверен 25.10"
     },
     "log": {
       "loglevel": "warning"
@@ -1724,91 +1286,11 @@
         "settings": {
           "vnext": [
             {
-              "address": "147.45.46.157",
-              "port": 8443,
-              "users": [
-                {
-                  "id": "75985152-e16e-4a48-87ff-35c2615e0ab5",
-                  "encryption": "none",
-                  "flow": "xtls-rprx-vision"
-                }
-              ]
-            }
-          ]
-        },
-        "streamSettings": {
-          "network": "tcp",
-          "security": "reality",
-          "realitySettings": {
-            "serverName": "apple.com",
-            "fingerprint": "ios",
-            "publicKey": "SbVKOEMjK0sIlbwg4akyBg5mL5KZwwB-ed4eEE7YnRc",
-            "shortId": "",
-            "spiderX": "/"
-          }
-        },
-        "mux": {
-          "enabled": false
-        },
-        "tag": "sever-ru-02"
-      }
-    ],
-    "routing": {
-      "domainStrategy": "AsIs",
-      "rules": [
-        {
-          "type": "field",
-          "network": "tcp,udp",
-          "outboundTag": "sever-ru-02"
-        }
-      ]
-    }
-  },
-  {
-    "remarks": "Север • Россия 03",
-    "meta": {
-      "serverDescription": "3 игры · 154–174мс · 25.10",
-      "serverdescription": "3 игры · 154–174мс · 25.10"
-    },
-    "log": {
-      "loglevel": "warning"
-    },
-    "dns": {
-      "servers": [
-        "1.1.1.1",
-        "8.8.8.8"
-      ]
-    },
-    "inbounds": [
-      {
-        "tag": "socks",
-        "listen": "127.0.0.1",
-        "port": 10808,
-        "protocol": "socks",
-        "settings": {
-          "auth": "noauth",
-          "udp": true
-        }
-      },
-      {
-        "tag": "http",
-        "listen": "127.0.0.1",
-        "port": 10809,
-        "protocol": "http",
-        "settings": {}
-      }
-    ],
-    "outbounds": [
-      {
-        "protocol": "vless",
-        "settings": {
-          "vnext": [
-            {
-              "address": "45.9.118.179",
+              "address": "45.144.221.169",
               "port": 443,
               "users": [
                 {
-                  "id": "fd0a5c32-afc0-4d57-b95a-ca6ec8f93e87",
+                  "id": "30572b57-f5ab-4eb8-82d4-a24d399b99f6",
                   "encryption": "none",
                   "flow": "xtls-rprx-vision"
                 }
@@ -1820,9 +1302,9 @@
           "network": "tcp",
           "security": "reality",
           "realitySettings": {
-            "serverName": "ozon.ru",
+            "serverName": "arizona.eosapp.net",
             "fingerprint": "qq",
-            "publicKey": "SbVKOEMjK0sIlbwg4akyBg5mL5KZwwB-ed4eEE7YnRc",
+            "publicKey": "Buy9pirx5Ih_LHwc6R3BCmvRL4g4Ljx6B3MEsZfIZhU",
             "shortId": "",
             "spiderX": "/"
           }
@@ -1830,7 +1312,7 @@
         "mux": {
           "enabled": false
         },
-        "tag": "sever-ru-03"
+        "tag": "sever-us-01"
       }
     ],
     "routing": {
@@ -1839,87 +1321,7 @@
         {
           "type": "field",
           "network": "tcp,udp",
-          "outboundTag": "sever-ru-03"
-        }
-      ]
-    }
-  },
-  {
-    "remarks": "Север • Россия 04",
-    "meta": {
-      "serverDescription": "3 игры · 206–243мс · 25.10",
-      "serverdescription": "3 игры · 206–243мс · 25.10"
-    },
-    "log": {
-      "loglevel": "warning"
-    },
-    "dns": {
-      "servers": [
-        "1.1.1.1",
-        "8.8.8.8"
-      ]
-    },
-    "inbounds": [
-      {
-        "tag": "socks",
-        "listen": "127.0.0.1",
-        "port": 10808,
-        "protocol": "socks",
-        "settings": {
-          "auth": "noauth",
-          "udp": true
-        }
-      },
-      {
-        "tag": "http",
-        "listen": "127.0.0.1",
-        "port": 10809,
-        "protocol": "http",
-        "settings": {}
-      }
-    ],
-    "outbounds": [
-      {
-        "protocol": "vless",
-        "settings": {
-          "vnext": [
-            {
-              "address": "45.128.78.196",
-              "port": 443,
-              "users": [
-                {
-                  "id": "fd0a5c32-afc0-4d57-b95a-ca6ec8f93e87",
-                  "encryption": "none",
-                  "flow": "xtls-rprx-vision"
-                }
-              ]
-            }
-          ]
-        },
-        "streamSettings": {
-          "network": "tcp",
-          "security": "reality",
-          "realitySettings": {
-            "serverName": "ozon.ru",
-            "fingerprint": "ios",
-            "publicKey": "SbVKOEMjK0sIlbwg4akyBg5mL5KZwwB-ed4eEE7YnRc",
-            "shortId": "",
-            "spiderX": "/"
-          }
-        },
-        "mux": {
-          "enabled": false
-        },
-        "tag": "sever-ru-04"
-      }
-    ],
-    "routing": {
-      "domainStrategy": "AsIs",
-      "rules": [
-        {
-          "type": "field",
-          "network": "tcp,udp",
-          "outboundTag": "sever-ru-04"
+          "outboundTag": "sever-us-01"
         }
       ]
     }
