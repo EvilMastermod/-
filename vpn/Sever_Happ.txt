@@ -1,7 +1,8 @@
 #profile-title: base64:4p2EINCh0LXQstC10YAgVlBOIOKAoiBNaW5lY3JhZnQ=
-#announce: base64:8J+OriBTa3lUaW1lIOKAoiBTcGFjZSDigKIgRnVuU2t5CuKIniDQkdC10Lcg0YHQvtCx0YHRgtCy0LXQvdC90L7Qs9C+INC70LjQvNC40YLQsCDRgtGA0LDRhNC40LrQsArwn4e38J+HuiAxINGA0LDQsdC+0YfQuNC5INGD0LfQtdC7IMK3INC/0YDQvtCy0LXRgNC60LAgMjUuMTAK0JTQvtGB0YLRg9C/0L3QvtGB0YLRjCDQuCDQvtCz0YDQsNC90LjRh9C10L3QuNGPINC30LDQstC40YHRj9GCINC+0YIg0LLQu9Cw0LTQtdC70YzRhtCwLg==
+#announce: base64:8J+OriBTa3lUaW1lIOKAoiBTcGFjZSDigKIgRnVuU2t5CuKIniDQkdC10Lcg0YHQvtCx0YHRgtCy0LXQvdC90L7Qs9C+INC70LjQvNC40YLQsCDRgtGA0LDRhNC40LrQsArwn4e38J+HuiAxIFJVIMK3IPCfh7rwn4e4IDEgVVMgwrcg0L/RgNC+0LLQtdGA0LrQsCAyNS4xMArQlNC+0YHRgtGD0L/QvdC+0YHRgtGMINC4INC+0LPRgNCw0L3QuNGH0LXQvdC40Y8g0LfQsNCy0LjRgdGP0YIg0L7RgiDQstC70LDQtNC10LvRjNGG0LXQsi4=
 #subscription-userinfo: upload=0; download=0; total=0; expire=0
 #profile-web-page-url: https://github.com/EvilMastermod/-/blob/main/vpn/Sever_Minecraft.md
-#sub-info-text: ∞ Без лимита со стороны подписки. Публичный узел: ограничения и доступность зависят от владельца.
+#sub-info-text: ∞ Подписка без собственного лимита трафика. У публичных узлов могут быть ограничения.
 #sub-info-color: blue
-vless://5ad13ef8-ced8-43b5-9d8c-f046a3ce9ddc@213.226.127.71:2066?encryption=none&security=reality&type=tcp&sni=tiktok.com&fp=chrome&pbk=kLCwYNBhCg68BQah9El1lNg6GQ7-7Y7xfTtIs6MiTEg&sid=d18f4e&spx=%2F&flow=xtls-rprx-vision#%D0%A1%D0%B5%D0%B2%D0%B5%D1%80%20%E2%80%A2%20%D0%A0%D0%BE%D1%81%D1%81%D0%B8%D1%8F%20%E2%80%94%20%D0%BE%D1%81%D0%BD%D0%BE%D0%B2%D0%BD%D0%BE%D0%B9?serverDescription=MyDQuNCz0YDRiyDCtyA4N+KAkzE5MNC80YEgwrcgMjUuMTA=
+vless://5ad13ef8-ced8-43b5-9d8c-f046a3ce9ddc@213.226.127.71:2066?security=reality&type=tcp&encryption=none&flow=xtls-rprx-vision&sni=tiktok.com&fp=chrome&pbk=kLCwYNBhCg68BQah9El1lNg6GQ7-7Y7xfTtIs6MiTEg&sid=d18f4e&spx=%2F#%D0%A1%D0%B5%D0%B2%D0%B5%D1%80%20%E2%80%A2%20%D0%A0%D0%BE%D1%81%D1%81%D0%B8%D1%8F%2001?serverDescription=MyDQuNCz0YDRiyDCtyDQv9GA0L7QstC10YDQtdC9IDI1LjEw
+vless://30572b57-f5ab-4eb8-82d4-a24d399b99f6@45.144.221.169:443?security=reality&type=tcp&encryption=none&flow=xtls-rprx-vision&sni=arizona.eosapp.net&fp=qq&pbk=Buy9pirx5Ih_LHwc6R3BCmvRL4g4Ljx6B3MEsZfIZhU&sid=&spx=%2F#%D0%A1%D0%B5%D0%B2%D0%B5%D1%80%20%E2%80%A2%20%D0%A1%D0%A8%D0%90%2001?serverDescription=U2t5K0Z1biDCtyDQv9GA0L7QstC10YDQtdC9IDI1LjEw
