@@ -351,103 +351,103 @@
     "RU": {
       "tested": 420,
       "country_verified": 14,
-      "wrong_country": 51,
+      "wrong_country": 55,
       "retained_old_nodes": false,
       "selected": [
         {
+          "server": "45.9.118.177:8443",
+          "http_ms": 513,
+          "jitter_ms": 26,
+          "success_rate": 1.0,
+          "exit": "RU"
+        },
+        {
           "server": "193.160.140.99:443",
-          "http_ms": 524,
-          "jitter_ms": 45,
+          "http_ms": 538,
+          "jitter_ms": 1,
           "success_rate": 1.0,
           "exit": "RU"
         },
         {
           "server": "193.160.141.2:8443",
-          "http_ms": 532,
-          "jitter_ms": 68,
-          "success_rate": 1.0,
-          "exit": "RU"
-        },
-        {
-          "server": "193.160.140.117:8443",
-          "http_ms": 547,
-          "jitter_ms": 34,
-          "success_rate": 1.0,
-          "exit": "RU"
-        },
-        {
-          "server": "193.160.141.8:443",
-          "http_ms": 554,
-          "jitter_ms": 23,
-          "success_rate": 1.0,
-          "exit": "RU"
-        },
-        {
-          "server": "45.128.78.176:443",
-          "http_ms": 544,
-          "jitter_ms": 66,
-          "success_rate": 1.0,
-          "exit": "RU"
-        },
-        {
-          "server": "45.9.118.177:8443",
-          "http_ms": 548,
-          "jitter_ms": 57,
+          "http_ms": 539,
+          "jitter_ms": 92,
           "success_rate": 1.0,
           "exit": "RU"
         },
         {
           "server": "193.160.140.115:443",
-          "http_ms": 556,
-          "jitter_ms": 78,
+          "http_ms": 557,
+          "jitter_ms": 28,
           "success_rate": 1.0,
           "exit": "RU"
         },
         {
-          "server": "45.151.71.152:443",
-          "http_ms": 572,
-          "jitter_ms": 35,
+          "server": "45.128.78.176:443",
+          "http_ms": 538,
+          "jitter_ms": 106,
+          "success_rate": 1.0,
+          "exit": "RU"
+        },
+        {
+          "server": "193.160.140.117:8443",
+          "http_ms": 562,
+          "jitter_ms": 79,
+          "success_rate": 1.0,
+          "exit": "RU"
+        },
+        {
+          "server": "193.160.141.8:443",
+          "http_ms": 573,
+          "jitter_ms": 124,
           "success_rate": 1.0,
           "exit": "RU"
         },
         {
           "server": "45.151.71.164:443",
-          "http_ms": 604,
-          "jitter_ms": 53,
+          "http_ms": 648,
+          "jitter_ms": 84,
           "success_rate": 1.0,
           "exit": "RU"
         },
         {
-          "server": "213.226.127.71:2066",
-          "http_ms": 872,
-          "jitter_ms": 5,
-          "success_rate": 1.0,
-          "exit": "RU"
-        },
-        {
-          "server": "147.45.46.157:8443",
-          "http_ms": 986,
-          "jitter_ms": 953,
+          "server": "193.160.141.27:443",
+          "http_ms": 656,
+          "jitter_ms": 153,
           "success_rate": 1.0,
           "exit": "RU"
         },
         {
           "server": "46.243.142.104:443",
-          "http_ms": 1739,
-          "jitter_ms": 1656,
+          "http_ms": 1350,
+          "jitter_ms": 592,
+          "success_rate": 1.0,
+          "exit": "RU"
+        },
+        {
+          "server": "santehdv.site:443",
+          "http_ms": 1488,
+          "jitter_ms": 1103,
           "success_rate": 1.0,
           "exit": "RU"
         },
         {
           "server": "45.151.71.147:443",
-          "http_ms": 635,
-          "jitter_ms": null,
-          "success_rate": 0.5,
+          "http_ms": 1641,
+          "jitter_ms": 500,
+          "success_rate": 1.0,
           "exit": "RU"
         },
         {
-          "server": "santehdv.site:443",
-          "http_ms": 936,
+          "server": "147.45.46.157:8443",
+          "http_ms": 1632,
+          "jitter_ms": 2173,
+          "success_rate": 1.0,
+          "exit": "RU"
+        },
+        {
+          "server": "185.147.27.183:8443",
+          "http_ms": 685,
           "jitter_ms": null,
           "success_rate": 0.5,
           "exit": "RU"
@@ -2372,5 +2372,6 @@
         }
       ]
     }
-  }
+  },
+  "ru_updated_utc": "2026-10-25T16:48:57Z"
 }
