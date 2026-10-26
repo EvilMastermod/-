@@ -350,125 +350,90 @@
     },
     "RU": {
       "tested": 420,
-      "country_verified": 18,
-      "wrong_country": 49,
+      "country_verified": 12,
+      "wrong_country": 53,
       "retained_old_nodes": false,
       "selected": [
         {
-          "server": "37.235.249.32:443",
-          "http_ms": 635,
-          "jitter_ms": 26,
-          "success_rate": 1.0,
-          "exit": "RU"
-        },
-        {
-          "server": "147.45.46.157:8443",
-          "http_ms": 632,
-          "jitter_ms": 39,
-          "success_rate": 1.0,
-          "exit": "RU"
-        },
-        {
-          "server": "45.9.118.177:8443",
-          "http_ms": 628,
-          "jitter_ms": 69,
-          "success_rate": 1.0,
-          "exit": "RU"
-        },
-        {
-          "server": "147.45.46.137:443",
-          "http_ms": 634,
-          "jitter_ms": 53,
-          "success_rate": 1.0,
-          "exit": "RU"
-        },
-        {
           "server": "193.160.140.119:443",
-          "http_ms": 637,
-          "jitter_ms": 44,
-          "success_rate": 1.0,
-          "exit": "RU"
-        },
-        {
-          "server": "193.160.141.2:8443",
-          "http_ms": 638,
-          "jitter_ms": 77,
-          "success_rate": 1.0,
-          "exit": "RU"
-        },
-        {
-          "server": "193.160.140.117:8443",
-          "http_ms": 659,
-          "jitter_ms": 34,
+          "http_ms": 640,
+          "jitter_ms": 71,
           "success_rate": 1.0,
           "exit": "RU"
         },
         {
           "server": "193.160.141.8:443",
-          "http_ms": 659,
-          "jitter_ms": 102,
+          "http_ms": 655,
+          "jitter_ms": 52,
+          "success_rate": 1.0,
+          "exit": "RU"
+        },
+        {
+          "server": "193.160.141.2:8443",
+          "http_ms": 648,
+          "jitter_ms": 84,
+          "success_rate": 1.0,
+          "exit": "RU"
+        },
+        {
+          "server": "37.235.249.32:443",
+          "http_ms": 663,
+          "jitter_ms": 62,
+          "success_rate": 1.0,
+          "exit": "RU"
+        },
+        {
+          "server": "45.9.118.177:8443",
+          "http_ms": 666,
+          "jitter_ms": 78,
+          "success_rate": 1.0,
+          "exit": "RU"
+        },
+        {
+          "server": "147.45.46.157:8443",
+          "http_ms": 686,
+          "jitter_ms": 13,
+          "success_rate": 1.0,
+          "exit": "RU"
+        },
+        {
+          "server": "147.45.46.137:443",
+          "http_ms": 676,
+          "jitter_ms": 97,
+          "success_rate": 1.0,
+          "exit": "RU"
+        },
+        {
+          "server": "193.160.140.117:8443",
+          "http_ms": 711,
+          "jitter_ms": 112,
           "success_rate": 1.0,
           "exit": "RU"
         },
         {
           "server": "193.160.141.27:443",
-          "http_ms": 685,
-          "jitter_ms": 54,
+          "http_ms": 734,
+          "jitter_ms": 64,
           "success_rate": 1.0,
           "exit": "RU"
         },
         {
-          "server": "147.45.175.81:443",
-          "http_ms": 791,
-          "jitter_ms": null,
-          "success_rate": 0.5,
-          "exit": "RU"
-        },
-        {
-          "server": "xsru1.ddnsfree.com:443",
-          "http_ms": 803,
-          "jitter_ms": null,
-          "success_rate": 0.5,
+          "server": "89.19.220.19:443",
+          "http_ms": 968,
+          "jitter_ms": 29,
+          "success_rate": 1.0,
           "exit": "RU"
         },
         {
           "server": "78.153.136.15:443",
-          "http_ms": 940,
+          "http_ms": 1078,
           "jitter_ms": null,
           "success_rate": 0.5,
           "exit": "RU"
         },
         {
           "server": "81.222.148.104:443",
-          "http_ms": 1039,
-          "jitter_ms": null,
-          "success_rate": 0.5,
-          "exit": "RU"
-        },
-        {
-          "server": "194.87.143.165:8443",
-          "http_ms": 1063,
-          "jitter_ms": null,
-          "success_rate": 0.5,
-          "exit": "RU"
-        },
-        {
-          "server": "193.233.221.86:443",
-          "http_ms": 1240,
-          "jitter_ms": null,
-          "success_rate": 0.5,
-          "exit": "RU"
-        },
-        {
-          "server": "94.228.167.12:443",
-          "http_ms": 1296,
-          "jitter_ms": null,
-          "success_rate": 0.5,
-          "exit": "RU"
-        },
-        {
-          "server": "89.19.220.19:443",
-          "http_ms": 1882,
+          "http_ms": 1126,
           "jitter_ms": null,
           "success_rate": 0.5,
           "exit": "RU"
@@ -2687,5 +2652,6 @@
         }
       ]
     }
-  }
+  },
+  "ru_updated_utc": "2026-10-26T13:31:46Z"
 }
