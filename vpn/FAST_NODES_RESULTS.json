@@ -351,11 +351,18 @@
     "RU": {
       "tested": 420,
       "country_verified": 8,
-      "wrong_country": 38,
+      "wrong_country": 33,
       "retained_old_nodes": false,
       "selected": [
         {
           "server": "193.160.140.159:8443",
+          "http_ms": 626,
+          "jitter_ms": 42,
+          "success_rate": 1.0,
+          "exit": "RU"
+        },
+        {
+          "server": "193.160.141.81:8443",
           "http_ms": 629,
           "jitter_ms": 50,
           "success_rate": 1.0,
@@ -363,49 +370,42 @@
         },
         {
           "server": "193.160.140.168:8443",
-          "http_ms": 634,
-          "jitter_ms": 54,
+          "http_ms": 635,
+          "jitter_ms": 64,
           "success_rate": 1.0,
           "exit": "RU"
         },
         {
           "server": "147.45.46.157:8443",
-          "http_ms": 652,
-          "jitter_ms": 43,
+          "http_ms": 656,
+          "jitter_ms": 94,
           "success_rate": 1.0,
           "exit": "RU"
         },
         {
-          "server": "193.160.141.81:8443",
-          "http_ms": 756,
-          "jitter_ms": 231,
+          "server": "ru.letsconnectpoint.com:443",
+          "http_ms": 913,
+          "jitter_ms": 108,
           "success_rate": 1.0,
-          "exit": "RU"
-        },
-        {
-          "server": "81.222.148.104:443",
-          "http_ms": 978,
-          "jitter_ms": null,
-          "success_rate": 0.5,
           "exit": "RU"
         },
         {
           "server": "78.153.136.15:443",
-          "http_ms": 995,
+          "http_ms": 944,
           "jitter_ms": null,
           "success_rate": 0.5,
           "exit": "RU"
         },
         {
-          "server": "89.19.220.19:443",
-          "http_ms": 1130,
+          "server": "81.222.148.104:443",
+          "http_ms": 1028,
           "jitter_ms": null,
           "success_rate": 0.5,
           "exit": "RU"
         },
         {
           "server": "147.45.175.81:443",
-          "http_ms": 1346,
+          "http_ms": 1316,
           "jitter_ms": null,
           "success_rate": 0.5,
           "exit": "RU"
@@ -2491,5 +2491,6 @@
         }
       ]
     }
-  }
+  },
+  "ru_updated_utc": "2026-10-27T20:15:24Z"
 }
