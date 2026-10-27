@@ -1,0 +1,47 @@
+name: Publish Nyxvera Launcher v1.0.4 to GitHub Releases
+
+on:
+  push:
+    branches: [nyxvera-full-build]
+    paths:
+      - '.github/workflows/nyxvera-release.yml'
+  workflow_dispatch:
+
+permissions:
+  actions: read
+  contents: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Download existing successful Windows EXE build
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh run download 40547877079 \
+            --repo "${GITHUB_REPOSITORY}" \
+            --name NyxveraLauncher-Full-Portable-Windows-x64 \
+            --dir downloaded
+          find downloaded -type f -maxdepth 4 -print
+      - name: Verify exact binary and prepare release asset
+        shell: bash
+        run: |
+          set -euo pipefail
+          file="$(find downloaded -type f -name '*.exe' -print -quit)"
+          test -n "$file"
+          echo "982deb2a3570ea9384da35bb6cc0a921ffdc5677f295f410ef2f3a42d757a832  $file" | sha256sum -c -
+          cp "$file" NyxveraLauncher_Full_v1.0.4.exe
+          ls -lh NyxveraLauncher_Full_v1.0.4.exe
+      - name: Publish permanent GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          gh release create v1.0.4 NyxveraLauncher_Full_v1.0.4.exe \
+            --repo "$GITHUB_REPOSITORY" \
+            --target 8f3d9e820896623b3f715cc5f621d3b35b6132e6 \
+            --title "Nyxvera Launcher v1.0.4 — Windows Portable" \
+            --notes "Nyxvera Launcher for Windows x64 (portable EXE; no installer needed). Built via GitHub Actions. The application has not been independently tested on a physical Windows PC. Subscription management requires a separately deployed server."
