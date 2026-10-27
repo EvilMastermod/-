@@ -1,0 +1,68 @@
+name: Build complete Nyxvera portable Windows EXE
+on:
+  push:
+    branches: [nyxvera-full-build]
+    paths:
+      - 'nyxvera/client.tar.xz.b64'
+      - '.github/workflows/nyxvera-full-windows.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  windows-build:
+    runs-on: windows-latest
+    timeout-minutes: 45
+    steps:
+      - name: Checkout full client source
+        uses: actions/checkout@v4
+      - name: Install Python for archive extraction
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Unpack complete application sources
+        shell: pwsh
+        run: |
+          @'
+          import base64,io,lzma,tarfile,pathlib
+          p=pathlib.Path("nyxvera/client.tar.xz.b64")
+          data=lzma.decompress(base64.b64decode(p.read_text().strip()))
+          with tarfile.open(fileobj=io.BytesIO(data),mode="r:") as archive:
+              archive.extractall(path=".",filter="data")
+          print("Extracted full client")
+          '@ | python -
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install dependencies on build runner, NOT user's PC
+        working-directory: client
+        run: npm install --no-audit --no-fund
+      - name: Check code syntax
+        shell: pwsh
+        working-directory: client
+        run: |
+          Get-ChildItem src -Recurse -Filter *.js | ForEach-Object { node --check $_.FullName; if ($LASTEXITCODE -ne 0) { exit 1 } }
+      - name: Test profile and settings
+        working-directory: client
+        run: npm test
+      - name: Build fully bundled Portable EXE
+        working-directory: client
+        env:
+          CSC_IDENTITY_AUTO_DISCOVERY: 'false'
+        run: npm run dist:portable
+      - name: Verify portable EXE contains runtime
+        shell: pwsh
+        run: |
+          $files = Get-ChildItem dist -Filter 'NyxveraLauncher_*.exe' -File
+          if ($files.Count -eq 0) { throw 'No portable EXE created' }
+          foreach ($file in $files) {
+            if ($file.Length -lt 50000000) { throw "Suspiciously small EXE: $($file.Length)" }
+            Write-Host "Built $($file.Name), $($file.Length) bytes"
+          }
+      - name: Upload complete launcher EXE
+        uses: actions/upload-artifact@v4
+        with:
+          name: NyxveraLauncher-Full-Portable-Windows-x64
+          path: dist/NyxveraLauncher_*.exe
+          if-no-files-found: error
+          retention-days: 30
