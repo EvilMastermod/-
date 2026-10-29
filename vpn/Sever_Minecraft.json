@@ -1923,5 +1923,293 @@
         }
       ]
     }
+  },
+  {
+    "remarks": "Север • Казахстан 01",
+    "meta": {
+      "serverDescription": "Тест · связь не подтверждена",
+      "serverdescription": "Тест · связь не подтверждена"
+    },
+    "log": {
+      "loglevel": "warning"
+    },
+    "dns": {
+      "servers": [
+        "1.1.1.1",
+        "8.8.8.8"
+      ]
+    },
+    "inbounds": [
+      {
+        "tag": "socks",
+        "listen": "127.0.0.1",
+        "port": 10808,
+        "protocol": "socks",
+        "settings": {
+          "auth": "noauth",
+          "udp": true
+        }
+      },
+      {
+        "tag": "http",
+        "listen": "127.0.0.1",
+        "port": 10809,
+        "protocol": "http",
+        "settings": {}
+      }
+    ],
+    "outbounds": [
+      {
+        "protocol": "vless",
+        "settings": {
+          "vnext": [
+            {
+              "address": "176.120.72.63",
+              "port": 38339,
+              "users": [
+                {
+                  "id": "481c5606-b586-44d7-bc2e-d8ef30d67f62",
+                  "encryption": "none"
+                }
+              ]
+            }
+          ]
+        },
+        "streamSettings": {
+          "network": "tcp",
+          "security": "reality",
+          "realitySettings": {
+            "serverName": "dl.google.com",
+            "fingerprint": "chrome",
+            "publicKey": "o0MFuznHh_Wztg0FTAMhFXm3hjAqOJAJIIVNn-_A9WA",
+            "shortId": "e16883e511",
+            "spiderX": "/"
+          }
+        },
+        "mux": {
+          "enabled": false
+        },
+        "tag": "sever-kz-01"
+      }
+    ],
+    "routing": {
+      "domainStrategy": "AsIs",
+      "rules": [
+        {
+          "type": "field",
+          "network": "tcp,udp",
+          "outboundTag": "sever-kz-01"
+        }
+      ]
+    }
+  },
+  {
+    "remarks": "Север • Казахстан 02",
+    "meta": {
+      "serverDescription": "Тест · связь не подтверждена",
+      "serverdescription": "Тест · связь не подтверждена"
+    },
+    "log": {
+      "loglevel": "warning"
+    },
+    "dns": {
+      "servers": [
+        "1.1.1.1",
+        "8.8.8.8"
+      ]
+    },
+    "inbounds": [
+      {
+        "tag": "socks",
+        "listen": "127.0.0.1",
+        "port": 10808,
+        "protocol": "socks",
+        "settings": {
+          "auth": "noauth",
+          "udp": true
+        }
+      },
+      {
+        "tag": "http",
+        "listen": "127.0.0.1",
+        "port": 10809,
+        "protocol": "http",
+        "settings": {}
+      }
+    ],
+    "outbounds": [
+      {
+        "protocol": "shadowsocks",
+        "settings": {
+          "servers": [
+            {
+              "address": "77.240.38.27",
+              "port": 8443,
+              "method": "chacha20-ietf-poly1305",
+              "password": "fkXtvCEQ1ZU1rzF3fIK0fw=="
+            }
+          ]
+        },
+        "streamSettings": {
+          "network": "tcp",
+          "security": "none"
+        },
+        "mux": {
+          "enabled": false
+        },
+        "tag": "sever-kz-02"
+      }
+    ],
+    "routing": {
+      "domainStrategy": "AsIs",
+      "rules": [
+        {
+          "type": "field",
+          "network": "tcp,udp",
+          "outboundTag": "sever-kz-02"
+        }
+      ]
+    }
+  },
+  {
+    "remarks": "Север • Казахстан 03",
+    "meta": {
+      "serverDescription": "Тест · связь не подтверждена",
+      "serverdescription": "Тест · связь не подтверждена"
+    },
+    "log": {
+      "loglevel": "warning"
+    },
+    "dns": {
+      "servers": [
+        "1.1.1.1",
+        "8.8.8.8"
+      ]
+    },
+    "inbounds": [
+      {
+        "tag": "socks",
+        "listen": "127.0.0.1",
+        "port": 10808,
+        "protocol": "socks",
+        "settings": {
+          "auth": "noauth",
+          "udp": true
+        }
+      },
+      {
+        "tag": "http",
+        "listen": "127.0.0.1",
+        "port": 10809,
+        "protocol": "http",
+        "settings": {}
+      }
+    ],
+    "outbounds": [
+      {
+        "protocol": "shadowsocks",
+        "settings": {
+          "servers": [
+            {
+              "address": "213.156.137.142",
+              "port": 43659,
+              "method": "chacha20-ietf-poly1305",
+              "password": "a8201bbd740420bb"
+            }
+          ]
+        },
+        "streamSettings": {
+          "network": "tcp",
+          "security": "none"
+        },
+        "mux": {
+          "enabled": false
+        },
+        "tag": "sever-kz-03"
+      }
+    ],
+    "routing": {
+      "domainStrategy": "AsIs",
+      "rules": [
+        {
+          "type": "field",
+          "network": "tcp,udp",
+          "outboundTag": "sever-kz-03"
+        }
+      ]
+    }
+  },
+  {
+    "remarks": "Север • Казахстан 04",
+    "meta": {
+      "serverDescription": "Тест · связь не подтверждена",
+      "serverdescription": "Тест · связь не подтверждена"
+    },
+    "log": {
+      "loglevel": "warning"
+    },
+    "dns": {
+      "servers": [
+        "1.1.1.1",
+        "8.8.8.8"
+      ]
+    },
+    "inbounds": [
+      {
+        "tag": "socks",
+        "listen": "127.0.0.1",
+        "port": 10808,
+        "protocol": "socks",
+        "settings": {
+          "auth": "noauth",
+          "udp": true
+        }
+      },
+      {
+        "tag": "http",
+        "listen": "127.0.0.1",
+        "port": 10809,
+        "protocol": "http",
+        "settings": {}
+      }
+    ],
+    "outbounds": [
+      {
+        "protocol": "vmess",
+        "settings": {
+          "vnext": [
+            {
+              "address": "91.224.74.35",
+              "port": 49600,
+              "users": [
+                {
+                  "id": "2ae94bac-b550-494a-9f02-0635ebf892a0",
+                  "alterId": 0,
+                  "security": "auto"
+                }
+              ]
+            }
+          ]
+        },
+        "streamSettings": {
+          "network": "tcp",
+          "security": "none"
+        },
+        "mux": {
+          "enabled": false
+        },
+        "tag": "sever-kz-04"
+      }
+    ],
+    "routing": {
+      "domainStrategy": "AsIs",
+      "rules": [
+        {
+          "type": "field",
+          "network": "tcp,udp",
+          "outboundTag": "sever-kz-04"
+        }
+      ]
+    }
   }
 ]
