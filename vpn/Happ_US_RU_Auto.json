@@ -10654,34 +10654,6 @@
         "settings": {
           "vnext": [
             {
-              "address": "185.147.27.164",
-              "port": 8443,
-              "users": [
-                {
-                  "id": "3a90bf69-1ffe-4ebb-b9a7-ad9ba8e9f66f",
-                  "encryption": "none",
-                  "flow": "xtls-rprx-vision"
-                }
-              ]
-            }
-          ]
-        },
-        "streamSettings": {
-          "network": "tcp",
-          "security": "tls",
-          "tlsSettings": {
-            "serverName": "user-6a8d949a.noooo.win",
-            "allowInsecure": false,
-            "fingerprint": "firefox"
-          }
-        }
-      },
-      {
-        "tag": "world-239",
-        "protocol": "vless",
-        "settings": {
-          "vnext": [
-            {
               "address": "45.12.75.242",
               "port": 26424,
               "users": [
@@ -10706,32 +10678,33 @@
         }
       },
       {
-        "tag": "world-240",
+        "tag": "world-239",
         "protocol": "vless",
         "settings": {
           "vnext": [
             {
-              "address": "193.233.220.173",
+              "address": "201.24.121.243",
               "port": 443,
               "users": [
                 {
-                  "id": "37ca5f34-2531-4fda-a781-20f3845fea88",
-                  "encryption": "none",
-                  "flow": "xtls-rprx-vision"
+                  "id": "32b5ca9b-3f81-4031-965d-e8b074216e8d",
+                  "encryption": "none"
                 }
               ]
             }
           ]
         },
         "streamSettings": {
-          "network": "tcp",
-          "security": "reality",
-          "realitySettings": {
-            "publicKey": "QPfM5knVgOkIykx2AC8S1MvkO_x-T9xMRYJdkF9aEng",
-            "shortId": "fda83f2787e6016d",
-            "serverName": "payeeclickerhalogen.berylcord.net",
-            "fingerprint": "safari",
-            "spiderX": "/"
+          "network": "grpc",
+          "security": "tls",
+          "tlsSettings": {
+            "serverName": "kk-ru24a1.testkknegr.online",
+            "allowInsecure": false,
+            "fingerprint": "chrome"
+          },
+          "grpcSettings": {
+            "serviceName": "vlgrpc",
+            "multiMode": false
           }
         }
       },
@@ -10827,34 +10800,6 @@
         "settings": {
           "vnext": [
             {
-              "address": "185.147.27.164",
-              "port": 8443,
-              "users": [
-                {
-                  "id": "3a90bf69-1ffe-4ebb-b9a7-ad9ba8e9f66f",
-                  "encryption": "none",
-                  "flow": "xtls-rprx-vision"
-                }
-              ]
-            }
-          ]
-        },
-        "streamSettings": {
-          "network": "tcp",
-          "security": "tls",
-          "tlsSettings": {
-            "serverName": "user-6a8d949a.noooo.win",
-            "allowInsecure": false,
-            "fingerprint": "firefox"
-          }
-        }
-      },
-      {
-        "tag": "ru-2",
-        "protocol": "vless",
-        "settings": {
-          "vnext": [
-            {
               "address": "45.12.75.242",
               "port": 26424,
               "users": [
@@ -10879,32 +10824,33 @@
         }
       },
       {
-        "tag": "ru-3",
+        "tag": "ru-2",
         "protocol": "vless",
         "settings": {
           "vnext": [
             {
-              "address": "193.233.220.173",
+              "address": "201.24.121.243",
               "port": 443,
               "users": [
                 {
-                  "id": "37ca5f34-2531-4fda-a781-20f3845fea88",
-                  "encryption": "none",
-                  "flow": "xtls-rprx-vision"
+                  "id": "32b5ca9b-3f81-4031-965d-e8b074216e8d",
+                  "encryption": "none"
                 }
               ]
             }
           ]
         },
         "streamSettings": {
-          "network": "tcp",
-          "security": "reality",
-          "realitySettings": {
-            "publicKey": "QPfM5knVgOkIykx2AC8S1MvkO_x-T9xMRYJdkF9aEng",
-            "shortId": "fda83f2787e6016d",
-            "serverName": "payeeclickerhalogen.berylcord.net",
-            "fingerprint": "safari",
-            "spiderX": "/"
+          "network": "grpc",
+          "security": "tls",
+          "tlsSettings": {
+            "serverName": "kk-ru24a1.testkknegr.online",
+            "allowInsecure": false,
+            "fingerprint": "chrome"
+          },
+          "grpcSettings": {
+            "serviceName": "vlgrpc",
+            "multiMode": false
           }
         }
       },
@@ -11000,34 +10946,6 @@
         "settings": {
           "vnext": [
             {
-              "address": "185.147.27.164",
-              "port": 8443,
-              "users": [
-                {
-                  "id": "3a90bf69-1ffe-4ebb-b9a7-ad9ba8e9f66f",
-                  "encryption": "none",
-                  "flow": "xtls-rprx-vision"
-                }
-              ]
-            }
-          ]
-        },
-        "streamSettings": {
-          "network": "tcp",
-          "security": "tls",
-          "tlsSettings": {
-            "serverName": "user-6a8d949a.noooo.win",
-            "allowInsecure": false,
-            "fingerprint": "firefox"
-          }
-        }
-      },
-      {
-        "tag": "ru-fast-2",
-        "protocol": "vless",
-        "settings": {
-          "vnext": [
-            {
               "address": "45.12.75.242",
               "port": 26424,
               "users": [
@@ -11047,36 +10965,6 @@
             "shortId": "23103e1e",
             "serverName": "ya.ru",
             "fingerprint": "chrome",
-            "spiderX": "/"
-          }
-        }
-      },
-      {
-        "tag": "ru-fast-3",
-        "protocol": "vless",
-        "settings": {
-          "vnext": [
-            {
-              "address": "193.233.220.173",
-              "port": 443,
-              "users": [
-                {
-                  "id": "37ca5f34-2531-4fda-a781-20f3845fea88",
-                  "encryption": "none",
-                  "flow": "xtls-rprx-vision"
-                }
-              ]
-            }
-          ]
-        },
-        "streamSettings": {
-          "network": "tcp",
-          "security": "reality",
-          "realitySettings": {
-            "publicKey": "QPfM5knVgOkIykx2AC8S1MvkO_x-T9xMRYJdkF9aEng",
-            "shortId": "fda83f2787e6016d",
-            "serverName": "payeeclickerhalogen.berylcord.net",
-            "fingerprint": "safari",
             "spiderX": "/"
           }
         }
@@ -11173,25 +11061,28 @@
         "settings": {
           "vnext": [
             {
-              "address": "185.147.27.164",
-              "port": 8443,
+              "address": "201.24.121.243",
+              "port": 443,
               "users": [
                 {
-                  "id": "3a90bf69-1ffe-4ebb-b9a7-ad9ba8e9f66f",
-                  "encryption": "none",
-                  "flow": "xtls-rprx-vision"
+                  "id": "32b5ca9b-3f81-4031-965d-e8b074216e8d",
+                  "encryption": "none"
                 }
               ]
             }
           ]
         },
         "streamSettings": {
-          "network": "tcp",
+          "network": "grpc",
           "security": "tls",
           "tlsSettings": {
-            "serverName": "user-6a8d949a.noooo.win",
+            "serverName": "kk-ru24a1.testkknegr.online",
             "allowInsecure": false,
-            "fingerprint": "firefox"
+            "fingerprint": "chrome"
+          },
+          "grpcSettings": {
+            "serviceName": "vlgrpc",
+            "multiMode": false
           }
         }
       },
@@ -11220,36 +11111,6 @@
             "shortId": "23103e1e",
             "serverName": "ya.ru",
             "fingerprint": "chrome",
-            "spiderX": "/"
-          }
-        }
-      },
-      {
-        "tag": "ru-game-3",
-        "protocol": "vless",
-        "settings": {
-          "vnext": [
-            {
-              "address": "193.233.220.173",
-              "port": 443,
-              "users": [
-                {
-                  "id": "37ca5f34-2531-4fda-a781-20f3845fea88",
-                  "encryption": "none",
-                  "flow": "xtls-rprx-vision"
-                }
-              ]
-            }
-          ]
-        },
-        "streamSettings": {
-          "network": "tcp",
-          "security": "reality",
-          "realitySettings": {
-            "publicKey": "QPfM5knVgOkIykx2AC8S1MvkO_x-T9xMRYJdkF9aEng",
-            "shortId": "fda83f2787e6016d",
-            "serverName": "payeeclickerhalogen.berylcord.net",
-            "fingerprint": "safari",
             "spiderX": "/"
           }
         }
@@ -11346,13 +11207,12 @@
         "settings": {
           "vnext": [
             {
-              "address": "185.147.27.164",
-              "port": 8443,
+              "address": "45.12.75.242",
+              "port": 26424,
               "users": [
                 {
-                  "id": "3a90bf69-1ffe-4ebb-b9a7-ad9ba8e9f66f",
-                  "encryption": "none",
-                  "flow": "xtls-rprx-vision"
+                  "id": "633f424e-2b11-48da-a6b3-a849dd71456f",
+                  "encryption": "none"
                 }
               ]
             }
@@ -11360,11 +11220,13 @@
         },
         "streamSettings": {
           "network": "tcp",
-          "security": "tls",
-          "tlsSettings": {
-            "serverName": "user-6a8d949a.noooo.win",
-            "allowInsecure": false,
-            "fingerprint": "firefox"
+          "security": "reality",
+          "realitySettings": {
+            "publicKey": "l8AubqcxQO-HRFJy4pZL1vbLOo-eXit69s-XulSELE0",
+            "shortId": "23103e1e",
+            "serverName": "ya.ru",
+            "fingerprint": "chrome",
+            "spiderX": "/"
           }
         }
       },
@@ -11440,11 +11302,11 @@
         "settings": {
           "vnext": [
             {
-              "address": "45.12.75.242",
-              "port": 26424,
+              "address": "201.24.121.243",
+              "port": 443,
               "users": [
                 {
-                  "id": "633f424e-2b11-48da-a6b3-a849dd71456f",
+                  "id": "32b5ca9b-3f81-4031-965d-e8b074216e8d",
                   "encryption": "none"
                 }
               ]
@@ -11452,110 +11314,16 @@
           ]
         },
         "streamSettings": {
-          "network": "tcp",
-          "security": "reality",
-          "realitySettings": {
-            "publicKey": "l8AubqcxQO-HRFJy4pZL1vbLOo-eXit69s-XulSELE0",
-            "shortId": "23103e1e",
-            "serverName": "ya.ru",
-            "fingerprint": "chrome",
-            "spiderX": "/"
-          }
-        }
-      },
-      {
-        "tag": "direct",
-        "protocol": "freedom",
-        "settings": {}
-      }
-    ],
-    "routing": {
-      "domainStrategy": "AsIs",
-      "rules": [
-        {
-          "type": "field",
-          "ip": [
-            "geoip:private"
-          ],
-          "outboundTag": "direct"
-        },
-        {
-          "type": "field",
-          "inboundTag": [
-            "socks",
-            "http"
-          ],
-          "outboundTag": "proxy"
-        }
-      ]
-    }
-  },
-  {
-    "remarks": "XetsiwVPN · 🇷🇺 РОССИЯ — СЕРВЕР 3",
-    "log": {
-      "loglevel": "warning"
-    },
-    "dns": {
-      "servers": [
-        "1.1.1.1",
-        "8.8.8.8"
-      ]
-    },
-    "inbounds": [
-      {
-        "tag": "socks",
-        "listen": "127.0.0.1",
-        "port": 10808,
-        "protocol": "socks",
-        "settings": {
-          "auth": "noauth",
-          "udp": true
-        },
-        "sniffing": {
-          "enabled": true,
-          "destOverride": [
-            "http",
-            "tls",
-            "quic"
-          ]
-        }
-      },
-      {
-        "tag": "http",
-        "listen": "127.0.0.1",
-        "port": 10809,
-        "protocol": "http",
-        "settings": {}
-      }
-    ],
-    "outbounds": [
-      {
-        "tag": "proxy",
-        "protocol": "vless",
-        "settings": {
-          "vnext": [
-            {
-              "address": "193.233.220.173",
-              "port": 443,
-              "users": [
-                {
-                  "id": "37ca5f34-2531-4fda-a781-20f3845fea88",
-                  "encryption": "none",
-                  "flow": "xtls-rprx-vision"
-                }
-              ]
-            }
-          ]
-        },
-        "streamSettings": {
-          "network": "tcp",
-          "security": "reality",
-          "realitySettings": {
-            "publicKey": "QPfM5knVgOkIykx2AC8S1MvkO_x-T9xMRYJdkF9aEng",
-            "shortId": "fda83f2787e6016d",
-            "serverName": "payeeclickerhalogen.berylcord.net",
-            "fingerprint": "safari",
-            "spiderX": "/"
+          "network": "grpc",
+          "security": "tls",
+          "tlsSettings": {
+            "serverName": "kk-ru24a1.testkknegr.online",
+            "allowInsecure": false,
+            "fingerprint": "chrome"
+          },
+          "grpcSettings": {
+            "serviceName": "vlgrpc",
+            "multiMode": false
           }
         }
       },
@@ -11631,13 +11399,12 @@
         "settings": {
           "vnext": [
             {
-              "address": "185.147.27.164",
-              "port": 8443,
+              "address": "45.12.75.242",
+              "port": 26424,
               "users": [
                 {
-                  "id": "3a90bf69-1ffe-4ebb-b9a7-ad9ba8e9f66f",
-                  "encryption": "none",
-                  "flow": "xtls-rprx-vision"
+                  "id": "633f424e-2b11-48da-a6b3-a849dd71456f",
+                  "encryption": "none"
                 }
               ]
             }
@@ -11645,11 +11412,13 @@
         },
         "streamSettings": {
           "network": "tcp",
-          "security": "tls",
-          "tlsSettings": {
-            "serverName": "user-6a8d949a.noooo.win",
-            "allowInsecure": false,
-            "fingerprint": "firefox"
+          "security": "reality",
+          "realitySettings": {
+            "publicKey": "l8AubqcxQO-HRFJy4pZL1vbLOo-eXit69s-XulSELE0",
+            "shortId": "23103e1e",
+            "serverName": "ya.ru",
+            "fingerprint": "chrome",
+            "spiderX": "/"
           }
         }
       },
