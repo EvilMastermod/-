@@ -308,34 +308,20 @@
     },
     "RU": {
       "tested": 420,
-      "country_verified": 4,
-      "wrong_country": 42,
+      "country_verified": 2,
+      "wrong_country": 48,
       "retained_old_nodes": false,
       "selected": [
         {
-          "server": "201.24.121.243:443",
-          "http_ms": 363,
-          "jitter_ms": null,
-          "success_rate": 0.5,
-          "exit": "RU"
-        },
-        {
-          "server": "201.24.49.49:2027",
-          "http_ms": 596,
-          "jitter_ms": null,
-          "success_rate": 0.5,
-          "exit": "RU"
-        },
-        {
           "server": "xssite.webredirect.org:443",
-          "http_ms": 666,
+          "http_ms": 735,
           "jitter_ms": null,
           "success_rate": 0.5,
           "exit": "RU"
         },
         {
           "server": "194.87.143.165:8443",
-          "http_ms": 788,
+          "http_ms": 969,
           "jitter_ms": null,
           "success_rate": 0.5,
           "exit": "RU"
@@ -2113,5 +2099,6 @@
         }
       ]
     }
-  }
+  },
+  "ru_updated_utc": "2026-10-30T18:12:50Z"
 }
