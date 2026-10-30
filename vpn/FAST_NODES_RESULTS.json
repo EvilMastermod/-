@@ -343,55 +343,48 @@
     },
     "RU": {
       "tested": 420,
-      "country_verified": 7,
-      "wrong_country": 55,
+      "country_verified": 6,
+      "wrong_country": 53,
       "retained_old_nodes": false,
       "selected": [
         {
-          "server": "88.218.170.236:443",
-          "http_ms": 880,
-          "jitter_ms": 60,
+          "server": "business.lesotorg-kirov.ru:443",
+          "http_ms": 1226,
+          "jitter_ms": 33,
           "success_rate": 1.0,
           "exit": "RU"
         },
         {
           "server": "194.87.143.165:8443",
-          "http_ms": 947,
+          "http_ms": 828,
+          "jitter_ms": null,
+          "success_rate": 0.5,
+          "exit": "RU"
+        },
+        {
+          "server": "88.218.170.236:443",
+          "http_ms": 833,
           "jitter_ms": null,
           "success_rate": 0.5,
           "exit": "RU"
         },
         {
           "server": "201.24.121.243:443",
-          "http_ms": 981,
+          "http_ms": 841,
           "jitter_ms": null,
           "success_rate": 0.5,
           "exit": "RU"
         },
         {
           "server": "185.229.9.135:443",
-          "http_ms": 1137,
-          "jitter_ms": null,
-          "success_rate": 0.5,
-          "exit": "RU"
-        },
-        {
-          "server": "business.lesotorg-kirov.ru:443",
-          "http_ms": 1427,
+          "http_ms": 861,
           "jitter_ms": null,
           "success_rate": 0.5,
           "exit": "RU"
         },
         {
           "server": "xssite.webredirect.org:443",
-          "http_ms": 1745,
-          "jitter_ms": null,
-          "success_rate": 0.5,
-          "exit": "RU"
-        },
-        {
-          "server": "46.254.19.164:443",
-          "http_ms": 1847,
+          "http_ms": 1328,
           "jitter_ms": null,
           "success_rate": 0.5,
           "exit": "RU"
@@ -2267,5 +2260,6 @@
         }
       ]
     }
-  }
+  },
+  "ru_updated_utc": "2026-10-30T22:39:40Z"
 }
