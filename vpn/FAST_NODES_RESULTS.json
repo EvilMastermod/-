@@ -329,20 +329,34 @@
     },
     "RU": {
       "tested": 420,
-      "country_verified": 2,
-      "wrong_country": 61,
+      "country_verified": 4,
+      "wrong_country": 55,
       "retained_old_nodes": false,
       "selected": [
         {
           "server": "194.87.143.165:8443",
-          "http_ms": 705,
+          "http_ms": 1018,
+          "jitter_ms": 25,
+          "success_rate": 1.0,
+          "exit": "RU"
+        },
+        {
+          "server": "185.147.27.183:8443",
+          "http_ms": 805,
+          "jitter_ms": null,
+          "success_rate": 0.5,
+          "exit": "RU"
+        },
+        {
+          "server": "185.147.27.164:8443",
+          "http_ms": 871,
           "jitter_ms": null,
           "success_rate": 0.5,
           "exit": "RU"
         },
         {
           "server": "201.24.121.243:443",
-          "http_ms": 733,
+          "http_ms": 1010,
           "jitter_ms": null,
           "success_rate": 0.5,
           "exit": "RU"
@@ -2323,5 +2337,6 @@
         }
       ]
     }
-  }
+  },
+  "ru_updated_utc": "2026-10-30T01:21:53Z"
 }
