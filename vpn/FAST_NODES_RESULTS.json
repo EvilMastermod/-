@@ -344,68 +344,68 @@
     "RU": {
       "tested": 420,
       "country_verified": 9,
-      "wrong_country": 81,
+      "wrong_country": 73,
       "retained_old_nodes": false,
       "selected": [
         {
           "server": "88.218.170.236:443",
-          "http_ms": 717,
-          "jitter_ms": 38,
+          "http_ms": 798,
+          "jitter_ms": 6,
           "success_rate": 1.0,
           "exit": "RU"
         },
         {
           "server": "194.87.143.165:8443",
-          "http_ms": 778,
-          "jitter_ms": 22,
+          "http_ms": 835,
+          "jitter_ms": 4,
+          "success_rate": 1.0,
+          "exit": "RU"
+        },
+        {
+          "server": "xnod13x.artemida.live:8443",
+          "http_ms": 1012,
+          "jitter_ms": 167,
           "success_rate": 1.0,
           "exit": "RU"
         },
         {
           "server": "xsru1.ddnsfree.com:443",
-          "http_ms": 918,
-          "jitter_ms": 471,
+          "http_ms": 973,
+          "jitter_ms": 534,
           "success_rate": 1.0,
           "exit": "RU"
         },
         {
           "server": "xssite.webredirect.org:443",
-          "http_ms": 959,
-          "jitter_ms": 546,
+          "http_ms": 977,
+          "jitter_ms": 528,
           "success_rate": 1.0,
           "exit": "RU"
         },
         {
+          "server": "178.236.242.254:8443",
+          "http_ms": 814,
+          "jitter_ms": null,
+          "success_rate": 0.5,
+          "exit": "RU"
+        },
+        {
           "server": "201.24.121.243:443",
-          "http_ms": 775,
+          "http_ms": 847,
           "jitter_ms": null,
           "success_rate": 0.5,
           "exit": "RU"
         },
         {
-          "server": "app-tw-113.statsmarket-wb.com:443",
-          "http_ms": 800,
+          "server": "185.229.9.135:443",
+          "http_ms": 890,
           "jitter_ms": null,
           "success_rate": 0.5,
           "exit": "RU"
         },
         {
-          "server": "46.254.19.164:443",
-          "http_ms": 919,
-          "jitter_ms": null,
-          "success_rate": 0.5,
-          "exit": "RU"
-        },
-        {
-          "server": "185.147.27.164:8443",
-          "http_ms": 2915,
-          "jitter_ms": null,
-          "success_rate": 0.5,
-          "exit": "RU"
-        },
-        {
-          "server": "45.12.75.242:26424",
-          "http_ms": 3167,
+          "server": "185.147.27.183:8443",
+          "http_ms": 3008,
           "jitter_ms": null,
           "success_rate": 0.5,
           "exit": "RU"
@@ -2351,5 +2351,6 @@
         }
       ]
     }
-  }
+  },
+  "ru_updated_utc": "2026-10-31T06:16:06Z"
 }
