@@ -350,41 +350,34 @@
     },
     "RU": {
       "tested": 420,
-      "country_verified": 6,
-      "wrong_country": 65,
+      "country_verified": 5,
+      "wrong_country": 59,
       "retained_old_nodes": false,
       "selected": [
         {
-          "server": "201.24.121.243:443",
-          "http_ms": 752,
-          "jitter_ms": 525,
+          "server": "app-tw-113.statsmarket-wb.com:443",
+          "http_ms": 1355,
+          "jitter_ms": 412,
           "success_rate": 1.0,
           "exit": "RU"
         },
         {
           "server": "147.45.148.6:443",
-          "http_ms": 912,
-          "jitter_ms": 85,
+          "http_ms": 1700,
+          "jitter_ms": 1244,
           "success_rate": 1.0,
           "exit": "RU"
         },
         {
-          "server": "app-tw-113.statsmarket-wb.com:443",
-          "http_ms": 920,
-          "jitter_ms": 65,
-          "success_rate": 1.0,
-          "exit": "RU"
-        },
-        {
-          "server": "13.143.184.226:443",
-          "http_ms": 875,
+          "server": "185.147.27.183:8443",
+          "http_ms": 820,
           "jitter_ms": null,
           "success_rate": 0.5,
           "exit": "RU"
         },
         {
-          "server": "185.229.9.135:443",
-          "http_ms": 1050,
+          "server": "13.143.184.226:443",
+          "http_ms": 871,
           "jitter_ms": null,
           "success_rate": 0.5,
           "exit": "RU"
@@ -2197,5 +2190,6 @@
         }
       ]
     }
-  }
+  },
+  "ru_updated_utc": "2026-11-02T06:47:55Z"
 }
