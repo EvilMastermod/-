@@ -287,15 +287,43 @@
     },
     "RU": {
       "tested": 420,
-      "country_verified": 1,
-      "wrong_country": 52,
+      "country_verified": 5,
+      "wrong_country": 51,
       "retained_old_nodes": false,
       "selected": [
         {
           "server": "147.45.148.6:443",
-          "http_ms": 762,
-          "jitter_ms": 10,
+          "http_ms": 868,
+          "jitter_ms": 28,
           "success_rate": 1.0,
+          "exit": "RU"
+        },
+        {
+          "server": "85.193.85.231:443",
+          "http_ms": 1000,
+          "jitter_ms": 111,
+          "success_rate": 1.0,
+          "exit": "RU"
+        },
+        {
+          "server": "185.229.9.135:443",
+          "http_ms": 1749,
+          "jitter_ms": 1042,
+          "success_rate": 1.0,
+          "exit": "RU"
+        },
+        {
+          "server": "147.45.110.236:443",
+          "http_ms": 818,
+          "jitter_ms": null,
+          "success_rate": 0.5,
+          "exit": "RU"
+        },
+        {
+          "server": "13.143.184.226:443",
+          "http_ms": 998,
+          "jitter_ms": null,
+          "success_rate": 0.5,
           "exit": "RU"
         }
       ]
@@ -1840,5 +1868,6 @@
         }
       ]
     }
-  }
+  },
+  "ru_updated_utc": "2026-11-03T19:48:51Z"
 }
