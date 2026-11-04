@@ -294,22 +294,29 @@
     },
     "RU": {
       "tested": 420,
-      "country_verified": 2,
-      "wrong_country": 61,
+      "country_verified": 3,
+      "wrong_country": 66,
       "retained_old_nodes": false,
       "selected": [
         {
-          "server": "xsru1.ddnsfree.com:443",
-          "http_ms": 736,
-          "jitter_ms": null,
-          "success_rate": 0.5,
+          "server": "yoy-api.bachidze.com:443",
+          "http_ms": 766,
+          "jitter_ms": 112,
+          "success_rate": 1.0,
           "exit": "RU"
         },
         {
-          "server": "13.143.184.226:443",
-          "http_ms": 2302,
-          "jitter_ms": null,
-          "success_rate": 0.5,
+          "server": "85.193.85.231:443",
+          "http_ms": 850,
+          "jitter_ms": 49,
+          "success_rate": 1.0,
+          "exit": "RU"
+        },
+        {
+          "server": "147.45.148.6:443",
+          "http_ms": 1582,
+          "jitter_ms": 1668,
+          "success_rate": 1.0,
           "exit": "RU"
         }
       ]
@@ -1833,5 +1840,6 @@
         }
       ]
     }
-  }
+  },
+  "ru_updated_utc": "2026-11-04T20:01:45Z"
 }
