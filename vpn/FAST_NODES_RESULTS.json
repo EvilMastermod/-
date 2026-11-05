@@ -315,41 +315,48 @@
     },
     "RU": {
       "tested": 420,
-      "country_verified": 5,
-      "wrong_country": 70,
+      "country_verified": 6,
+      "wrong_country": 62,
       "retained_old_nodes": false,
       "selected": [
         {
-          "server": "85.193.85.231:443",
-          "http_ms": 736,
-          "jitter_ms": 69,
+          "server": "201.24.121.243:443",
+          "http_ms": 540,
+          "jitter_ms": 373,
           "success_rate": 1.0,
           "exit": "RU"
         },
         {
           "server": "147.45.148.6:443",
-          "http_ms": 772,
-          "jitter_ms": 27,
+          "http_ms": 657,
+          "jitter_ms": 32,
           "success_rate": 1.0,
           "exit": "RU"
         },
         {
           "server": "yoy-api.bachidze.com:443",
-          "http_ms": 801,
-          "jitter_ms": 88,
+          "http_ms": 734,
+          "jitter_ms": 85,
           "success_rate": 1.0,
           "exit": "RU"
         },
         {
-          "server": "201.24.121.243:443",
-          "http_ms": 868,
-          "jitter_ms": null,
-          "success_rate": 0.5,
+          "server": "85.193.85.231:443",
+          "http_ms": 823,
+          "jitter_ms": 48,
+          "success_rate": 1.0,
           "exit": "RU"
         },
         {
           "server": "147.45.175.81:443",
-          "http_ms": 1553,
+          "http_ms": 1036,
+          "jitter_ms": 41,
+          "success_rate": 1.0,
+          "exit": "RU"
+        },
+        {
+          "server": "rus.noooo.win:8443",
+          "http_ms": 643,
           "jitter_ms": null,
           "success_rate": 0.5,
           "exit": "RU"
@@ -2071,5 +2078,6 @@
         }
       ]
     }
-  }
+  },
+  "ru_updated_utc": "2026-11-05T01:47:27Z"
 }
