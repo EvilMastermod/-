@@ -224,55 +224,27 @@
     },
     "RU": {
       "tested": 420,
-      "country_verified": 8,
-      "wrong_country": 48,
+      "country_verified": 4,
+      "wrong_country": 34,
       "retained_old_nodes": false,
       "selected": [
         {
-          "server": "yoy-api.bachidze.com:443",
-          "http_ms": 736,
-          "jitter_ms": 63,
-          "success_rate": 1.0,
-          "exit": "RU"
-        },
-        {
           "server": "147.45.104.86:7443",
-          "http_ms": 835,
-          "jitter_ms": 14,
+          "http_ms": 716,
+          "jitter_ms": 35,
           "success_rate": 1.0,
           "exit": "RU"
         },
         {
-          "server": "xsru1.ddnsfree.com:443",
-          "http_ms": 398,
-          "jitter_ms": null,
-          "success_rate": 0.5,
-          "exit": "RU"
-        },
-        {
-          "server": "xssite.webredirect.org:443",
-          "http_ms": 405,
-          "jitter_ms": null,
-          "success_rate": 0.5,
-          "exit": "RU"
-        },
-        {
-          "server": "188.130.209.204:443",
-          "http_ms": 727,
-          "jitter_ms": null,
-          "success_rate": 0.5,
-          "exit": "RU"
-        },
-        {
-          "server": "92.243.66.79:443",
-          "http_ms": 827,
-          "jitter_ms": null,
-          "success_rate": 0.5,
+          "server": "yoy-api.bachidze.com:443",
+          "http_ms": 1386,
+          "jitter_ms": 761,
+          "success_rate": 1.0,
           "exit": "RU"
         },
         {
           "server": "xsru2.freeddns.org:443",
-          "http_ms": 904,
+          "http_ms": 911,
           "jitter_ms": null,
           "success_rate": 0.5,
           "exit": "RU"
@@ -2078,5 +2050,6 @@
         }
       ]
     }
-  }
+  },
+  "ru_updated_utc": "2026-11-07T10:41:13Z"
 }
