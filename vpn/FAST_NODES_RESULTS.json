@@ -266,29 +266,36 @@
     },
     "RU": {
       "tested": 420,
-      "country_verified": 3,
-      "wrong_country": 52,
+      "country_verified": 4,
+      "wrong_country": 46,
       "retained_old_nodes": false,
       "selected": [
         {
-          "server": "83.147.246.12:443",
-          "http_ms": 672,
-          "jitter_ms": 61,
+          "server": "217.25.93.165:443",
+          "http_ms": 1292,
+          "jitter_ms": 867,
           "success_rate": 1.0,
           "exit": "RU"
         },
         {
           "server": "yoy-api.bachidze.com:443",
-          "http_ms": 696,
-          "jitter_ms": 21,
+          "http_ms": 1298,
+          "jitter_ms": 856,
           "success_rate": 1.0,
           "exit": "RU"
         },
         {
-          "server": "217.25.93.165:443",
-          "http_ms": 820,
-          "jitter_ms": 74,
+          "server": "83.147.246.12:443",
+          "http_ms": 1317,
+          "jitter_ms": 926,
           "success_rate": 1.0,
+          "exit": "RU"
+        },
+        {
+          "server": "92.243.66.79:443",
+          "http_ms": 3092,
+          "jitter_ms": null,
+          "success_rate": 0.5,
           "exit": "RU"
         }
       ]
@@ -1644,5 +1651,6 @@
         }
       ]
     }
-  }
+  },
+  "ru_updated_utc": "2026-11-08T13:53:06Z"
 }
