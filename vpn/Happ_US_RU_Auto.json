@@ -9664,7 +9664,7 @@
         "settings": {
           "vnext": [
             {
-              "address": "217.25.93.165",
+              "address": "83.147.246.12",
               "port": 443,
               "users": [
                 {
@@ -9694,7 +9694,7 @@
         "settings": {
           "vnext": [
             {
-              "address": "yoy-api.bachidze.com",
+              "address": "217.25.93.165",
               "port": 443,
               "users": [
                 {
@@ -9724,7 +9724,7 @@
         "settings": {
           "vnext": [
             {
-              "address": "83.147.246.12",
+              "address": "yoy-api.bachidze.com",
               "port": 443,
               "users": [
                 {
@@ -9754,27 +9754,30 @@
         "settings": {
           "vnext": [
             {
-              "address": "92.243.66.79",
+              "address": "9e72bbg.msk2.h1clayd.click",
               "port": 443,
               "users": [
                 {
-                  "id": "c5f59ef3-9540-49fa-bd1e-c6c2f79df49a",
-                  "encryption": "none",
-                  "flow": "xtls-rprx-vision"
+                  "id": "13e6bdfd-d51b-4e57-a40e-b88784cba8bd",
+                  "encryption": "none"
                 }
               ]
             }
           ]
         },
         "streamSettings": {
-          "network": "tcp",
+          "network": "grpc",
           "security": "reality",
           "realitySettings": {
-            "publicKey": "siD4oj2gdtLLEphV6fUXb8ueIc2WHVn7msOUhNGPf2o",
-            "shortId": "8d03c10b6a874a9c",
-            "serverName": "ru-mow.probe.geomyip.com",
+            "publicKey": "0R5QIf2DFXNgISIYDQdoWIdbNoImaJHrwOkc2tzRPyQ",
+            "shortId": "cc07501e28b18687",
+            "serverName": "9e72bbg.msk2.h1clayd.click",
             "fingerprint": "chrome",
             "spiderX": "/"
+          },
+          "grpcSettings": {
+            "serviceName": "93013a569b78",
+            "multiMode": false
           }
         }
       },
@@ -9870,7 +9873,7 @@
         "settings": {
           "vnext": [
             {
-              "address": "217.25.93.165",
+              "address": "83.147.246.12",
               "port": 443,
               "users": [
                 {
@@ -9900,7 +9903,7 @@
         "settings": {
           "vnext": [
             {
-              "address": "yoy-api.bachidze.com",
+              "address": "217.25.93.165",
               "port": 443,
               "users": [
                 {
@@ -9930,7 +9933,7 @@
         "settings": {
           "vnext": [
             {
-              "address": "83.147.246.12",
+              "address": "yoy-api.bachidze.com",
               "port": 443,
               "users": [
                 {
@@ -9960,27 +9963,30 @@
         "settings": {
           "vnext": [
             {
-              "address": "92.243.66.79",
+              "address": "9e72bbg.msk2.h1clayd.click",
               "port": 443,
               "users": [
                 {
-                  "id": "c5f59ef3-9540-49fa-bd1e-c6c2f79df49a",
-                  "encryption": "none",
-                  "flow": "xtls-rprx-vision"
+                  "id": "13e6bdfd-d51b-4e57-a40e-b88784cba8bd",
+                  "encryption": "none"
                 }
               ]
             }
           ]
         },
         "streamSettings": {
-          "network": "tcp",
+          "network": "grpc",
           "security": "reality",
           "realitySettings": {
-            "publicKey": "siD4oj2gdtLLEphV6fUXb8ueIc2WHVn7msOUhNGPf2o",
-            "shortId": "8d03c10b6a874a9c",
-            "serverName": "ru-mow.probe.geomyip.com",
+            "publicKey": "0R5QIf2DFXNgISIYDQdoWIdbNoImaJHrwOkc2tzRPyQ",
+            "shortId": "cc07501e28b18687",
+            "serverName": "9e72bbg.msk2.h1clayd.click",
             "fingerprint": "chrome",
             "spiderX": "/"
+          },
+          "grpcSettings": {
+            "serviceName": "93013a569b78",
+            "multiMode": false
           }
         }
       },
@@ -10106,7 +10112,7 @@
         "settings": {
           "vnext": [
             {
-              "address": "yoy-api.bachidze.com",
+              "address": "83.147.246.12",
               "port": 443,
               "users": [
                 {
@@ -10136,7 +10142,7 @@
         "settings": {
           "vnext": [
             {
-              "address": "83.147.246.12",
+              "address": "yoy-api.bachidze.com",
               "port": 443,
               "users": [
                 {
@@ -10157,6 +10163,39 @@
             "serverName": "yoy-api.bachidze.com",
             "fingerprint": "chrome",
             "spiderX": "/"
+          }
+        }
+      },
+      {
+        "tag": "ru-fast-4",
+        "protocol": "vless",
+        "settings": {
+          "vnext": [
+            {
+              "address": "9e72bbg.msk2.h1clayd.click",
+              "port": 443,
+              "users": [
+                {
+                  "id": "13e6bdfd-d51b-4e57-a40e-b88784cba8bd",
+                  "encryption": "none"
+                }
+              ]
+            }
+          ]
+        },
+        "streamSettings": {
+          "network": "grpc",
+          "security": "reality",
+          "realitySettings": {
+            "publicKey": "0R5QIf2DFXNgISIYDQdoWIdbNoImaJHrwOkc2tzRPyQ",
+            "shortId": "cc07501e28b18687",
+            "serverName": "9e72bbg.msk2.h1clayd.click",
+            "fingerprint": "chrome",
+            "spiderX": "/"
+          },
+          "grpcSettings": {
+            "serviceName": "93013a569b78",
+            "multiMode": false
           }
         }
       },
@@ -10282,7 +10321,7 @@
         "settings": {
           "vnext": [
             {
-              "address": "yoy-api.bachidze.com",
+              "address": "83.147.246.12",
               "port": 443,
               "users": [
                 {
@@ -10312,7 +10351,7 @@
         "settings": {
           "vnext": [
             {
-              "address": "83.147.246.12",
+              "address": "yoy-api.bachidze.com",
               "port": 443,
               "users": [
                 {
@@ -10342,27 +10381,30 @@
         "settings": {
           "vnext": [
             {
-              "address": "92.243.66.79",
+              "address": "9e72bbg.msk2.h1clayd.click",
               "port": 443,
               "users": [
                 {
-                  "id": "c5f59ef3-9540-49fa-bd1e-c6c2f79df49a",
-                  "encryption": "none",
-                  "flow": "xtls-rprx-vision"
+                  "id": "13e6bdfd-d51b-4e57-a40e-b88784cba8bd",
+                  "encryption": "none"
                 }
               ]
             }
           ]
         },
         "streamSettings": {
-          "network": "tcp",
+          "network": "grpc",
           "security": "reality",
           "realitySettings": {
-            "publicKey": "siD4oj2gdtLLEphV6fUXb8ueIc2WHVn7msOUhNGPf2o",
-            "shortId": "8d03c10b6a874a9c",
-            "serverName": "ru-mow.probe.geomyip.com",
+            "publicKey": "0R5QIf2DFXNgISIYDQdoWIdbNoImaJHrwOkc2tzRPyQ",
+            "shortId": "cc07501e28b18687",
+            "serverName": "9e72bbg.msk2.h1clayd.click",
             "fingerprint": "chrome",
             "spiderX": "/"
+          },
+          "grpcSettings": {
+            "serviceName": "93013a569b78",
+            "multiMode": false
           }
         }
       },
@@ -10458,7 +10500,7 @@
         "settings": {
           "vnext": [
             {
-              "address": "217.25.93.165",
+              "address": "83.147.246.12",
               "port": 443,
               "users": [
                 {
@@ -10554,7 +10596,7 @@
         "settings": {
           "vnext": [
             {
-              "address": "yoy-api.bachidze.com",
+              "address": "217.25.93.165",
               "port": 443,
               "users": [
                 {
@@ -10650,7 +10692,7 @@
         "settings": {
           "vnext": [
             {
-              "address": "83.147.246.12",
+              "address": "yoy-api.bachidze.com",
               "port": 443,
               "users": [
                 {
@@ -10746,27 +10788,30 @@
         "settings": {
           "vnext": [
             {
-              "address": "92.243.66.79",
+              "address": "9e72bbg.msk2.h1clayd.click",
               "port": 443,
               "users": [
                 {
-                  "id": "c5f59ef3-9540-49fa-bd1e-c6c2f79df49a",
-                  "encryption": "none",
-                  "flow": "xtls-rprx-vision"
+                  "id": "13e6bdfd-d51b-4e57-a40e-b88784cba8bd",
+                  "encryption": "none"
                 }
               ]
             }
           ]
         },
         "streamSettings": {
-          "network": "tcp",
+          "network": "grpc",
           "security": "reality",
           "realitySettings": {
-            "publicKey": "siD4oj2gdtLLEphV6fUXb8ueIc2WHVn7msOUhNGPf2o",
-            "shortId": "8d03c10b6a874a9c",
-            "serverName": "ru-mow.probe.geomyip.com",
+            "publicKey": "0R5QIf2DFXNgISIYDQdoWIdbNoImaJHrwOkc2tzRPyQ",
+            "shortId": "cc07501e28b18687",
+            "serverName": "9e72bbg.msk2.h1clayd.click",
             "fingerprint": "chrome",
             "spiderX": "/"
+          },
+          "grpcSettings": {
+            "serviceName": "93013a569b78",
+            "multiMode": false
           }
         }
       },
@@ -10943,7 +10988,7 @@
         "settings": {
           "vnext": [
             {
-              "address": "yoy-api.bachidze.com",
+              "address": "83.147.246.12",
               "port": 443,
               "users": [
                 {
