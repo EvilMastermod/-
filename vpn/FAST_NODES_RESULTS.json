@@ -280,76 +280,55 @@
     },
     "RU": {
       "tested": 420,
-      "country_verified": 10,
-      "wrong_country": 70,
+      "country_verified": 8,
+      "wrong_country": 45,
       "retained_old_nodes": false,
       "selected": [
         {
-          "server": "213.209.137.8:6443",
-          "http_ms": 784,
-          "jitter_ms": 13,
-          "success_rate": 1.0,
-          "exit": "RU"
-        },
-        {
-          "server": "mexico.topupaxme.icu:6443",
-          "http_ms": 823,
-          "jitter_ms": 6,
+          "server": "217.25.93.165:443",
+          "http_ms": 778,
+          "jitter_ms": 98,
           "success_rate": 1.0,
           "exit": "RU"
         },
         {
           "server": "83.147.246.12:443",
-          "http_ms": 868,
-          "jitter_ms": 5,
+          "http_ms": 801,
+          "jitter_ms": 94,
           "success_rate": 1.0,
           "exit": "RU"
         },
         {
-          "server": "87.242.94.231:8443",
-          "http_ms": 868,
-          "jitter_ms": 39,
-          "success_rate": 1.0,
-          "exit": "RU"
-        },
-        {
-          "server": "217.25.93.165:443",
-          "http_ms": 882,
-          "jitter_ms": 4,
-          "success_rate": 1.0,
-          "exit": "RU"
-        },
-        {
-          "server": "aurora-coffee.site:8443",
-          "http_ms": 896,
-          "jitter_ms": 29,
-          "success_rate": 1.0,
-          "exit": "RU"
-        },
-        {
-          "server": "9e72bbg.msk2.h1clayd.click:443",
-          "http_ms": 828,
-          "jitter_ms": 589,
+          "server": "185.178.208.167:443",
+          "http_ms": 1539,
+          "jitter_ms": 80,
           "success_rate": 1.0,
           "exit": "RU"
         },
         {
           "server": "yoy-api.bachidze.com:443",
-          "http_ms": 950,
-          "jitter_ms": 147,
-          "success_rate": 1.0,
-          "exit": "RU"
-        },
-        {
-          "server": "92.243.66.79:443",
-          "http_ms": 1112,
-          "jitter_ms": 247,
+          "http_ms": 2070,
+          "jitter_ms": 2307,
           "success_rate": 1.0,
           "exit": "RU"
         },
         {
           "server": "188.130.209.212:443",
-          "http_ms": 910,
+          "http_ms": 735,
+          "jitter_ms": null,
+          "success_rate": 0.5,
+          "exit": "RU"
+        },
+        {
+          "server": "147.45.175.81:443",
+          "http_ms": 855,
+          "jitter_ms": null,
+          "success_rate": 0.5,
+          "exit": "RU"
+        },
+        {
+          "server": "92.243.66.79:443",
+          "http_ms": 3166,
           "jitter_ms": null,
           "success_rate": 0.5,
           "exit": "RU"
@@ -1848,5 +1827,5 @@
       ]
     }
   },
-  "ru_updated_utc": "2026-11-09T01:13:24Z"
+  "ru_updated_utc": "2026-11-09T12:06:04Z"
 }

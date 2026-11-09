@@ -10348,11 +10348,11 @@
         "settings": {
           "vnext": [
             {
-              "address": "213.209.137.8",
-              "port": 6443,
+              "address": "217.25.93.165",
+              "port": 443,
               "users": [
                 {
-                  "id": "68a67906-5b37-4779-a6cc-58a1655f18b4",
+                  "id": "3bb97d46-789b-4229-88f6-9beb222a4137",
                   "encryption": "none",
                   "flow": "xtls-rprx-vision"
                 }
@@ -10362,44 +10362,18 @@
         },
         "streamSettings": {
           "network": "tcp",
-          "security": "tls",
-          "tlsSettings": {
-            "serverName": "mexico.topupaxme.icu",
-            "allowInsecure": false,
-            "fingerprint": "qq"
+          "security": "reality",
+          "realitySettings": {
+            "publicKey": "ZJlfiMh4ebjrTl2_kwAk_zXMAaCiwNS7yMd5XzlUgmI",
+            "shortId": "",
+            "serverName": "yoy-api.bachidze.com",
+            "fingerprint": "chrome",
+            "spiderX": "/"
           }
         }
       },
       {
         "tag": "world-229",
-        "protocol": "vless",
-        "settings": {
-          "vnext": [
-            {
-              "address": "mexico.topupaxme.icu",
-              "port": 6443,
-              "users": [
-                {
-                  "id": "68a67906-5b37-4779-a6cc-58a1655f18b4",
-                  "encryption": "none",
-                  "flow": "xtls-rprx-vision"
-                }
-              ]
-            }
-          ]
-        },
-        "streamSettings": {
-          "network": "tcp",
-          "security": "tls",
-          "tlsSettings": {
-            "serverName": "mexico.topupaxme.icu",
-            "allowInsecure": false,
-            "fingerprint": "edge"
-          }
-        }
-      },
-      {
-        "tag": "world-230",
         "protocol": "vless",
         "settings": {
           "vnext": [
@@ -10429,102 +10403,16 @@
         }
       },
       {
-        "tag": "world-231",
+        "tag": "world-230",
         "protocol": "vless",
         "settings": {
           "vnext": [
             {
-              "address": "87.242.94.231",
-              "port": 8443,
-              "users": [
-                {
-                  "id": "68a67906-5b37-4779-a6cc-58a1655f18b4",
-                  "encryption": "none",
-                  "flow": "xtls-rprx-vision"
-                }
-              ]
-            }
-          ]
-        },
-        "streamSettings": {
-          "network": "tcp",
-          "security": "tls",
-          "tlsSettings": {
-            "serverName": "cdn-glavslush.herumhas.shop",
-            "allowInsecure": false,
-            "fingerprint": "qq"
-          }
-        }
-      },
-      {
-        "tag": "world-232",
-        "protocol": "vless",
-        "settings": {
-          "vnext": [
-            {
-              "address": "217.25.93.165",
+              "address": "185.178.208.167",
               "port": 443,
               "users": [
                 {
-                  "id": "3bb97d46-789b-4229-88f6-9beb222a4137",
-                  "encryption": "none",
-                  "flow": "xtls-rprx-vision"
-                }
-              ]
-            }
-          ]
-        },
-        "streamSettings": {
-          "network": "tcp",
-          "security": "reality",
-          "realitySettings": {
-            "publicKey": "ZJlfiMh4ebjrTl2_kwAk_zXMAaCiwNS7yMd5XzlUgmI",
-            "shortId": "",
-            "serverName": "yoy-api.bachidze.com",
-            "fingerprint": "chrome",
-            "spiderX": "/"
-          }
-        }
-      },
-      {
-        "tag": "world-233",
-        "protocol": "vless",
-        "settings": {
-          "vnext": [
-            {
-              "address": "aurora-coffee.site",
-              "port": 8443,
-              "users": [
-                {
-                  "id": "68a67906-5b37-4779-a6cc-58a1655f18b4",
-                  "encryption": "none",
-                  "flow": "xtls-rprx-vision"
-                }
-              ]
-            }
-          ]
-        },
-        "streamSettings": {
-          "network": "tcp",
-          "security": "tls",
-          "tlsSettings": {
-            "serverName": "cdn-glavslush.herumhas.shop",
-            "allowInsecure": false,
-            "fingerprint": "edge"
-          }
-        }
-      },
-      {
-        "tag": "world-234",
-        "protocol": "vless",
-        "settings": {
-          "vnext": [
-            {
-              "address": "9e72bbg.msk2.h1clayd.click",
-              "port": 443,
-              "users": [
-                {
-                  "id": "13e6bdfd-d51b-4e57-a40e-b88784cba8bd",
+                  "id": "18b99163-5196-4ddc-85f8-8fdf5efdcd53",
                   "encryption": "none"
                 }
               ]
@@ -10532,23 +10420,23 @@
           ]
         },
         "streamSettings": {
-          "network": "grpc",
-          "security": "reality",
-          "realitySettings": {
-            "publicKey": "0R5QIf2DFXNgISIYDQdoWIdbNoImaJHrwOkc2tzRPyQ",
-            "shortId": "cc07501e28b18687",
-            "serverName": "9e72bbg.msk2.h1clayd.click",
-            "fingerprint": "chrome",
-            "spiderX": "/"
+          "network": "ws",
+          "security": "tls",
+          "tlsSettings": {
+            "serverName": "stechnostore.life",
+            "allowInsecure": false,
+            "fingerprint": "firefox"
           },
-          "grpcSettings": {
-            "serviceName": "93013a569b78",
-            "multiMode": false
+          "wsSettings": {
+            "path": "/player/collect/9c8514f9552d/",
+            "headers": {
+              "Host": "stechnostore.life"
+            }
           }
         }
       },
       {
-        "tag": "world-235",
+        "tag": "world-231",
         "protocol": "vless",
         "settings": {
           "vnext": [
@@ -10578,37 +10466,7 @@
         }
       },
       {
-        "tag": "world-236",
-        "protocol": "vless",
-        "settings": {
-          "vnext": [
-            {
-              "address": "92.243.66.79",
-              "port": 443,
-              "users": [
-                {
-                  "id": "c5f59ef3-9540-49fa-bd1e-c6c2f79df49a",
-                  "encryption": "none",
-                  "flow": "xtls-rprx-vision"
-                }
-              ]
-            }
-          ]
-        },
-        "streamSettings": {
-          "network": "tcp",
-          "security": "reality",
-          "realitySettings": {
-            "publicKey": "siD4oj2gdtLLEphV6fUXb8ueIc2WHVn7msOUhNGPf2o",
-            "shortId": "8d03c10b6a874a9c",
-            "serverName": "ru-mow.probe.geomyip.com",
-            "fingerprint": "chrome",
-            "spiderX": "/"
-          }
-        }
-      },
-      {
-        "tag": "world-237",
+        "tag": "world-232",
         "protocol": "vless",
         "settings": {
           "vnext": [
@@ -10633,6 +10491,69 @@
             "shortId": "11979c0c9b2da371",
             "serverName": "thumbs.mycdn-io.ru",
             "fingerprint": "ios",
+            "spiderX": "/"
+          }
+        }
+      },
+      {
+        "tag": "world-233",
+        "protocol": "vless",
+        "settings": {
+          "vnext": [
+            {
+              "address": "147.45.175.81",
+              "port": 443,
+              "users": [
+                {
+                  "id": "c90395e6-2140-47ad-a54d-9b166729d3ef",
+                  "encryption": "none"
+                }
+              ]
+            }
+          ]
+        },
+        "streamSettings": {
+          "network": "ws",
+          "security": "tls",
+          "tlsSettings": {
+            "serverName": "xsru1.ddnsfree.com",
+            "allowInsecure": false,
+            "fingerprint": "edge"
+          },
+          "wsSettings": {
+            "path": "/wsru",
+            "headers": {
+              "Host": "xsru1.ddnsfree.com"
+            }
+          }
+        }
+      },
+      {
+        "tag": "world-234",
+        "protocol": "vless",
+        "settings": {
+          "vnext": [
+            {
+              "address": "92.243.66.79",
+              "port": 443,
+              "users": [
+                {
+                  "id": "c5f59ef3-9540-49fa-bd1e-c6c2f79df49a",
+                  "encryption": "none",
+                  "flow": "xtls-rprx-vision"
+                }
+              ]
+            }
+          ]
+        },
+        "streamSettings": {
+          "network": "tcp",
+          "security": "reality",
+          "realitySettings": {
+            "publicKey": "siD4oj2gdtLLEphV6fUXb8ueIc2WHVn7msOUhNGPf2o",
+            "shortId": "8d03c10b6a874a9c",
+            "serverName": "ru-mow.probe.geomyip.com",
+            "fingerprint": "chrome",
             "spiderX": "/"
           }
         }
@@ -10729,11 +10650,11 @@
         "settings": {
           "vnext": [
             {
-              "address": "213.209.137.8",
-              "port": 6443,
+              "address": "217.25.93.165",
+              "port": 443,
               "users": [
                 {
-                  "id": "68a67906-5b37-4779-a6cc-58a1655f18b4",
+                  "id": "3bb97d46-789b-4229-88f6-9beb222a4137",
                   "encryption": "none",
                   "flow": "xtls-rprx-vision"
                 }
@@ -10743,44 +10664,18 @@
         },
         "streamSettings": {
           "network": "tcp",
-          "security": "tls",
-          "tlsSettings": {
-            "serverName": "mexico.topupaxme.icu",
-            "allowInsecure": false,
-            "fingerprint": "qq"
+          "security": "reality",
+          "realitySettings": {
+            "publicKey": "ZJlfiMh4ebjrTl2_kwAk_zXMAaCiwNS7yMd5XzlUgmI",
+            "shortId": "",
+            "serverName": "yoy-api.bachidze.com",
+            "fingerprint": "chrome",
+            "spiderX": "/"
           }
         }
       },
       {
         "tag": "ru-2",
-        "protocol": "vless",
-        "settings": {
-          "vnext": [
-            {
-              "address": "mexico.topupaxme.icu",
-              "port": 6443,
-              "users": [
-                {
-                  "id": "68a67906-5b37-4779-a6cc-58a1655f18b4",
-                  "encryption": "none",
-                  "flow": "xtls-rprx-vision"
-                }
-              ]
-            }
-          ]
-        },
-        "streamSettings": {
-          "network": "tcp",
-          "security": "tls",
-          "tlsSettings": {
-            "serverName": "mexico.topupaxme.icu",
-            "allowInsecure": false,
-            "fingerprint": "edge"
-          }
-        }
-      },
-      {
-        "tag": "ru-3",
         "protocol": "vless",
         "settings": {
           "vnext": [
@@ -10810,102 +10705,16 @@
         }
       },
       {
-        "tag": "ru-4",
+        "tag": "ru-3",
         "protocol": "vless",
         "settings": {
           "vnext": [
             {
-              "address": "87.242.94.231",
-              "port": 8443,
-              "users": [
-                {
-                  "id": "68a67906-5b37-4779-a6cc-58a1655f18b4",
-                  "encryption": "none",
-                  "flow": "xtls-rprx-vision"
-                }
-              ]
-            }
-          ]
-        },
-        "streamSettings": {
-          "network": "tcp",
-          "security": "tls",
-          "tlsSettings": {
-            "serverName": "cdn-glavslush.herumhas.shop",
-            "allowInsecure": false,
-            "fingerprint": "qq"
-          }
-        }
-      },
-      {
-        "tag": "ru-5",
-        "protocol": "vless",
-        "settings": {
-          "vnext": [
-            {
-              "address": "217.25.93.165",
+              "address": "185.178.208.167",
               "port": 443,
               "users": [
                 {
-                  "id": "3bb97d46-789b-4229-88f6-9beb222a4137",
-                  "encryption": "none",
-                  "flow": "xtls-rprx-vision"
-                }
-              ]
-            }
-          ]
-        },
-        "streamSettings": {
-          "network": "tcp",
-          "security": "reality",
-          "realitySettings": {
-            "publicKey": "ZJlfiMh4ebjrTl2_kwAk_zXMAaCiwNS7yMd5XzlUgmI",
-            "shortId": "",
-            "serverName": "yoy-api.bachidze.com",
-            "fingerprint": "chrome",
-            "spiderX": "/"
-          }
-        }
-      },
-      {
-        "tag": "ru-6",
-        "protocol": "vless",
-        "settings": {
-          "vnext": [
-            {
-              "address": "aurora-coffee.site",
-              "port": 8443,
-              "users": [
-                {
-                  "id": "68a67906-5b37-4779-a6cc-58a1655f18b4",
-                  "encryption": "none",
-                  "flow": "xtls-rprx-vision"
-                }
-              ]
-            }
-          ]
-        },
-        "streamSettings": {
-          "network": "tcp",
-          "security": "tls",
-          "tlsSettings": {
-            "serverName": "cdn-glavslush.herumhas.shop",
-            "allowInsecure": false,
-            "fingerprint": "edge"
-          }
-        }
-      },
-      {
-        "tag": "ru-7",
-        "protocol": "vless",
-        "settings": {
-          "vnext": [
-            {
-              "address": "9e72bbg.msk2.h1clayd.click",
-              "port": 443,
-              "users": [
-                {
-                  "id": "13e6bdfd-d51b-4e57-a40e-b88784cba8bd",
+                  "id": "18b99163-5196-4ddc-85f8-8fdf5efdcd53",
                   "encryption": "none"
                 }
               ]
@@ -10913,23 +10722,23 @@
           ]
         },
         "streamSettings": {
-          "network": "grpc",
-          "security": "reality",
-          "realitySettings": {
-            "publicKey": "0R5QIf2DFXNgISIYDQdoWIdbNoImaJHrwOkc2tzRPyQ",
-            "shortId": "cc07501e28b18687",
-            "serverName": "9e72bbg.msk2.h1clayd.click",
-            "fingerprint": "chrome",
-            "spiderX": "/"
+          "network": "ws",
+          "security": "tls",
+          "tlsSettings": {
+            "serverName": "stechnostore.life",
+            "allowInsecure": false,
+            "fingerprint": "firefox"
           },
-          "grpcSettings": {
-            "serviceName": "93013a569b78",
-            "multiMode": false
+          "wsSettings": {
+            "path": "/player/collect/9c8514f9552d/",
+            "headers": {
+              "Host": "stechnostore.life"
+            }
           }
         }
       },
       {
-        "tag": "ru-8",
+        "tag": "ru-4",
         "protocol": "vless",
         "settings": {
           "vnext": [
@@ -10959,37 +10768,7 @@
         }
       },
       {
-        "tag": "ru-9",
-        "protocol": "vless",
-        "settings": {
-          "vnext": [
-            {
-              "address": "92.243.66.79",
-              "port": 443,
-              "users": [
-                {
-                  "id": "c5f59ef3-9540-49fa-bd1e-c6c2f79df49a",
-                  "encryption": "none",
-                  "flow": "xtls-rprx-vision"
-                }
-              ]
-            }
-          ]
-        },
-        "streamSettings": {
-          "network": "tcp",
-          "security": "reality",
-          "realitySettings": {
-            "publicKey": "siD4oj2gdtLLEphV6fUXb8ueIc2WHVn7msOUhNGPf2o",
-            "shortId": "8d03c10b6a874a9c",
-            "serverName": "ru-mow.probe.geomyip.com",
-            "fingerprint": "chrome",
-            "spiderX": "/"
-          }
-        }
-      },
-      {
-        "tag": "ru-10",
+        "tag": "ru-5",
         "protocol": "vless",
         "settings": {
           "vnext": [
@@ -11014,6 +10793,69 @@
             "shortId": "11979c0c9b2da371",
             "serverName": "thumbs.mycdn-io.ru",
             "fingerprint": "ios",
+            "spiderX": "/"
+          }
+        }
+      },
+      {
+        "tag": "ru-6",
+        "protocol": "vless",
+        "settings": {
+          "vnext": [
+            {
+              "address": "147.45.175.81",
+              "port": 443,
+              "users": [
+                {
+                  "id": "c90395e6-2140-47ad-a54d-9b166729d3ef",
+                  "encryption": "none"
+                }
+              ]
+            }
+          ]
+        },
+        "streamSettings": {
+          "network": "ws",
+          "security": "tls",
+          "tlsSettings": {
+            "serverName": "xsru1.ddnsfree.com",
+            "allowInsecure": false,
+            "fingerprint": "edge"
+          },
+          "wsSettings": {
+            "path": "/wsru",
+            "headers": {
+              "Host": "xsru1.ddnsfree.com"
+            }
+          }
+        }
+      },
+      {
+        "tag": "ru-7",
+        "protocol": "vless",
+        "settings": {
+          "vnext": [
+            {
+              "address": "92.243.66.79",
+              "port": 443,
+              "users": [
+                {
+                  "id": "c5f59ef3-9540-49fa-bd1e-c6c2f79df49a",
+                  "encryption": "none",
+                  "flow": "xtls-rprx-vision"
+                }
+              ]
+            }
+          ]
+        },
+        "streamSettings": {
+          "network": "tcp",
+          "security": "reality",
+          "realitySettings": {
+            "publicKey": "siD4oj2gdtLLEphV6fUXb8ueIc2WHVn7msOUhNGPf2o",
+            "shortId": "8d03c10b6a874a9c",
+            "serverName": "ru-mow.probe.geomyip.com",
+            "fingerprint": "chrome",
             "spiderX": "/"
           }
         }
@@ -11110,11 +10952,11 @@
         "settings": {
           "vnext": [
             {
-              "address": "213.209.137.8",
-              "port": 6443,
+              "address": "217.25.93.165",
+              "port": 443,
               "users": [
                 {
-                  "id": "68a67906-5b37-4779-a6cc-58a1655f18b4",
+                  "id": "3bb97d46-789b-4229-88f6-9beb222a4137",
                   "encryption": "none",
                   "flow": "xtls-rprx-vision"
                 }
@@ -11124,44 +10966,18 @@
         },
         "streamSettings": {
           "network": "tcp",
-          "security": "tls",
-          "tlsSettings": {
-            "serverName": "mexico.topupaxme.icu",
-            "allowInsecure": false,
-            "fingerprint": "qq"
+          "security": "reality",
+          "realitySettings": {
+            "publicKey": "ZJlfiMh4ebjrTl2_kwAk_zXMAaCiwNS7yMd5XzlUgmI",
+            "shortId": "",
+            "serverName": "yoy-api.bachidze.com",
+            "fingerprint": "chrome",
+            "spiderX": "/"
           }
         }
       },
       {
         "tag": "ru-fast-2",
-        "protocol": "vless",
-        "settings": {
-          "vnext": [
-            {
-              "address": "mexico.topupaxme.icu",
-              "port": 6443,
-              "users": [
-                {
-                  "id": "68a67906-5b37-4779-a6cc-58a1655f18b4",
-                  "encryption": "none",
-                  "flow": "xtls-rprx-vision"
-                }
-              ]
-            }
-          ]
-        },
-        "streamSettings": {
-          "network": "tcp",
-          "security": "tls",
-          "tlsSettings": {
-            "serverName": "mexico.topupaxme.icu",
-            "allowInsecure": false,
-            "fingerprint": "edge"
-          }
-        }
-      },
-      {
-        "tag": "ru-fast-3",
         "protocol": "vless",
         "settings": {
           "vnext": [
@@ -11191,40 +11007,45 @@
         }
       },
       {
-        "tag": "ru-fast-4",
+        "tag": "ru-fast-3",
         "protocol": "vless",
         "settings": {
           "vnext": [
             {
-              "address": "87.242.94.231",
-              "port": 8443,
+              "address": "185.178.208.167",
+              "port": 443,
               "users": [
                 {
-                  "id": "68a67906-5b37-4779-a6cc-58a1655f18b4",
-                  "encryption": "none",
-                  "flow": "xtls-rprx-vision"
+                  "id": "18b99163-5196-4ddc-85f8-8fdf5efdcd53",
+                  "encryption": "none"
                 }
               ]
             }
           ]
         },
         "streamSettings": {
-          "network": "tcp",
+          "network": "ws",
           "security": "tls",
           "tlsSettings": {
-            "serverName": "cdn-glavslush.herumhas.shop",
+            "serverName": "stechnostore.life",
             "allowInsecure": false,
-            "fingerprint": "qq"
+            "fingerprint": "firefox"
+          },
+          "wsSettings": {
+            "path": "/player/collect/9c8514f9552d/",
+            "headers": {
+              "Host": "stechnostore.life"
+            }
           }
         }
       },
       {
-        "tag": "ru-fast-5",
+        "tag": "ru-fast-4",
         "protocol": "vless",
         "settings": {
           "vnext": [
             {
-              "address": "217.25.93.165",
+              "address": "yoy-api.bachidze.com",
               "port": 443,
               "users": [
                 {
@@ -11245,34 +11066,6 @@
             "serverName": "yoy-api.bachidze.com",
             "fingerprint": "chrome",
             "spiderX": "/"
-          }
-        }
-      },
-      {
-        "tag": "ru-fast-6",
-        "protocol": "vless",
-        "settings": {
-          "vnext": [
-            {
-              "address": "aurora-coffee.site",
-              "port": 8443,
-              "users": [
-                {
-                  "id": "68a67906-5b37-4779-a6cc-58a1655f18b4",
-                  "encryption": "none",
-                  "flow": "xtls-rprx-vision"
-                }
-              ]
-            }
-          ]
-        },
-        "streamSettings": {
-          "network": "tcp",
-          "security": "tls",
-          "tlsSettings": {
-            "serverName": "cdn-glavslush.herumhas.shop",
-            "allowInsecure": false,
-            "fingerprint": "edge"
           }
         }
       },
@@ -11368,11 +11161,11 @@
         "settings": {
           "vnext": [
             {
-              "address": "213.209.137.8",
-              "port": 6443,
+              "address": "188.130.209.212",
+              "port": 443,
               "users": [
                 {
-                  "id": "68a67906-5b37-4779-a6cc-58a1655f18b4",
+                  "id": "c8c2ddff-825a-46c3-bbdd-4a101de468a7",
                   "encryption": "none",
                   "flow": "xtls-rprx-vision"
                 }
@@ -11382,11 +11175,13 @@
         },
         "streamSettings": {
           "network": "tcp",
-          "security": "tls",
-          "tlsSettings": {
-            "serverName": "mexico.topupaxme.icu",
-            "allowInsecure": false,
-            "fingerprint": "qq"
+          "security": "reality",
+          "realitySettings": {
+            "publicKey": "6vubZmkLVtaiFF8JyGFy7XSy2pc7ywN4P625QLKw8wc",
+            "shortId": "11979c0c9b2da371",
+            "serverName": "thumbs.mycdn-io.ru",
+            "fingerprint": "ios",
+            "spiderX": "/"
           }
         }
       },
@@ -11396,11 +11191,11 @@
         "settings": {
           "vnext": [
             {
-              "address": "mexico.topupaxme.icu",
-              "port": 6443,
+              "address": "217.25.93.165",
+              "port": 443,
               "users": [
                 {
-                  "id": "68a67906-5b37-4779-a6cc-58a1655f18b4",
+                  "id": "3bb97d46-789b-4229-88f6-9beb222a4137",
                   "encryption": "none",
                   "flow": "xtls-rprx-vision"
                 }
@@ -11410,49 +11205,18 @@
         },
         "streamSettings": {
           "network": "tcp",
-          "security": "tls",
-          "tlsSettings": {
-            "serverName": "mexico.topupaxme.icu",
-            "allowInsecure": false,
-            "fingerprint": "edge"
+          "security": "reality",
+          "realitySettings": {
+            "publicKey": "ZJlfiMh4ebjrTl2_kwAk_zXMAaCiwNS7yMd5XzlUgmI",
+            "shortId": "",
+            "serverName": "yoy-api.bachidze.com",
+            "fingerprint": "chrome",
+            "spiderX": "/"
           }
         }
       },
       {
         "tag": "ru-game-3",
-        "protocol": "vless",
-        "settings": {
-          "vnext": [
-            {
-              "address": "9e72bbg.msk2.h1clayd.click",
-              "port": 443,
-              "users": [
-                {
-                  "id": "13e6bdfd-d51b-4e57-a40e-b88784cba8bd",
-                  "encryption": "none"
-                }
-              ]
-            }
-          ]
-        },
-        "streamSettings": {
-          "network": "grpc",
-          "security": "reality",
-          "realitySettings": {
-            "publicKey": "0R5QIf2DFXNgISIYDQdoWIdbNoImaJHrwOkc2tzRPyQ",
-            "shortId": "cc07501e28b18687",
-            "serverName": "9e72bbg.msk2.h1clayd.click",
-            "fingerprint": "chrome",
-            "spiderX": "/"
-          },
-          "grpcSettings": {
-            "serviceName": "93013a569b78",
-            "multiMode": false
-          }
-        }
-      },
-      {
-        "tag": "ru-game-4",
         "protocol": "vless",
         "settings": {
           "vnext": [
@@ -11482,30 +11246,68 @@
         }
       },
       {
-        "tag": "ru-game-5",
+        "tag": "ru-game-4",
         "protocol": "vless",
         "settings": {
           "vnext": [
             {
-              "address": "87.242.94.231",
-              "port": 8443,
+              "address": "147.45.175.81",
+              "port": 443,
               "users": [
                 {
-                  "id": "68a67906-5b37-4779-a6cc-58a1655f18b4",
-                  "encryption": "none",
-                  "flow": "xtls-rprx-vision"
+                  "id": "c90395e6-2140-47ad-a54d-9b166729d3ef",
+                  "encryption": "none"
                 }
               ]
             }
           ]
         },
         "streamSettings": {
-          "network": "tcp",
+          "network": "ws",
           "security": "tls",
           "tlsSettings": {
-            "serverName": "cdn-glavslush.herumhas.shop",
+            "serverName": "xsru1.ddnsfree.com",
             "allowInsecure": false,
-            "fingerprint": "qq"
+            "fingerprint": "edge"
+          },
+          "wsSettings": {
+            "path": "/wsru",
+            "headers": {
+              "Host": "xsru1.ddnsfree.com"
+            }
+          }
+        }
+      },
+      {
+        "tag": "ru-game-5",
+        "protocol": "vless",
+        "settings": {
+          "vnext": [
+            {
+              "address": "185.178.208.167",
+              "port": 443,
+              "users": [
+                {
+                  "id": "18b99163-5196-4ddc-85f8-8fdf5efdcd53",
+                  "encryption": "none"
+                }
+              ]
+            }
+          ]
+        },
+        "streamSettings": {
+          "network": "ws",
+          "security": "tls",
+          "tlsSettings": {
+            "serverName": "stechnostore.life",
+            "allowInsecure": false,
+            "fingerprint": "firefox"
+          },
+          "wsSettings": {
+            "path": "/player/collect/9c8514f9552d/",
+            "headers": {
+              "Host": "stechnostore.life"
+            }
           }
         }
       },
@@ -11601,11 +11403,11 @@
         "settings": {
           "vnext": [
             {
-              "address": "213.209.137.8",
-              "port": 6443,
+              "address": "217.25.93.165",
+              "port": 443,
               "users": [
                 {
-                  "id": "68a67906-5b37-4779-a6cc-58a1655f18b4",
+                  "id": "3bb97d46-789b-4229-88f6-9beb222a4137",
                   "encryption": "none",
                   "flow": "xtls-rprx-vision"
                 }
@@ -11615,11 +11417,13 @@
         },
         "streamSettings": {
           "network": "tcp",
-          "security": "tls",
-          "tlsSettings": {
-            "serverName": "mexico.topupaxme.icu",
-            "allowInsecure": false,
-            "fingerprint": "qq"
+          "security": "reality",
+          "realitySettings": {
+            "publicKey": "ZJlfiMh4ebjrTl2_kwAk_zXMAaCiwNS7yMd5XzlUgmI",
+            "shortId": "",
+            "serverName": "yoy-api.bachidze.com",
+            "fingerprint": "chrome",
+            "spiderX": "/"
           }
         }
       },
@@ -11652,100 +11456,6 @@
   },
   {
     "remarks": "XetsiwVPN · 🇷🇺 РОССИЯ — СЕРВЕР 2",
-    "log": {
-      "loglevel": "warning"
-    },
-    "dns": {
-      "servers": [
-        "1.1.1.1",
-        "8.8.8.8"
-      ]
-    },
-    "inbounds": [
-      {
-        "tag": "socks",
-        "listen": "127.0.0.1",
-        "port": 10808,
-        "protocol": "socks",
-        "settings": {
-          "auth": "noauth",
-          "udp": true
-        },
-        "sniffing": {
-          "enabled": true,
-          "destOverride": [
-            "http",
-            "tls",
-            "quic"
-          ]
-        }
-      },
-      {
-        "tag": "http",
-        "listen": "127.0.0.1",
-        "port": 10809,
-        "protocol": "http",
-        "settings": {}
-      }
-    ],
-    "outbounds": [
-      {
-        "tag": "proxy",
-        "protocol": "vless",
-        "settings": {
-          "vnext": [
-            {
-              "address": "mexico.topupaxme.icu",
-              "port": 6443,
-              "users": [
-                {
-                  "id": "68a67906-5b37-4779-a6cc-58a1655f18b4",
-                  "encryption": "none",
-                  "flow": "xtls-rprx-vision"
-                }
-              ]
-            }
-          ]
-        },
-        "streamSettings": {
-          "network": "tcp",
-          "security": "tls",
-          "tlsSettings": {
-            "serverName": "mexico.topupaxme.icu",
-            "allowInsecure": false,
-            "fingerprint": "edge"
-          }
-        }
-      },
-      {
-        "tag": "direct",
-        "protocol": "freedom",
-        "settings": {}
-      }
-    ],
-    "routing": {
-      "domainStrategy": "AsIs",
-      "rules": [
-        {
-          "type": "field",
-          "ip": [
-            "geoip:private"
-          ],
-          "outboundTag": "direct"
-        },
-        {
-          "type": "field",
-          "inboundTag": [
-            "socks",
-            "http"
-          ],
-          "outboundTag": "proxy"
-        }
-      ]
-    }
-  },
-  {
-    "remarks": "XetsiwVPN · 🇷🇺 РОССИЯ — СЕРВЕР 3",
     "log": {
       "loglevel": "warning"
     },
@@ -11841,7 +11551,7 @@
     }
   },
   {
-    "remarks": "XetsiwVPN · 🇷🇺 РОССИЯ — СЕРВЕР 4",
+    "remarks": "XetsiwVPN · 🇷🇺 РОССИЯ — СЕРВЕР 3",
     "log": {
       "loglevel": "warning"
     },
@@ -11885,295 +11595,11 @@
         "settings": {
           "vnext": [
             {
-              "address": "87.242.94.231",
-              "port": 8443,
-              "users": [
-                {
-                  "id": "68a67906-5b37-4779-a6cc-58a1655f18b4",
-                  "encryption": "none",
-                  "flow": "xtls-rprx-vision"
-                }
-              ]
-            }
-          ]
-        },
-        "streamSettings": {
-          "network": "tcp",
-          "security": "tls",
-          "tlsSettings": {
-            "serverName": "cdn-glavslush.herumhas.shop",
-            "allowInsecure": false,
-            "fingerprint": "qq"
-          }
-        }
-      },
-      {
-        "tag": "direct",
-        "protocol": "freedom",
-        "settings": {}
-      }
-    ],
-    "routing": {
-      "domainStrategy": "AsIs",
-      "rules": [
-        {
-          "type": "field",
-          "ip": [
-            "geoip:private"
-          ],
-          "outboundTag": "direct"
-        },
-        {
-          "type": "field",
-          "inboundTag": [
-            "socks",
-            "http"
-          ],
-          "outboundTag": "proxy"
-        }
-      ]
-    }
-  },
-  {
-    "remarks": "XetsiwVPN · 🇷🇺 РОССИЯ — СЕРВЕР 5",
-    "log": {
-      "loglevel": "warning"
-    },
-    "dns": {
-      "servers": [
-        "1.1.1.1",
-        "8.8.8.8"
-      ]
-    },
-    "inbounds": [
-      {
-        "tag": "socks",
-        "listen": "127.0.0.1",
-        "port": 10808,
-        "protocol": "socks",
-        "settings": {
-          "auth": "noauth",
-          "udp": true
-        },
-        "sniffing": {
-          "enabled": true,
-          "destOverride": [
-            "http",
-            "tls",
-            "quic"
-          ]
-        }
-      },
-      {
-        "tag": "http",
-        "listen": "127.0.0.1",
-        "port": 10809,
-        "protocol": "http",
-        "settings": {}
-      }
-    ],
-    "outbounds": [
-      {
-        "tag": "proxy",
-        "protocol": "vless",
-        "settings": {
-          "vnext": [
-            {
-              "address": "217.25.93.165",
+              "address": "185.178.208.167",
               "port": 443,
               "users": [
                 {
-                  "id": "3bb97d46-789b-4229-88f6-9beb222a4137",
-                  "encryption": "none",
-                  "flow": "xtls-rprx-vision"
-                }
-              ]
-            }
-          ]
-        },
-        "streamSettings": {
-          "network": "tcp",
-          "security": "reality",
-          "realitySettings": {
-            "publicKey": "ZJlfiMh4ebjrTl2_kwAk_zXMAaCiwNS7yMd5XzlUgmI",
-            "shortId": "",
-            "serverName": "yoy-api.bachidze.com",
-            "fingerprint": "chrome",
-            "spiderX": "/"
-          }
-        }
-      },
-      {
-        "tag": "direct",
-        "protocol": "freedom",
-        "settings": {}
-      }
-    ],
-    "routing": {
-      "domainStrategy": "AsIs",
-      "rules": [
-        {
-          "type": "field",
-          "ip": [
-            "geoip:private"
-          ],
-          "outboundTag": "direct"
-        },
-        {
-          "type": "field",
-          "inboundTag": [
-            "socks",
-            "http"
-          ],
-          "outboundTag": "proxy"
-        }
-      ]
-    }
-  },
-  {
-    "remarks": "XetsiwVPN · 🇷🇺 РОССИЯ — СЕРВЕР 6",
-    "log": {
-      "loglevel": "warning"
-    },
-    "dns": {
-      "servers": [
-        "1.1.1.1",
-        "8.8.8.8"
-      ]
-    },
-    "inbounds": [
-      {
-        "tag": "socks",
-        "listen": "127.0.0.1",
-        "port": 10808,
-        "protocol": "socks",
-        "settings": {
-          "auth": "noauth",
-          "udp": true
-        },
-        "sniffing": {
-          "enabled": true,
-          "destOverride": [
-            "http",
-            "tls",
-            "quic"
-          ]
-        }
-      },
-      {
-        "tag": "http",
-        "listen": "127.0.0.1",
-        "port": 10809,
-        "protocol": "http",
-        "settings": {}
-      }
-    ],
-    "outbounds": [
-      {
-        "tag": "proxy",
-        "protocol": "vless",
-        "settings": {
-          "vnext": [
-            {
-              "address": "aurora-coffee.site",
-              "port": 8443,
-              "users": [
-                {
-                  "id": "68a67906-5b37-4779-a6cc-58a1655f18b4",
-                  "encryption": "none",
-                  "flow": "xtls-rprx-vision"
-                }
-              ]
-            }
-          ]
-        },
-        "streamSettings": {
-          "network": "tcp",
-          "security": "tls",
-          "tlsSettings": {
-            "serverName": "cdn-glavslush.herumhas.shop",
-            "allowInsecure": false,
-            "fingerprint": "edge"
-          }
-        }
-      },
-      {
-        "tag": "direct",
-        "protocol": "freedom",
-        "settings": {}
-      }
-    ],
-    "routing": {
-      "domainStrategy": "AsIs",
-      "rules": [
-        {
-          "type": "field",
-          "ip": [
-            "geoip:private"
-          ],
-          "outboundTag": "direct"
-        },
-        {
-          "type": "field",
-          "inboundTag": [
-            "socks",
-            "http"
-          ],
-          "outboundTag": "proxy"
-        }
-      ]
-    }
-  },
-  {
-    "remarks": "XetsiwVPN · 🇷🇺 РОССИЯ — СЕРВЕР 7",
-    "log": {
-      "loglevel": "warning"
-    },
-    "dns": {
-      "servers": [
-        "1.1.1.1",
-        "8.8.8.8"
-      ]
-    },
-    "inbounds": [
-      {
-        "tag": "socks",
-        "listen": "127.0.0.1",
-        "port": 10808,
-        "protocol": "socks",
-        "settings": {
-          "auth": "noauth",
-          "udp": true
-        },
-        "sniffing": {
-          "enabled": true,
-          "destOverride": [
-            "http",
-            "tls",
-            "quic"
-          ]
-        }
-      },
-      {
-        "tag": "http",
-        "listen": "127.0.0.1",
-        "port": 10809,
-        "protocol": "http",
-        "settings": {}
-      }
-    ],
-    "outbounds": [
-      {
-        "tag": "proxy",
-        "protocol": "vless",
-        "settings": {
-          "vnext": [
-            {
-              "address": "9e72bbg.msk2.h1clayd.click",
-              "port": 443,
-              "users": [
-                {
-                  "id": "13e6bdfd-d51b-4e57-a40e-b88784cba8bd",
+                  "id": "18b99163-5196-4ddc-85f8-8fdf5efdcd53",
                   "encryption": "none"
                 }
               ]
@@ -12181,18 +11607,18 @@
           ]
         },
         "streamSettings": {
-          "network": "grpc",
-          "security": "reality",
-          "realitySettings": {
-            "publicKey": "0R5QIf2DFXNgISIYDQdoWIdbNoImaJHrwOkc2tzRPyQ",
-            "shortId": "cc07501e28b18687",
-            "serverName": "9e72bbg.msk2.h1clayd.click",
-            "fingerprint": "chrome",
-            "spiderX": "/"
+          "network": "ws",
+          "security": "tls",
+          "tlsSettings": {
+            "serverName": "stechnostore.life",
+            "allowInsecure": false,
+            "fingerprint": "firefox"
           },
-          "grpcSettings": {
-            "serviceName": "93013a569b78",
-            "multiMode": false
+          "wsSettings": {
+            "path": "/player/collect/9c8514f9552d/",
+            "headers": {
+              "Host": "stechnostore.life"
+            }
           }
         }
       },
@@ -12224,7 +11650,7 @@
     }
   },
   {
-    "remarks": "XetsiwVPN · 🇷🇺 РОССИЯ — СЕРВЕР 8",
+    "remarks": "XetsiwVPN · 🇷🇺 РОССИЯ — СЕРВЕР 4",
     "log": {
       "loglevel": "warning"
     },
@@ -12320,103 +11746,7 @@
     }
   },
   {
-    "remarks": "XetsiwVPN · 🇷🇺 РОССИЯ — СЕРВЕР 9",
-    "log": {
-      "loglevel": "warning"
-    },
-    "dns": {
-      "servers": [
-        "1.1.1.1",
-        "8.8.8.8"
-      ]
-    },
-    "inbounds": [
-      {
-        "tag": "socks",
-        "listen": "127.0.0.1",
-        "port": 10808,
-        "protocol": "socks",
-        "settings": {
-          "auth": "noauth",
-          "udp": true
-        },
-        "sniffing": {
-          "enabled": true,
-          "destOverride": [
-            "http",
-            "tls",
-            "quic"
-          ]
-        }
-      },
-      {
-        "tag": "http",
-        "listen": "127.0.0.1",
-        "port": 10809,
-        "protocol": "http",
-        "settings": {}
-      }
-    ],
-    "outbounds": [
-      {
-        "tag": "proxy",
-        "protocol": "vless",
-        "settings": {
-          "vnext": [
-            {
-              "address": "92.243.66.79",
-              "port": 443,
-              "users": [
-                {
-                  "id": "c5f59ef3-9540-49fa-bd1e-c6c2f79df49a",
-                  "encryption": "none",
-                  "flow": "xtls-rprx-vision"
-                }
-              ]
-            }
-          ]
-        },
-        "streamSettings": {
-          "network": "tcp",
-          "security": "reality",
-          "realitySettings": {
-            "publicKey": "siD4oj2gdtLLEphV6fUXb8ueIc2WHVn7msOUhNGPf2o",
-            "shortId": "8d03c10b6a874a9c",
-            "serverName": "ru-mow.probe.geomyip.com",
-            "fingerprint": "chrome",
-            "spiderX": "/"
-          }
-        }
-      },
-      {
-        "tag": "direct",
-        "protocol": "freedom",
-        "settings": {}
-      }
-    ],
-    "routing": {
-      "domainStrategy": "AsIs",
-      "rules": [
-        {
-          "type": "field",
-          "ip": [
-            "geoip:private"
-          ],
-          "outboundTag": "direct"
-        },
-        {
-          "type": "field",
-          "inboundTag": [
-            "socks",
-            "http"
-          ],
-          "outboundTag": "proxy"
-        }
-      ]
-    }
-  },
-  {
-    "remarks": "XetsiwVPN · 🇷🇺 РОССИЯ — СЕРВЕР 10",
+    "remarks": "XetsiwVPN · 🇷🇺 РОССИЯ — СЕРВЕР 5",
     "log": {
       "loglevel": "warning"
     },
@@ -12512,6 +11842,201 @@
     }
   },
   {
+    "remarks": "XetsiwVPN · 🇷🇺 РОССИЯ — СЕРВЕР 6",
+    "log": {
+      "loglevel": "warning"
+    },
+    "dns": {
+      "servers": [
+        "1.1.1.1",
+        "8.8.8.8"
+      ]
+    },
+    "inbounds": [
+      {
+        "tag": "socks",
+        "listen": "127.0.0.1",
+        "port": 10808,
+        "protocol": "socks",
+        "settings": {
+          "auth": "noauth",
+          "udp": true
+        },
+        "sniffing": {
+          "enabled": true,
+          "destOverride": [
+            "http",
+            "tls",
+            "quic"
+          ]
+        }
+      },
+      {
+        "tag": "http",
+        "listen": "127.0.0.1",
+        "port": 10809,
+        "protocol": "http",
+        "settings": {}
+      }
+    ],
+    "outbounds": [
+      {
+        "tag": "proxy",
+        "protocol": "vless",
+        "settings": {
+          "vnext": [
+            {
+              "address": "147.45.175.81",
+              "port": 443,
+              "users": [
+                {
+                  "id": "c90395e6-2140-47ad-a54d-9b166729d3ef",
+                  "encryption": "none"
+                }
+              ]
+            }
+          ]
+        },
+        "streamSettings": {
+          "network": "ws",
+          "security": "tls",
+          "tlsSettings": {
+            "serverName": "xsru1.ddnsfree.com",
+            "allowInsecure": false,
+            "fingerprint": "edge"
+          },
+          "wsSettings": {
+            "path": "/wsru",
+            "headers": {
+              "Host": "xsru1.ddnsfree.com"
+            }
+          }
+        }
+      },
+      {
+        "tag": "direct",
+        "protocol": "freedom",
+        "settings": {}
+      }
+    ],
+    "routing": {
+      "domainStrategy": "AsIs",
+      "rules": [
+        {
+          "type": "field",
+          "ip": [
+            "geoip:private"
+          ],
+          "outboundTag": "direct"
+        },
+        {
+          "type": "field",
+          "inboundTag": [
+            "socks",
+            "http"
+          ],
+          "outboundTag": "proxy"
+        }
+      ]
+    }
+  },
+  {
+    "remarks": "XetsiwVPN · 🇷🇺 РОССИЯ — СЕРВЕР 7",
+    "log": {
+      "loglevel": "warning"
+    },
+    "dns": {
+      "servers": [
+        "1.1.1.1",
+        "8.8.8.8"
+      ]
+    },
+    "inbounds": [
+      {
+        "tag": "socks",
+        "listen": "127.0.0.1",
+        "port": 10808,
+        "protocol": "socks",
+        "settings": {
+          "auth": "noauth",
+          "udp": true
+        },
+        "sniffing": {
+          "enabled": true,
+          "destOverride": [
+            "http",
+            "tls",
+            "quic"
+          ]
+        }
+      },
+      {
+        "tag": "http",
+        "listen": "127.0.0.1",
+        "port": 10809,
+        "protocol": "http",
+        "settings": {}
+      }
+    ],
+    "outbounds": [
+      {
+        "tag": "proxy",
+        "protocol": "vless",
+        "settings": {
+          "vnext": [
+            {
+              "address": "92.243.66.79",
+              "port": 443,
+              "users": [
+                {
+                  "id": "c5f59ef3-9540-49fa-bd1e-c6c2f79df49a",
+                  "encryption": "none",
+                  "flow": "xtls-rprx-vision"
+                }
+              ]
+            }
+          ]
+        },
+        "streamSettings": {
+          "network": "tcp",
+          "security": "reality",
+          "realitySettings": {
+            "publicKey": "siD4oj2gdtLLEphV6fUXb8ueIc2WHVn7msOUhNGPf2o",
+            "shortId": "8d03c10b6a874a9c",
+            "serverName": "ru-mow.probe.geomyip.com",
+            "fingerprint": "chrome",
+            "spiderX": "/"
+          }
+        }
+      },
+      {
+        "tag": "direct",
+        "protocol": "freedom",
+        "settings": {}
+      }
+    ],
+    "routing": {
+      "domainStrategy": "AsIs",
+      "rules": [
+        {
+          "type": "field",
+          "ip": [
+            "geoip:private"
+          ],
+          "outboundTag": "direct"
+        },
+        {
+          "type": "field",
+          "inboundTag": [
+            "socks",
+            "http"
+          ],
+          "outboundTag": "proxy"
+        }
+      ]
+    }
+  },
+  {
     "remarks": "XetsiwVPN · 🎧 DISCORD — РОССИЯ — ГОЛОС RTC",
     "log": {
       "loglevel": "warning"
@@ -12556,11 +12081,11 @@
         "settings": {
           "vnext": [
             {
-              "address": "213.209.137.8",
-              "port": 6443,
+              "address": "217.25.93.165",
+              "port": 443,
               "users": [
                 {
-                  "id": "68a67906-5b37-4779-a6cc-58a1655f18b4",
+                  "id": "3bb97d46-789b-4229-88f6-9beb222a4137",
                   "encryption": "none",
                   "flow": "xtls-rprx-vision"
                 }
@@ -12570,11 +12095,13 @@
         },
         "streamSettings": {
           "network": "tcp",
-          "security": "tls",
-          "tlsSettings": {
-            "serverName": "mexico.topupaxme.icu",
-            "allowInsecure": false,
-            "fingerprint": "qq"
+          "security": "reality",
+          "realitySettings": {
+            "publicKey": "ZJlfiMh4ebjrTl2_kwAk_zXMAaCiwNS7yMd5XzlUgmI",
+            "shortId": "",
+            "serverName": "yoy-api.bachidze.com",
+            "fingerprint": "chrome",
+            "spiderX": "/"
           }
         }
       },
@@ -12655,11 +12182,11 @@
         "settings": {
           "vnext": [
             {
-              "address": "mexico.topupaxme.icu",
-              "port": 6443,
+              "address": "83.147.246.12",
+              "port": 443,
               "users": [
                 {
-                  "id": "68a67906-5b37-4779-a6cc-58a1655f18b4",
+                  "id": "3bb97d46-789b-4229-88f6-9beb222a4137",
                   "encryption": "none",
                   "flow": "xtls-rprx-vision"
                 }
@@ -12669,11 +12196,13 @@
         },
         "streamSettings": {
           "network": "tcp",
-          "security": "tls",
-          "tlsSettings": {
-            "serverName": "mexico.topupaxme.icu",
-            "allowInsecure": false,
-            "fingerprint": "edge"
+          "security": "reality",
+          "realitySettings": {
+            "publicKey": "ZJlfiMh4ebjrTl2_kwAk_zXMAaCiwNS7yMd5XzlUgmI",
+            "shortId": "",
+            "serverName": "yoy-api.bachidze.com",
+            "fingerprint": "chrome",
+            "spiderX": "/"
           }
         }
       },
