@@ -10750,6 +10750,37 @@
         "settings": {
           "vnext": [
             {
+              "address": "vps2.nemnogogo.com",
+              "port": 443,
+              "users": [
+                {
+                  "id": "95f85937-7b95-45c4-8d69-95da6a978569",
+                  "encryption": "none"
+                }
+              ]
+            }
+          ]
+        },
+        "streamSettings": {
+          "network": "grpc",
+          "security": "tls",
+          "tlsSettings": {
+            "serverName": "vps2.nemnogogo.com",
+            "allowInsecure": false,
+            "fingerprint": "ios"
+          },
+          "grpcSettings": {
+            "serviceName": "mobile.api.Event",
+            "multiMode": false
+          }
+        }
+      },
+      {
+        "tag": "world-240",
+        "protocol": "vless",
+        "settings": {
+          "vnext": [
+            {
               "address": "188.130.209.212",
               "port": 443,
               "users": [
@@ -10862,6 +10893,37 @@
     "outbounds": [
       {
         "tag": "ru-1",
+        "protocol": "vless",
+        "settings": {
+          "vnext": [
+            {
+              "address": "vps2.nemnogogo.com",
+              "port": 443,
+              "users": [
+                {
+                  "id": "95f85937-7b95-45c4-8d69-95da6a978569",
+                  "encryption": "none"
+                }
+              ]
+            }
+          ]
+        },
+        "streamSettings": {
+          "network": "grpc",
+          "security": "tls",
+          "tlsSettings": {
+            "serverName": "vps2.nemnogogo.com",
+            "allowInsecure": false,
+            "fingerprint": "ios"
+          },
+          "grpcSettings": {
+            "serviceName": "mobile.api.Event",
+            "multiMode": false
+          }
+        }
+      },
+      {
+        "tag": "ru-2",
         "protocol": "vless",
         "settings": {
           "vnext": [
@@ -10982,6 +11044,37 @@
         "settings": {
           "vnext": [
             {
+              "address": "vps2.nemnogogo.com",
+              "port": 443,
+              "users": [
+                {
+                  "id": "95f85937-7b95-45c4-8d69-95da6a978569",
+                  "encryption": "none"
+                }
+              ]
+            }
+          ]
+        },
+        "streamSettings": {
+          "network": "grpc",
+          "security": "tls",
+          "tlsSettings": {
+            "serverName": "vps2.nemnogogo.com",
+            "allowInsecure": false,
+            "fingerprint": "ios"
+          },
+          "grpcSettings": {
+            "serviceName": "mobile.api.Event",
+            "multiMode": false
+          }
+        }
+      },
+      {
+        "tag": "ru-fast-2",
+        "protocol": "vless",
+        "settings": {
+          "vnext": [
+            {
               "address": "188.130.209.212",
               "port": 443,
               "users": [
@@ -11094,6 +11187,37 @@
     "outbounds": [
       {
         "tag": "ru-game-1",
+        "protocol": "vless",
+        "settings": {
+          "vnext": [
+            {
+              "address": "vps2.nemnogogo.com",
+              "port": 443,
+              "users": [
+                {
+                  "id": "95f85937-7b95-45c4-8d69-95da6a978569",
+                  "encryption": "none"
+                }
+              ]
+            }
+          ]
+        },
+        "streamSettings": {
+          "network": "grpc",
+          "security": "tls",
+          "tlsSettings": {
+            "serverName": "vps2.nemnogogo.com",
+            "allowInsecure": false,
+            "fingerprint": "ios"
+          },
+          "grpcSettings": {
+            "serviceName": "mobile.api.Event",
+            "multiMode": false
+          }
+        }
+      },
+      {
+        "tag": "ru-game-2",
         "protocol": "vless",
         "settings": {
           "vnext": [
@@ -11214,6 +11338,103 @@
         "settings": {
           "vnext": [
             {
+              "address": "vps2.nemnogogo.com",
+              "port": 443,
+              "users": [
+                {
+                  "id": "95f85937-7b95-45c4-8d69-95da6a978569",
+                  "encryption": "none"
+                }
+              ]
+            }
+          ]
+        },
+        "streamSettings": {
+          "network": "grpc",
+          "security": "tls",
+          "tlsSettings": {
+            "serverName": "vps2.nemnogogo.com",
+            "allowInsecure": false,
+            "fingerprint": "ios"
+          },
+          "grpcSettings": {
+            "serviceName": "mobile.api.Event",
+            "multiMode": false
+          }
+        }
+      },
+      {
+        "tag": "direct",
+        "protocol": "freedom",
+        "settings": {}
+      }
+    ],
+    "routing": {
+      "domainStrategy": "AsIs",
+      "rules": [
+        {
+          "type": "field",
+          "ip": [
+            "geoip:private"
+          ],
+          "outboundTag": "direct"
+        },
+        {
+          "type": "field",
+          "inboundTag": [
+            "socks",
+            "http"
+          ],
+          "outboundTag": "proxy"
+        }
+      ]
+    }
+  },
+  {
+    "remarks": "XetsiwVPN · 🇷🇺 РОССИЯ — СЕРВЕР 2",
+    "log": {
+      "loglevel": "warning"
+    },
+    "dns": {
+      "servers": [
+        "1.1.1.1",
+        "8.8.8.8"
+      ]
+    },
+    "inbounds": [
+      {
+        "tag": "socks",
+        "listen": "127.0.0.1",
+        "port": 10808,
+        "protocol": "socks",
+        "settings": {
+          "auth": "noauth",
+          "udp": true
+        },
+        "sniffing": {
+          "enabled": true,
+          "destOverride": [
+            "http",
+            "tls",
+            "quic"
+          ]
+        }
+      },
+      {
+        "tag": "http",
+        "listen": "127.0.0.1",
+        "port": 10809,
+        "protocol": "http",
+        "settings": {}
+      }
+    ],
+    "outbounds": [
+      {
+        "tag": "proxy",
+        "protocol": "vless",
+        "settings": {
+          "vnext": [
+            {
               "address": "188.130.209.212",
               "port": 443,
               "users": [
@@ -11267,6 +11488,108 @@
   },
   {
     "remarks": "XetsiwVPN · 🎧 DISCORD — РОССИЯ — ГОЛОС RTC",
+    "log": {
+      "loglevel": "warning"
+    },
+    "dns": {
+      "servers": [
+        "1.1.1.1",
+        "8.8.8.8"
+      ]
+    },
+    "inbounds": [
+      {
+        "tag": "socks",
+        "listen": "127.0.0.1",
+        "port": 10808,
+        "protocol": "socks",
+        "settings": {
+          "auth": "noauth",
+          "udp": true
+        },
+        "sniffing": {
+          "enabled": true,
+          "destOverride": [
+            "http",
+            "tls",
+            "quic"
+          ]
+        }
+      },
+      {
+        "tag": "http",
+        "listen": "127.0.0.1",
+        "port": 10809,
+        "protocol": "http",
+        "settings": {}
+      }
+    ],
+    "outbounds": [
+      {
+        "tag": "proxy",
+        "protocol": "vless",
+        "settings": {
+          "vnext": [
+            {
+              "address": "vps2.nemnogogo.com",
+              "port": 443,
+              "users": [
+                {
+                  "id": "95f85937-7b95-45c4-8d69-95da6a978569",
+                  "encryption": "none"
+                }
+              ]
+            }
+          ]
+        },
+        "streamSettings": {
+          "network": "grpc",
+          "security": "tls",
+          "tlsSettings": {
+            "serverName": "vps2.nemnogogo.com",
+            "allowInsecure": false,
+            "fingerprint": "ios"
+          },
+          "grpcSettings": {
+            "serviceName": "mobile.api.Event",
+            "multiMode": false
+          }
+        }
+      },
+      {
+        "tag": "direct",
+        "protocol": "freedom",
+        "settings": {}
+      }
+    ],
+    "routing": {
+      "domainStrategy": "AsIs",
+      "rules": [
+        {
+          "type": "field",
+          "ip": [
+            "geoip:private"
+          ],
+          "outboundTag": "direct"
+        },
+        {
+          "type": "field",
+          "network": "udp",
+          "outboundTag": "proxy"
+        },
+        {
+          "type": "field",
+          "inboundTag": [
+            "socks",
+            "http"
+          ],
+          "outboundTag": "proxy"
+        }
+      ]
+    }
+  },
+  {
+    "remarks": "XetsiwVPN · 🎧 DISCORD — РОССИЯ — РЕЗЕРВ",
     "log": {
       "loglevel": "warning"
     },
