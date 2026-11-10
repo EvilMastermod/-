@@ -238,27 +238,41 @@
     },
     "RU": {
       "tested": 420,
-      "country_verified": 3,
-      "wrong_country": 53,
+      "country_verified": 5,
+      "wrong_country": 77,
       "retained_old_nodes": false,
       "selected": [
         {
-          "server": "vps3.nemnogogo.com:443",
-          "http_ms": 548,
-          "jitter_ms": null,
-          "success_rate": 0.5,
+          "server": "vps2.nemnogogo.com:443",
+          "http_ms": 691,
+          "jitter_ms": 472,
+          "success_rate": 1.0,
           "exit": "RU"
         },
         {
-          "server": "188.130.209.212:443",
-          "http_ms": 972,
-          "jitter_ms": null,
-          "success_rate": 0.5,
+          "server": "vps3.nemnogogo.com:443",
+          "http_ms": 699,
+          "jitter_ms": 472,
+          "success_rate": 1.0,
           "exit": "RU"
         },
         {
           "server": "92.243.66.79:443",
-          "http_ms": 1981,
+          "http_ms": 850,
+          "jitter_ms": 6,
+          "success_rate": 1.0,
+          "exit": "RU"
+        },
+        {
+          "server": "188.130.209.212:443",
+          "http_ms": 730,
+          "jitter_ms": null,
+          "success_rate": 0.5,
+          "exit": "RU"
+        },
+        {
+          "server": "201.24.121.243:443",
+          "http_ms": 873,
           "jitter_ms": null,
           "success_rate": 0.5,
           "exit": "RU"
@@ -1875,5 +1889,6 @@
         }
       ]
     }
-  }
+  },
+  "ru_updated_utc": "2026-11-10T23:43:02Z"
 }
