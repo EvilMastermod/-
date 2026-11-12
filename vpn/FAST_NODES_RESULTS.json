@@ -351,40 +351,40 @@
     "RU": {
       "tested": 420,
       "country_verified": 5,
-      "wrong_country": 67,
+      "wrong_country": 65,
       "retained_old_nodes": false,
       "selected": [
         {
           "server": "5.42.111.231:443",
-          "http_ms": 613,
-          "jitter_ms": 242,
+          "http_ms": 626,
+          "jitter_ms": 383,
+          "success_rate": 1.0,
+          "exit": "RU"
+        },
+        {
+          "server": "201.24.121.243:443",
+          "http_ms": 620,
+          "jitter_ms": 445,
           "success_rate": 1.0,
           "exit": "RU"
         },
         {
           "server": "vps3.nemnogogo.com:443",
-          "http_ms": 578,
-          "jitter_ms": 420,
+          "http_ms": 696,
+          "jitter_ms": 475,
           "success_rate": 1.0,
           "exit": "RU"
         },
         {
           "server": "92.243.66.79:443",
-          "http_ms": 1720,
-          "jitter_ms": 2016,
+          "http_ms": 1318,
+          "jitter_ms": 991,
           "success_rate": 1.0,
           "exit": "RU"
         },
         {
           "server": "188.130.209.212:443",
-          "http_ms": 588,
-          "jitter_ms": null,
-          "success_rate": 0.5,
-          "exit": "RU"
-        },
-        {
-          "server": "201.24.121.243:443",
-          "http_ms": 742,
+          "http_ms": 724,
           "jitter_ms": null,
           "success_rate": 0.5,
           "exit": "RU"
@@ -2246,5 +2246,6 @@
         }
       ]
     }
-  }
+  },
+  "ru_updated_utc": "2026-11-12T01:00:06Z"
 }
