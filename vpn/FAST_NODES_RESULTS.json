@@ -266,76 +266,83 @@
     },
     "RU": {
       "tested": 420,
-      "country_verified": 10,
-      "wrong_country": 51,
+      "country_verified": 11,
+      "wrong_country": 53,
       "retained_old_nodes": false,
       "selected": [
         {
-          "server": "200.169.179.233:443",
-          "http_ms": 556,
-          "jitter_ms": 292,
-          "success_rate": 1.0,
-          "exit": "RU"
-        },
-        {
           "server": "201.24.121.243:443",
-          "http_ms": 563,
-          "jitter_ms": 288,
+          "http_ms": 608,
+          "jitter_ms": 404,
           "success_rate": 1.0,
           "exit": "RU"
         },
         {
           "server": "201.51.12.98:443",
-          "http_ms": 554,
-          "jitter_ms": 348,
+          "http_ms": 640,
+          "jitter_ms": 350,
           "success_rate": 1.0,
           "exit": "RU"
         },
         {
           "server": "201.24.116.192:443",
-          "http_ms": 596,
-          "jitter_ms": 354,
+          "http_ms": 644,
+          "jitter_ms": 353,
+          "success_rate": 1.0,
+          "exit": "RU"
+        },
+        {
+          "server": "200.169.179.233:443",
+          "http_ms": 636,
+          "jitter_ms": 406,
+          "success_rate": 1.0,
+          "exit": "RU"
+        },
+        {
+          "server": "vps3.nemnogogo.com:443",
+          "http_ms": 701,
+          "jitter_ms": 390,
           "success_rate": 1.0,
           "exit": "RU"
         },
         {
           "server": "136.234.9.6:443",
-          "http_ms": 697,
-          "jitter_ms": 248,
+          "http_ms": 878,
+          "jitter_ms": 553,
           "success_rate": 1.0,
           "exit": "RU"
         },
         {
           "server": "212.41.8.76:13443",
-          "http_ms": 1510,
-          "jitter_ms": 2263,
+          "http_ms": 1840,
+          "jitter_ms": 2593,
+          "success_rate": 1.0,
+          "exit": "RU"
+        },
+        {
+          "server": "212.233.90.78:443",
+          "http_ms": 2258,
+          "jitter_ms": 1297,
           "success_rate": 1.0,
           "exit": "RU"
         },
         {
           "server": "129.101.98.60:443",
-          "http_ms": 555,
+          "http_ms": 672,
           "jitter_ms": null,
           "success_rate": 0.5,
           "exit": "RU"
         },
         {
           "server": "ru7e2bab87cc39.eu-cdn539.com:443",
-          "http_ms": 600,
-          "jitter_ms": null,
-          "success_rate": 0.5,
-          "exit": "RU"
-        },
-        {
-          "server": "vps3.nemnogogo.com:443",
-          "http_ms": 753,
+          "http_ms": 782,
           "jitter_ms": null,
           "success_rate": 0.5,
           "exit": "RU"
         },
         {
           "server": "5.59.204.81:8443",
-          "http_ms": 2827,
+          "http_ms": 2964,
           "jitter_ms": null,
           "success_rate": 0.5,
           "exit": "RU"
@@ -1819,5 +1826,6 @@
         }
       ]
     }
-  }
+  },
+  "ru_updated_utc": "2026-11-14T22:44:50Z"
 }
