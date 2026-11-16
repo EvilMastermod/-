@@ -10609,11 +10609,11 @@
         "settings": {
           "vnext": [
             {
-              "address": "201.24.121.243",
+              "address": "201.24.116.192",
               "port": 443,
               "users": [
                 {
-                  "id": "32b5ca9b-3f81-4031-965d-e8b074216e8d",
+                  "id": "38308ff1-5aa9-494f-a25a-0f2870d56b3e",
                   "encryption": "none"
                 }
               ]
@@ -10624,12 +10624,12 @@
           "network": "grpc",
           "security": "tls",
           "tlsSettings": {
-            "serverName": "kk-ru24a1.testkknegr.online",
+            "serverName": "vps3.nemnogogo.com",
             "allowInsecure": false,
-            "fingerprint": "chrome"
+            "fingerprint": "firefox"
           },
           "grpcSettings": {
-            "serviceName": "vlgrpc",
+            "serviceName": "mobile.api.Event",
             "multiMode": false
           }
         }
@@ -10671,11 +10671,11 @@
         "settings": {
           "vnext": [
             {
-              "address": "201.24.116.192",
+              "address": "201.24.121.243",
               "port": 443,
               "users": [
                 {
-                  "id": "38308ff1-5aa9-494f-a25a-0f2870d56b3e",
+                  "id": "32b5ca9b-3f81-4031-965d-e8b074216e8d",
                   "encryption": "none"
                 }
               ]
@@ -10686,12 +10686,12 @@
           "network": "grpc",
           "security": "tls",
           "tlsSettings": {
-            "serverName": "vps3.nemnogogo.com",
+            "serverName": "kk-ru24a1.testkknegr.online",
             "allowInsecure": false,
-            "fingerprint": "firefox"
+            "fingerprint": "chrome"
           },
           "grpcSettings": {
-            "serviceName": "mobile.api.Event",
+            "serviceName": "vlgrpc",
             "multiMode": false
           }
         }
@@ -10753,36 +10753,6 @@
             "shortId": "3992cc7fb9fcbe58",
             "serverName": "ru7e2bab87cc39.eu-cdn539.com",
             "fingerprint": "chrome",
-            "spiderX": "/"
-          }
-        }
-      },
-      {
-        "tag": "world-240",
-        "protocol": "vless",
-        "settings": {
-          "vnext": [
-            {
-              "address": "ru7e2bab87cc39.eu-cdn539.com",
-              "port": 443,
-              "users": [
-                {
-                  "id": "e75ad2eb-6c1f-45ce-8023-f5f10875df66",
-                  "encryption": "none",
-                  "flow": "xtls-rprx-vision"
-                }
-              ]
-            }
-          ]
-        },
-        "streamSettings": {
-          "network": "tcp",
-          "security": "reality",
-          "realitySettings": {
-            "publicKey": "lews1n_fypGexd_dMofEO4Vy1ULsFeVIFa90MMY3pm4",
-            "shortId": "3992cc7fb9fcbe58",
-            "serverName": "ru7e2bab87cc39.eu-cdn539.com",
-            "fingerprint": "firefox",
             "spiderX": "/"
           }
         }
@@ -10910,11 +10880,11 @@
         "settings": {
           "vnext": [
             {
-              "address": "201.24.121.243",
+              "address": "201.24.116.192",
               "port": 443,
               "users": [
                 {
-                  "id": "32b5ca9b-3f81-4031-965d-e8b074216e8d",
+                  "id": "38308ff1-5aa9-494f-a25a-0f2870d56b3e",
                   "encryption": "none"
                 }
               ]
@@ -10925,12 +10895,12 @@
           "network": "grpc",
           "security": "tls",
           "tlsSettings": {
-            "serverName": "kk-ru24a1.testkknegr.online",
+            "serverName": "vps3.nemnogogo.com",
             "allowInsecure": false,
-            "fingerprint": "chrome"
+            "fingerprint": "firefox"
           },
           "grpcSettings": {
-            "serviceName": "vlgrpc",
+            "serviceName": "mobile.api.Event",
             "multiMode": false
           }
         }
@@ -10972,11 +10942,11 @@
         "settings": {
           "vnext": [
             {
-              "address": "201.24.116.192",
+              "address": "201.24.121.243",
               "port": 443,
               "users": [
                 {
-                  "id": "38308ff1-5aa9-494f-a25a-0f2870d56b3e",
+                  "id": "32b5ca9b-3f81-4031-965d-e8b074216e8d",
                   "encryption": "none"
                 }
               ]
@@ -10987,12 +10957,12 @@
           "network": "grpc",
           "security": "tls",
           "tlsSettings": {
-            "serverName": "vps3.nemnogogo.com",
+            "serverName": "kk-ru24a1.testkknegr.online",
             "allowInsecure": false,
-            "fingerprint": "firefox"
+            "fingerprint": "chrome"
           },
           "grpcSettings": {
-            "serviceName": "mobile.api.Event",
+            "serviceName": "vlgrpc",
             "multiMode": false
           }
         }
@@ -11054,36 +11024,6 @@
             "shortId": "3992cc7fb9fcbe58",
             "serverName": "ru7e2bab87cc39.eu-cdn539.com",
             "fingerprint": "chrome",
-            "spiderX": "/"
-          }
-        }
-      },
-      {
-        "tag": "ru-7",
-        "protocol": "vless",
-        "settings": {
-          "vnext": [
-            {
-              "address": "ru7e2bab87cc39.eu-cdn539.com",
-              "port": 443,
-              "users": [
-                {
-                  "id": "e75ad2eb-6c1f-45ce-8023-f5f10875df66",
-                  "encryption": "none",
-                  "flow": "xtls-rprx-vision"
-                }
-              ]
-            }
-          ]
-        },
-        "streamSettings": {
-          "network": "tcp",
-          "security": "reality",
-          "realitySettings": {
-            "publicKey": "lews1n_fypGexd_dMofEO4Vy1ULsFeVIFa90MMY3pm4",
-            "shortId": "3992cc7fb9fcbe58",
-            "serverName": "ru7e2bab87cc39.eu-cdn539.com",
-            "fingerprint": "firefox",
             "spiderX": "/"
           }
         }
@@ -11211,11 +11151,11 @@
         "settings": {
           "vnext": [
             {
-              "address": "201.24.121.243",
+              "address": "201.24.116.192",
               "port": 443,
               "users": [
                 {
-                  "id": "32b5ca9b-3f81-4031-965d-e8b074216e8d",
+                  "id": "38308ff1-5aa9-494f-a25a-0f2870d56b3e",
                   "encryption": "none"
                 }
               ]
@@ -11226,12 +11166,12 @@
           "network": "grpc",
           "security": "tls",
           "tlsSettings": {
-            "serverName": "kk-ru24a1.testkknegr.online",
+            "serverName": "vps3.nemnogogo.com",
             "allowInsecure": false,
-            "fingerprint": "chrome"
+            "fingerprint": "firefox"
           },
           "grpcSettings": {
-            "serviceName": "vlgrpc",
+            "serviceName": "mobile.api.Event",
             "multiMode": false
           }
         }
@@ -11273,11 +11213,11 @@
         "settings": {
           "vnext": [
             {
-              "address": "201.24.116.192",
+              "address": "201.24.121.243",
               "port": 443,
               "users": [
                 {
-                  "id": "38308ff1-5aa9-494f-a25a-0f2870d56b3e",
+                  "id": "32b5ca9b-3f81-4031-965d-e8b074216e8d",
                   "encryption": "none"
                 }
               ]
@@ -11288,12 +11228,12 @@
           "network": "grpc",
           "security": "tls",
           "tlsSettings": {
-            "serverName": "vps3.nemnogogo.com",
+            "serverName": "kk-ru24a1.testkknegr.online",
             "allowInsecure": false,
-            "fingerprint": "firefox"
+            "fingerprint": "chrome"
           },
           "grpcSettings": {
-            "serviceName": "mobile.api.Event",
+            "serviceName": "vlgrpc",
             "multiMode": false
           }
         }
@@ -11452,11 +11392,11 @@
         "settings": {
           "vnext": [
             {
-              "address": "201.24.121.243",
+              "address": "201.24.116.192",
               "port": 443,
               "users": [
                 {
-                  "id": "32b5ca9b-3f81-4031-965d-e8b074216e8d",
+                  "id": "38308ff1-5aa9-494f-a25a-0f2870d56b3e",
                   "encryption": "none"
                 }
               ]
@@ -11467,12 +11407,12 @@
           "network": "grpc",
           "security": "tls",
           "tlsSettings": {
-            "serverName": "kk-ru24a1.testkknegr.online",
+            "serverName": "vps3.nemnogogo.com",
             "allowInsecure": false,
-            "fingerprint": "chrome"
+            "fingerprint": "firefox"
           },
           "grpcSettings": {
-            "serviceName": "vlgrpc",
+            "serviceName": "mobile.api.Event",
             "multiMode": false
           }
         }
@@ -11514,11 +11454,11 @@
         "settings": {
           "vnext": [
             {
-              "address": "201.24.116.192",
+              "address": "201.24.121.243",
               "port": 443,
               "users": [
                 {
-                  "id": "38308ff1-5aa9-494f-a25a-0f2870d56b3e",
+                  "id": "32b5ca9b-3f81-4031-965d-e8b074216e8d",
                   "encryption": "none"
                 }
               ]
@@ -11529,12 +11469,12 @@
           "network": "grpc",
           "security": "tls",
           "tlsSettings": {
-            "serverName": "vps3.nemnogogo.com",
+            "serverName": "kk-ru24a1.testkknegr.online",
             "allowInsecure": false,
-            "fingerprint": "firefox"
+            "fingerprint": "chrome"
           },
           "grpcSettings": {
-            "serviceName": "mobile.api.Event",
+            "serviceName": "vlgrpc",
             "multiMode": false
           }
         }
@@ -11758,11 +11698,11 @@
         "settings": {
           "vnext": [
             {
-              "address": "201.24.121.243",
+              "address": "201.24.116.192",
               "port": 443,
               "users": [
                 {
-                  "id": "32b5ca9b-3f81-4031-965d-e8b074216e8d",
+                  "id": "38308ff1-5aa9-494f-a25a-0f2870d56b3e",
                   "encryption": "none"
                 }
               ]
@@ -11773,12 +11713,12 @@
           "network": "grpc",
           "security": "tls",
           "tlsSettings": {
-            "serverName": "kk-ru24a1.testkknegr.online",
+            "serverName": "vps3.nemnogogo.com",
             "allowInsecure": false,
-            "fingerprint": "chrome"
+            "fingerprint": "firefox"
           },
           "grpcSettings": {
-            "serviceName": "vlgrpc",
+            "serviceName": "mobile.api.Event",
             "multiMode": false
           }
         }
@@ -11952,11 +11892,11 @@
         "settings": {
           "vnext": [
             {
-              "address": "201.24.116.192",
+              "address": "201.24.121.243",
               "port": 443,
               "users": [
                 {
-                  "id": "38308ff1-5aa9-494f-a25a-0f2870d56b3e",
+                  "id": "32b5ca9b-3f81-4031-965d-e8b074216e8d",
                   "encryption": "none"
                 }
               ]
@@ -11967,12 +11907,12 @@
           "network": "grpc",
           "security": "tls",
           "tlsSettings": {
-            "serverName": "vps3.nemnogogo.com",
+            "serverName": "kk-ru24a1.testkknegr.online",
             "allowInsecure": false,
-            "fingerprint": "firefox"
+            "fingerprint": "chrome"
           },
           "grpcSettings": {
-            "serviceName": "mobile.api.Event",
+            "serviceName": "vlgrpc",
             "multiMode": false
           }
         }
@@ -12198,102 +12138,6 @@
     }
   },
   {
-    "remarks": "XetsiwVPN · 🇷🇺 РОССИЯ — СЕРВЕР 7",
-    "log": {
-      "loglevel": "warning"
-    },
-    "dns": {
-      "servers": [
-        "1.1.1.1",
-        "8.8.8.8"
-      ]
-    },
-    "inbounds": [
-      {
-        "tag": "socks",
-        "listen": "127.0.0.1",
-        "port": 10808,
-        "protocol": "socks",
-        "settings": {
-          "auth": "noauth",
-          "udp": true
-        },
-        "sniffing": {
-          "enabled": true,
-          "destOverride": [
-            "http",
-            "tls",
-            "quic"
-          ]
-        }
-      },
-      {
-        "tag": "http",
-        "listen": "127.0.0.1",
-        "port": 10809,
-        "protocol": "http",
-        "settings": {}
-      }
-    ],
-    "outbounds": [
-      {
-        "tag": "proxy",
-        "protocol": "vless",
-        "settings": {
-          "vnext": [
-            {
-              "address": "ru7e2bab87cc39.eu-cdn539.com",
-              "port": 443,
-              "users": [
-                {
-                  "id": "e75ad2eb-6c1f-45ce-8023-f5f10875df66",
-                  "encryption": "none",
-                  "flow": "xtls-rprx-vision"
-                }
-              ]
-            }
-          ]
-        },
-        "streamSettings": {
-          "network": "tcp",
-          "security": "reality",
-          "realitySettings": {
-            "publicKey": "lews1n_fypGexd_dMofEO4Vy1ULsFeVIFa90MMY3pm4",
-            "shortId": "3992cc7fb9fcbe58",
-            "serverName": "ru7e2bab87cc39.eu-cdn539.com",
-            "fingerprint": "firefox",
-            "spiderX": "/"
-          }
-        }
-      },
-      {
-        "tag": "direct",
-        "protocol": "freedom",
-        "settings": {}
-      }
-    ],
-    "routing": {
-      "domainStrategy": "AsIs",
-      "rules": [
-        {
-          "type": "field",
-          "ip": [
-            "geoip:private"
-          ],
-          "outboundTag": "direct"
-        },
-        {
-          "type": "field",
-          "inboundTag": [
-            "socks",
-            "http"
-          ],
-          "outboundTag": "proxy"
-        }
-      ]
-    }
-  },
-  {
     "remarks": "XetsiwVPN · 🎧 DISCORD — РОССИЯ — ГОЛОС RTC",
     "log": {
       "loglevel": "warning"
@@ -12440,11 +12284,11 @@
         "settings": {
           "vnext": [
             {
-              "address": "201.24.121.243",
+              "address": "201.24.116.192",
               "port": 443,
               "users": [
                 {
-                  "id": "32b5ca9b-3f81-4031-965d-e8b074216e8d",
+                  "id": "38308ff1-5aa9-494f-a25a-0f2870d56b3e",
                   "encryption": "none"
                 }
               ]
@@ -12455,12 +12299,12 @@
           "network": "grpc",
           "security": "tls",
           "tlsSettings": {
-            "serverName": "kk-ru24a1.testkknegr.online",
+            "serverName": "vps3.nemnogogo.com",
             "allowInsecure": false,
-            "fingerprint": "chrome"
+            "fingerprint": "firefox"
           },
           "grpcSettings": {
-            "serviceName": "vlgrpc",
+            "serviceName": "mobile.api.Event",
             "multiMode": false
           }
         }
