@@ -287,62 +287,55 @@
     },
     "RU": {
       "tested": 420,
-      "country_verified": 8,
-      "wrong_country": 48,
+      "country_verified": 7,
+      "wrong_country": 42,
       "retained_old_nodes": false,
       "selected": [
         {
-          "server": "201.51.12.98:443",
-          "http_ms": 608,
-          "jitter_ms": 317,
-          "success_rate": 1.0,
-          "exit": "RU"
-        },
-        {
           "server": "200.169.179.233:443",
-          "http_ms": 612,
-          "jitter_ms": 301,
+          "http_ms": 756,
+          "jitter_ms": 455,
           "success_rate": 1.0,
           "exit": "RU"
         },
         {
           "server": "201.24.121.243:443",
-          "http_ms": 611,
-          "jitter_ms": 326,
+          "http_ms": 762,
+          "jitter_ms": 452,
           "success_rate": 1.0,
-          "exit": "RU"
-        },
-        {
-          "server": "94.139.250.226:443",
-          "http_ms": 700,
-          "jitter_ms": 107,
-          "success_rate": 1.0,
-          "exit": "RU"
-        },
-        {
-          "server": "129.101.98.60:443",
-          "http_ms": 638,
-          "jitter_ms": null,
-          "success_rate": 0.5,
-          "exit": "RU"
-        },
-        {
-          "server": "94.228.123.26:443",
-          "http_ms": 672,
-          "jitter_ms": null,
-          "success_rate": 0.5,
           "exit": "RU"
         },
         {
           "server": "vps3.nemnogogo.com:443",
-          "http_ms": 798,
+          "http_ms": 805,
+          "jitter_ms": 524,
+          "success_rate": 1.0,
+          "exit": "RU"
+        },
+        {
+          "server": "201.51.12.98:443",
+          "http_ms": 823,
+          "jitter_ms": 504,
+          "success_rate": 1.0,
+          "exit": "RU"
+        },
+        {
+          "server": "94.228.123.26:443",
+          "http_ms": 869,
           "jitter_ms": null,
           "success_rate": 0.5,
           "exit": "RU"
         },
         {
-          "server": "ru7e2bab87cc39.eu-cdn539.com:443",
-          "http_ms": 1768,
+          "server": "89.223.124.93:443",
+          "http_ms": 870,
+          "jitter_ms": null,
+          "success_rate": 0.5,
+          "exit": "RU"
+        },
+        {
+          "server": "94.139.250.226:443",
+          "http_ms": 2000,
           "jitter_ms": null,
           "success_rate": 0.5,
           "exit": "RU"
@@ -1791,5 +1784,6 @@
         }
       ]
     }
-  }
+  },
+  "ru_updated_utc": "2026-11-18T20:54:18Z"
 }
