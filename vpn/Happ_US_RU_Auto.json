@@ -10206,37 +10206,6 @@
         "settings": {
           "vnext": [
             {
-              "address": "200.169.179.233",
-              "port": 443,
-              "users": [
-                {
-                  "id": "38308ff1-5aa9-494f-a25a-0f2870d56b3e",
-                  "encryption": "none"
-                }
-              ]
-            }
-          ]
-        },
-        "streamSettings": {
-          "network": "grpc",
-          "security": "tls",
-          "tlsSettings": {
-            "serverName": "vps3.nemnogogo.com",
-            "allowInsecure": false,
-            "fingerprint": "chrome"
-          },
-          "grpcSettings": {
-            "serviceName": "mobile.api.Event",
-            "multiMode": false
-          }
-        }
-      },
-      {
-        "tag": "world-223",
-        "protocol": "vless",
-        "settings": {
-          "vnext": [
-            {
               "address": "201.24.121.243",
               "port": 443,
               "users": [
@@ -10263,7 +10232,69 @@
         }
       },
       {
+        "tag": "world-223",
+        "protocol": "vless",
+        "settings": {
+          "vnext": [
+            {
+              "address": "200.169.179.233",
+              "port": 443,
+              "users": [
+                {
+                  "id": "38308ff1-5aa9-494f-a25a-0f2870d56b3e",
+                  "encryption": "none"
+                }
+              ]
+            }
+          ]
+        },
+        "streamSettings": {
+          "network": "grpc",
+          "security": "tls",
+          "tlsSettings": {
+            "serverName": "vps3.nemnogogo.com",
+            "allowInsecure": false,
+            "fingerprint": "firefox"
+          },
+          "grpcSettings": {
+            "serviceName": "mobile.api.Event",
+            "multiMode": false
+          }
+        }
+      },
+      {
         "tag": "world-224",
+        "protocol": "vless",
+        "settings": {
+          "vnext": [
+            {
+              "address": "201.24.116.192",
+              "port": 443,
+              "users": [
+                {
+                  "id": "38308ff1-5aa9-494f-a25a-0f2870d56b3e",
+                  "encryption": "none"
+                }
+              ]
+            }
+          ]
+        },
+        "streamSettings": {
+          "network": "grpc",
+          "security": "tls",
+          "tlsSettings": {
+            "serverName": "vps3.nemnogogo.com",
+            "allowInsecure": false,
+            "fingerprint": "firefox"
+          },
+          "grpcSettings": {
+            "serviceName": "mobile.api.Event",
+            "multiMode": false
+          }
+        }
+      },
+      {
+        "tag": "world-225",
         "protocol": "vless",
         "settings": {
           "vnext": [
@@ -10294,7 +10325,7 @@
         }
       },
       {
-        "tag": "world-225",
+        "tag": "world-226",
         "protocol": "vless",
         "settings": {
           "vnext": [
@@ -10325,7 +10356,68 @@
         }
       },
       {
-        "tag": "world-226",
+        "tag": "world-227",
+        "protocol": "vless",
+        "settings": {
+          "vnext": [
+            {
+              "address": "147.45.175.81",
+              "port": 443,
+              "users": [
+                {
+                  "id": "c90395e6-2140-47ad-a54d-9b166729d3ef",
+                  "encryption": "none"
+                }
+              ]
+            }
+          ]
+        },
+        "streamSettings": {
+          "network": "grpc",
+          "security": "tls",
+          "tlsSettings": {
+            "serverName": "xssite.webredirect.org",
+            "allowInsecure": false,
+            "fingerprint": "random"
+          },
+          "grpcSettings": {
+            "serviceName": "grpc-ru",
+            "multiMode": false
+          }
+        }
+      },
+      {
+        "tag": "world-228",
+        "protocol": "vless",
+        "settings": {
+          "vnext": [
+            {
+              "address": "129.101.98.60",
+              "port": 443,
+              "users": [
+                {
+                  "id": "e75ad2eb-6c1f-45ce-8023-f5f10875df66",
+                  "encryption": "none",
+                  "flow": "xtls-rprx-vision"
+                }
+              ]
+            }
+          ]
+        },
+        "streamSettings": {
+          "network": "tcp",
+          "security": "reality",
+          "realitySettings": {
+            "publicKey": "lews1n_fypGexd_dMofEO4Vy1ULsFeVIFa90MMY3pm4",
+            "shortId": "3992cc7fb9fcbe58",
+            "serverName": "ru7e2bab87cc39.eu-cdn539.com",
+            "fingerprint": "chrome",
+            "spiderX": "/"
+          }
+        }
+      },
+      {
+        "tag": "world-229",
         "protocol": "vless",
         "settings": {
           "vnext": [
@@ -10350,65 +10442,6 @@
             "shortId": "",
             "serverName": "ghjgdfgdfghjmb.wey-land.net",
             "fingerprint": "qq",
-            "spiderX": "/"
-          }
-        }
-      },
-      {
-        "tag": "world-227",
-        "protocol": "vless",
-        "settings": {
-          "vnext": [
-            {
-              "address": "89.223.124.93",
-              "port": 443,
-              "users": [
-                {
-                  "id": "955d8dc7-5e3b-40ac-b2bb-bd8aa20fc7e6",
-                  "encryption": "none",
-                  "flow": "xtls-rprx-vision"
-                }
-              ]
-            }
-          ]
-        },
-        "streamSettings": {
-          "network": "tcp",
-          "security": "reality",
-          "realitySettings": {
-            "publicKey": "rLkjhzhSAJrey5Qv3624_5B-MpViafV2dDdDCnqn_l4",
-            "shortId": "",
-            "serverName": "dfgdfgb.wey-land.net",
-            "fingerprint": "qq",
-            "spiderX": "/"
-          }
-        }
-      },
-      {
-        "tag": "world-228",
-        "protocol": "vless",
-        "settings": {
-          "vnext": [
-            {
-              "address": "94.139.250.226",
-              "port": 443,
-              "users": [
-                {
-                  "id": "a30903dc-1bf0-0001-8b1b-603a3a56211c",
-                  "encryption": "none"
-                }
-              ]
-            }
-          ]
-        },
-        "streamSettings": {
-          "network": "tcp",
-          "security": "reality",
-          "realitySettings": {
-            "publicKey": "drl7nndYdfzZY1aQ0eUAWmNV0nsHig2uDnu9siy9biQ",
-            "shortId": "6d2f8a41c9e705b3",
-            "serverName": "net-api-ctl.galioncc.com",
-            "fingerprint": "chrome",
             "spiderX": "/"
           }
         }
@@ -10505,37 +10538,6 @@
         "settings": {
           "vnext": [
             {
-              "address": "200.169.179.233",
-              "port": 443,
-              "users": [
-                {
-                  "id": "38308ff1-5aa9-494f-a25a-0f2870d56b3e",
-                  "encryption": "none"
-                }
-              ]
-            }
-          ]
-        },
-        "streamSettings": {
-          "network": "grpc",
-          "security": "tls",
-          "tlsSettings": {
-            "serverName": "vps3.nemnogogo.com",
-            "allowInsecure": false,
-            "fingerprint": "chrome"
-          },
-          "grpcSettings": {
-            "serviceName": "mobile.api.Event",
-            "multiMode": false
-          }
-        }
-      },
-      {
-        "tag": "ru-2",
-        "protocol": "vless",
-        "settings": {
-          "vnext": [
-            {
               "address": "201.24.121.243",
               "port": 443,
               "users": [
@@ -10562,7 +10564,69 @@
         }
       },
       {
+        "tag": "ru-2",
+        "protocol": "vless",
+        "settings": {
+          "vnext": [
+            {
+              "address": "200.169.179.233",
+              "port": 443,
+              "users": [
+                {
+                  "id": "38308ff1-5aa9-494f-a25a-0f2870d56b3e",
+                  "encryption": "none"
+                }
+              ]
+            }
+          ]
+        },
+        "streamSettings": {
+          "network": "grpc",
+          "security": "tls",
+          "tlsSettings": {
+            "serverName": "vps3.nemnogogo.com",
+            "allowInsecure": false,
+            "fingerprint": "firefox"
+          },
+          "grpcSettings": {
+            "serviceName": "mobile.api.Event",
+            "multiMode": false
+          }
+        }
+      },
+      {
         "tag": "ru-3",
+        "protocol": "vless",
+        "settings": {
+          "vnext": [
+            {
+              "address": "201.24.116.192",
+              "port": 443,
+              "users": [
+                {
+                  "id": "38308ff1-5aa9-494f-a25a-0f2870d56b3e",
+                  "encryption": "none"
+                }
+              ]
+            }
+          ]
+        },
+        "streamSettings": {
+          "network": "grpc",
+          "security": "tls",
+          "tlsSettings": {
+            "serverName": "vps3.nemnogogo.com",
+            "allowInsecure": false,
+            "fingerprint": "firefox"
+          },
+          "grpcSettings": {
+            "serviceName": "mobile.api.Event",
+            "multiMode": false
+          }
+        }
+      },
+      {
+        "tag": "ru-4",
         "protocol": "vless",
         "settings": {
           "vnext": [
@@ -10593,7 +10657,7 @@
         }
       },
       {
-        "tag": "ru-4",
+        "tag": "ru-5",
         "protocol": "vless",
         "settings": {
           "vnext": [
@@ -10624,7 +10688,68 @@
         }
       },
       {
-        "tag": "ru-5",
+        "tag": "ru-6",
+        "protocol": "vless",
+        "settings": {
+          "vnext": [
+            {
+              "address": "147.45.175.81",
+              "port": 443,
+              "users": [
+                {
+                  "id": "c90395e6-2140-47ad-a54d-9b166729d3ef",
+                  "encryption": "none"
+                }
+              ]
+            }
+          ]
+        },
+        "streamSettings": {
+          "network": "grpc",
+          "security": "tls",
+          "tlsSettings": {
+            "serverName": "xssite.webredirect.org",
+            "allowInsecure": false,
+            "fingerprint": "random"
+          },
+          "grpcSettings": {
+            "serviceName": "grpc-ru",
+            "multiMode": false
+          }
+        }
+      },
+      {
+        "tag": "ru-7",
+        "protocol": "vless",
+        "settings": {
+          "vnext": [
+            {
+              "address": "129.101.98.60",
+              "port": 443,
+              "users": [
+                {
+                  "id": "e75ad2eb-6c1f-45ce-8023-f5f10875df66",
+                  "encryption": "none",
+                  "flow": "xtls-rprx-vision"
+                }
+              ]
+            }
+          ]
+        },
+        "streamSettings": {
+          "network": "tcp",
+          "security": "reality",
+          "realitySettings": {
+            "publicKey": "lews1n_fypGexd_dMofEO4Vy1ULsFeVIFa90MMY3pm4",
+            "shortId": "3992cc7fb9fcbe58",
+            "serverName": "ru7e2bab87cc39.eu-cdn539.com",
+            "fingerprint": "chrome",
+            "spiderX": "/"
+          }
+        }
+      },
+      {
+        "tag": "ru-8",
         "protocol": "vless",
         "settings": {
           "vnext": [
@@ -10649,65 +10774,6 @@
             "shortId": "",
             "serverName": "ghjgdfgdfghjmb.wey-land.net",
             "fingerprint": "qq",
-            "spiderX": "/"
-          }
-        }
-      },
-      {
-        "tag": "ru-6",
-        "protocol": "vless",
-        "settings": {
-          "vnext": [
-            {
-              "address": "89.223.124.93",
-              "port": 443,
-              "users": [
-                {
-                  "id": "955d8dc7-5e3b-40ac-b2bb-bd8aa20fc7e6",
-                  "encryption": "none",
-                  "flow": "xtls-rprx-vision"
-                }
-              ]
-            }
-          ]
-        },
-        "streamSettings": {
-          "network": "tcp",
-          "security": "reality",
-          "realitySettings": {
-            "publicKey": "rLkjhzhSAJrey5Qv3624_5B-MpViafV2dDdDCnqn_l4",
-            "shortId": "",
-            "serverName": "dfgdfgb.wey-land.net",
-            "fingerprint": "qq",
-            "spiderX": "/"
-          }
-        }
-      },
-      {
-        "tag": "ru-7",
-        "protocol": "vless",
-        "settings": {
-          "vnext": [
-            {
-              "address": "94.139.250.226",
-              "port": 443,
-              "users": [
-                {
-                  "id": "a30903dc-1bf0-0001-8b1b-603a3a56211c",
-                  "encryption": "none"
-                }
-              ]
-            }
-          ]
-        },
-        "streamSettings": {
-          "network": "tcp",
-          "security": "reality",
-          "realitySettings": {
-            "publicKey": "drl7nndYdfzZY1aQ0eUAWmNV0nsHig2uDnu9siy9biQ",
-            "shortId": "6d2f8a41c9e705b3",
-            "serverName": "net-api-ctl.galioncc.com",
-            "fingerprint": "chrome",
             "spiderX": "/"
           }
         }
@@ -10804,37 +10870,6 @@
         "settings": {
           "vnext": [
             {
-              "address": "200.169.179.233",
-              "port": 443,
-              "users": [
-                {
-                  "id": "38308ff1-5aa9-494f-a25a-0f2870d56b3e",
-                  "encryption": "none"
-                }
-              ]
-            }
-          ]
-        },
-        "streamSettings": {
-          "network": "grpc",
-          "security": "tls",
-          "tlsSettings": {
-            "serverName": "vps3.nemnogogo.com",
-            "allowInsecure": false,
-            "fingerprint": "chrome"
-          },
-          "grpcSettings": {
-            "serviceName": "mobile.api.Event",
-            "multiMode": false
-          }
-        }
-      },
-      {
-        "tag": "ru-fast-2",
-        "protocol": "vless",
-        "settings": {
-          "vnext": [
-            {
               "address": "201.24.121.243",
               "port": 443,
               "users": [
@@ -10861,7 +10896,69 @@
         }
       },
       {
+        "tag": "ru-fast-2",
+        "protocol": "vless",
+        "settings": {
+          "vnext": [
+            {
+              "address": "200.169.179.233",
+              "port": 443,
+              "users": [
+                {
+                  "id": "38308ff1-5aa9-494f-a25a-0f2870d56b3e",
+                  "encryption": "none"
+                }
+              ]
+            }
+          ]
+        },
+        "streamSettings": {
+          "network": "grpc",
+          "security": "tls",
+          "tlsSettings": {
+            "serverName": "vps3.nemnogogo.com",
+            "allowInsecure": false,
+            "fingerprint": "firefox"
+          },
+          "grpcSettings": {
+            "serviceName": "mobile.api.Event",
+            "multiMode": false
+          }
+        }
+      },
+      {
         "tag": "ru-fast-3",
+        "protocol": "vless",
+        "settings": {
+          "vnext": [
+            {
+              "address": "201.24.116.192",
+              "port": 443,
+              "users": [
+                {
+                  "id": "38308ff1-5aa9-494f-a25a-0f2870d56b3e",
+                  "encryption": "none"
+                }
+              ]
+            }
+          ]
+        },
+        "streamSettings": {
+          "network": "grpc",
+          "security": "tls",
+          "tlsSettings": {
+            "serverName": "vps3.nemnogogo.com",
+            "allowInsecure": false,
+            "fingerprint": "firefox"
+          },
+          "grpcSettings": {
+            "serviceName": "mobile.api.Event",
+            "multiMode": false
+          }
+        }
+      },
+      {
+        "tag": "ru-fast-4",
         "protocol": "vless",
         "settings": {
           "vnext": [
@@ -10892,7 +10989,7 @@
         }
       },
       {
-        "tag": "ru-fast-4",
+        "tag": "ru-fast-5",
         "protocol": "vless",
         "settings": {
           "vnext": [
@@ -10918,6 +11015,37 @@
           },
           "grpcSettings": {
             "serviceName": "mobile.api.Event",
+            "multiMode": false
+          }
+        }
+      },
+      {
+        "tag": "ru-fast-6",
+        "protocol": "vless",
+        "settings": {
+          "vnext": [
+            {
+              "address": "147.45.175.81",
+              "port": 443,
+              "users": [
+                {
+                  "id": "c90395e6-2140-47ad-a54d-9b166729d3ef",
+                  "encryption": "none"
+                }
+              ]
+            }
+          ]
+        },
+        "streamSettings": {
+          "network": "grpc",
+          "security": "tls",
+          "tlsSettings": {
+            "serverName": "xssite.webredirect.org",
+            "allowInsecure": false,
+            "fingerprint": "random"
+          },
+          "grpcSettings": {
+            "serviceName": "grpc-ru",
             "multiMode": false
           }
         }
@@ -11014,37 +11142,6 @@
         "settings": {
           "vnext": [
             {
-              "address": "200.169.179.233",
-              "port": 443,
-              "users": [
-                {
-                  "id": "38308ff1-5aa9-494f-a25a-0f2870d56b3e",
-                  "encryption": "none"
-                }
-              ]
-            }
-          ]
-        },
-        "streamSettings": {
-          "network": "grpc",
-          "security": "tls",
-          "tlsSettings": {
-            "serverName": "vps3.nemnogogo.com",
-            "allowInsecure": false,
-            "fingerprint": "chrome"
-          },
-          "grpcSettings": {
-            "serviceName": "mobile.api.Event",
-            "multiMode": false
-          }
-        }
-      },
-      {
-        "tag": "ru-game-2",
-        "protocol": "vless",
-        "settings": {
-          "vnext": [
-            {
               "address": "201.24.121.243",
               "port": 443,
               "users": [
@@ -11071,7 +11168,69 @@
         }
       },
       {
+        "tag": "ru-game-2",
+        "protocol": "vless",
+        "settings": {
+          "vnext": [
+            {
+              "address": "201.24.116.192",
+              "port": 443,
+              "users": [
+                {
+                  "id": "38308ff1-5aa9-494f-a25a-0f2870d56b3e",
+                  "encryption": "none"
+                }
+              ]
+            }
+          ]
+        },
+        "streamSettings": {
+          "network": "grpc",
+          "security": "tls",
+          "tlsSettings": {
+            "serverName": "vps3.nemnogogo.com",
+            "allowInsecure": false,
+            "fingerprint": "firefox"
+          },
+          "grpcSettings": {
+            "serviceName": "mobile.api.Event",
+            "multiMode": false
+          }
+        }
+      },
+      {
         "tag": "ru-game-3",
+        "protocol": "vless",
+        "settings": {
+          "vnext": [
+            {
+              "address": "200.169.179.233",
+              "port": 443,
+              "users": [
+                {
+                  "id": "38308ff1-5aa9-494f-a25a-0f2870d56b3e",
+                  "encryption": "none"
+                }
+              ]
+            }
+          ]
+        },
+        "streamSettings": {
+          "network": "grpc",
+          "security": "tls",
+          "tlsSettings": {
+            "serverName": "vps3.nemnogogo.com",
+            "allowInsecure": false,
+            "fingerprint": "firefox"
+          },
+          "grpcSettings": {
+            "serviceName": "mobile.api.Event",
+            "multiMode": false
+          }
+        }
+      },
+      {
+        "tag": "ru-game-4",
         "protocol": "vless",
         "settings": {
           "vnext": [
@@ -11102,7 +11261,7 @@
         }
       },
       {
-        "tag": "ru-game-4",
+        "tag": "ru-game-5",
         "protocol": "vless",
         "settings": {
           "vnext": [
@@ -11129,36 +11288,6 @@
           "grpcSettings": {
             "serviceName": "mobile.api.Event",
             "multiMode": false
-          }
-        }
-      },
-      {
-        "tag": "ru-game-5",
-        "protocol": "vless",
-        "settings": {
-          "vnext": [
-            {
-              "address": "94.228.123.26",
-              "port": 443,
-              "users": [
-                {
-                  "id": "955d8dc7-5e3b-40ac-b2bb-bd8aa20fc7e6",
-                  "encryption": "none",
-                  "flow": "xtls-rprx-vision"
-                }
-              ]
-            }
-          ]
-        },
-        "streamSettings": {
-          "network": "tcp",
-          "security": "reality",
-          "realitySettings": {
-            "publicKey": "cYVz2YZI-PELLGGm38rrGcipPvnWcSMswOh4j536bmg",
-            "shortId": "",
-            "serverName": "ghjgdfgdfghjmb.wey-land.net",
-            "fingerprint": "qq",
-            "spiderX": "/"
           }
         }
       },
@@ -11254,11 +11383,11 @@
         "settings": {
           "vnext": [
             {
-              "address": "200.169.179.233",
+              "address": "201.24.121.243",
               "port": 443,
               "users": [
                 {
-                  "id": "38308ff1-5aa9-494f-a25a-0f2870d56b3e",
+                  "id": "32b5ca9b-3f81-4031-965d-e8b074216e8d",
                   "encryption": "none"
                 }
               ]
@@ -11269,12 +11398,12 @@
           "network": "grpc",
           "security": "tls",
           "tlsSettings": {
-            "serverName": "vps3.nemnogogo.com",
+            "serverName": "kk-ru24a1.testkknegr.online",
             "allowInsecure": false,
             "fingerprint": "chrome"
           },
           "grpcSettings": {
-            "serviceName": "mobile.api.Event",
+            "serviceName": "vlgrpc",
             "multiMode": false
           }
         }
@@ -11351,11 +11480,11 @@
         "settings": {
           "vnext": [
             {
-              "address": "201.24.121.243",
+              "address": "200.169.179.233",
               "port": 443,
               "users": [
                 {
-                  "id": "32b5ca9b-3f81-4031-965d-e8b074216e8d",
+                  "id": "38308ff1-5aa9-494f-a25a-0f2870d56b3e",
                   "encryption": "none"
                 }
               ]
@@ -11366,12 +11495,12 @@
           "network": "grpc",
           "security": "tls",
           "tlsSettings": {
-            "serverName": "kk-ru24a1.testkknegr.online",
+            "serverName": "vps3.nemnogogo.com",
             "allowInsecure": false,
-            "fingerprint": "chrome"
+            "fingerprint": "firefox"
           },
           "grpcSettings": {
-            "serviceName": "vlgrpc",
+            "serviceName": "mobile.api.Event",
             "multiMode": false
           }
         }
@@ -11448,7 +11577,7 @@
         "settings": {
           "vnext": [
             {
-              "address": "vps3.nemnogogo.com",
+              "address": "201.24.116.192",
               "port": 443,
               "users": [
                 {
@@ -11465,7 +11594,7 @@
           "tlsSettings": {
             "serverName": "vps3.nemnogogo.com",
             "allowInsecure": false,
-            "fingerprint": "chrome"
+            "fingerprint": "firefox"
           },
           "grpcSettings": {
             "serviceName": "mobile.api.Event",
@@ -11545,7 +11674,7 @@
         "settings": {
           "vnext": [
             {
-              "address": "201.51.12.98",
+              "address": "vps3.nemnogogo.com",
               "port": 443,
               "users": [
                 {
@@ -11642,27 +11771,28 @@
         "settings": {
           "vnext": [
             {
-              "address": "94.228.123.26",
+              "address": "201.51.12.98",
               "port": 443,
               "users": [
                 {
-                  "id": "955d8dc7-5e3b-40ac-b2bb-bd8aa20fc7e6",
-                  "encryption": "none",
-                  "flow": "xtls-rprx-vision"
+                  "id": "38308ff1-5aa9-494f-a25a-0f2870d56b3e",
+                  "encryption": "none"
                 }
               ]
             }
           ]
         },
         "streamSettings": {
-          "network": "tcp",
-          "security": "reality",
-          "realitySettings": {
-            "publicKey": "cYVz2YZI-PELLGGm38rrGcipPvnWcSMswOh4j536bmg",
-            "shortId": "",
-            "serverName": "ghjgdfgdfghjmb.wey-land.net",
-            "fingerprint": "qq",
-            "spiderX": "/"
+          "network": "grpc",
+          "security": "tls",
+          "tlsSettings": {
+            "serverName": "vps3.nemnogogo.com",
+            "allowInsecure": false,
+            "fingerprint": "chrome"
+          },
+          "grpcSettings": {
+            "serviceName": "mobile.api.Event",
+            "multiMode": false
           }
         }
       },
@@ -11738,27 +11868,28 @@
         "settings": {
           "vnext": [
             {
-              "address": "89.223.124.93",
+              "address": "147.45.175.81",
               "port": 443,
               "users": [
                 {
-                  "id": "955d8dc7-5e3b-40ac-b2bb-bd8aa20fc7e6",
-                  "encryption": "none",
-                  "flow": "xtls-rprx-vision"
+                  "id": "c90395e6-2140-47ad-a54d-9b166729d3ef",
+                  "encryption": "none"
                 }
               ]
             }
           ]
         },
         "streamSettings": {
-          "network": "tcp",
-          "security": "reality",
-          "realitySettings": {
-            "publicKey": "rLkjhzhSAJrey5Qv3624_5B-MpViafV2dDdDCnqn_l4",
-            "shortId": "",
-            "serverName": "dfgdfgb.wey-land.net",
-            "fingerprint": "qq",
-            "spiderX": "/"
+          "network": "grpc",
+          "security": "tls",
+          "tlsSettings": {
+            "serverName": "xssite.webredirect.org",
+            "allowInsecure": false,
+            "fingerprint": "random"
+          },
+          "grpcSettings": {
+            "serviceName": "grpc-ru",
+            "multiMode": false
           }
         }
       },
@@ -11834,12 +11965,13 @@
         "settings": {
           "vnext": [
             {
-              "address": "94.139.250.226",
+              "address": "129.101.98.60",
               "port": 443,
               "users": [
                 {
-                  "id": "a30903dc-1bf0-0001-8b1b-603a3a56211c",
-                  "encryption": "none"
+                  "id": "e75ad2eb-6c1f-45ce-8023-f5f10875df66",
+                  "encryption": "none",
+                  "flow": "xtls-rprx-vision"
                 }
               ]
             }
@@ -11849,10 +11981,106 @@
           "network": "tcp",
           "security": "reality",
           "realitySettings": {
-            "publicKey": "drl7nndYdfzZY1aQ0eUAWmNV0nsHig2uDnu9siy9biQ",
-            "shortId": "6d2f8a41c9e705b3",
-            "serverName": "net-api-ctl.galioncc.com",
+            "publicKey": "lews1n_fypGexd_dMofEO4Vy1ULsFeVIFa90MMY3pm4",
+            "shortId": "3992cc7fb9fcbe58",
+            "serverName": "ru7e2bab87cc39.eu-cdn539.com",
             "fingerprint": "chrome",
+            "spiderX": "/"
+          }
+        }
+      },
+      {
+        "tag": "direct",
+        "protocol": "freedom",
+        "settings": {}
+      }
+    ],
+    "routing": {
+      "domainStrategy": "AsIs",
+      "rules": [
+        {
+          "type": "field",
+          "ip": [
+            "geoip:private"
+          ],
+          "outboundTag": "direct"
+        },
+        {
+          "type": "field",
+          "inboundTag": [
+            "socks",
+            "http"
+          ],
+          "outboundTag": "proxy"
+        }
+      ]
+    }
+  },
+  {
+    "remarks": "XetsiwVPN · 🇷🇺 РОССИЯ — СЕРВЕР 8",
+    "log": {
+      "loglevel": "warning"
+    },
+    "dns": {
+      "servers": [
+        "1.1.1.1",
+        "8.8.8.8"
+      ]
+    },
+    "inbounds": [
+      {
+        "tag": "socks",
+        "listen": "127.0.0.1",
+        "port": 10808,
+        "protocol": "socks",
+        "settings": {
+          "auth": "noauth",
+          "udp": true
+        },
+        "sniffing": {
+          "enabled": true,
+          "destOverride": [
+            "http",
+            "tls",
+            "quic"
+          ]
+        }
+      },
+      {
+        "tag": "http",
+        "listen": "127.0.0.1",
+        "port": 10809,
+        "protocol": "http",
+        "settings": {}
+      }
+    ],
+    "outbounds": [
+      {
+        "tag": "proxy",
+        "protocol": "vless",
+        "settings": {
+          "vnext": [
+            {
+              "address": "94.228.123.26",
+              "port": 443,
+              "users": [
+                {
+                  "id": "955d8dc7-5e3b-40ac-b2bb-bd8aa20fc7e6",
+                  "encryption": "none",
+                  "flow": "xtls-rprx-vision"
+                }
+              ]
+            }
+          ]
+        },
+        "streamSettings": {
+          "network": "tcp",
+          "security": "reality",
+          "realitySettings": {
+            "publicKey": "cYVz2YZI-PELLGGm38rrGcipPvnWcSMswOh4j536bmg",
+            "shortId": "",
+            "serverName": "ghjgdfgdfghjmb.wey-land.net",
+            "fingerprint": "qq",
             "spiderX": "/"
           }
         }
@@ -11929,11 +12157,11 @@
         "settings": {
           "vnext": [
             {
-              "address": "200.169.179.233",
+              "address": "201.24.121.243",
               "port": 443,
               "users": [
                 {
-                  "id": "38308ff1-5aa9-494f-a25a-0f2870d56b3e",
+                  "id": "32b5ca9b-3f81-4031-965d-e8b074216e8d",
                   "encryption": "none"
                 }
               ]
@@ -11944,12 +12172,12 @@
           "network": "grpc",
           "security": "tls",
           "tlsSettings": {
-            "serverName": "vps3.nemnogogo.com",
+            "serverName": "kk-ru24a1.testkknegr.online",
             "allowInsecure": false,
             "fingerprint": "chrome"
           },
           "grpcSettings": {
-            "serviceName": "mobile.api.Event",
+            "serviceName": "vlgrpc",
             "multiMode": false
           }
         }
@@ -12031,11 +12259,11 @@
         "settings": {
           "vnext": [
             {
-              "address": "201.24.121.243",
+              "address": "200.169.179.233",
               "port": 443,
               "users": [
                 {
-                  "id": "32b5ca9b-3f81-4031-965d-e8b074216e8d",
+                  "id": "38308ff1-5aa9-494f-a25a-0f2870d56b3e",
                   "encryption": "none"
                 }
               ]
@@ -12046,12 +12274,12 @@
           "network": "grpc",
           "security": "tls",
           "tlsSettings": {
-            "serverName": "kk-ru24a1.testkknegr.online",
+            "serverName": "vps3.nemnogogo.com",
             "allowInsecure": false,
-            "fingerprint": "chrome"
+            "fingerprint": "firefox"
           },
           "grpcSettings": {
-            "serviceName": "vlgrpc",
+            "serviceName": "mobile.api.Event",
             "multiMode": false
           }
         }
