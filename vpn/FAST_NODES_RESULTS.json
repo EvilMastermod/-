@@ -210,76 +210,62 @@
     },
     "RU": {
       "tested": 420,
-      "country_verified": 10,
-      "wrong_country": 78,
+      "country_verified": 8,
+      "wrong_country": 75,
       "retained_old_nodes": false,
       "selected": [
         {
-          "server": "201.51.12.98:443",
-          "http_ms": 522,
-          "jitter_ms": 341,
-          "success_rate": 1.0,
-          "exit": "RU"
-        },
-        {
-          "server": "200.169.179.233:443",
-          "http_ms": 525,
-          "jitter_ms": 334,
+          "server": "135.106.175.19:443",
+          "http_ms": 586,
+          "jitter_ms": 15,
           "success_rate": 1.0,
           "exit": "RU"
         },
         {
           "server": "201.24.116.192:443",
-          "http_ms": 544,
-          "jitter_ms": 343,
+          "http_ms": 586,
+          "jitter_ms": 323,
           "success_rate": 1.0,
           "exit": "RU"
         },
         {
-          "server": "109.107.189.69:8443",
-          "http_ms": 625,
-          "jitter_ms": 32,
+          "server": "201.51.12.98:443",
+          "http_ms": 614,
+          "jitter_ms": 337,
+          "success_rate": 1.0,
+          "exit": "RU"
+        },
+        {
+          "server": "200.169.179.233:443",
+          "http_ms": 661,
+          "jitter_ms": 232,
           "success_rate": 1.0,
           "exit": "RU"
         },
         {
           "server": "vps3.nemnogogo.com:443",
-          "http_ms": 623,
-          "jitter_ms": 528,
+          "http_ms": 629,
+          "jitter_ms": 452,
           "success_rate": 1.0,
           "exit": "RU"
         },
         {
           "server": "xssite.webredirect.org:443",
-          "http_ms": 657,
-          "jitter_ms": null,
-          "success_rate": 0.5,
-          "exit": "RU"
-        },
-        {
-          "server": "147.45.175.81:443",
-          "http_ms": 664,
+          "http_ms": 672,
           "jitter_ms": null,
           "success_rate": 0.5,
           "exit": "RU"
         },
         {
           "server": "147.45.97.130:2066",
-          "http_ms": 722,
+          "http_ms": 786,
           "jitter_ms": null,
           "success_rate": 0.5,
           "exit": "RU"
         },
         {
-          "server": "185.178.208.167:443",
-          "http_ms": 1066,
-          "jitter_ms": null,
-          "success_rate": 0.5,
-          "exit": "RU"
-        },
-        {
-          "server": "tochkacdn.top:443",
-          "http_ms": 1077,
+          "server": "109.107.189.69:8443",
+          "http_ms": 799,
           "jitter_ms": null,
           "success_rate": 0.5,
           "exit": "RU"
@@ -1616,5 +1602,6 @@
         }
       ]
     }
-  }
+  },
+  "ru_updated_utc": "2026-11-22T11:58:36Z"
 }
