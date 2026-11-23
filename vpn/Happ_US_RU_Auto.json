@@ -8045,6 +8045,36 @@
         "settings": {
           "vnext": [
             {
+              "address": "109.107.189.69",
+              "port": 8443,
+              "users": [
+                {
+                  "id": "cfd6ce74-f4c5-4815-bba4-2fd0fa77bf4e",
+                  "encryption": "none",
+                  "flow": "xtls-rprx-vision"
+                }
+              ]
+            }
+          ]
+        },
+        "streamSettings": {
+          "network": "tcp",
+          "security": "reality",
+          "realitySettings": {
+            "publicKey": "q1EhO97gyUBlF7LiAfeAESI0O2Mg95T4yIk7keOnMEE",
+            "shortId": "0912cc7f28aa26ba",
+            "serverName": "gw-721bd5.dobry.monster",
+            "fingerprint": "firefox",
+            "spiderX": "/"
+          }
+        }
+      },
+      {
+        "tag": "world-153",
+        "protocol": "vless",
+        "settings": {
+          "vnext": [
+            {
               "address": "201.51.12.98",
               "port": 443,
               "users": [
@@ -8062,7 +8092,7 @@
           "tlsSettings": {
             "serverName": "vps3.nemnogogo.com",
             "allowInsecure": false,
-            "fingerprint": "chrome"
+            "fingerprint": "firefox"
           },
           "grpcSettings": {
             "serviceName": "mobile.api.Event",
@@ -8071,7 +8101,7 @@
         }
       },
       {
-        "tag": "world-153",
+        "tag": "world-154",
         "protocol": "vless",
         "settings": {
           "vnext": [
@@ -8102,37 +8132,38 @@
         }
       },
       {
-        "tag": "world-154",
+        "tag": "world-155",
         "protocol": "vless",
         "settings": {
           "vnext": [
             {
-              "address": "109.107.189.69",
-              "port": 8443,
+              "address": "147.45.175.81",
+              "port": 443,
               "users": [
                 {
-                  "id": "cfd6ce74-f4c5-4815-bba4-2fd0fa77bf4e",
-                  "encryption": "none",
-                  "flow": "xtls-rprx-vision"
+                  "id": "c90395e6-2140-47ad-a54d-9b166729d3ef",
+                  "encryption": "none"
                 }
               ]
             }
           ]
         },
         "streamSettings": {
-          "network": "tcp",
-          "security": "reality",
-          "realitySettings": {
-            "publicKey": "q1EhO97gyUBlF7LiAfeAESI0O2Mg95T4yIk7keOnMEE",
-            "shortId": "0912cc7f28aa26ba",
-            "serverName": "gw-721bd5.dobry.monster",
-            "fingerprint": "firefox",
-            "spiderX": "/"
+          "network": "grpc",
+          "security": "tls",
+          "tlsSettings": {
+            "serverName": "xsru1.ddnsfree.com",
+            "allowInsecure": false,
+            "fingerprint": "random"
+          },
+          "grpcSettings": {
+            "serviceName": "grpc-ru",
+            "multiMode": false
           }
         }
       },
       {
-        "tag": "world-155",
+        "tag": "world-156",
         "protocol": "vless",
         "settings": {
           "vnext": [
@@ -8159,6 +8190,34 @@
           "grpcSettings": {
             "serviceName": "grpc-ru",
             "multiMode": false
+          }
+        }
+      },
+      {
+        "tag": "world-157",
+        "protocol": "vless",
+        "settings": {
+          "vnext": [
+            {
+              "address": "168.113.132.167",
+              "port": 52006,
+              "users": [
+                {
+                  "id": "cde5d3ef-7d14-0bb8-a74d-ac98e39bf9ec",
+                  "encryption": "none",
+                  "flow": "xtls-rprx-vision"
+                }
+              ]
+            }
+          ]
+        },
+        "streamSettings": {
+          "network": "tcp",
+          "security": "tls",
+          "tlsSettings": {
+            "serverName": "168.113.132.167",
+            "allowInsecure": false,
+            "fingerprint": "firefox"
           }
         }
       },
@@ -8316,6 +8375,36 @@
         "settings": {
           "vnext": [
             {
+              "address": "109.107.189.69",
+              "port": 8443,
+              "users": [
+                {
+                  "id": "cfd6ce74-f4c5-4815-bba4-2fd0fa77bf4e",
+                  "encryption": "none",
+                  "flow": "xtls-rprx-vision"
+                }
+              ]
+            }
+          ]
+        },
+        "streamSettings": {
+          "network": "tcp",
+          "security": "reality",
+          "realitySettings": {
+            "publicKey": "q1EhO97gyUBlF7LiAfeAESI0O2Mg95T4yIk7keOnMEE",
+            "shortId": "0912cc7f28aa26ba",
+            "serverName": "gw-721bd5.dobry.monster",
+            "fingerprint": "firefox",
+            "spiderX": "/"
+          }
+        }
+      },
+      {
+        "tag": "ru-4",
+        "protocol": "vless",
+        "settings": {
+          "vnext": [
+            {
               "address": "201.51.12.98",
               "port": 443,
               "users": [
@@ -8333,7 +8422,7 @@
           "tlsSettings": {
             "serverName": "vps3.nemnogogo.com",
             "allowInsecure": false,
-            "fingerprint": "chrome"
+            "fingerprint": "firefox"
           },
           "grpcSettings": {
             "serviceName": "mobile.api.Event",
@@ -8342,7 +8431,7 @@
         }
       },
       {
-        "tag": "ru-4",
+        "tag": "ru-5",
         "protocol": "vless",
         "settings": {
           "vnext": [
@@ -8373,37 +8462,38 @@
         }
       },
       {
-        "tag": "ru-5",
+        "tag": "ru-6",
         "protocol": "vless",
         "settings": {
           "vnext": [
             {
-              "address": "109.107.189.69",
-              "port": 8443,
+              "address": "147.45.175.81",
+              "port": 443,
               "users": [
                 {
-                  "id": "cfd6ce74-f4c5-4815-bba4-2fd0fa77bf4e",
-                  "encryption": "none",
-                  "flow": "xtls-rprx-vision"
+                  "id": "c90395e6-2140-47ad-a54d-9b166729d3ef",
+                  "encryption": "none"
                 }
               ]
             }
           ]
         },
         "streamSettings": {
-          "network": "tcp",
-          "security": "reality",
-          "realitySettings": {
-            "publicKey": "q1EhO97gyUBlF7LiAfeAESI0O2Mg95T4yIk7keOnMEE",
-            "shortId": "0912cc7f28aa26ba",
-            "serverName": "gw-721bd5.dobry.monster",
-            "fingerprint": "firefox",
-            "spiderX": "/"
+          "network": "grpc",
+          "security": "tls",
+          "tlsSettings": {
+            "serverName": "xsru1.ddnsfree.com",
+            "allowInsecure": false,
+            "fingerprint": "random"
+          },
+          "grpcSettings": {
+            "serviceName": "grpc-ru",
+            "multiMode": false
           }
         }
       },
       {
-        "tag": "ru-6",
+        "tag": "ru-7",
         "protocol": "vless",
         "settings": {
           "vnext": [
@@ -8430,6 +8520,34 @@
           "grpcSettings": {
             "serviceName": "grpc-ru",
             "multiMode": false
+          }
+        }
+      },
+      {
+        "tag": "ru-8",
+        "protocol": "vless",
+        "settings": {
+          "vnext": [
+            {
+              "address": "168.113.132.167",
+              "port": 52006,
+              "users": [
+                {
+                  "id": "cde5d3ef-7d14-0bb8-a74d-ac98e39bf9ec",
+                  "encryption": "none",
+                  "flow": "xtls-rprx-vision"
+                }
+              ]
+            }
+          ]
+        },
+        "streamSettings": {
+          "network": "tcp",
+          "security": "tls",
+          "tlsSettings": {
+            "serverName": "168.113.132.167",
+            "allowInsecure": false,
+            "fingerprint": "firefox"
           }
         }
       },
@@ -8556,37 +8674,6 @@
         "settings": {
           "vnext": [
             {
-              "address": "201.51.12.98",
-              "port": 443,
-              "users": [
-                {
-                  "id": "38308ff1-5aa9-494f-a25a-0f2870d56b3e",
-                  "encryption": "none"
-                }
-              ]
-            }
-          ]
-        },
-        "streamSettings": {
-          "network": "grpc",
-          "security": "tls",
-          "tlsSettings": {
-            "serverName": "vps3.nemnogogo.com",
-            "allowInsecure": false,
-            "fingerprint": "chrome"
-          },
-          "grpcSettings": {
-            "serviceName": "mobile.api.Event",
-            "multiMode": false
-          }
-        }
-      },
-      {
-        "tag": "ru-fast-3",
-        "protocol": "vless",
-        "settings": {
-          "vnext": [
-            {
               "address": "201.24.116.192",
               "port": 443,
               "users": [
@@ -8613,7 +8700,68 @@
         }
       },
       {
+        "tag": "ru-fast-3",
+        "protocol": "vless",
+        "settings": {
+          "vnext": [
+            {
+              "address": "109.107.189.69",
+              "port": 8443,
+              "users": [
+                {
+                  "id": "cfd6ce74-f4c5-4815-bba4-2fd0fa77bf4e",
+                  "encryption": "none",
+                  "flow": "xtls-rprx-vision"
+                }
+              ]
+            }
+          ]
+        },
+        "streamSettings": {
+          "network": "tcp",
+          "security": "reality",
+          "realitySettings": {
+            "publicKey": "q1EhO97gyUBlF7LiAfeAESI0O2Mg95T4yIk7keOnMEE",
+            "shortId": "0912cc7f28aa26ba",
+            "serverName": "gw-721bd5.dobry.monster",
+            "fingerprint": "firefox",
+            "spiderX": "/"
+          }
+        }
+      },
+      {
         "tag": "ru-fast-4",
+        "protocol": "vless",
+        "settings": {
+          "vnext": [
+            {
+              "address": "201.51.12.98",
+              "port": 443,
+              "users": [
+                {
+                  "id": "38308ff1-5aa9-494f-a25a-0f2870d56b3e",
+                  "encryption": "none"
+                }
+              ]
+            }
+          ]
+        },
+        "streamSettings": {
+          "network": "grpc",
+          "security": "tls",
+          "tlsSettings": {
+            "serverName": "vps3.nemnogogo.com",
+            "allowInsecure": false,
+            "fingerprint": "firefox"
+          },
+          "grpcSettings": {
+            "serviceName": "mobile.api.Event",
+            "multiMode": false
+          }
+        }
+      },
+      {
+        "tag": "ru-fast-5",
         "protocol": "vless",
         "settings": {
           "vnext": [
@@ -8639,6 +8787,37 @@
           },
           "grpcSettings": {
             "serviceName": "mobile.api.Event",
+            "multiMode": false
+          }
+        }
+      },
+      {
+        "tag": "ru-fast-6",
+        "protocol": "vless",
+        "settings": {
+          "vnext": [
+            {
+              "address": "147.45.175.81",
+              "port": 443,
+              "users": [
+                {
+                  "id": "c90395e6-2140-47ad-a54d-9b166729d3ef",
+                  "encryption": "none"
+                }
+              ]
+            }
+          ]
+        },
+        "streamSettings": {
+          "network": "grpc",
+          "security": "tls",
+          "tlsSettings": {
+            "serverName": "xsru1.ddnsfree.com",
+            "allowInsecure": false,
+            "fingerprint": "random"
+          },
+          "grpcSettings": {
+            "serviceName": "grpc-ru",
             "multiMode": false
           }
         }
@@ -8766,37 +8945,7 @@
         "settings": {
           "vnext": [
             {
-              "address": "109.107.189.69",
-              "port": 8443,
-              "users": [
-                {
-                  "id": "cfd6ce74-f4c5-4815-bba4-2fd0fa77bf4e",
-                  "encryption": "none",
-                  "flow": "xtls-rprx-vision"
-                }
-              ]
-            }
-          ]
-        },
-        "streamSettings": {
-          "network": "tcp",
-          "security": "reality",
-          "realitySettings": {
-            "publicKey": "q1EhO97gyUBlF7LiAfeAESI0O2Mg95T4yIk7keOnMEE",
-            "shortId": "0912cc7f28aa26ba",
-            "serverName": "gw-721bd5.dobry.monster",
-            "fingerprint": "firefox",
-            "spiderX": "/"
-          }
-        }
-      },
-      {
-        "tag": "ru-game-3",
-        "protocol": "vless",
-        "settings": {
-          "vnext": [
-            {
-              "address": "201.51.12.98",
+              "address": "201.24.116.192",
               "port": 443,
               "users": [
                 {
@@ -8813,11 +8962,39 @@
           "tlsSettings": {
             "serverName": "vps3.nemnogogo.com",
             "allowInsecure": false,
-            "fingerprint": "chrome"
+            "fingerprint": "firefox"
           },
           "grpcSettings": {
             "serviceName": "mobile.api.Event",
             "multiMode": false
+          }
+        }
+      },
+      {
+        "tag": "ru-game-3",
+        "protocol": "vless",
+        "settings": {
+          "vnext": [
+            {
+              "address": "168.113.132.167",
+              "port": 52006,
+              "users": [
+                {
+                  "id": "cde5d3ef-7d14-0bb8-a74d-ac98e39bf9ec",
+                  "encryption": "none",
+                  "flow": "xtls-rprx-vision"
+                }
+              ]
+            }
+          ]
+        },
+        "streamSettings": {
+          "network": "tcp",
+          "security": "tls",
+          "tlsSettings": {
+            "serverName": "168.113.132.167",
+            "allowInsecure": false,
+            "fingerprint": "firefox"
           }
         }
       },
@@ -8858,7 +9035,7 @@
         "settings": {
           "vnext": [
             {
-              "address": "201.24.116.192",
+              "address": "201.51.12.98",
               "port": 443,
               "users": [
                 {
@@ -9169,6 +9346,102 @@
         "settings": {
           "vnext": [
             {
+              "address": "109.107.189.69",
+              "port": 8443,
+              "users": [
+                {
+                  "id": "cfd6ce74-f4c5-4815-bba4-2fd0fa77bf4e",
+                  "encryption": "none",
+                  "flow": "xtls-rprx-vision"
+                }
+              ]
+            }
+          ]
+        },
+        "streamSettings": {
+          "network": "tcp",
+          "security": "reality",
+          "realitySettings": {
+            "publicKey": "q1EhO97gyUBlF7LiAfeAESI0O2Mg95T4yIk7keOnMEE",
+            "shortId": "0912cc7f28aa26ba",
+            "serverName": "gw-721bd5.dobry.monster",
+            "fingerprint": "firefox",
+            "spiderX": "/"
+          }
+        }
+      },
+      {
+        "tag": "direct",
+        "protocol": "freedom",
+        "settings": {}
+      }
+    ],
+    "routing": {
+      "domainStrategy": "AsIs",
+      "rules": [
+        {
+          "type": "field",
+          "ip": [
+            "geoip:private"
+          ],
+          "outboundTag": "direct"
+        },
+        {
+          "type": "field",
+          "inboundTag": [
+            "socks",
+            "http"
+          ],
+          "outboundTag": "proxy"
+        }
+      ]
+    }
+  },
+  {
+    "remarks": "XetsiwVPN · 🇷🇺 РОССИЯ — СЕРВЕР 4",
+    "log": {
+      "loglevel": "warning"
+    },
+    "dns": {
+      "servers": [
+        "1.1.1.1",
+        "8.8.8.8"
+      ]
+    },
+    "inbounds": [
+      {
+        "tag": "socks",
+        "listen": "127.0.0.1",
+        "port": 10808,
+        "protocol": "socks",
+        "settings": {
+          "auth": "noauth",
+          "udp": true
+        },
+        "sniffing": {
+          "enabled": true,
+          "destOverride": [
+            "http",
+            "tls",
+            "quic"
+          ]
+        }
+      },
+      {
+        "tag": "http",
+        "listen": "127.0.0.1",
+        "port": 10809,
+        "protocol": "http",
+        "settings": {}
+      }
+    ],
+    "outbounds": [
+      {
+        "tag": "proxy",
+        "protocol": "vless",
+        "settings": {
+          "vnext": [
+            {
               "address": "201.51.12.98",
               "port": 443,
               "users": [
@@ -9186,7 +9459,7 @@
           "tlsSettings": {
             "serverName": "vps3.nemnogogo.com",
             "allowInsecure": false,
-            "fingerprint": "chrome"
+            "fingerprint": "firefox"
           },
           "grpcSettings": {
             "serviceName": "mobile.api.Event",
@@ -9222,7 +9495,7 @@
     }
   },
   {
-    "remarks": "XetsiwVPN · 🇷🇺 РОССИЯ — СЕРВЕР 4",
+    "remarks": "XetsiwVPN · 🇷🇺 РОССИЯ — СЕРВЕР 5",
     "log": {
       "loglevel": "warning"
     },
@@ -9319,7 +9592,7 @@
     }
   },
   {
-    "remarks": "XetsiwVPN · 🇷🇺 РОССИЯ — СЕРВЕР 5",
+    "remarks": "XetsiwVPN · 🇷🇺 РОССИЯ — СЕРВЕР 6",
     "log": {
       "loglevel": "warning"
     },
@@ -9363,27 +9636,28 @@
         "settings": {
           "vnext": [
             {
-              "address": "109.107.189.69",
-              "port": 8443,
+              "address": "147.45.175.81",
+              "port": 443,
               "users": [
                 {
-                  "id": "cfd6ce74-f4c5-4815-bba4-2fd0fa77bf4e",
-                  "encryption": "none",
-                  "flow": "xtls-rprx-vision"
+                  "id": "c90395e6-2140-47ad-a54d-9b166729d3ef",
+                  "encryption": "none"
                 }
               ]
             }
           ]
         },
         "streamSettings": {
-          "network": "tcp",
-          "security": "reality",
-          "realitySettings": {
-            "publicKey": "q1EhO97gyUBlF7LiAfeAESI0O2Mg95T4yIk7keOnMEE",
-            "shortId": "0912cc7f28aa26ba",
-            "serverName": "gw-721bd5.dobry.monster",
-            "fingerprint": "firefox",
-            "spiderX": "/"
+          "network": "grpc",
+          "security": "tls",
+          "tlsSettings": {
+            "serverName": "xsru1.ddnsfree.com",
+            "allowInsecure": false,
+            "fingerprint": "random"
+          },
+          "grpcSettings": {
+            "serviceName": "grpc-ru",
+            "multiMode": false
           }
         }
       },
@@ -9415,7 +9689,7 @@
     }
   },
   {
-    "remarks": "XetsiwVPN · 🇷🇺 РОССИЯ — СЕРВЕР 6",
+    "remarks": "XetsiwVPN · 🇷🇺 РОССИЯ — СЕРВЕР 7",
     "log": {
       "loglevel": "warning"
     },
@@ -9481,6 +9755,100 @@
           "grpcSettings": {
             "serviceName": "grpc-ru",
             "multiMode": false
+          }
+        }
+      },
+      {
+        "tag": "direct",
+        "protocol": "freedom",
+        "settings": {}
+      }
+    ],
+    "routing": {
+      "domainStrategy": "AsIs",
+      "rules": [
+        {
+          "type": "field",
+          "ip": [
+            "geoip:private"
+          ],
+          "outboundTag": "direct"
+        },
+        {
+          "type": "field",
+          "inboundTag": [
+            "socks",
+            "http"
+          ],
+          "outboundTag": "proxy"
+        }
+      ]
+    }
+  },
+  {
+    "remarks": "XetsiwVPN · 🇷🇺 РОССИЯ — СЕРВЕР 8",
+    "log": {
+      "loglevel": "warning"
+    },
+    "dns": {
+      "servers": [
+        "1.1.1.1",
+        "8.8.8.8"
+      ]
+    },
+    "inbounds": [
+      {
+        "tag": "socks",
+        "listen": "127.0.0.1",
+        "port": 10808,
+        "protocol": "socks",
+        "settings": {
+          "auth": "noauth",
+          "udp": true
+        },
+        "sniffing": {
+          "enabled": true,
+          "destOverride": [
+            "http",
+            "tls",
+            "quic"
+          ]
+        }
+      },
+      {
+        "tag": "http",
+        "listen": "127.0.0.1",
+        "port": 10809,
+        "protocol": "http",
+        "settings": {}
+      }
+    ],
+    "outbounds": [
+      {
+        "tag": "proxy",
+        "protocol": "vless",
+        "settings": {
+          "vnext": [
+            {
+              "address": "168.113.132.167",
+              "port": 52006,
+              "users": [
+                {
+                  "id": "cde5d3ef-7d14-0bb8-a74d-ac98e39bf9ec",
+                  "encryption": "none",
+                  "flow": "xtls-rprx-vision"
+                }
+              ]
+            }
+          ]
+        },
+        "streamSettings": {
+          "network": "tcp",
+          "security": "tls",
+          "tlsSettings": {
+            "serverName": "168.113.132.167",
+            "allowInsecure": false,
+            "fingerprint": "firefox"
           }
         }
       },
@@ -9658,7 +10026,7 @@
         "settings": {
           "vnext": [
             {
-              "address": "201.51.12.98",
+              "address": "201.24.116.192",
               "port": 443,
               "users": [
                 {
@@ -9675,7 +10043,7 @@
           "tlsSettings": {
             "serverName": "vps3.nemnogogo.com",
             "allowInsecure": false,
-            "fingerprint": "chrome"
+            "fingerprint": "firefox"
           },
           "grpcSettings": {
             "serviceName": "mobile.api.Event",
