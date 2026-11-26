@@ -237,63 +237,56 @@
       ]
     },
     "RU": {
-      "tested": 347,
-      "country_verified": 8,
-      "wrong_country": 76,
+      "tested": 332,
+      "country_verified": 7,
+      "wrong_country": 66,
       "retained_old_nodes": false,
       "selected": [
         {
-          "server": "200.169.179.233:443",
-          "http_ms": 706,
-          "jitter_ms": 489,
-          "success_rate": 1.0,
-          "exit": "RU"
-        },
-        {
           "server": "201.24.116.192:443",
-          "http_ms": 722,
-          "jitter_ms": 439,
-          "success_rate": 1.0,
-          "exit": "RU"
-        },
-        {
-          "server": "212.233.90.78:443",
-          "http_ms": 838,
-          "jitter_ms": 3,
+          "http_ms": 622,
+          "jitter_ms": 409,
           "success_rate": 1.0,
           "exit": "RU"
         },
         {
           "server": "201.51.12.98:443",
-          "http_ms": 716,
-          "jitter_ms": 500,
+          "http_ms": 634,
+          "jitter_ms": 443,
           "success_rate": 1.0,
           "exit": "RU"
         },
         {
-          "server": "leviko-ru4448.shopingggg.ir:443",
-          "http_ms": 863,
-          "jitter_ms": 772,
-          "success_rate": 1.0,
+          "server": "212.233.90.78:443",
+          "http_ms": 620,
+          "jitter_ms": null,
+          "success_rate": 0.5,
           "exit": "RU"
         },
         {
-          "server": "xsru1.ddnsfree.com:443",
-          "http_ms": 747,
+          "server": "185.22.234.129:443",
+          "http_ms": 743,
           "jitter_ms": null,
           "success_rate": 0.5,
           "exit": "RU"
         },
         {
           "server": "147.45.175.81:443",
-          "http_ms": 751,
+          "http_ms": 804,
           "jitter_ms": null,
           "success_rate": 0.5,
           "exit": "RU"
         },
         {
-          "server": "xssite.webredirect.org:443",
-          "http_ms": 763,
+          "server": "200.169.179.233:443",
+          "http_ms": 888,
+          "jitter_ms": null,
+          "success_rate": 0.5,
+          "exit": "RU"
+        },
+        {
+          "server": "smartcdn.top:443",
+          "http_ms": 917,
           "jitter_ms": null,
           "success_rate": 0.5,
           "exit": "RU"
@@ -1434,5 +1427,6 @@
         }
       ]
     }
-  }
+  },
+  "ru_updated_utc": "2026-11-26T17:18:11Z"
 }
