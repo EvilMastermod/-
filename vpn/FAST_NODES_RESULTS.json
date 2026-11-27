@@ -1,277 +1,249 @@
 {
   "version": "2.0",
   "verified_from": "GitHub Actions runner, not user's device/network",
-  "checked_utc": "2026-11-27T08:23:47Z",
+  "checked_utc": "2026-11-27T21:13:23Z",
   "limitations": "HTTP response time is not ICMP ping and cannot predict game ping",
   "countries": {
     "US": {
       "tested": 185,
-      "country_verified": 39,
-      "wrong_country": 5,
+      "country_verified": 35,
+      "wrong_country": 8,
       "retained_old_nodes": false,
       "selected": [
         {
           "server": "185.95.231.156:443",
-          "http_ms": 116,
-          "jitter_ms": 118,
-          "success_rate": 1.0,
-          "exit": "US"
-        },
-        {
-          "server": "159.89.87.21:28190",
-          "http_ms": 118,
-          "jitter_ms": 112,
-          "success_rate": 1.0,
-          "exit": "US"
-        },
-        {
-          "server": "195.123.235.183:443",
-          "http_ms": 144,
-          "jitter_ms": 99,
-          "success_rate": 1.0,
-          "exit": "US"
-        },
-        {
-          "server": "45.144.112.55:443",
-          "http_ms": 198,
-          "jitter_ms": 107,
-          "success_rate": 1.0,
-          "exit": "US"
-        },
-        {
-          "server": "169.40.42.35:443",
-          "http_ms": 228,
-          "jitter_ms": 226,
-          "success_rate": 1.0,
-          "exit": "US"
-        },
-        {
-          "server": "67.220.73.204:16016",
-          "http_ms": 274,
-          "jitter_ms": 172,
+          "http_ms": 210,
+          "jitter_ms": 103,
           "success_rate": 1.0,
           "exit": "US"
         },
         {
           "server": "207.244.243.12:443",
-          "http_ms": 337,
-          "jitter_ms": 120,
+          "http_ms": 200,
+          "jitter_ms": 161,
           "success_rate": 1.0,
           "exit": "US"
         },
         {
-          "server": "67.220.73.204:18662",
-          "http_ms": 362,
-          "jitter_ms": 57,
-          "success_rate": 1.0,
-          "exit": "US"
-        },
-        {
-          "server": "148.135.86.162:10000",
-          "http_ms": 352,
-          "jitter_ms": 184,
-          "success_rate": 1.0,
-          "exit": "US"
-        },
-        {
-          "server": "38.145.220.193:443",
-          "http_ms": 351,
-          "jitter_ms": 190,
+          "server": "159.89.87.21:28190",
+          "http_ms": 231,
+          "jitter_ms": 122,
           "success_rate": 1.0,
           "exit": "US"
         },
         {
           "server": "38.244.5.231:443",
-          "http_ms": 366,
-          "jitter_ms": 182,
+          "http_ms": 294,
+          "jitter_ms": 177,
           "success_rate": 1.0,
           "exit": "US"
         },
         {
-          "server": "166.0.25.92:443",
-          "http_ms": 376,
-          "jitter_ms": 199,
-          "success_rate": 1.0,
-          "exit": "US"
-        },
-        {
-          "server": "15.204.97.209:23576",
-          "http_ms": 394,
-          "jitter_ms": 199,
-          "success_rate": 1.0,
-          "exit": "US"
-        },
-        {
-          "server": "15.204.97.198:23576",
-          "http_ms": 400,
-          "jitter_ms": 191,
-          "success_rate": 1.0,
-          "exit": "US"
-        },
-        {
-          "server": "188.114.98.0:443",
-          "http_ms": 418,
-          "jitter_ms": 193,
-          "success_rate": 1.0,
-          "exit": "US"
-        },
-        {
-          "server": "216.106.185.158:443",
-          "http_ms": 443,
-          "jitter_ms": 178,
-          "success_rate": 1.0,
-          "exit": "US"
-        },
-        {
-          "server": "172.64.154.113:8443",
-          "http_ms": 449,
-          "jitter_ms": 156,
-          "success_rate": 1.0,
-          "exit": "US"
-        },
-        {
-          "server": "162.159.254.201:443",
-          "http_ms": 458,
-          "jitter_ms": 225,
-          "success_rate": 1.0,
-          "exit": "US"
-        },
-        {
-          "server": "104.18.45.236:2096",
-          "http_ms": 478,
-          "jitter_ms": 172,
-          "success_rate": 1.0,
-          "exit": "US"
-        },
-        {
-          "server": "216.227.161.95:7443",
-          "http_ms": 447,
-          "jitter_ms": 388,
-          "success_rate": 1.0,
-          "exit": "US"
-        },
-        {
-          "server": "xray-b8ct4r2f-sahdon-hosaindoost.cloady.io:443",
-          "http_ms": 529,
-          "jitter_ms": 152,
-          "success_rate": 1.0,
-          "exit": "US"
-        },
-        {
-          "server": "ww13.levikogjgfdd.ir:23576",
-          "http_ms": 522,
-          "jitter_ms": 276,
-          "success_rate": 1.0,
-          "exit": "US"
-        },
-        {
-          "server": "195.211.98.43:443",
-          "http_ms": 482,
-          "jitter_ms": 511,
-          "success_rate": 1.0,
-          "exit": "US"
-        },
-        {
-          "server": "saas.sin.fan:2053",
-          "http_ms": 602,
-          "jitter_ms": 245,
-          "success_rate": 1.0,
-          "exit": "US"
-        },
-        {
-          "server": "179.254.94.184:443",
-          "http_ms": 701,
-          "jitter_ms": 194,
+          "server": "38.145.220.193:443",
+          "http_ms": 298,
+          "jitter_ms": 165,
           "success_rate": 1.0,
           "exit": "US"
         },
         {
           "server": "199.7.140.201:443",
-          "http_ms": 959,
-          "jitter_ms": 180,
-          "success_rate": 1.0,
-          "exit": "US"
-        },
-        {
-          "server": "fr-free.fastestrelay.com:443",
-          "http_ms": 1082,
-          "jitter_ms": 123,
-          "success_rate": 1.0,
-          "exit": "US"
-        },
-        {
-          "server": "47.253.226.114:443",
-          "http_ms": 989,
-          "jitter_ms": 586,
-          "success_rate": 1.0,
-          "exit": "US"
-        },
-        {
-          "server": "47.251.95.178:443",
-          "http_ms": 1148,
-          "jitter_ms": 36,
+          "http_ms": 303,
+          "jitter_ms": 204,
           "success_rate": 1.0,
           "exit": "US"
         },
         {
           "server": "167.17.69.171:443",
-          "http_ms": 914,
-          "jitter_ms": 981,
+          "http_ms": 336,
+          "jitter_ms": 154,
           "success_rate": 1.0,
           "exit": "US"
         },
         {
-          "server": "48.102.138.175:8443",
-          "http_ms": 2294,
-          "jitter_ms": 1067,
+          "server": "xray-b8ct4r2f-sahdon-hosaindoost.cloady.io:443",
+          "http_ms": 368,
+          "jitter_ms": 42,
+          "success_rate": 1.0,
+          "exit": "US"
+        },
+        {
+          "server": "45.144.112.55:443",
+          "http_ms": 316,
+          "jitter_ms": 258,
+          "success_rate": 1.0,
+          "exit": "US"
+        },
+        {
+          "server": "67.220.73.204:16016",
+          "http_ms": 301,
+          "jitter_ms": 324,
+          "success_rate": 1.0,
+          "exit": "US"
+        },
+        {
+          "server": "15.204.97.209:23576",
+          "http_ms": 338,
+          "jitter_ms": 202,
+          "success_rate": 1.0,
+          "exit": "US"
+        },
+        {
+          "server": "67.220.73.204:18662",
+          "http_ms": 312,
+          "jitter_ms": 332,
+          "success_rate": 1.0,
+          "exit": "US"
+        },
+        {
+          "server": "15.204.97.216:23576",
+          "http_ms": 350,
+          "jitter_ms": 227,
+          "success_rate": 1.0,
+          "exit": "US"
+        },
+        {
+          "server": "169.40.42.35:443",
+          "http_ms": 381,
+          "jitter_ms": 110,
+          "success_rate": 1.0,
+          "exit": "US"
+        },
+        {
+          "server": "216.106.185.158:443",
+          "http_ms": 377,
+          "jitter_ms": 200,
+          "success_rate": 1.0,
+          "exit": "US"
+        },
+        {
+          "server": "166.0.25.92:443",
+          "http_ms": 425,
+          "jitter_ms": 86,
+          "success_rate": 1.0,
+          "exit": "US"
+        },
+        {
+          "server": "148.135.86.162:10000",
+          "http_ms": 376,
+          "jitter_ms": 347,
+          "success_rate": 1.0,
+          "exit": "US"
+        },
+        {
+          "server": "162.159.254.201:443",
+          "http_ms": 446,
+          "jitter_ms": 146,
+          "success_rate": 1.0,
+          "exit": "US"
+        },
+        {
+          "server": "179.254.94.184:443",
+          "http_ms": 508,
+          "jitter_ms": 171,
+          "success_rate": 1.0,
+          "exit": "US"
+        },
+        {
+          "server": "ww13.levikogjgfdd.ir:23576",
+          "http_ms": 511,
+          "jitter_ms": 270,
+          "success_rate": 1.0,
+          "exit": "US"
+        },
+        {
+          "server": "188.114.98.0:443",
+          "http_ms": 495,
+          "jitter_ms": 370,
+          "success_rate": 1.0,
+          "exit": "US"
+        },
+        {
+          "server": "205.186.112.19:443",
+          "http_ms": 522,
+          "jitter_ms": 359,
+          "success_rate": 1.0,
+          "exit": "US"
+        },
+        {
+          "server": "leviko-us4350.shopingggg.ir:443",
+          "http_ms": 696,
+          "jitter_ms": 83,
+          "success_rate": 1.0,
+          "exit": "US"
+        },
+        {
+          "server": "172.64.154.113:8443",
+          "http_ms": 688,
+          "jitter_ms": 616,
+          "success_rate": 1.0,
+          "exit": "US"
+        },
+        {
+          "server": "fr-free.fastestrelay.com:443",
+          "http_ms": 1127,
+          "jitter_ms": 100,
+          "success_rate": 1.0,
+          "exit": "US"
+        },
+        {
+          "server": "162.35.101.177:443",
+          "http_ms": 1466,
+          "jitter_ms": 537,
+          "success_rate": 1.0,
+          "exit": "US"
+        },
+        {
+          "server": "195.211.98.43:443",
+          "http_ms": 1742,
+          "jitter_ms": 913,
+          "success_rate": 1.0,
+          "exit": "US"
+        },
+        {
+          "server": "179.254.115.111:443",
+          "http_ms": 1782,
+          "jitter_ms": 1131,
           "success_rate": 1.0,
           "exit": "US"
         },
         {
           "server": "91.238.123.9:443",
-          "http_ms": 2701,
-          "jitter_ms": 1322,
+          "http_ms": 2533,
+          "jitter_ms": 144,
           "success_rate": 1.0,
           "exit": "US"
         },
         {
+          "server": "kuruish.org:443",
+          "http_ms": 333,
+          "jitter_ms": null,
+          "success_rate": 0.5,
+          "exit": "US"
+        },
+        {
           "server": "45.61.186.3:443",
-          "http_ms": 344,
+          "http_ms": 369,
           "jitter_ms": null,
           "success_rate": 0.5,
           "exit": "US"
         },
         {
-          "server": "205.186.112.19:443",
-          "http_ms": 583,
-          "jitter_ms": null,
-          "success_rate": 0.5,
-          "exit": "US"
-        },
-        {
-          "server": "162.35.101.177:443",
-          "http_ms": 967,
+          "server": "48.102.138.175:8443",
+          "http_ms": 750,
           "jitter_ms": null,
           "success_rate": 0.5,
           "exit": "US"
         },
         {
           "server": "195.123.240.65:443",
-          "http_ms": 1984,
-          "jitter_ms": null,
-          "success_rate": 0.5,
-          "exit": "US"
-        },
-        {
-          "server": "2.24.124.64:443",
-          "http_ms": 3702,
+          "http_ms": 1038,
           "jitter_ms": null,
           "success_rate": 0.5,
           "exit": "US"
         },
         {
           "server": "47.251.108.158:443",
-          "http_ms": 3738,
+          "http_ms": 2430,
           "jitter_ms": null,
           "success_rate": 0.5,
           "exit": "US"
@@ -279,63 +251,56 @@
       ]
     },
     "RU": {
-      "tested": 333,
-      "country_verified": 8,
-      "wrong_country": 64,
+      "tested": 331,
+      "country_verified": 7,
+      "wrong_country": 74,
       "retained_old_nodes": false,
       "selected": [
         {
+          "server": "201.24.116.192:443",
+          "http_ms": 668,
+          "jitter_ms": 374,
+          "success_rate": 1.0,
+          "exit": "RU"
+        },
+        {
           "server": "200.169.179.233:443",
-          "http_ms": 698,
-          "jitter_ms": 409,
+          "http_ms": 688,
+          "jitter_ms": 421,
           "success_rate": 1.0,
           "exit": "RU"
         },
         {
-          "server": "185.22.234.129:443",
-          "http_ms": 917,
-          "jitter_ms": 122,
-          "success_rate": 1.0,
-          "exit": "RU"
-        },
-        {
-          "server": "smartcdn.top:443",
-          "http_ms": 1022,
-          "jitter_ms": 7,
+          "server": "147.45.175.81:443",
+          "http_ms": 954,
+          "jitter_ms": 375,
           "success_rate": 1.0,
           "exit": "RU"
         },
         {
           "server": "212.233.90.78:443",
-          "http_ms": 736,
-          "jitter_ms": null,
-          "success_rate": 0.5,
-          "exit": "RU"
-        },
-        {
-          "server": "201.24.116.192:443",
-          "http_ms": 853,
+          "http_ms": 661,
           "jitter_ms": null,
           "success_rate": 0.5,
           "exit": "RU"
         },
         {
           "server": "201.51.12.98:443",
-          "http_ms": 869,
+          "http_ms": 841,
           "jitter_ms": null,
           "success_rate": 0.5,
           "exit": "RU"
         },
         {
-          "server": "147.45.175.81:443",
-          "http_ms": 1188,
+          "server": "durov.sky-vault.top:8443",
+          "http_ms": 862,
           "jitter_ms": null,
           "success_rate": 0.5,
           "exit": "RU"
         },
         {
           "server": "xssite.webredirect.org:443",
-          "http_ms": 1274,
+          "http_ms": 1230,
           "jitter_ms": null,
           "success_rate": 0.5,
           "exit": "RU"
@@ -345,131 +310,131 @@
     "DE": {
       "tested": 135,
       "country_verified": 18,
-      "wrong_country": 18,
+      "wrong_country": 16,
       "retained_old_nodes": false,
       "selected": [
         {
-          "server": "94.103.168.62:2087",
-          "http_ms": 422,
-          "jitter_ms": 19,
-          "success_rate": 1.0,
-          "exit": "DE"
-        },
-        {
-          "server": "152.53.236.22:443",
-          "http_ms": 425,
+          "server": "152.53.236.182:443",
+          "http_ms": 530,
           "jitter_ms": 28,
           "success_rate": 1.0,
           "exit": "DE"
         },
         {
-          "server": "46.28.69.123:443",
-          "http_ms": 452,
-          "jitter_ms": 7,
-          "success_rate": 1.0,
-          "exit": "DE"
-        },
-        {
-          "server": "152.53.236.182:443",
-          "http_ms": 448,
-          "jitter_ms": 31,
-          "success_rate": 1.0,
-          "exit": "DE"
-        },
-        {
-          "server": "152.53.239.182:443",
-          "http_ms": 453,
-          "jitter_ms": 38,
-          "success_rate": 1.0,
-          "exit": "DE"
-        },
-        {
-          "server": "jdvymxi.cvewfjg.shop:443",
-          "http_ms": 458,
+          "server": "152.53.127.214:443",
+          "http_ms": 548,
           "jitter_ms": 23,
           "success_rate": 1.0,
           "exit": "DE"
         },
         {
-          "server": "152.53.127.214:443",
-          "http_ms": 461,
-          "jitter_ms": 18,
-          "success_rate": 1.0,
-          "exit": "DE"
-        },
-        {
-          "server": "jdwabxe.cvewfjg.shop:443",
-          "http_ms": 460,
-          "jitter_ms": 37,
+          "server": "152.53.236.22:443",
+          "http_ms": 550,
+          "jitter_ms": 19,
           "success_rate": 1.0,
           "exit": "DE"
         },
         {
           "server": "jdwadgw.cvewfjg.shop:443",
-          "http_ms": 459,
-          "jitter_ms": 52,
+          "http_ms": 564,
+          "jitter_ms": 11,
           "success_rate": 1.0,
           "exit": "DE"
         },
         {
-          "server": "jdwacdi.cvewfjg.shop:443",
-          "http_ms": 470,
-          "jitter_ms": 33,
+          "server": "152.53.239.182:443",
+          "http_ms": 560,
+          "jitter_ms": 30,
           "success_rate": 1.0,
           "exit": "DE"
         },
         {
           "server": "82.118.19.153:443",
-          "http_ms": 483,
-          "jitter_ms": 24,
+          "http_ms": 581,
+          "jitter_ms": 2,
           "success_rate": 1.0,
           "exit": "DE"
         },
         {
-          "server": "82.39.171.12:443",
-          "http_ms": 613,
-          "jitter_ms": 24,
+          "server": "jdwacdi.cvewfjg.shop:443",
+          "http_ms": 568,
+          "jitter_ms": 56,
+          "success_rate": 1.0,
+          "exit": "DE"
+        },
+        {
+          "server": "150.251.143.253:443",
+          "http_ms": 588,
+          "jitter_ms": 25,
+          "success_rate": 1.0,
+          "exit": "DE"
+        },
+        {
+          "server": "jdvymxi.cvewfjg.shop:443",
+          "http_ms": 592,
+          "jitter_ms": 26,
+          "success_rate": 1.0,
+          "exit": "DE"
+        },
+        {
+          "server": "jdwabxe.cvewfjg.shop:443",
+          "http_ms": 597,
+          "jitter_ms": 60,
           "success_rate": 1.0,
           "exit": "DE"
         },
         {
           "server": "2.26.251.236:443",
-          "http_ms": 850,
-          "jitter_ms": 150,
+          "http_ms": 638,
+          "jitter_ms": 89,
           "success_rate": 1.0,
           "exit": "DE"
         },
         {
           "server": "31.56.18.99:443",
-          "http_ms": 926,
-          "jitter_ms": 886,
+          "http_ms": 720,
+          "jitter_ms": 154,
           "success_rate": 1.0,
           "exit": "DE"
         },
         {
-          "server": "144.31.125.60:443",
-          "http_ms": 948,
-          "jitter_ms": 1084,
+          "server": "82.39.171.12:443",
+          "http_ms": 830,
+          "jitter_ms": 47,
           "success_rate": 1.0,
           "exit": "DE"
         },
         {
-          "server": "ww2.levikogjgfdd.ir:443",
-          "http_ms": 1141,
-          "jitter_ms": 1396,
+          "server": "71b840t.de7.h1clayd.click:443",
+          "http_ms": 934,
+          "jitter_ms": 75,
+          "success_rate": 1.0,
+          "exit": "DE"
+        },
+        {
+          "server": "4935e4t.de25.h1clayd.click:443",
+          "http_ms": 1083,
+          "jitter_ms": 92,
+          "success_rate": 1.0,
+          "exit": "DE"
+        },
+        {
+          "server": "177.3.213.177:8444",
+          "http_ms": 885,
+          "jitter_ms": 1070,
           "success_rate": 1.0,
           "exit": "DE"
         },
         {
           "server": "92.118.206.218:8443",
-          "http_ms": 431,
+          "http_ms": 554,
           "jitter_ms": null,
           "success_rate": 0.5,
           "exit": "DE"
         },
         {
           "server": "176.98.176.60:443",
-          "http_ms": 757,
+          "http_ms": 861,
           "jitter_ms": null,
           "success_rate": 0.5,
           "exit": "DE"
@@ -478,202 +443,181 @@
     },
     "NL": {
       "tested": 135,
-      "country_verified": 30,
+      "country_verified": 27,
       "wrong_country": 13,
       "retained_old_nodes": false,
       "selected": [
         {
+          "server": "51.194.118.38:443",
+          "http_ms": 430,
+          "jitter_ms": 269,
+          "success_rate": 1.0,
+          "exit": "NL"
+        },
+        {
           "server": "51.15.16.68:2053",
-          "http_ms": 372,
-          "jitter_ms": 29,
+          "http_ms": 490,
+          "jitter_ms": 46,
           "success_rate": 1.0,
           "exit": "NL"
         },
         {
-          "server": "50.7.169.243:443",
-          "http_ms": 374,
-          "jitter_ms": 41,
-          "success_rate": 1.0,
-          "exit": "NL"
-        },
-        {
-          "server": "51.158.206.34:23576",
-          "http_ms": 388,
-          "jitter_ms": 7,
-          "success_rate": 1.0,
-          "exit": "NL"
-        },
-        {
-          "server": "51.158.206.19:23576",
-          "http_ms": 383,
-          "jitter_ms": 28,
-          "success_rate": 1.0,
-          "exit": "NL"
-        },
-        {
-          "server": "138.124.245.102:443",
-          "http_ms": 422,
-          "jitter_ms": 25,
-          "success_rate": 1.0,
-          "exit": "NL"
-        },
-        {
-          "server": "147.45.61.144:443",
-          "http_ms": 442,
-          "jitter_ms": 8,
-          "success_rate": 1.0,
-          "exit": "NL"
-        },
-        {
-          "server": "5.35.44.218:8443",
-          "http_ms": 485,
-          "jitter_ms": 20,
-          "success_rate": 1.0,
-          "exit": "NL"
-        },
-        {
-          "server": "171.22.183.167:443",
-          "http_ms": 465,
-          "jitter_ms": 114,
-          "success_rate": 1.0,
-          "exit": "NL"
-        },
-        {
-          "server": "86.54.28.75:443",
-          "http_ms": 494,
-          "jitter_ms": 79,
-          "success_rate": 1.0,
-          "exit": "NL"
-        },
-        {
-          "server": "free-amsterdam-node-1.cloudwidecdn.com:443",
-          "http_ms": 508,
-          "jitter_ms": 33,
-          "success_rate": 1.0,
-          "exit": "NL"
-        },
-        {
-          "server": "79.182.70.192:443",
-          "http_ms": 596,
-          "jitter_ms": 9,
-          "success_rate": 1.0,
-          "exit": "NL"
-        },
-        {
-          "server": "152.70.58.201:443",
-          "http_ms": 624,
-          "jitter_ms": 41,
-          "success_rate": 1.0,
-          "exit": "NL"
-        },
-        {
-          "server": "user.betust.net:443",
-          "http_ms": 749,
-          "jitter_ms": 64,
-          "success_rate": 1.0,
-          "exit": "NL"
-        },
-        {
-          "server": "130.12.242.106:443",
-          "http_ms": 756,
-          "jitter_ms": 182,
-          "success_rate": 1.0,
-          "exit": "NL"
-        },
-        {
-          "server": "72.56.4.84:443",
-          "http_ms": 812,
-          "jitter_ms": 34,
-          "success_rate": 1.0,
-          "exit": "NL"
-        },
-        {
-          "server": "147.45.108.45:443",
-          "http_ms": 813,
+          "server": "51.158.206.103:23576",
+          "http_ms": 499,
           "jitter_ms": 32,
           "success_rate": 1.0,
           "exit": "NL"
         },
         {
-          "server": "87.199.205.28:443",
-          "http_ms": 710,
-          "jitter_ms": 469,
-          "success_rate": 1.0,
-          "exit": "NL"
-        },
-        {
-          "server": "104.171.135.229:443",
-          "http_ms": 834,
-          "jitter_ms": 2,
-          "success_rate": 1.0,
-          "exit": "NL"
-        },
-        {
-          "server": "72.56.38.83:443",
-          "http_ms": 836,
-          "jitter_ms": 1,
-          "success_rate": 1.0,
-          "exit": "NL"
-        },
-        {
-          "server": "196.196.148.76:443",
-          "http_ms": 1020,
-          "jitter_ms": 168,
+          "server": "51.158.206.87:23576",
+          "http_ms": 500,
+          "jitter_ms": 46,
           "success_rate": 1.0,
           "exit": "NL"
         },
         {
           "server": "78.17.215.141:443",
-          "http_ms": 900,
-          "jitter_ms": 972,
+          "http_ms": 510,
+          "jitter_ms": 15,
           "success_rate": 1.0,
           "exit": "NL"
         },
         {
-          "server": "153.52.85.198:443",
-          "http_ms": 2160,
-          "jitter_ms": 899,
+          "server": "50.7.169.243:443",
+          "http_ms": 515,
+          "jitter_ms": 46,
+          "success_rate": 1.0,
+          "exit": "NL"
+        },
+        {
+          "server": "5.35.44.218:8443",
+          "http_ms": 640,
+          "jitter_ms": 27,
+          "success_rate": 1.0,
+          "exit": "NL"
+        },
+        {
+          "server": "user.betust.net:443",
+          "http_ms": 680,
+          "jitter_ms": 64,
+          "success_rate": 1.0,
+          "exit": "NL"
+        },
+        {
+          "server": "87.199.205.28:443",
+          "http_ms": 701,
+          "jitter_ms": 24,
+          "success_rate": 1.0,
+          "exit": "NL"
+        },
+        {
+          "server": "152.70.58.201:443",
+          "http_ms": 711,
+          "jitter_ms": 34,
+          "success_rate": 1.0,
+          "exit": "NL"
+        },
+        {
+          "server": "130.12.242.106:443",
+          "http_ms": 742,
+          "jitter_ms": 65,
+          "success_rate": 1.0,
+          "exit": "NL"
+        },
+        {
+          "server": "fr-free.fastestrelay.com:443",
+          "http_ms": 760,
+          "jitter_ms": 30,
           "success_rate": 1.0,
           "exit": "NL"
         },
         {
           "server": "164.37.224.246:443",
-          "http_ms": 2907,
-          "jitter_ms": 1528,
+          "http_ms": 834,
+          "jitter_ms": 518,
           "success_rate": 1.0,
           "exit": "NL"
         },
         {
-          "server": "79.182.70.232:443",
-          "http_ms": 3631,
-          "jitter_ms": 118,
+          "server": "79.182.70.192:443",
+          "http_ms": 1022,
+          "jitter_ms": 283,
           "success_rate": 1.0,
           "exit": "NL"
         },
         {
-          "server": "2.59.183.167:443",
-          "http_ms": 493,
+          "server": "13.141.37.245:443",
+          "http_ms": 984,
+          "jitter_ms": 529,
+          "success_rate": 1.0,
+          "exit": "NL"
+        },
+        {
+          "server": "79.182.39.131:443",
+          "http_ms": 1627,
+          "jitter_ms": 1898,
+          "success_rate": 1.0,
+          "exit": "NL"
+        },
+        {
+          "server": "201.8.64.253:443",
+          "http_ms": 1644,
+          "jitter_ms": 1843,
+          "success_rate": 1.0,
+          "exit": "NL"
+        },
+        {
+          "server": "free-amsterdam-node-1.cloudwidecdn.com:443",
+          "http_ms": 1968,
+          "jitter_ms": 923,
+          "success_rate": 1.0,
+          "exit": "NL"
+        },
+        {
+          "server": "153.52.85.198:443",
+          "http_ms": 1866,
+          "jitter_ms": 1645,
+          "success_rate": 1.0,
+          "exit": "NL"
+        },
+        {
+          "server": "86.54.28.75:443",
+          "http_ms": 2078,
+          "jitter_ms": 1416,
+          "success_rate": 1.0,
+          "exit": "NL"
+        },
+        {
+          "server": "196.196.148.76:443",
+          "http_ms": 2240,
+          "jitter_ms": 1272,
+          "success_rate": 1.0,
+          "exit": "NL"
+        },
+        {
+          "server": "171.22.183.167:443",
+          "http_ms": 2232,
+          "jitter_ms": 1343,
+          "success_rate": 1.0,
+          "exit": "NL"
+        },
+        {
+          "server": "72.56.38.83:443",
+          "http_ms": 922,
           "jitter_ms": null,
           "success_rate": 0.5,
           "exit": "NL"
         },
         {
           "server": "164.37.224.51:443",
-          "http_ms": 2030,
+          "http_ms": 2161,
           "jitter_ms": null,
           "success_rate": 0.5,
           "exit": "NL"
         },
         {
-          "server": "79.182.39.131:443",
-          "http_ms": 2212,
-          "jitter_ms": null,
-          "success_rate": 0.5,
-          "exit": "NL"
-        },
-        {
-          "server": "201.8.64.253:443",
-          "http_ms": 2277,
+          "server": "79.182.70.232:443",
+          "http_ms": 3671,
           "jitter_ms": null,
           "success_rate": 0.5,
           "exit": "NL"
@@ -681,113 +625,92 @@
       ]
     },
     "FI": {
-      "tested": 83,
+      "tested": 80,
       "country_verified": 1,
       "wrong_country": 13,
       "retained_old_nodes": false,
       "selected": [
         {
-          "server": "147.45.45.194:443",
-          "http_ms": 1794,
-          "jitter_ms": 48,
-          "success_rate": 1.0,
+          "server": "213.176.92.168:10444",
+          "http_ms": 801,
+          "jitter_ms": null,
+          "success_rate": 0.5,
           "exit": "FI"
         }
       ]
     },
     "FR": {
-      "tested": 85,
-      "country_verified": 13,
-      "wrong_country": 18,
+      "tested": 84,
+      "country_verified": 10,
+      "wrong_country": 19,
       "retained_old_nodes": false,
       "selected": [
         {
           "server": "62.210.91.10:23576",
-          "http_ms": 432,
-          "jitter_ms": 43,
-          "success_rate": 1.0,
-          "exit": "FR"
-        },
-        {
-          "server": "152.228.139.33:35108",
-          "http_ms": 396,
-          "jitter_ms": 293,
+          "http_ms": 532,
+          "jitter_ms": 26,
           "success_rate": 1.0,
           "exit": "FR"
         },
         {
           "server": "152.228.139.33:51671",
-          "http_ms": 397,
-          "jitter_ms": 306,
+          "http_ms": 473,
+          "jitter_ms": 354,
           "success_rate": 1.0,
           "exit": "FR"
         },
         {
           "server": "62.210.91.2:23576",
-          "http_ms": 436,
-          "jitter_ms": 0,
+          "http_ms": 538,
+          "jitter_ms": 101,
           "success_rate": 1.0,
           "exit": "FR"
         },
         {
-          "server": "213.183.45.23:8454",
-          "http_ms": 919,
-          "jitter_ms": 50,
-          "success_rate": 1.0,
-          "exit": "FR"
-        },
-        {
-          "server": "145.223.68.58:443",
-          "http_ms": 950,
-          "jitter_ms": 980,
+          "server": "152.228.139.33:35108",
+          "http_ms": 503,
+          "jitter_ms": 318,
           "success_rate": 1.0,
           "exit": "FR"
         },
         {
           "server": "ww3.levikogjgfdd.ir:443",
-          "http_ms": 1422,
-          "jitter_ms": 1537,
+          "http_ms": 1932,
+          "jitter_ms": 489,
           "success_rate": 1.0,
           "exit": "FR"
         },
         {
-          "server": "185.71.216.177:2092",
-          "http_ms": 3678,
-          "jitter_ms": 233,
+          "server": "161.97.160.224:443",
+          "http_ms": 2140,
+          "jitter_ms": 344,
           "success_rate": 1.0,
-          "exit": "FR"
-        },
-        {
-          "server": "durov.sky-vault.top:8443",
-          "http_ms": 397,
-          "jitter_ms": null,
-          "success_rate": 0.5,
           "exit": "FR"
         },
         {
           "server": "163.245.42.56:443",
-          "http_ms": 405,
+          "http_ms": 489,
           "jitter_ms": null,
           "success_rate": 0.5,
           "exit": "FR"
         },
         {
           "server": "9.247.23.209:443",
-          "http_ms": 407,
+          "http_ms": 545,
           "jitter_ms": null,
           "success_rate": 0.5,
           "exit": "FR"
         },
         {
           "server": "edge.bookmai.com:443",
-          "http_ms": 428,
+          "http_ms": 577,
           "jitter_ms": null,
           "success_rate": 0.5,
           "exit": "FR"
         },
         {
-          "server": "161.97.160.224:443",
-          "http_ms": 762,
+          "server": "145.223.68.58:443",
+          "http_ms": 2602,
           "jitter_ms": null,
           "success_rate": 0.5,
           "exit": "FR"
@@ -795,21 +718,28 @@
       ]
     },
     "PL": {
-      "tested": 65,
-      "country_verified": 2,
+      "tested": 62,
+      "country_verified": 3,
       "wrong_country": 12,
       "retained_old_nodes": false,
       "selected": [
         {
-          "server": "82.118.22.161:443",
-          "http_ms": 534,
+          "server": "150.241.87.52:443",
+          "http_ms": 532,
           "jitter_ms": null,
           "success_rate": 0.5,
           "exit": "PL"
         },
         {
           "server": "150.251.113.34:443",
-          "http_ms": 1133,
+          "http_ms": 936,
+          "jitter_ms": null,
+          "success_rate": 0.5,
+          "exit": "PL"
+        },
+        {
+          "server": "82.118.22.161:443",
+          "http_ms": 2772,
           "jitter_ms": null,
           "success_rate": 0.5,
           "exit": "PL"
@@ -817,65 +747,51 @@
       ]
     },
     "GB": {
-      "tested": 85,
-      "country_verified": 8,
-      "wrong_country": 23,
+      "tested": 81,
+      "country_verified": 6,
+      "wrong_country": 24,
       "retained_old_nodes": false,
       "selected": [
         {
           "server": "136.176.68.34:443",
-          "http_ms": 368,
-          "jitter_ms": 55,
-          "success_rate": 1.0,
-          "exit": "GB"
-        },
-        {
-          "server": "51.38.71.147:443",
-          "http_ms": 490,
-          "jitter_ms": 68,
-          "success_rate": 1.0,
-          "exit": "GB"
-        },
-        {
-          "server": "158.220.95.242:443",
-          "http_ms": 494,
-          "jitter_ms": 102,
-          "success_rate": 1.0,
-          "exit": "GB"
-        },
-        {
-          "server": "uk1.connectsuite.org:443",
-          "http_ms": 552,
-          "jitter_ms": 137,
+          "http_ms": 512,
+          "jitter_ms": 13,
           "success_rate": 1.0,
           "exit": "GB"
         },
         {
           "server": "188.114.98.0:443",
-          "http_ms": 638,
-          "jitter_ms": 73,
+          "http_ms": 943,
+          "jitter_ms": 358,
           "success_rate": 1.0,
           "exit": "GB"
         },
         {
           "server": "chatgpt.com:443",
-          "http_ms": 686,
-          "jitter_ms": 255,
+          "http_ms": 1074,
+          "jitter_ms": 19,
           "success_rate": 1.0,
           "exit": "GB"
         },
         {
           "server": "172.64.155.209:443",
-          "http_ms": 833,
-          "jitter_ms": 404,
+          "http_ms": 1566,
+          "jitter_ms": 193,
           "success_rate": 1.0,
           "exit": "GB"
         },
         {
-          "server": "138.124.125.193:10444",
-          "http_ms": 507,
-          "jitter_ms": null,
-          "success_rate": 0.5,
+          "server": "uk1.connectsuite.org:443",
+          "http_ms": 2642,
+          "jitter_ms": 446,
+          "success_rate": 1.0,
+          "exit": "GB"
+        },
+        {
+          "server": "51.38.71.147:443",
+          "http_ms": 2789,
+          "jitter_ms": 814,
+          "success_rate": 1.0,
           "exit": "GB"
         }
       ]
@@ -883,20 +799,20 @@
     "CA": {
       "tested": 95,
       "country_verified": 2,
-      "wrong_country": 15,
+      "wrong_country": 14,
       "retained_old_nodes": false,
       "selected": [
         {
           "server": "209.200.246.148:443",
-          "http_ms": 208,
-          "jitter_ms": 125,
+          "http_ms": 328,
+          "jitter_ms": 145,
           "success_rate": 1.0,
           "exit": "CA"
         },
         {
           "server": "66.163.113.9:443",
-          "http_ms": 260,
-          "jitter_ms": 47,
+          "http_ms": 515,
+          "jitter_ms": 192,
           "success_rate": 1.0,
           "exit": "CA"
         }
@@ -904,223 +820,160 @@
     },
     "JP": {
       "tested": 130,
-      "country_verified": 31,
-      "wrong_country": 12,
+      "country_verified": 22,
+      "wrong_country": 13,
       "retained_old_nodes": false,
       "selected": [
         {
-          "server": "sync.2ml.bid:443",
-          "http_ms": 703,
-          "jitter_ms": 12,
+          "server": "158.101.151.157:443",
+          "http_ms": 698,
+          "jitter_ms": 266,
           "success_rate": 1.0,
           "exit": "JP"
         },
         {
-          "server": "158.101.151.157:443",
-          "http_ms": 806,
-          "jitter_ms": 225,
+          "server": "50.7.159.242:443",
+          "http_ms": 733,
+          "jitter_ms": 248,
           "success_rate": 1.0,
           "exit": "JP"
         },
         {
           "server": "154.36.152.216:443",
-          "http_ms": 1099,
-          "jitter_ms": 296,
+          "http_ms": 896,
+          "jitter_ms": 261,
           "success_rate": 1.0,
           "exit": "JP"
         },
         {
           "server": "31.76.91.98:443",
-          "http_ms": 1080,
-          "jitter_ms": 729,
-          "success_rate": 1.0,
-          "exit": "JP"
-        },
-        {
-          "server": "185.200.66.193:443",
-          "http_ms": 1868,
-          "jitter_ms": 477,
-          "success_rate": 1.0,
-          "exit": "JP"
-        },
-        {
-          "server": "213.183.41.31:8463",
-          "http_ms": 2060,
-          "jitter_ms": 279,
-          "success_rate": 1.0,
-          "exit": "JP"
-        },
-        {
-          "server": "43.170.8.95:443",
-          "http_ms": 1988,
-          "jitter_ms": 757,
-          "success_rate": 1.0,
-          "exit": "JP"
-        },
-        {
-          "server": "152.69.200.216:443",
-          "http_ms": 2420,
-          "jitter_ms": 31,
-          "success_rate": 1.0,
-          "exit": "JP"
-        },
-        {
-          "server": "104.18.37.127:443",
-          "http_ms": 2476,
-          "jitter_ms": 264,
-          "success_rate": 1.0,
-          "exit": "JP"
-        },
-        {
-          "server": "104.21.6.186:443",
-          "http_ms": 2095,
-          "jitter_ms": 2338,
-          "success_rate": 1.0,
-          "exit": "JP"
-        },
-        {
-          "server": "104.16.10.9:443",
-          "http_ms": 2762,
-          "jitter_ms": 1243,
-          "success_rate": 1.0,
-          "exit": "JP"
-        },
-        {
-          "server": "104.19.164.155:443",
-          "http_ms": 2602,
-          "jitter_ms": 2023,
-          "success_rate": 1.0,
-          "exit": "JP"
-        },
-        {
-          "server": "104.21.34.106:443",
-          "http_ms": 3118,
-          "jitter_ms": 673,
+          "http_ms": 1258,
+          "jitter_ms": 666,
           "success_rate": 1.0,
           "exit": "JP"
         },
         {
           "server": "104.19.48.107:443",
-          "http_ms": 3220,
-          "jitter_ms": 793,
+          "http_ms": 1697,
+          "jitter_ms": 562,
           "success_rate": 1.0,
           "exit": "JP"
         },
         {
-          "server": "185.71.216.177:2090",
-          "http_ms": 3236,
-          "jitter_ms": 820,
+          "server": "162.159.254.3:443",
+          "http_ms": 2047,
+          "jitter_ms": 1116,
           "success_rate": 1.0,
-          "exit": "JP"
-        },
-        {
-          "server": "188.114.97.6:443",
-          "http_ms": 3260,
-          "jitter_ms": 916,
-          "success_rate": 1.0,
-          "exit": "JP"
-        },
-        {
-          "server": "104.21.70.228:443",
-          "http_ms": 1381,
-          "jitter_ms": null,
-          "success_rate": 0.5,
           "exit": "JP"
         },
         {
           "server": "104.16.111.102:443",
-          "http_ms": 1938,
+          "http_ms": 1998,
+          "jitter_ms": 2117,
+          "success_rate": 1.0,
+          "exit": "JP"
+        },
+        {
+          "server": "172.67.156.147:443",
+          "http_ms": 2686,
+          "jitter_ms": 342,
+          "success_rate": 1.0,
+          "exit": "JP"
+        },
+        {
+          "server": "104.21.70.21:443",
+          "http_ms": 1019,
           "jitter_ms": null,
           "success_rate": 0.5,
           "exit": "JP"
         },
         {
           "server": "154.31.114.162:8443",
-          "http_ms": 2073,
+          "http_ms": 1408,
           "jitter_ms": null,
           "success_rate": 0.5,
           "exit": "JP"
         },
         {
-          "server": "104.17.50.53:443",
-          "http_ms": 2200,
+          "server": "104.21.70.228:443",
+          "http_ms": 1626,
           "jitter_ms": null,
           "success_rate": 0.5,
           "exit": "JP"
         },
         {
-          "server": "172.64.190.13:443",
-          "http_ms": 2258,
+          "server": "188.114.97.6:443",
+          "http_ms": 1627,
           "jitter_ms": null,
           "success_rate": 0.5,
           "exit": "JP"
         },
         {
           "server": "104.18.42.98:443",
-          "http_ms": 2616,
+          "http_ms": 1845,
           "jitter_ms": null,
           "success_rate": 0.5,
           "exit": "JP"
         },
         {
-          "server": "131.143.214.224:443",
-          "http_ms": 2645,
-          "jitter_ms": null,
-          "success_rate": 0.5,
-          "exit": "JP"
-        },
-        {
-          "server": "104.19.33.25:443",
-          "http_ms": 2682,
-          "jitter_ms": null,
-          "success_rate": 0.5,
-          "exit": "JP"
-        },
-        {
-          "server": "104.19.33.237:443",
-          "http_ms": 2837,
-          "jitter_ms": null,
-          "success_rate": 0.5,
-          "exit": "JP"
-        },
-        {
-          "server": "104.18.153.10:443",
-          "http_ms": 2932,
-          "jitter_ms": null,
-          "success_rate": 0.5,
-          "exit": "JP"
-        },
-        {
-          "server": "104.24.0.1:443",
-          "http_ms": 2980,
-          "jitter_ms": null,
-          "success_rate": 0.5,
-          "exit": "JP"
-        },
-        {
-          "server": "104.17.210.74:443",
-          "http_ms": 2994,
-          "jitter_ms": null,
-          "success_rate": 0.5,
-          "exit": "JP"
-        },
-        {
-          "server": "104.16.10.135:443",
-          "http_ms": 3008,
+          "server": "104.21.219.160:443",
+          "http_ms": 2767,
           "jitter_ms": null,
           "success_rate": 0.5,
           "exit": "JP"
         },
         {
           "server": "104.24.31.89:443",
-          "http_ms": 3156,
+          "http_ms": 3047,
           "jitter_ms": null,
           "success_rate": 0.5,
           "exit": "JP"
         },
         {
-          "server": "172.67.156.147:443",
-          "http_ms": 3571,
+          "server": "172.64.190.13:443",
+          "http_ms": 3062,
+          "jitter_ms": null,
+          "success_rate": 0.5,
+          "exit": "JP"
+        },
+        {
+          "server": "172.67.217.240:443",
+          "http_ms": 3120,
+          "jitter_ms": null,
+          "success_rate": 0.5,
+          "exit": "JP"
+        },
+        {
+          "server": "104.17.210.74:443",
+          "http_ms": 3123,
+          "jitter_ms": null,
+          "success_rate": 0.5,
+          "exit": "JP"
+        },
+        {
+          "server": "104.16.10.135:443",
+          "http_ms": 3163,
+          "jitter_ms": null,
+          "success_rate": 0.5,
+          "exit": "JP"
+        },
+        {
+          "server": "104.21.33.59:443",
+          "http_ms": 3351,
+          "jitter_ms": null,
+          "success_rate": 0.5,
+          "exit": "JP"
+        },
+        {
+          "server": "104.21.34.106:443",
+          "http_ms": 3428,
+          "jitter_ms": null,
+          "success_rate": 0.5,
+          "exit": "JP"
+        },
+        {
+          "server": "104.19.33.25:443",
+          "http_ms": 3695,
           "jitter_ms": null,
           "success_rate": 0.5,
           "exit": "JP"
@@ -1128,112 +981,98 @@
       ]
     },
     "SG": {
-      "tested": 77,
-      "country_verified": 16,
+      "tested": 83,
+      "country_verified": 15,
       "wrong_country": 12,
       "retained_old_nodes": false,
       "selected": [
         {
           "server": "47.84.226.221:443",
-          "http_ms": 1022,
-          "jitter_ms": 173,
-          "success_rate": 1.0,
-          "exit": "SG"
-        },
-        {
-          "server": "188.166.182.158:8443",
-          "http_ms": 1024,
-          "jitter_ms": 183,
-          "success_rate": 1.0,
-          "exit": "SG"
-        },
-        {
-          "server": "206.206.78.36:443",
-          "http_ms": 1046,
-          "jitter_ms": 228,
-          "success_rate": 1.0,
-          "exit": "SG"
-        },
-        {
-          "server": "188.166.182.158:443",
-          "http_ms": 1049,
-          "jitter_ms": 254,
+          "http_ms": 923,
+          "jitter_ms": 184,
           "success_rate": 1.0,
           "exit": "SG"
         },
         {
           "server": "140.245.113.33:443",
-          "http_ms": 1070,
-          "jitter_ms": 281,
+          "http_ms": 926,
+          "jitter_ms": 190,
           "success_rate": 1.0,
           "exit": "SG"
         },
         {
-          "server": "139.162.27.96:2096",
-          "http_ms": 1238,
-          "jitter_ms": 179,
-          "success_rate": 1.0,
-          "exit": "SG"
-        },
-        {
-          "server": "103.106.229.177:21002",
-          "http_ms": 1316,
-          "jitter_ms": 207,
-          "success_rate": 1.0,
-          "exit": "SG"
-        },
-        {
-          "server": "103.106.229.177:21003",
-          "http_ms": 1328,
-          "jitter_ms": 203,
-          "success_rate": 1.0,
-          "exit": "SG"
-        },
-        {
-          "server": "213.183.45.23:8444",
-          "http_ms": 1695,
-          "jitter_ms": 174,
+          "server": "194.233.67.103:2053",
+          "http_ms": 944,
+          "jitter_ms": 194,
           "success_rate": 1.0,
           "exit": "SG"
         },
         {
           "server": "5.34.177.164:443",
-          "http_ms": 2244,
-          "jitter_ms": 171,
+          "http_ms": 1052,
+          "jitter_ms": 245,
+          "success_rate": 1.0,
+          "exit": "SG"
+        },
+        {
+          "server": "139.162.27.96:2096",
+          "http_ms": 1106,
+          "jitter_ms": 191,
+          "success_rate": 1.0,
+          "exit": "SG"
+        },
+        {
+          "server": "103.106.229.177:21003",
+          "http_ms": 1202,
+          "jitter_ms": 185,
+          "success_rate": 1.0,
+          "exit": "SG"
+        },
+        {
+          "server": "103.106.229.177:21004",
+          "http_ms": 1202,
+          "jitter_ms": 192,
+          "success_rate": 1.0,
+          "exit": "SG"
+        },
+        {
+          "server": "510.150333.xyz:21001",
+          "http_ms": 1481,
+          "jitter_ms": 214,
           "success_rate": 1.0,
           "exit": "SG"
         },
         {
           "server": "510.150333.xyz:21003",
-          "http_ms": 2562,
-          "jitter_ms": 1494,
+          "http_ms": 1650,
+          "jitter_ms": 146,
           "success_rate": 1.0,
           "exit": "SG"
         },
         {
-          "server": "510.150333.xyz:21004",
-          "http_ms": 1610,
-          "jitter_ms": null,
-          "success_rate": 0.5,
-          "exit": "SG"
-        },
-        {
-          "server": "147.93.173.45:10444",
-          "http_ms": 1670,
-          "jitter_ms": null,
-          "success_rate": 0.5,
+          "server": "141.193.213.20:8443",
+          "http_ms": 1950,
+          "jitter_ms": 357,
+          "success_rate": 1.0,
           "exit": "SG"
         },
         {
           "server": "141.193.213.21:8443",
-          "http_ms": 2824,
+          "http_ms": 2252,
+          "jitter_ms": 584,
+          "success_rate": 1.0,
+          "exit": "SG"
+        },
+        {
+          "server": "147.93.173.45:10444",
+          "http_ms": 1222,
           "jitter_ms": null,
           "success_rate": 0.5,
           "exit": "SG"
         },
         {
-          "server": "194.233.67.103:2053",
-          "http_ms": 3240,
+          "server": "news.zoom.us:8443",
+          "http_ms": 1982,
           "jitter_ms": null,
           "success_rate": 0.5,
           "exit": "SG"
@@ -1241,38 +1080,45 @@
       ]
     },
     "SE": {
-      "tested": 57,
-      "country_verified": 3,
-      "wrong_country": 14,
+      "tested": 63,
+      "country_verified": 4,
+      "wrong_country": 18,
       "retained_old_nodes": false,
       "selected": [
         {
           "server": "138.124.86.230:48115",
-          "http_ms": 415,
-          "jitter_ms": 318,
+          "http_ms": 514,
+          "jitter_ms": 382,
           "success_rate": 1.0,
           "exit": "SE"
         },
         {
           "server": "r.dhafhdtjdti.site:443",
-          "http_ms": 497,
-          "jitter_ms": 2,
+          "http_ms": 706,
+          "jitter_ms": 79,
+          "success_rate": 1.0,
+          "exit": "SE"
+        },
+        {
+          "server": "leviko-se4581.shopingggg.ir:48115",
+          "http_ms": 629,
+          "jitter_ms": 618,
           "success_rate": 1.0,
           "exit": "SE"
         },
         {
           "server": "46.29.255.123:59539",
-          "http_ms": 992,
-          "jitter_ms": 49,
+          "http_ms": 1656,
+          "jitter_ms": 85,
           "success_rate": 1.0,
           "exit": "SE"
         }
       ]
     },
     "AT": {
-      "tested": 15,
+      "tested": 16,
       "country_verified": 0,
-      "wrong_country": 12,
+      "wrong_country": 13,
       "retained_old_nodes": true,
       "selected": [
         {
@@ -1285,59 +1131,52 @@
       ]
     },
     "CZ": {
-      "tested": 20,
-      "country_verified": 3,
-      "wrong_country": 12,
+      "tested": 21,
+      "country_verified": 2,
+      "wrong_country": 13,
       "retained_old_nodes": false,
       "selected": [
         {
-          "server": "195.123.245.241:443",
-          "http_ms": 486,
-          "jitter_ms": 38,
-          "success_rate": 1.0,
-          "exit": "CZ"
-        },
-        {
           "server": "212.102.38.25:443",
-          "http_ms": 498,
-          "jitter_ms": 27,
+          "http_ms": 610,
+          "jitter_ms": 10,
           "success_rate": 1.0,
           "exit": "CZ"
         },
         {
-          "server": "153.52.69.249:443",
-          "http_ms": 558,
-          "jitter_ms": null,
-          "success_rate": 0.5,
+          "server": "195.123.245.241:443",
+          "http_ms": 722,
+          "jitter_ms": 9,
+          "success_rate": 1.0,
           "exit": "CZ"
         }
       ]
     },
     "CH": {
-      "tested": 26,
+      "tested": 25,
       "country_verified": 3,
       "wrong_country": 12,
       "retained_old_nodes": false,
       "selected": [
         {
-          "server": "45.90.59.15:443",
-          "http_ms": 464,
-          "jitter_ms": 57,
-          "success_rate": 1.0,
-          "exit": "CH"
-        },
-        {
           "server": "50.117.15.225:443",
-          "http_ms": 1555,
-          "jitter_ms": 96,
+          "http_ms": 1637,
+          "jitter_ms": 38,
           "success_rate": 1.0,
           "exit": "CH"
         },
         {
           "server": "lists.soloramtin.cyou:443",
-          "http_ms": 1672,
-          "jitter_ms": 117,
+          "http_ms": 1877,
+          "jitter_ms": 148,
           "success_rate": 1.0,
+          "exit": "CH"
+        },
+        {
+          "server": "45.90.59.15:443",
+          "http_ms": 2882,
+          "jitter_ms": null,
+          "success_rate": 0.5,
           "exit": "CH"
         }
       ]
@@ -1345,69 +1184,76 @@
     "IT": {
       "tested": 55,
       "country_verified": 2,
-      "wrong_country": 20,
+      "wrong_country": 23,
       "retained_old_nodes": false,
       "selected": [
         {
-          "server": "82.118.16.187:443",
-          "http_ms": 520,
-          "jitter_ms": 27,
+          "server": "82.118.16.189:443",
+          "http_ms": 628,
+          "jitter_ms": 89,
           "success_rate": 1.0,
           "exit": "IT"
         },
         {
-          "server": "82.118.16.189:443",
-          "http_ms": 528,
-          "jitter_ms": 11,
-          "success_rate": 1.0,
+          "server": "82.118.16.187:443",
+          "http_ms": 657,
+          "jitter_ms": null,
+          "success_rate": 0.5,
           "exit": "IT"
         }
       ]
     },
     "ES": {
-      "tested": 33,
-      "country_verified": 6,
-      "wrong_country": 12,
+      "tested": 36,
+      "country_verified": 7,
+      "wrong_country": 13,
       "retained_old_nodes": false,
       "selected": [
         {
-          "server": "13.143.239.66:443",
-          "http_ms": 2140,
-          "jitter_ms": 659,
-          "success_rate": 1.0,
-          "exit": "ES"
-        },
-        {
           "server": "b3cd32g.es9.h1clayd.click:443",
-          "http_ms": 2516,
-          "jitter_ms": 1260,
+          "http_ms": 1050,
+          "jitter_ms": 768,
           "success_rate": 1.0,
           "exit": "ES"
         },
         {
-          "server": "196.196.149.80:443",
-          "http_ms": 2654,
-          "jitter_ms": 1137,
+          "server": "46.28.71.247:443",
+          "http_ms": 2296,
+          "jitter_ms": 1169,
           "success_rate": 1.0,
           "exit": "ES"
         },
         {
           "server": "196.199.122.2:443",
-          "http_ms": 2514,
+          "http_ms": 1170,
           "jitter_ms": null,
           "success_rate": 0.5,
           "exit": "ES"
         },
         {
-          "server": "46.28.71.247:443",
-          "http_ms": 2634,
+          "server": "7aa271t.es9.h1clayd.click:443",
+          "http_ms": 1198,
+          "jitter_ms": null,
+          "success_rate": 0.5,
+          "exit": "ES"
+        },
+        {
+          "server": "196.196.149.80:443",
+          "http_ms": 1211,
           "jitter_ms": null,
           "success_rate": 0.5,
           "exit": "ES"
         },
         {
           "server": "196.196.148.90:443",
-          "http_ms": 3087,
+          "http_ms": 1315,
+          "jitter_ms": null,
+          "success_rate": 0.5,
+          "exit": "ES"
+        },
+        {
+          "server": "196.196.149.81:443",
+          "http_ms": 1472,
           "jitter_ms": null,
           "success_rate": 0.5,
           "exit": "ES"
@@ -1415,49 +1261,56 @@
       ]
     },
     "HK": {
-      "tested": 56,
-      "country_verified": 7,
-      "wrong_country": 12,
+      "tested": 54,
+      "country_verified": 8,
+      "wrong_country": 13,
       "retained_old_nodes": false,
       "selected": [
         {
-          "server": "2.26.204.46:31001",
-          "http_ms": 988,
-          "jitter_ms": 225,
+          "server": "8.210.92.38:443",
+          "http_ms": 840,
+          "jitter_ms": 223,
           "success_rate": 1.0,
           "exit": "HK"
         },
         {
-          "server": "8.210.92.38:443",
-          "http_ms": 1818,
-          "jitter_ms": 991,
+          "server": "2.26.204.46:31001",
+          "http_ms": 892,
+          "jitter_ms": 231,
+          "success_rate": 1.0,
+          "exit": "HK"
+        },
+        {
+          "server": "38.207.178.28:20086",
+          "http_ms": 1132,
+          "jitter_ms": 207,
           "success_rate": 1.0,
           "exit": "HK"
         },
         {
           "server": "116.213.43.43:11103",
-          "http_ms": 2517,
-          "jitter_ms": 32,
+          "http_ms": 1694,
+          "jitter_ms": 1373,
+          "success_rate": 1.0,
+          "exit": "HK"
+        },
+        {
+          "server": "116.213.43.43:11102",
+          "http_ms": 2407,
+          "jitter_ms": 1566,
           "success_rate": 1.0,
           "exit": "HK"
         },
         {
           "server": "156.226.168.221:35193",
-          "http_ms": 2094,
-          "jitter_ms": null,
-          "success_rate": 0.5,
-          "exit": "HK"
-        },
-        {
-          "server": "116.213.43.43:11102",
-          "http_ms": 2111,
+          "http_ms": 3643,
           "jitter_ms": null,
           "success_rate": 0.5,
           "exit": "HK"
         },
         {
           "server": "hk3n.wxgqlfx.vip:35193",
-          "http_ms": 2970,
+          "http_ms": 3774,
           "jitter_ms": null,
           "success_rate": 0.5,
           "exit": "HK"
@@ -1465,73 +1318,80 @@
       ]
     },
     "KR": {
-      "tested": 23,
-      "country_verified": 4,
-      "wrong_country": 12,
+      "tested": 25,
+      "country_verified": 5,
+      "wrong_country": 13,
       "retained_old_nodes": false,
       "selected": [
         {
           "server": "8.220.198.29:443",
-          "http_ms": 920,
-          "jitter_ms": 267,
+          "http_ms": 834,
+          "jitter_ms": 323,
           "success_rate": 1.0,
           "exit": "KR"
         },
         {
           "server": "krd.80782636.xyz:443",
-          "http_ms": 1101,
-          "jitter_ms": 258,
+          "http_ms": 1026,
+          "jitter_ms": 225,
+          "success_rate": 1.0,
+          "exit": "KR"
+        },
+        {
+          "server": "47.80.19.173:2053",
+          "http_ms": 1190,
+          "jitter_ms": 622,
+          "success_rate": 1.0,
+          "exit": "KR"
+        },
+        {
+          "server": "188.114.98.0:443",
+          "http_ms": 1346,
+          "jitter_ms": 213,
           "success_rate": 1.0,
           "exit": "KR"
         },
         {
           "server": "104.25.128.15:443",
-          "http_ms": 1515,
-          "jitter_ms": 208,
-          "success_rate": 1.0,
-          "exit": "KR"
-        },
-        {
-          "server": "saas.sin.fan:443",
-          "http_ms": 3572,
-          "jitter_ms": 303,
+          "http_ms": 1396,
+          "jitter_ms": 217,
           "success_rate": 1.0,
           "exit": "KR"
         }
       ]
     },
     "AU": {
-      "tested": 16,
+      "tested": 17,
       "country_verified": 2,
-      "wrong_country": 12,
+      "wrong_country": 13,
       "retained_old_nodes": false,
       "selected": [
         {
           "server": "51.161.204.242:443",
-          "http_ms": 1036,
-          "jitter_ms": 313,
+          "http_ms": 920,
+          "jitter_ms": 350,
           "success_rate": 1.0,
           "exit": "AU"
         },
         {
           "server": "46.250.240.80:2053",
-          "http_ms": 1186,
-          "jitter_ms": 359,
+          "http_ms": 1026,
+          "jitter_ms": 330,
           "success_rate": 1.0,
           "exit": "AU"
         }
       ]
     },
     "TW": {
-      "tested": 24,
+      "tested": 25,
       "country_verified": 1,
-      "wrong_country": 12,
+      "wrong_country": 13,
       "retained_old_nodes": false,
       "selected": [
         {
           "server": "85.237.207.221:443",
-          "http_ms": 942,
-          "jitter_ms": 260,
+          "http_ms": 817,
+          "jitter_ms": 270,
           "success_rate": 1.0,
           "exit": "TW"
         }
@@ -1539,30 +1399,30 @@
     },
     "TR": {
       "tested": 60,
-      "country_verified": 2,
+      "country_verified": 0,
       "wrong_country": 16,
-      "retained_old_nodes": false,
+      "retained_old_nodes": true,
       "selected": [
         {
           "server": "143.246.136.128:50738",
-          "http_ms": 1503,
+          "http_ms": null,
           "jitter_ms": null,
-          "success_rate": 0.5,
-          "exit": "TR"
+          "success_rate": 0,
+          "exit": "previously checked"
         },
         {
           "server": "turkey-ip1.mmdaqaorg.xyz:50738",
-          "http_ms": 1607,
+          "http_ms": null,
           "jitter_ms": null,
-          "success_rate": 0.5,
-          "exit": "TR"
+          "success_rate": 0,
+          "exit": "previously checked"
         }
       ]
     },
     "UA": {
-      "tested": 16,
+      "tested": 17,
       "country_verified": 0,
-      "wrong_country": 12,
+      "wrong_country": 13,
       "retained_old_nodes": true,
       "selected": [
         {
@@ -1581,6 +1441,5 @@
         }
       ]
     }
-  },
-  "ru_updated_utc": "2026-11-27T13:04:55Z"
+  }
 }
