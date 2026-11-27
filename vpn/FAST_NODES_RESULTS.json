@@ -202,63 +202,70 @@
       ]
     },
     "RU": {
-      "tested": 326,
-      "country_verified": 8,
-      "wrong_country": 71,
+      "tested": 334,
+      "country_verified": 9,
+      "wrong_country": 93,
       "retained_old_nodes": false,
       "selected": [
         {
-          "server": "201.51.12.98:443",
-          "http_ms": 792,
-          "jitter_ms": 563,
-          "success_rate": 1.0,
-          "exit": "RU"
-        },
-        {
-          "server": "201.24.116.192:443",
-          "http_ms": 810,
-          "jitter_ms": 509,
-          "success_rate": 1.0,
-          "exit": "RU"
-        },
-        {
-          "server": "185.22.234.129:443",
-          "http_ms": 1010,
-          "jitter_ms": 9,
-          "success_rate": 1.0,
-          "exit": "RU"
-        },
-        {
-          "server": "smartcdn.top:443",
-          "http_ms": 1067,
-          "jitter_ms": 46,
-          "success_rate": 1.0,
-          "exit": "RU"
-        },
-        {
-          "server": "147.45.175.81:443",
-          "http_ms": 1083,
-          "jitter_ms": 560,
+          "server": "45.158.197.237:8443",
+          "http_ms": 532,
+          "jitter_ms": 24,
           "success_rate": 1.0,
           "exit": "RU"
         },
         {
           "server": "212.233.90.78:443",
-          "http_ms": 839,
-          "jitter_ms": null,
-          "success_rate": 0.5,
+          "http_ms": 664,
+          "jitter_ms": 5,
+          "success_rate": 1.0,
           "exit": "RU"
         },
         {
           "server": "200.169.179.233:443",
-          "http_ms": 1097,
-          "jitter_ms": null,
-          "success_rate": 0.5,
+          "http_ms": 603,
+          "jitter_ms": 412,
+          "success_rate": 1.0,
+          "exit": "RU"
+        },
+        {
+          "server": "201.24.116.192:443",
+          "http_ms": 622,
+          "jitter_ms": 402,
+          "success_rate": 1.0,
+          "exit": "RU"
+        },
+        {
+          "server": "201.51.12.98:443",
+          "http_ms": 620,
+          "jitter_ms": 423,
+          "success_rate": 1.0,
+          "exit": "RU"
+        },
+        {
+          "server": "185.22.234.129:443",
+          "http_ms": 821,
+          "jitter_ms": 0,
+          "success_rate": 1.0,
+          "exit": "RU"
+        },
+        {
+          "server": "147.45.175.81:443",
+          "http_ms": 914,
+          "jitter_ms": 441,
+          "success_rate": 1.0,
           "exit": "RU"
         },
         {
           "server": "xssite.webredirect.org:443",
-          "http_ms": 1448,
+          "http_ms": 1016,
+          "jitter_ms": 637,
+          "success_rate": 1.0,
+          "exit": "RU"
+        },
+        {
+          "server": "smartcdn.top:443",
+          "http_ms": 885,
           "jitter_ms": null,
           "success_rate": 0.5,
           "exit": "RU"
@@ -1315,5 +1322,6 @@
         }
       ]
     }
-  }
+  },
+  "ru_updated_utc": "2026-11-27T01:55:27Z"
 }
